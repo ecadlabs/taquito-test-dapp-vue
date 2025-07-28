@@ -1,5 +1,5 @@
 <template>
 	<div>
-		<p>Taquito Test dApp</p>
+		<p>Home</p>
 	</div>
 </template>

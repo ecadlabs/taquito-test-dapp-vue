@@ -10,10 +10,10 @@
   ],
   "compilerOptions": {
     /* Src alias */
-    "baseUrl": "src",
+    "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./*"
+        "./src/*"
       ]
     }
   }
