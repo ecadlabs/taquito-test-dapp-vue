@@ -1,5 +1,5 @@
-import Transfer from "@/modules/tests/tests/transfer.vue";
+import TransferTez from "@/modules/tests/tests/transfer/transfer-tez.vue";
 
 export const AvailableTests = {
-	'transfer': Transfer
+	'transfer': TransferTez
 }

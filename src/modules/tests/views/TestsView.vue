@@ -3,15 +3,15 @@
     <div class="w-1/4 border">
       Sidebar
     </div>
-    <TestComponent v-if="currentTestComponent">
+    <TestWrapper v-if="currentTestComponent">
       <component :is="currentTestComponent" v-if="currentTestComponent" />
-    </TestComponent>
+    </TestWrapper>
     <p v-else>No test selected</p>
   </div>
 </template>
 
 <script setup lang="ts">
-import TestComponent from '@/modules/tests/components/test.vue';
+import TestWrapper from '@/modules/tests/components/test-wrapper.vue';
 import { AvailableTests } from '@/modules/tests/tests';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';

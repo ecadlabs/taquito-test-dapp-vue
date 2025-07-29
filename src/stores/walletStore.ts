@@ -12,7 +12,7 @@ export const useWalletStore = defineStore('wallet', () => {
 	const address = ref<string>();
 	const balance = ref<BigNumber>();
 
-	const getTezos = computed(() => Tezos);
+	const getTezos = computed(() => Tezos.value);
 	const getWallet = computed(() => wallet.value);
 	const getAddress = computed(() => address.value);
 	const getBalance = computed(() => balance.value);
@@ -79,7 +79,7 @@ export const useWalletStore = defineStore('wallet', () => {
 			if (wallet.value) {
 				address.value = await wallet.value.getPKH();
 				await fetchBalance();
-				Tezos.value.setWalletProvider(wallet.value);
+				Tezos.value.setProvider({ wallet: wallet.value });
 			} else {
 				throw ReferenceError("Wallet was not found after initialization should have finished.")
 			}
@@ -146,6 +146,7 @@ export const useWalletStore = defineStore('wallet', () => {
 	}
 
 	return {
+		Tezos,
 		getTezos,
 		getAddress,
 		getBalance,
