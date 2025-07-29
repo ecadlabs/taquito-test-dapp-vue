@@ -86,6 +86,9 @@ export const useWalletStore = defineStore('wallet', () => {
 
 		} catch (error) {
 			console.error("Failed to initialize wallet or request permissions:", error);
+			wallet.value = undefined;
+			address.value = undefined;
+			balance.value = undefined;
 			throw error;
 		}
 	}
@@ -93,7 +96,7 @@ export const useWalletStore = defineStore('wallet', () => {
 	/**
 	 * Disconnects the currently connected wallet.
 	 *
-	 * This function clears the active account from the wallet client
+	 * This function clears the active account from the wallet client, disconnects the wallet,
 	 * and resets the wallet, address, and balance state to `undefined`.
 	 *
 	 * @throws {ReferenceError} If no wallet is currently connected.
@@ -105,7 +108,13 @@ export const useWalletStore = defineStore('wallet', () => {
 		}
 
 		try {
-			await wallet.value.client.clearActiveAccount();
+			if (wallet.value instanceof BeaconWallet) {
+				await wallet.value.client.clearActiveAccount();
+			}
+
+			// WalletConnect and Beacon share the same name for the disconnection
+			await wallet.value.disconnect();
+
 			wallet.value = undefined;
 			address.value = undefined;
 			balance.value = undefined;
