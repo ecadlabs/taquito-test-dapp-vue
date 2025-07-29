@@ -1,6 +1,6 @@
 <template>
 	<div class="bg-gray-500 flex justify-between items-center p-3 text-white">
-		<RouterLink :to="{ name: 'home' }">Taquito Test dApp</RouterLink>
+		<RouterLink :to="{ name: 'home' }">Taquito Playground</RouterLink>
 		<WalletControl />
 	</div>
 </template>

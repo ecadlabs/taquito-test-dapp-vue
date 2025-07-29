@@ -8,7 +8,7 @@ export const useWalletStore = defineStore('wallet', () => {
 
 	const wallet = ref<BeaconWallet>();
 	const address = ref<string>();
-	const balance = ref<number>();
+	const balance = ref<BigNumber>();
 
 	const getTezos = computed(() => Tezos);
 	const getWallet = computed(() => wallet.value);
@@ -44,7 +44,7 @@ export const useWalletStore = defineStore('wallet', () => {
 			await wallet.value.requestPermissions();
 			address.value = await wallet.value.getPKH();
 			Tezos.value.setWalletProvider(wallet.value);
-			console.log("Wallet connection successful:", wallet.value)
+			await fetchBalance();
 		} catch (error) {
 			console.error("Failed to initialize wallet or request permissions:", error);
 			throw error;
@@ -70,12 +70,31 @@ export const useWalletStore = defineStore('wallet', () => {
 			wallet.value = undefined;
 			address.value = undefined;
 			balance.value = undefined;
-			console.log("Wallet disconnected successfully");
 		} catch (error) {
 			console.error("Error disconnecting wallet:", error);
 			throw error;
 		}
 	};
+
+	/**
+	 * Asynchronously fetches the balance for the current wallet address from the Tezos network and updates the `balance` state value.
+	 *
+	 * @throws {ReferenceError} If there is no saved address to fetch the balance for.
+	 * @throws {Error} If an error occurs while fetching the balance from the Tezos network.
+	 */
+	const fetchBalance = async () => {
+		if (!address.value) {
+			console.log("Could not fetch balance as there is no saved address.")
+			throw new ReferenceError("Could not fetch balance: no address")
+		}
+
+		try {
+			balance.value = await Tezos.value.tz.getBalance(address.value);
+		} catch (error) {
+			console.error("Error fetching balance:", error);
+			throw error;
+		}
+	}
 
 	return {
 		getTezos,
@@ -83,6 +102,7 @@ export const useWalletStore = defineStore('wallet', () => {
 		getBalance,
 		getWallet,
 		initializeWallet,
-		disconnectWallet
+		disconnectWallet,
+		fetchBalance
 	}
 })
