@@ -1,5 +1,5 @@
 <template>
-	<div class="bg-cyan-500 flex justify-between items-center">
+	<div class="bg-gray-500 flex justify-between items-center p-3 text-white">
 		<RouterLink :to="{ name: 'home' }">Taquito Test dApp</RouterLink>
 		<WalletControl />
 	</div>
