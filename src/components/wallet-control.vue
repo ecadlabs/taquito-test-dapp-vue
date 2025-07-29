@@ -24,7 +24,7 @@
 			<DialogHeader>
 				<DialogTitle>Connect Wallet</DialogTitle>
 				<DialogDescription>
-					<div class="flex items-center gap-1 flex-wrap">
+					<div class="flex items-center space-x-1 flex-wrap">
 						<span>Taquito Playground supports both</span>
 						<a href="https://www.walletbeacon.io/" target="_blank"
 							class="text-blue-400 hover:underline">Beacon</a>
@@ -37,6 +37,18 @@
 			</DialogHeader>
 
 			<div>
+				<Alert v-if="provider === 'walletconnect'" class="mb-4">
+					<AlertTitle class="flex items-center gap-1">
+						<Siren class="size-4" />
+						<p>Heads up!</p>
+					</AlertTitle>
+					<AlertDescription>
+						WalletConnect doesn't support account caching, so you'll need to re-connect your wallet
+						every
+						time you access Taquito Playground.
+					</AlertDescription>
+				</Alert>
+
 				<Select v-model="provider">
 					<SelectTrigger class="w-[150px]">
 						<SelectValue />
@@ -99,8 +111,9 @@
 import { useWalletStore } from '@/stores/walletStore';
 import { computed, ref, watch } from 'vue';
 import type { WalletProvider } from '@/types/wallet';
-import { Loader2 } from 'lucide-vue-next'
+import { Loader2, Siren } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import {
 	Dialog,
 	DialogContent,

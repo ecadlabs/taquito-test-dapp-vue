@@ -53,8 +53,6 @@ export const useWalletStore = defineStore('wallet', () => {
 				if (cachedAccount === undefined) {
 					await wallet.value.requestPermissions();
 				}
-
-				localStorage.setItem('wallet-provider', 'beacon');
 			} else if (provider === 'walletconnect') {
 				wallet.value = await WalletConnect.init({
 					projectId: import.meta.env.VITE_REOWN_PROJECT_ID,
@@ -79,8 +77,6 @@ export const useWalletStore = defineStore('wallet', () => {
 						],
 					}
 				});
-
-				localStorage.setItem('wallet-provider', 'walletconnect');
 			} else {
 				throw new TypeError(`Unknown wallet provider: ${provider}`);
 			}

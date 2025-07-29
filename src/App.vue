@@ -19,15 +19,9 @@ import { useWalletStore } from '@/stores/walletStore';
 const walletStore = useWalletStore();
 
 onMounted(() => {
-  const provider = localStorage.getItem('wallet-provider');
-
-  // This if statement should be replaced with some sort of TypeScript implementation of LocalStorage
-  if (provider === 'beacon') {
+  const beaconActiveAccount = localStorage.getItem('beacon:active-account');
+  if (beaconActiveAccount !== 'undefined') {
     walletStore.initializeWallet('beacon')
-  } else {
-    //
   }
-
-
 })
 </script>
