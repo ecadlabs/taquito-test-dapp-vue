@@ -1,8 +1,10 @@
 <template>
-	<div class="bg-gray-500 flex justify-between items-center p-3 text-white">
-		<RouterLink :to="{ name: 'home' }">Taquito Playground</RouterLink>
-		<WalletControl />
-	</div>
+  <div class="bg-gray-500 flex justify-between items-center p-3 text-white">
+    <RouterLink :to="{ name: 'home' }">
+      Taquito Playground
+    </RouterLink>
+    <WalletControl />
+  </div>
 </template>
 
 <script setup lang="ts">
