@@ -43,6 +43,7 @@ export const useWalletStore = defineStore('wallet', () => {
 					network: {
 						type: import.meta.env.VITE_NETWORK_TYPE,
 					},
+					enableMetrics: true,
 				};
 
 				wallet.value = new BeaconWallet(options);
