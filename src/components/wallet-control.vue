@@ -9,8 +9,9 @@
 				WalletConnect
 			</option>
 		</select>
-		<button v-if="!address" @click="connect()">
-			Connect Wallet
+		<button v-if="!address" @click="connect()" :disabled="connecting">
+			<p v-if="connecting">Loading...</p>
+			<p v-else>Connect Wallet</p>
 		</button>
 		<button v-else @click="disconnect()">
 			Disconnect Wallet
@@ -35,9 +36,12 @@ const address = computed(() => walletStore.getAddress)
 const balance = computed(() => walletStore.getBalance)
 
 const provider = ref<WalletProvider>('beacon')
+const connecting = ref<boolean>(false);
 
 const connect = async () => {
+	connecting.value = true;
 	await walletStore.initializeWallet(provider.value);
+	connecting.value = false;
 }
 
 const disconnect = async () => {
