@@ -1,6 +1,7 @@
 <template>
 	<div class="text-right">
-		<select id="wallet-provider" v-model="provider" name="provider" class="mr-4 px-2 py-1 rounded-md bg-gray-400">
+		<select v-if="!address" id="wallet-provider" v-model="provider" name="provider"
+			class="mr-4 px-2 py-1 rounded-md bg-gray-400">
 			<option value="beacon">
 				Beacon
 			</option>
