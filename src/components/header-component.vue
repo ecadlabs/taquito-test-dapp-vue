@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between items-center p-3 mx-4">
+  <div class="flex justify-between p-4 mx-4">
     <RouterLink :to="{ name: 'home' }" class="font-medium leading-none flex gap-1.5 items-center p-2">
       <img src="@/assets/logo.svg" alt="Taquito Logo" class="size-5">
       <p>Taquito Playground</p>
@@ -22,14 +22,14 @@
       </NavigationMenuList>
     </NavigationMenu>
 
-    <!-- <WalletControl /> -->
+    <WalletControl />
   </div>
 
 
 </template>
 
 <script setup lang="ts">
-// import WalletControl from '@/components/wallet-control.vue';
+import WalletControl from '@/components/wallet-control.vue';
 
 import {
   NavigationMenu,

@@ -83,8 +83,6 @@ export const useWalletStore = defineStore('wallet', () => {
 			} else {
 				throw ReferenceError("Wallet was not found after initialization should have finished.")
 			}
-
-
 		} catch (error) {
 			console.error("Failed to initialize wallet or request permissions:", error);
 			wallet.value = undefined;
