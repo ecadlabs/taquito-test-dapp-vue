@@ -95,7 +95,7 @@ export const useWalletStore = defineStore('wallet', () => {
 	/**
 	 * Disconnects the currently connected wallet.
 	 *
-	 * This function clears the active account from the wallet client, disconnects the wallet,
+	 * This function disconnects the wallet, clears the active account from the wallet client,
 	 * and resets the wallet, address, and balance state to `undefined`.
 	 *
 	 * @throws {ReferenceError} If no wallet is currently connected.
@@ -108,11 +108,11 @@ export const useWalletStore = defineStore('wallet', () => {
 
 		try {
 			if (wallet.value instanceof BeaconWallet) {
+				await wallet.value.client.disconnect();
 				await wallet.value.client.clearActiveAccount();
+			} else if (wallet.value instanceof WalletConnect) {
+				await wallet.value.disconnect();
 			}
-
-			// WalletConnect and Beacon share the same name for the disconnection
-			await wallet.value.disconnect();
 
 			wallet.value = undefined;
 			address.value = undefined;
