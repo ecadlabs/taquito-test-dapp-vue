@@ -26,7 +26,6 @@ export const originateContracts = async (): Promise<string> => {
 	const signer = new InMemorySigner(key);
 	Tezos.setProvider({ signer });
 
-	// Read the contract code from file
 	const contractPath = join(process.cwd(), 'src', 'contracts', 'compiled', 'counter.tz');
 	const counterCode = readFileSync(contractPath, 'utf8');
 
@@ -41,7 +40,6 @@ export const originateContracts = async (): Promise<string> => {
 		await originationOp.contract();
 		console.log(`Origination completed. Contract address: ${originationOp.contractAddress}`);
 
-		// Save the contract address to a file for use in the website
 		const contractAddress = originationOp.contractAddress;
 		if (!contractAddress) {
 			throw new Error('Contract address is undefined after origination');
