@@ -1,7 +1,15 @@
 import { useWalletStore } from "@/stores/walletStore"
 const CONTRACT_ADDRESS = 'KT1AoX6862rfFB5F1yxiE6Y8EwTQz8G1WEBb';
 
-const increment = async (amount: number) => {
+/**
+ * Increments the contract storage value by the specified amount.
+ * 
+ * @async
+ * @param {number} amount - The amount to increment the storage by (must be between 1 and 100 inclusive).
+ * @throws {Error} If the amount is not within the valid range.
+ * @returns {Promise<void>}
+ */
+const increment = async (amount: number): Promise<void> => {
 	if (amount <= 0 || amount > 100) throw new Error('Incrementation value must be between 1 and 100 inclusive.');
 
 	const walletStore = useWalletStore();
@@ -21,7 +29,15 @@ const increment = async (amount: number) => {
 	}
 }
 
-const decrement = async (amount: number) => {
+/**
+ * Decrements the contract storage value by the specified amount.
+ * 
+ * @async
+ * @param {number} amount - The amount to decrement the storage by (must be between 1 and 100 inclusive).
+ * @throws {Error} If the amount is not within the valid range.
+ * @returns {Promise<void>}
+ */
+const decrement = async (amount: number): Promise<void> => {
 	if (amount <= 0 || amount > 100) throw new Error('Decrementation value must be between 1 and 100 inclusive.');
 
 	const walletStore = useWalletStore();
@@ -41,7 +57,13 @@ const decrement = async (amount: number) => {
 	}
 }
 
-const reset = async () => {
+/**
+ * Resets the contract storage value to its initial state.
+ * 
+ * @async
+ * @returns {Promise<void>}
+ */
+const reset = async (): Promise<void> => {
 	const walletStore = useWalletStore();
 	const Tezos = walletStore.getTezos;
 
@@ -59,6 +81,12 @@ const reset = async () => {
 	}
 }
 
+/**
+ * Fetches and logs the current storage value of the contract.
+ * 
+ * @async
+ * @returns {Promise<void>}
+ */
 const getContractStorage = async (): Promise<void> => {
 	const walletStore = useWalletStore();
 	const Tezos = walletStore.getTezos;
@@ -74,6 +102,12 @@ const getContractStorage = async (): Promise<void> => {
 	return;
 }
 
+/**
+ * Fetches and logs the available contract methods.
+ * 
+ * @async
+ * @returns {Promise<void>}
+ */
 const getContractMethods = async (): Promise<void> => {
 	const walletStore = useWalletStore();
 	const Tezos = walletStore.getTezos;

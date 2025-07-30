@@ -1,6 +1,5 @@
 <template>
-	<div>
-		<p>This is a contract incrementation and decrementation test component</p>
+	<div class="flex flex-col items-center gap-4">
 		<div>
 			<NumberField :min="1" :max="100" class="w-28">
 				<Label>Amount</Label>
@@ -11,18 +10,20 @@
 				</NumberFieldContent>
 			</NumberField>
 		</div>
-		<Button @click="getContractStorage()">Get storage value</Button>
-		<Button @click="getContractMethods()">Get methods</Button>
-		<Button @click="increment(amount)">Increment</Button>
-		<Button @click="decrement(amount)">Decrement</Button>
-		<Button @click="reset()">Reset storage</Button>
+		<div class="flex gap-2">
+			<Button @click="getContractStorage()">Get Storage Value</Button>
+			<Button @click="decrement(amount)">Decrement Storage</Button>
+			<Button @click="increment(amount)">Increment Storage</Button>
+			<Button @click="reset()">Reset Storage</Button>
+		</div>
+
 
 	</div>
 </template>
 
 <script setup lang='ts'>
 import Button from '@/components/ui/button/Button.vue';
-import { increment, decrement, reset, getContractStorage, getContractMethods } from '@/modules/tests/tests/counter/counter-contract';
+import { increment, decrement, reset, getContractStorage } from '@/modules/tests/tests/counter/counter-contract';
 import { ref } from 'vue';
 
 import { Label } from '@/components/ui/label'
