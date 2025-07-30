@@ -2,7 +2,7 @@ import { useWalletStore } from "@/stores/walletStore"
 const CONTRACT_ADDRESS = 'KT1AoX6862rfFB5F1yxiE6Y8EwTQz8G1WEBb';
 
 const increment = async (amount: number) => {
-	// TODO: Set limits on the amount
+	if (amount <= 0 || amount > 100) throw new Error('Incrementation value must be between 1 and 100 inclusive.');
 
 	const walletStore = useWalletStore();
 	const Tezos = walletStore.getTezos;
@@ -22,7 +22,8 @@ const increment = async (amount: number) => {
 }
 
 const decrement = async (amount: number) => {
-	// TODO: Set limits on the amount
+	if (amount <= 0 || amount > 100) throw new Error('Decrementation value must be between 1 and 100 inclusive.');
+
 	const walletStore = useWalletStore();
 	const Tezos = walletStore.getTezos;
 
