@@ -6,7 +6,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
 	'transfer': {
 		id: 'transfer',
 		title: 'Transfer Between tz1 Addresses',
-		description: 'Transferring TEZ betwen two tz1 addresses.',
+		description: 'Transferring a small amount of TEZ betwen two tz1 addresses.',
 		category: 'Wallet to Wallet Transactions',
 		learningGoals: [
 			'Understand how to create and send transactions',

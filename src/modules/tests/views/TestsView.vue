@@ -1,7 +1,7 @@
 <template>
   <div class="flex w-full h-[calc(100vh-4.5rem)]">
     <div
-      class="w-fit sticky [top:4.5rem] self-start z-10 h-[calc(100vh-4.5rem)] max-h-[calc(100vh-4.5rem)] overflow-hidden">
+      class="w-full sticky [top:4.5rem] self-start z-10 h-[calc(100vh-4.5rem)] max-h-[calc(100vh-4.5rem)] overflow-hidden">
       <SidebarProvider class="!min-h-fit h-full">
         <SidebarComponent />
         <SidebarInset>
@@ -59,7 +59,6 @@ const currentTest = computed(() => {
   return null;
 });
 
-// Breadcrumb data computed from current test
 const selectedTestFriendlyCategory = computed(() => {
   if (currentTest.value) {
     return currentTest.value.category;
