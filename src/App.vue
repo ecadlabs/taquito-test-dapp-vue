@@ -1,9 +1,12 @@
 <template>
   <Toaster />
-
   <div id="app">
-    <HeaderComponent />
-    <router-view />
+    <header class="sticky top-0 bg-background z-20">
+      <HeaderComponent />
+    </header>
+    <main>
+      <router-view />
+    </main>
   </div>
 </template>
 

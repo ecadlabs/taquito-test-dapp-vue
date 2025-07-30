@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="mx-4">
 		<div class="mb-4">
 			<p>This is temporary content in the test.vue component that will eventually hold all the metadata about the
 				test,

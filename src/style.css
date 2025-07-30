@@ -64,7 +64,6 @@
   }
 }
 
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -184,5 +183,7 @@
 
   body {
     @apply bg-background text-foreground;
+    /* Prevent elastic scroll from affecting layout */
+    overscroll-behavior: none;
   }
 }

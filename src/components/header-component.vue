@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between p-4 mx-4">
+  <div class="flex justify-between p-4">
     <RouterLink :to="{ name: 'home' }" class="font-medium leading-none flex gap-1.5 items-center p-2">
       <img src="@/assets/logo.svg" alt="Taquito Logo" class="size-5">
       <p>Taquito Playground</p>
