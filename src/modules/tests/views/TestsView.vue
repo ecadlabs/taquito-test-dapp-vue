@@ -11,9 +11,7 @@
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem class="hidden sm:block">
-                  <BreadcrumbLink href="#">
-                    {{ selectedTestFriendlyCategory }}
-                  </BreadcrumbLink>
+                  {{ selectedTestFriendlyCategory }}
                 </BreadcrumbItem>
                 <BreadcrumbSeparator class="hidden sm:block" />
                 <BreadcrumbItem>
