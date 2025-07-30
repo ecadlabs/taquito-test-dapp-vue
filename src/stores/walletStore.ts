@@ -53,6 +53,8 @@ export const useWalletStore = defineStore('wallet', () => {
 				if (cachedAccount === undefined) {
 					await wallet.value.requestPermissions();
 				}
+
+				localStorage.setItem('wallet-provider', 'beacon');
 			} else if (provider === 'walletconnect') {
 				wallet.value = await WalletConnect.init({
 					projectId: import.meta.env.VITE_REOWN_PROJECT_ID,
@@ -66,17 +68,25 @@ export const useWalletStore = defineStore('wallet', () => {
 
 				if (!wallet.value) throw ReferenceError("Wallet not found after WalletConnect initialization should have finished.")
 
-				await wallet.value.requestPermissions({
-					permissionScope: {
-						networks: [import.meta.env.VITE_NETWORK_TYPE],
-						events: [],
-						methods: [
-							PermissionScopeMethods.TEZOS_SEND,
-							PermissionScopeMethods.TEZOS_SIGN,
-							PermissionScopeMethods.TEZOS_GET_ACCOUNTS
-						],
-					}
-				});
+				const latestSessionKey = await wallet.value.getAllExistingSessionKeys()?.[0];
+
+				if (latestSessionKey) {
+					await wallet.value.configureWithExistingSessionKey(latestSessionKey);
+				} else {
+					await wallet.value.requestPermissions({
+						permissionScope: {
+							networks: [import.meta.env.VITE_NETWORK_TYPE],
+							events: [],
+							methods: [
+								PermissionScopeMethods.TEZOS_SEND,
+								PermissionScopeMethods.TEZOS_SIGN,
+								PermissionScopeMethods.TEZOS_GET_ACCOUNTS
+							],
+						}
+					});
+				}
+
+				localStorage.setItem('wallet-provider', 'walletconnect');
 			} else {
 				throw new TypeError(`Unknown wallet provider: ${provider}`);
 			}
@@ -117,6 +127,7 @@ export const useWalletStore = defineStore('wallet', () => {
 				await wallet.value.client.clearActiveAccount();
 			} else if (wallet.value instanceof WalletConnect) {
 				await wallet.value.disconnect();
+				await deleteWalletConnectSessionFromIndexedDB();
 			}
 
 			wallet.value = undefined;
@@ -148,6 +159,64 @@ export const useWalletStore = defineStore('wallet', () => {
 		}
 	}
 
+	/**
+	 * Performs an operation on the WalletConnect session stored in IndexedDB.
+	 *
+	 * This function opens the 'WALLET_CONNECT_V2_INDEXED_DB' IndexedDB database,
+	 * accesses the 'keyvaluestorage' object store, and searches for a key that starts with
+	 * 'wc@2:client:0.3:session'. If such a key is found, it executes the provided operation
+	 * callback on the object store and session key. The result of the operation is returned.
+	 * If the database, store, or key does not exist, or if any error occurs, it resolves to `undefined`.
+	 *
+	 * @param {'readonly' | 'readwrite'} mode - The transaction mode for the object store.
+	 * @param {(store: IDBObjectStore, sessionKey: string) => IDBRequest} operation - A callback that performs an IndexedDB operation using the object store and session key.
+	 * @returns {Promise<string | undefined>} The result of the operation if successful, otherwise `undefined`.
+	 */
+	const walletConnectIndexedDBOperation = async (
+		mode: 'readonly' | 'readwrite',
+		operation: (store: IDBObjectStore, sessionKey: string) => IDBRequest
+	): Promise<string | undefined> => {
+		return new Promise((resolve) => {
+			const request = indexedDB.open('WALLET_CONNECT_V2_INDEXED_DB');
+			request.onerror = () => resolve(undefined);
+			request.onsuccess = () => {
+				try {
+					const tx = request.result.transaction('keyvaluestorage', mode);
+					const store = tx.objectStore('keyvaluestorage');
+					const keysReq = store.getAllKeys();
+					keysReq.onerror = () => resolve(undefined);
+					keysReq.onsuccess = () => {
+						const sessionKey = (keysReq.result as string[]).find(key => key.startsWith('wc@2:client:0.3:session'));
+						if (!sessionKey) return resolve(undefined);
+						const sessionReq = operation(store, sessionKey);
+						sessionReq.onerror = () => resolve(undefined);
+						sessionReq.onsuccess = () => resolve(sessionReq.result ?? undefined);
+					};
+				} catch {
+					resolve(undefined);
+				}
+			};
+		});
+	}
+
+	/**
+	 * Retrieves the WalletConnect session from IndexedDB if it exists.
+	 *
+	 * @returns {Promise<string | undefined>} The WalletConnect session data if found, otherwise `undefined`.
+	 */
+	const getWalletConnectSessionFromIndexedDB = async (): Promise<string | undefined> => {
+		return walletConnectIndexedDBOperation('readonly', (store, sessionKey) => store.get(sessionKey));
+	}
+
+	/**
+	 * Deletes the WalletConnect session from IndexedDB if it exists.
+	 *
+	 * @returns {Promise<string | undefined>} The result of the delete operation if successful, otherwise `undefined`.
+	 */
+	const deleteWalletConnectSessionFromIndexedDB = async (): Promise<string | undefined> => {
+		return walletConnectIndexedDBOperation('readwrite', (store, sessionKey) => store.delete(sessionKey));
+	}
+
 	return {
 		Tezos,
 		getTezos,
@@ -156,6 +225,7 @@ export const useWalletStore = defineStore('wallet', () => {
 		getWallet,
 		initializeWallet,
 		disconnectWallet,
-		fetchBalance
+		fetchBalance,
+		getWalletConnectSessionFromIndexedDB
 	}
 })
