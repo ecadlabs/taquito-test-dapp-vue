@@ -1,11 +1,11 @@
 <template>
 	<div class="flex flex-col items-center gap-4">
 		<div>
-			<NumberField :min="1" :max="100" class="w-28">
+			<NumberField :min="1" :max="100" v-model="amount" class="w-28">
 				<Label>Amount</Label>
 				<NumberFieldContent>
 					<NumberFieldDecrement />
-					<NumberFieldInput v-model="amount" />
+					<NumberFieldInput />
 					<NumberFieldIncrement />
 				</NumberFieldContent>
 			</NumberField>
@@ -25,7 +25,6 @@
 import Button from '@/components/ui/button/Button.vue';
 import { increment, decrement, reset, getContractStorage } from '@/modules/tests/tests/counter/counter-contract';
 import { ref } from 'vue';
-
 import { Label } from '@/components/ui/label'
 import {
 	NumberField,
