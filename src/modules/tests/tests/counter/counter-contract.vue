@@ -10,14 +10,12 @@
 				</NumberFieldContent>
 			</NumberField>
 		</div>
-		<div class="flex gap-2">
+		<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
 			<Button @click="getContractStorage()">Get Storage Value</Button>
 			<Button @click="decrement(amount)">Decrement Storage</Button>
 			<Button @click="increment(amount)">Increment Storage</Button>
 			<Button @click="reset()">Reset Storage</Button>
 		</div>
-
-
 	</div>
 </template>
 
