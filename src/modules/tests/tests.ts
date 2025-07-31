@@ -108,6 +108,80 @@ export const AvailableTests: Record<string, TestMetadata> = {
 		},
 		// component: CounterContract
 	},
+	// Not fully written yet
+	'delegation': {
+		id: 'delegation',
+		title: 'Baking Delegation',
+		description: 'Deploying a test contract to the blockchain with basic methods and storage.',
+		category: 'Advanced Features',
+		learningGoals: [
+			'Understand smart contract deployment patterns',
+			'Learn about keys and the signing process',
+			'Learn about the confirmation process'
+		],
+		prerequisites: [
+			'Basic understanding of smart contracts',
+			'Familiarity with Promises/Async functions in JavaScript'
+		],
+		setup: [
+			'Set up a Tezos wallet and fund it with some TEZ',
+			'Connect your wallet to Taquito Playground',
+			'Obtain your wallet key for signing'
+		],
+		operationalFlow: {
+			description: 'description',
+			diagram: 'diagram'
+		},
+		stepByStepNarrative: [
+			'Step 1',
+			'Step 2',
+			'Step 3'
+		],
+		relatedTests: ['transfer'],
+		sourceCode: {
+			contract: 'https://example.com',
+			script: 'https://example.com',
+			documentation: 'https://taquito.io/docs/originate'
+		},
+		// component: CounterContract
+	},
+	// Not fully written yet
+	'staking': {
+		id: 'staking',
+		title: 'Staking Operations',
+		description: 'Deploying a test contract to the blockchain with basic methods and storage.',
+		category: 'Advanced Features',
+		learningGoals: [
+			'Understand smart contract deployment patterns',
+			'Learn about keys and the signing process',
+			'Learn about the confirmation process'
+		],
+		prerequisites: [
+			'Basic understanding of smart contracts',
+			'Familiarity with Promises/Async functions in JavaScript'
+		],
+		setup: [
+			'Set up a Tezos wallet and fund it with some TEZ',
+			'Connect your wallet to Taquito Playground',
+			'Obtain your wallet key for signing'
+		],
+		operationalFlow: {
+			description: 'description',
+			diagram: 'diagram'
+		},
+		stepByStepNarrative: [
+			'Step 1',
+			'Step 2',
+			'Step 3'
+		],
+		relatedTests: ['transfer'],
+		sourceCode: {
+			contract: 'https://example.com',
+			script: 'https://example.com',
+			documentation: 'https://taquito.io/docs/originate'
+		},
+		// component: CounterContract
+	},
 };
 
 export const getTestById = (id: string): TestMetadata | undefined => {
