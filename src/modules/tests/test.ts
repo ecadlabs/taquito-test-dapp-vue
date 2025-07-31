@@ -19,5 +19,5 @@ export interface TestMetadata {
 		script?: string;
 		documentation?: string;
 	};
-	component: Component,
+	component?: Component,
 }

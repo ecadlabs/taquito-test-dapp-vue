@@ -7,8 +7,8 @@
         <SidebarInset>
           <header class="flex my-4 shrink-0 items-center gap-2 px-4">
             <SidebarTrigger class="-ml-1 flex md:hidden" />
-            <Separator orientation="vertical" class="mr-2 md:hidden" />
-            <Breadcrumb>
+            <Separator v-if="currentTestComponent" orientation="vertical" class="mr-2 md:hidden" />
+            <Breadcrumb v-if="currentTestComponent">
               <BreadcrumbList>
                 <BreadcrumbItem class="hidden sm:block">
                   {{ selectedTestFriendlyCategory }}
@@ -24,7 +24,13 @@
             <TestWrapper v-if="currentTestComponent">
               <component :is="currentTestComponent" v-if="currentTestComponent" />
             </TestWrapper>
-            <p v-else>No test selected</p>
+            <div v-else class="w-full h-full">
+              <div class="mx-auto w-fit mt-16 md:mt-32 text-center">
+                <HeartCrack class="size-8 mx-auto" />
+                <h1 class="font-bold text-2xl md:text-3xl">No Test Found</h1>
+                <p class="text-sm md:text-base mx-8">Hmm, it looks like we don't have this test set up yet.</p>
+              </div>
+            </div>
           </div>
         </SidebarInset>
       </SidebarProvider>
@@ -48,6 +54,7 @@ import { Separator } from '@/components/ui/separator'
 import { getTestById } from '@/modules/tests/tests';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { HeartCrack } from 'lucide-vue-next';
 
 const route = useRoute();
 
