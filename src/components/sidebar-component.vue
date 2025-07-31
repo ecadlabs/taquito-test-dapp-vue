@@ -1,5 +1,11 @@
 <template>
 	<Sidebar>
+		<SidebarHeader>
+			<div class="font-medium leading-none flex gap-1.5 items-center p-2 mt-2">
+				<img src="@/assets/logo.svg" alt="Taquito Logo" class="size-5">
+				<p>Taquito Playground</p>
+			</div>
+		</SidebarHeader>
 		<SidebarContent>
 			<SidebarGroup v-for="item in data.nav" :key="item.title">
 				<SidebarGroupLabel>{{ item.title }}</SidebarGroupLabel>
@@ -27,6 +33,7 @@ import {
 	SidebarGroup,
 	SidebarGroupContent,
 	SidebarGroupLabel,
+	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,

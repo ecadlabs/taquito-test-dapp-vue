@@ -8,7 +8,7 @@
     <NavigationMenu class="[&_div.absolute]:left-auto [&_div.absolute]:right-0">
       <NavigationMenuList>
         <NavigationMenuItem>
-          <RouterLink :to="{ name: 'tests' }">
+          <RouterLink :to="{ name: 'tests', params: { test: firstTestId } }">
             <NavigationMenuLink :class="navigationMenuTriggerStyle()">
               Examples
             </NavigationMenuLink>
@@ -38,6 +38,12 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu'
+import { AvailableTests } from '@/modules/tests/tests';
+import { computed } from 'vue';
+
+const firstTestId = computed(() => {
+  return Object.values(AvailableTests)[0].id
+})
 
 
 </script>
