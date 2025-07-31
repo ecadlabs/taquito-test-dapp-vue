@@ -1,6 +1,6 @@
 <template>
 	<Sidebar>
-		<SidebarHeader>
+		<SidebarHeader class="block md:hidden">
 			<div class="font-medium leading-none flex gap-1.5 items-center p-2 mt-2">
 				<img src="@/assets/logo.svg" alt="Taquito Logo" class="size-5">
 				<p>Taquito Playground</p>
