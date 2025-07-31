@@ -1,6 +1,7 @@
 <template>
 	<div>
-		<div>
+		<!-- Large Screens -->
+		<div class="hidden md:block">
 			<div v-if="!address" class="flex items-center gap-2">
 				<div class="size-3 rounded-full bg-red-400" />
 				<p class="sr-only">Wallet Disconnected</p>
@@ -13,6 +14,25 @@
 				<p class="sr-only">Wallet Connected</p>
 				<Button variant="outline" @click="showDisconnectDialog = true">
 					Disconnect Wallet
+				</Button>
+			</div>
+		</div>
+		<!-- Small Screens -->
+		<div class="block md:hidden">
+			<div v-if="!address" class="flex items-center gap-2">
+				<div class="size-3 rounded-full bg-red-400" />
+				<p class="sr-only">Wallet Disconnected</p>
+				<Button size="icon" variant="outline" @click="showConnectDialog = true">
+					<p class="sr-only">Connect Wallet</p>
+					<Wallet class="size-5" />
+				</Button>
+			</div>
+			<div v-else class="flex items-center gap-2">
+				<div class="size-3 rounded-full bg-green-400" />
+				<p class="sr-only">Wallet Connected</p>
+				<Button size="icon" variant="outline" @click="showDisconnectDialog = true">
+					<p class="sr-only">Disconnect Wallet</p>
+					<Unplug class="size-5" />
 				</Button>
 			</div>
 		</div>
@@ -99,7 +119,7 @@
 import { useWalletStore } from '@/stores/walletStore';
 import { computed, ref, watch } from 'vue';
 import type { WalletProvider } from '@/types/wallet';
-import { Loader2 } from 'lucide-vue-next'
+import { Loader2, Wallet, Unplug } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import {
 	Dialog,
