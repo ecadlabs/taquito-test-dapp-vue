@@ -5,7 +5,7 @@ import type { TestDiagram } from '@/modules/tests/test';
 export const useDiagramStore = defineStore('diagram', () => {
 	const currentDiagram = ref<TestDiagram | null>(null);
 	const currentStep = ref<string | null>(null);
-	const diagramStatus = ref<'idle' | 'running' | 'completed'>('idle');
+	const diagramStatus = ref<'idle' | 'running' | 'completed' | 'errored'>('idle');
 	const errored = ref<boolean>(false);
 	const errorMessage = ref();
 	const successful = ref<boolean>(false);
@@ -43,6 +43,7 @@ export const useDiagramStore = defineStore('diagram', () => {
 
 	const setErrorMessage = (error: unknown) => {
 		errorMessage.value = error;
+		diagramStatus.value = 'errored'
 	}
 
 	const resetDiagram = () => {

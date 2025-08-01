@@ -1,5 +1,6 @@
 <template>
 	<div class="overflow-auto w-full relative" ref="diagram-container">
+		{{ diagramStatus }}
 		<div class="min-w-full h-[150px] relative min-w-max">
 			<!-- Connections layer -->
 			<div class="absolute top-0 left-0 w-full h-full pointer-events-none z-[1]">
@@ -275,7 +276,11 @@ function getNodeClass(node: DiagramNode): string {
 
 	// Error nodes should never be the current step
 	if (node.id === currentStep.value && node.type !== 'error') {
-		classes.push('current');
+		if (diagramStatus.value === 'errored') {
+			classes.push('current');
+		} else {
+			classes.push('current-animated');
+		}
 	}
 
 	if (isNodeCompleted(node)) {
@@ -378,7 +383,7 @@ function isNodeCompleted(node: DiagramNode | undefined): boolean {
 
 /* Success and error path coloring */
 .success-path .connection-line {
-	background: #10b981 !important;
+	background: #10b981;
 }
 
 .error-path .connection-line {
@@ -430,20 +435,36 @@ function isNodeCompleted(node: DiagramNode | undefined): boolean {
 	}
 }
 
+@keyframes pulse {
+
+	0%,
+	100% {
+		border-color: #3b83f680
+	}
+
+	50% {
+		border-color: #3b82f6
+	}
+}
+
 /* Node state coloring */
 .node-circle {
-	border-width: 2.5px !important;
+	border-width: 2.5px;
 }
 
 .node.current .node-circle {
-	border-color: #3b82f6 !important;
+	border-color: #3b82f6;
+}
+
+.node.current-animated .node-circle {
+	animation: pulse 2s infinite;
 }
 
 .node.completed .node-circle {
-	border-color: #10b981 !important;
+	border-color: #10b981;
 }
 
 .node.error .node-circle {
-	border-color: #ef4444 !important;
+	border-color: #ef4444;
 }
 </style>
