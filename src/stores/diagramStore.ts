@@ -7,6 +7,7 @@ export const useDiagramStore = defineStore('diagram', () => {
 	const currentStep = ref<string | null>(null);
 	const diagramStatus = ref<'idle' | 'running' | 'completed'>('idle');
 	const errored = ref<boolean>(false);
+	const errorMessage = ref();
 	const successful = ref<boolean>(false);
 
 	const setDiagram = (diagram: TestDiagram) => {
@@ -15,6 +16,7 @@ export const useDiagramStore = defineStore('diagram', () => {
 		currentStep.value = null;
 		errored.value = false;
 		successful.value = false;
+		errorMessage.value = undefined;
 	};
 
 	const setProgress = (stepId: string, status: 'running' | 'completed') => {
@@ -39,11 +41,16 @@ export const useDiagramStore = defineStore('diagram', () => {
 		successful.value = true;
 	}
 
+	const setErrorMessage = (error: unknown) => {
+		errorMessage.value = error;
+	}
+
 	const resetDiagram = () => {
 		if (currentDiagram.value) {
 			diagramStatus.value = 'idle';
 			currentStep.value = null;
 			errored.value = false;
+			errorMessage.value = undefined;
 			successful.value = false;
 		}
 	};
@@ -58,5 +65,7 @@ export const useDiagramStore = defineStore('diagram', () => {
 		setErrored,
 		resetDiagram,
 		setSuccessful,
+		setErrorMessage,
+		errorMessage,
 	};
 }); 

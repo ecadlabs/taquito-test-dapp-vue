@@ -62,7 +62,6 @@ const sendTransfer = async () => {
 		await send(toAddress.value, amount.value);
 	} catch (error) {
 		console.error(error);
-		throw new Error(error as string);
 	} finally {
 		sending.value = false;
 	}

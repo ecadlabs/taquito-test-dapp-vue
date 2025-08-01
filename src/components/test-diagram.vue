@@ -1,6 +1,6 @@
 <template>
 	<div class="overflow-auto w-full relative" ref="diagram-container">
-		<div class="min-w-full h-[130px] relative min-w-max">
+		<div class="min-w-full h-[150px] relative min-w-max">
 			<!-- Connections layer -->
 			<div class="absolute top-0 left-0 w-full h-full pointer-events-none z-[1]">
 				<div v-for="connection in connections" :key="connection.id"
@@ -26,9 +26,14 @@
 						class="node-circle w-5 h-5 rounded-full bg-white border-2 border-gray-300 transition-all duration-300">
 					</div>
 					<!-- Text label below or below -->
-					<div class="text-xs absolute font-medium text-gray-700 text-center max-w-[100px] leading-[1.2]"
+					<div class="text-xs absolute font-medium text-gray-700 text-center leading-[1.2]"
 						:class="node.type === 'error' ? 'top-6' : 'bottom-6'">
-						{{ node.label }}
+						<p>
+							{{ node.label }}
+						</p>
+						<p v-if="node.type === 'error'" class="text-red-400 mt-1">
+							{{ errorMessage }}
+						</p>
 					</div>
 				</div>
 			</div>
@@ -52,6 +57,7 @@ const diagram = computed(() => diagramStore.currentDiagram);
 const currentStep = computed(() => diagramStore.currentStep);
 const diagramStatus = computed(() => diagramStore.diagramStatus);
 const errored = computed(() => diagramStore.errored);
+const errorMessage = computed(() => diagramStore.errorMessage);
 
 const positionedNodes = computed(() => {
 	if (!diagram.value?.nodes) return [];

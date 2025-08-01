@@ -26,6 +26,7 @@ const send = async (to: string, amount: number) => {
 	} catch (error) {
 		console.error(`Failed to send transfer to '${to}': ${error}`);
 		diagramStore.setErrored();
+		diagramStore.setErrorMessage(error);
 		throw error;
 	}
 }
