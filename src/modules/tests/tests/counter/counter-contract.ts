@@ -1,7 +1,8 @@
 import { useWalletStore } from "@/stores/walletStore"
 import { useDiagramStore } from "@/stores/diagramStore"
 
-const CONTRACT_ADDRESS = 'KT1AoX6862rfFB5F1yxiE6Y8EwTQz8G1WEBb';
+// const CONTRACT_ADDRESS = 'KT1AoX6862rfFB5F1yxiE6Y8EwTQz8G1WEBb';
+const CONTRACT_ADDRESS = 'KT1RLWdB5zJcN7RVqu5MRWp3gvkMUGEpuc1d'
 
 /**
  * Increments the contract storage value by the specified amount.
@@ -92,27 +93,14 @@ const reset = async (): Promise<void> => {
 	const Tezos = walletStore.getTezos;
 
 	try {
-		// Set progress: Getting contract
 		diagramStore.setProgress('get-contract', 'running');
-
 		const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
-		console.log(`Resetting storage value`);
-
-		diagramStore.setProgress('get-contract', 'completed');
 		diagramStore.setProgress('execute-operation', 'running');
-
-		// Set progress: Executing operation
 		const operation = await contract.methodsObject.reset().send();
-
-		diagramStore.setProgress('execute-operation', 'completed');
 		diagramStore.setProgress('wait-confirmation', 'running');
-
-		// Set progress: Waiting for confirmation
 		console.log(`Waiting for ${operation.opHash} to be confirmed...`);
 		const operationHash = await operation.confirmation(3);
 		console.log(`Operation injected: https://ghost.tzstats.com/${operationHash}`)
-
-		diagramStore.setProgress('wait-confirmation', 'completed');
 		diagramStore.setProgress('success', 'completed');
 
 	} catch (error) {
@@ -134,14 +122,11 @@ const getContractStorage = async (): Promise<void> => {
 	const Tezos = walletStore.getTezos;
 
 	try {
-		// Set progress: Getting contract
 		diagramStore.setProgress('get-contract', 'running');
 
 		const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 		const storage = await contract.storage();
 		console.log(`Current storage value: ${storage}`);
-
-		diagramStore.setProgress('get-contract', 'completed');
 		diagramStore.setProgress('success', 'completed');
 
 	} catch (error) {
@@ -173,8 +158,6 @@ const getContractMethods = async (): Promise<void> => {
 			.then((c) => {
 				const methods = c.parameterSchema.ExtractSignatures();
 				console.log(JSON.stringify(methods, null, 2));
-
-				diagramStore.setProgress('get-contract', 'completed');
 				diagramStore.setProgress('success', 'completed');
 			})
 			.catch((error) => {

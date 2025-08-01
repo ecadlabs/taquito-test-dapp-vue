@@ -4,6 +4,7 @@ import { BeaconWallet } from "@taquito/beacon-wallet"
 import { TezosToolkit } from "@taquito/taquito"
 import type { WalletProvider } from "@/types/wallet"
 import { PermissionScopeMethods, WalletConnect } from '@taquito/wallet-connect'
+import { NetworkType } from "@airgap/beacon-types"
 
 export const useWalletStore = defineStore('wallet', () => {
 	const Tezos = ref<TezosToolkit>(new TezosToolkit(import.meta.env.VITE_RPC_URL));
@@ -30,18 +31,20 @@ export const useWalletStore = defineStore('wallet', () => {
 	 * @throws {Error} If wallet initialization or permission request fails (e.g., user cancels the wallet popup).
 	 */
 	const initializeWallet = async (provider: WalletProvider): Promise<void> => {
-		if (wallet.value) {
-			console.error("Failed to initialize wallet due to a wallet already being initialized in this session.")
-			throw new ReferenceError("Failed to initialize wallet: a wallet is already initialized.")
-		}
-
 		try {
+			if (wallet.value) {
+				console.error("Failed to initialize wallet due to a wallet already being initialized in this session.")
+				throw new ReferenceError("Failed to initialize wallet: a wallet is already initialized.")
+			}
+
 			if (provider === 'beacon') {
 				const options = {
 					name: 'Taquito Playground',
 					iconUrl: 'https://tezostaquito.io/img/favicon.svg',
 					network: {
-						type: import.meta.env.VITE_NETWORK_TYPE,
+						type: NetworkType.CUSTOM,
+						name: import.meta.env.VITE_NETWORK_TYPE,
+						rpcUrl: import.meta.env.VITE_RPC_URL,
 					},
 					enableMetrics: true,
 				};

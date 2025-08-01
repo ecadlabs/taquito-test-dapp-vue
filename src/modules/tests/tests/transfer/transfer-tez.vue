@@ -38,8 +38,10 @@ import {
 	NumberFieldInput,
 } from '@/components/ui/number-field'
 import { Loader2 } from 'lucide-vue-next';
-
-const toAddress = ref<string>('tz1h3rQ8wBxFd8L9B3d7Jhaawu6Z568XU3xY')
+// Ghostnet
+// const toAddress = ref<string>('tz1h3rQ8wBxFd8L9B3d7Jhaawu6Z568XU3xY')
+// Seoulnet
+const toAddress = ref<string>('tz1VRj54TQDtUGgv6gF4AbGbXMphyDpVkCpf')
 const amount = ref<number>(1);
 const sending = ref<boolean>(false);
 const diagramStore = useDiagramStore();

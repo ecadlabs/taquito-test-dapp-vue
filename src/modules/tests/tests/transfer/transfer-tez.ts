@@ -7,7 +7,6 @@ const send = async (to: string, amount: number) => {
 	const Tezos = walletStore.getTezos;
 
 	try {
-		// Set progress: Validate input
 		diagramStore.setProgress('validate-input', 'running');
 
 		// Validate input parameters
@@ -15,24 +14,12 @@ const send = async (to: string, amount: number) => {
 			throw new Error('Invalid recipient address or amount');
 		}
 
-		diagramStore.setProgress('validate-input', 'completed');
 		diagramStore.setProgress('create-transaction', 'running');
-
-		// Set progress: Create transaction
 		const transfer = await Tezos.wallet.transfer({ to, amount }).send();
 
-		diagramStore.setProgress('create-transaction', 'completed');
 		diagramStore.setProgress('send-transaction', 'running');
-
-		// Set progress: Send transaction
-		diagramStore.setProgress('send-transaction', 'completed');
 		diagramStore.setProgress('wait-confirmation', 'running');
-
-		// Set progress: Wait for confirmation
-		const confirmationResponse = await transfer.confirmation();
-		console.log(confirmationResponse);
-
-		diagramStore.setProgress('wait-confirmation', 'completed');
+		await transfer.confirmation();
 		diagramStore.setProgress('success', 'completed');
 
 		await walletStore.fetchBalance();
