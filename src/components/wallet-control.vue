@@ -141,7 +141,7 @@ import { toast } from 'vue-sonner';
 const walletStore = useWalletStore();
 
 const address = computed(() => walletStore.getAddress)
-const balance = computed(() => walletStore.getBalance)
+// const balance = computed(() => walletStore.getBalance)
 
 const provider = ref<WalletProvider>('beacon')
 const loading = ref<boolean>(false);
