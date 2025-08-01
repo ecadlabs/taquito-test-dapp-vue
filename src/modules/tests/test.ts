@@ -1,5 +1,17 @@
 import type { Component } from "vue";
 
+export interface DiagramNode {
+	id: string;
+	label: string;
+	type: 'start' | 'process' | 'decision' | 'success' | 'error' | 'end';
+	position?: { x: number; y: number };
+	next?: string;
+}
+
+export interface TestDiagram {
+	nodes: DiagramNode[];
+}
+
 export interface TestMetadata {
 	id: string;
 	title: string;
@@ -19,5 +31,6 @@ export interface TestMetadata {
 		script?: string;
 		documentation?: string;
 	};
-	component?: Component,
+	component?: Component;
+	diagram?: TestDiagram;
 }

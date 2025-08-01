@@ -35,7 +35,40 @@ export const AvailableTests: Record<string, TestMetadata> = {
 			script: 'https://example.com',
 			documentation: 'https://taquito.io/docs/making_transfers'
 		},
-		component: TransferTez
+		component: TransferTez,
+		diagram: {
+			nodes: [
+				{
+					id: 'start',
+					label: 'Start',
+					type: 'start',
+					next: 'validate-input'
+				},
+				{
+					id: 'validate-input',
+					label: 'Validate Input',
+					type: 'process',
+					next: 'create-transaction'
+				},
+				{
+					id: 'create-transaction',
+					label: 'Create Transaction',
+					type: 'process',
+					next: 'send-transaction'
+				},
+				{
+					id: 'send-transaction',
+					label: 'Send Transaction',
+					type: 'process',
+					next: 'wait-confirmation'
+				},
+				{
+					id: 'wait-confirmation',
+					label: 'Wait for Confirmation',
+					type: 'process',
+				},
+			],
+		}
 	},
 	'counter-contract': {
 		id: 'counter-contract',
@@ -70,7 +103,34 @@ export const AvailableTests: Record<string, TestMetadata> = {
 			script: 'https://example.com',
 			documentation: 'https://taquito.io/docs/smartcontracts'
 		},
-		component: CounterContract
+		component: CounterContract,
+		diagram: {
+			nodes: [
+				{
+					id: 'start',
+					label: 'Start',
+					type: 'start',
+					next: 'get-contract'
+				},
+				{
+					id: 'get-contract',
+					label: 'Get Contract',
+					type: 'process',
+					next: 'execute-operation'
+				},
+				{
+					id: 'execute-operation',
+					label: 'Execute Operation',
+					type: 'process',
+					next: 'wait-confirmation'
+				},
+				{
+					id: 'wait-confirmation',
+					label: 'Wait for Confirmation',
+					type: 'process',
+				},
+			],
+		}
 	},
 	'contract-origination': {
 		id: 'contract-origination',

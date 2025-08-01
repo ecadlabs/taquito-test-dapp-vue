@@ -87,9 +87,7 @@
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<!-- <p class="text-sm text-muted-foreground">{{ testMetadata.operationalFlow.description }}</p> -->
-						<p class="text-sm text-muted-foreground">In the future, operational diagrams will be displayed
-							in this card.</p>
+						<TestDiagram />
 					</CardContent>
 				</Card>
 
@@ -160,7 +158,10 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { getTestById } from '@/modules/tests/tests';
 import type { TestMetadata } from '@/modules/tests/test';
+import TestDiagram from '@/components/test-diagram.vue';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useDiagramStore } from '@/stores/diagramStore';
+import { onUnmounted } from 'vue';
 import {
 	BookOpen,
 	Target,
@@ -180,8 +181,15 @@ const route = useRoute();
 const testId = computed(() => route.params.test as string);
 const testMetadata = computed((): TestMetadata | undefined => getTestById(testId.value));
 
+const diagramStore = useDiagramStore();
+
 const getTestTitle = (testId: string): string => {
 	const test = getTestById(testId);
 	return test?.title || testId;
 };
+
+onUnmounted(() => {
+	// Reset diagram when leaving test
+	diagramStore.resetDiagram();
+});
 </script>

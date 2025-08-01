@@ -20,9 +20,11 @@
 </template>
 
 <script setup lang='ts'>
+import { useDiagramStore } from '@/stores/diagramStore';
+import { getTestById } from '@/modules/tests/tests';
 import Button from '@/components/ui/button/Button.vue';
 import { increment, decrement, reset, getContractStorage } from '@/modules/tests/tests/counter/counter-contract';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { Label } from '@/components/ui/label'
 import {
 	NumberField,
@@ -32,5 +34,14 @@ import {
 	NumberFieldInput,
 } from '@/components/ui/number-field'
 
-const amount = ref<number>(0);
+const amount = ref<number>(1);
+const diagramStore = useDiagramStore();
+
+onMounted(() => {
+	// Set the diagram for this test
+	const testMetadata = getTestById('counter-contract');
+	if (testMetadata?.diagram) {
+		diagramStore.setDiagram(testMetadata.diagram);
+	}
+});
 </script>

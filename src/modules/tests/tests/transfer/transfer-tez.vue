@@ -23,7 +23,9 @@
 </template>
 
 <script setup lang='ts'>
-import { ref } from 'vue';
+import { useDiagramStore } from '@/stores/diagramStore';
+import { getTestById } from '@/modules/tests/tests';
+import { ref, onMounted } from 'vue';
 import { send } from '@/modules/tests/tests/transfer/transfer-tez';
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button';
@@ -39,8 +41,16 @@ import { Loader2 } from 'lucide-vue-next';
 
 const toAddress = ref<string>('tz1h3rQ8wBxFd8L9B3d7Jhaawu6Z568XU3xY')
 const amount = ref<number>(1);
-
 const sending = ref<boolean>(false);
+const diagramStore = useDiagramStore();
+
+onMounted(() => {
+	// Set the diagram for this test
+	const testMetadata = getTestById('transfer');
+	if (testMetadata?.diagram) {
+		diagramStore.setDiagram(testMetadata.diagram);
+	}
+});
 
 const sendTransfer = async () => {
 	if (!toAddress.value) return;
@@ -50,7 +60,7 @@ const sendTransfer = async () => {
 		await send(toAddress.value, amount.value);
 	} catch (error) {
 		console.error(error);
-		// TODO: show error in operational flow, or a toast
+		throw new Error(error as string);
 	} finally {
 		sending.value = false;
 	}

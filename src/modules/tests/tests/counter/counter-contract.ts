@@ -1,4 +1,6 @@
 import { useWalletStore } from "@/stores/walletStore"
+import { useDiagramStore } from "@/stores/diagramStore"
+
 const CONTRACT_ADDRESS = 'KT1AoX6862rfFB5F1yxiE6Y8EwTQz8G1WEBb';
 
 /**
@@ -10,22 +12,36 @@ const CONTRACT_ADDRESS = 'KT1AoX6862rfFB5F1yxiE6Y8EwTQz8G1WEBb';
  * @returns {Promise<void>}
  */
 const increment = async (amount: number): Promise<void> => {
+	const diagramStore = useDiagramStore();
+
 	if (amount <= 0 || amount > 100) throw new Error('Incrementation value must be between 1 and 100 inclusive.');
 
 	const walletStore = useWalletStore();
 	const Tezos = walletStore.getTezos;
 
 	try {
+		// Set progress: Getting contract
+		diagramStore.setProgress('get-contract', 'running');
+
 		const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 		console.log(`Incrementing storage value by ${amount}...`);
 
+		diagramStore.setProgress('execute-operation', 'running');
+
+		// Set progress: Executing operation
 		const operation = await contract.methodsObject.increment(amount).send();
 
+		diagramStore.setProgress('wait-confirmation', 'running');
+
+		// Set progress: Waiting for confirmation
 		console.log(`Waiting for ${operation.opHash} to be confirmed...`);
 		const operationHash = await operation.confirmation(3);
 		console.log(`Operation injected: https://ghost.tzstats.com/${operationHash}`)
+		diagramStore.setProgress('success', 'completed');
+
 	} catch (error) {
 		console.log(`Error: ${JSON.stringify(error, null, 2)}`)
+		diagramStore.setErrored();
 	}
 }
 
@@ -38,22 +54,28 @@ const increment = async (amount: number): Promise<void> => {
  * @returns {Promise<void>}
  */
 const decrement = async (amount: number): Promise<void> => {
+	const diagramStore = useDiagramStore();
+
 	if (amount <= 0 || amount > 100) throw new Error('Decrementation value must be between 1 and 100 inclusive.');
 
 	const walletStore = useWalletStore();
 	const Tezos = walletStore.getTezos;
 
 	try {
+		diagramStore.setProgress('get-contract', 'running');
 		const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 		console.log(`Decrementing storage value by ${amount}...`);
-
+		diagramStore.setProgress('execute-operation', 'running');
 		const operation = await contract.methodsObject.decrement(amount).send();
-
+		diagramStore.setProgress('wait-confirmation', 'running');
 		console.log(`Waiting for ${operation.opHash} to be confirmed...`);
 		const operationHash = await operation.confirmation(3);
 		console.log(`Operation injected: https://ghost.tzstats.com/${operationHash}`)
+		diagramStore.setProgress('success', 'completed');
+
 	} catch (error) {
 		console.log(`Error: ${JSON.stringify(error, null, 2)}`)
+		diagramStore.setErrored();
 	}
 }
 
@@ -64,20 +86,38 @@ const decrement = async (amount: number): Promise<void> => {
  * @returns {Promise<void>}
  */
 const reset = async (): Promise<void> => {
+	const diagramStore = useDiagramStore();
+
 	const walletStore = useWalletStore();
 	const Tezos = walletStore.getTezos;
 
 	try {
+		// Set progress: Getting contract
+		diagramStore.setProgress('get-contract', 'running');
+
 		const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 		console.log(`Resetting storage value`);
 
+		diagramStore.setProgress('get-contract', 'completed');
+		diagramStore.setProgress('execute-operation', 'running');
+
+		// Set progress: Executing operation
 		const operation = await contract.methodsObject.reset().send();
 
+		diagramStore.setProgress('execute-operation', 'completed');
+		diagramStore.setProgress('wait-confirmation', 'running');
+
+		// Set progress: Waiting for confirmation
 		console.log(`Waiting for ${operation.opHash} to be confirmed...`);
 		const operationHash = await operation.confirmation(3);
 		console.log(`Operation injected: https://ghost.tzstats.com/${operationHash}`)
+
+		diagramStore.setProgress('wait-confirmation', 'completed');
+		diagramStore.setProgress('success', 'completed');
+
 	} catch (error) {
 		console.log(`Error: ${JSON.stringify(error, null, 2)}`)
+		diagramStore.setErrored();
 	}
 }
 
@@ -88,15 +128,25 @@ const reset = async (): Promise<void> => {
  * @returns {Promise<void>}
  */
 const getContractStorage = async (): Promise<void> => {
+	const diagramStore = useDiagramStore();
+
 	const walletStore = useWalletStore();
 	const Tezos = walletStore.getTezos;
 
 	try {
+		// Set progress: Getting contract
+		diagramStore.setProgress('get-contract', 'running');
+
 		const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 		const storage = await contract.storage();
 		console.log(`Current storage value: ${storage}`);
+
+		diagramStore.setProgress('get-contract', 'completed');
+		diagramStore.setProgress('success', 'completed');
+
 	} catch (error) {
 		console.log(`Error: ${error}`)
+		diagramStore.setErrored();
 	}
 
 	return;
@@ -109,16 +159,32 @@ const getContractStorage = async (): Promise<void> => {
  * @returns {Promise<void>}
  */
 const getContractMethods = async (): Promise<void> => {
+	const diagramStore = useDiagramStore();
+
 	const walletStore = useWalletStore();
 	const Tezos = walletStore.getTezos;
 
-	await Tezos.wallet
-		.at(CONTRACT_ADDRESS)
-		.then((c) => {
-			const methods = c.parameterSchema.ExtractSignatures();
-			console.log(JSON.stringify(methods, null, 2));
-		})
-		.catch((error) => console.log(`Error: ${error}`));
+	try {
+		// Set progress: Getting contract
+		diagramStore.setProgress('get-contract', 'running');
+
+		await Tezos.wallet
+			.at(CONTRACT_ADDRESS)
+			.then((c) => {
+				const methods = c.parameterSchema.ExtractSignatures();
+				console.log(JSON.stringify(methods, null, 2));
+
+				diagramStore.setProgress('get-contract', 'completed');
+				diagramStore.setProgress('success', 'completed');
+			})
+			.catch((error) => {
+				console.log(`Error: ${error}`)
+				diagramStore.setErrored();
+			});
+	} catch (error) {
+		console.log(`Error: ${error}`)
+		diagramStore.setErrored();
+	}
 
 	return;
 }
