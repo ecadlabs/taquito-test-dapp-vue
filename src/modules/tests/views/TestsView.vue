@@ -20,7 +20,7 @@
               </BreadcrumbList>
             </Breadcrumb>
           </header>
-          <div class="flex-1 overflow-auto">
+          <div ref="scrollContainer" class="flex-1 overflow-auto">
             <TestWrapper v-if="currentTestComponent">
               <component :is="currentTestComponent" v-if="currentTestComponent" />
             </TestWrapper>
@@ -52,11 +52,18 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
 import { getTestById } from '@/modules/tests/tests';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { HeartCrack } from 'lucide-vue-next';
 
 const route = useRoute();
+const scrollContainer = ref<HTMLElement>();
+
+watch(() => route.params.test, () => {
+  if (scrollContainer.value) {
+    scrollContainer.value.scrollTop = 0;
+  }
+});
 
 const currentTest = computed(() => {
   const testName = route.params.test as string;
