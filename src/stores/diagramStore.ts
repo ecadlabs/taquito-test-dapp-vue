@@ -9,16 +9,19 @@ export const useDiagramStore = defineStore('diagram', () => {
 	const errorMessage = ref();
 	const successful = ref<boolean>(false);
 	const operationHash = ref<string>();
+	const currentTestId = ref<string | null>(null);
 
-	const setDiagram = (diagram: TestDiagram) => {
+	const setDiagram = (diagram: TestDiagram, testId: string) => {
+		resetDiagram();
 		currentDiagram.value = diagram;
-		diagramStatus.value = 'idle';
-		currentStep.value = null
-		successful.value = false;
-		errorMessage.value = undefined;
+		currentTestId.value = testId;
 	};
 
-	const setProgress = (stepId: string, status: 'running' | 'completed') => {
+	const setProgress = (stepId: string, status: 'running' | 'completed', testId?: string) => {
+		if (testId && currentTestId.value !== testId) {
+			return;
+		}
+
 		// Reset diagram if there was an error - this allows users to retry
 		// and should only run when the user interacts with something, since
 		// if the diagram has errored, no more progress can be made.
@@ -26,31 +29,49 @@ export const useDiagramStore = defineStore('diagram', () => {
 			resetDiagram();
 		}
 
-		if (currentDiagram.value) {
+		if (currentDiagram.value && currentTestId.value) {
 			currentStep.value = stepId;
 			diagramStatus.value = status;
 		}
 	};
 
-	const setSuccessful = () => {
+	const setSuccessful = (testId?: string) => {
+		if (testId && currentTestId.value !== testId) {
+			return;
+		}
 		successful.value = true;
 	}
 
-	const setErrorMessage = (error: unknown) => {
+	const setErrorMessage = (error: unknown, testId?: string) => {
+		if (testId && currentTestId.value !== testId) {
+			return;
+		}
 		errorMessage.value = error;
-		diagramStatus.value = 'errored'
+		diagramStatus.value = 'errored';
 	}
 
-	const setOperationHash = (hash: string) => {
+	const setOperationHash = (hash: string, testId?: string) => {
+		if (testId && currentTestId.value !== testId) {
+			return;
+		}
 		operationHash.value = hash;
 	}
 
 	const resetDiagram = () => {
 		if (currentDiagram.value) {
-			diagramStatus.value = 'idle';
+			currentDiagram.value = null;
 			currentStep.value = null;
+			diagramStatus.value = 'idle';
 			errorMessage.value = undefined;
 			successful.value = false;
+			operationHash.value = undefined;
+			currentTestId.value = null;
+		}
+	};
+
+	const cancelCurrentTest = () => {
+		if (currentTestId.value) {
+			resetDiagram();
 		}
 	};
 
@@ -60,11 +81,13 @@ export const useDiagramStore = defineStore('diagram', () => {
 		diagramStatus,
 		errorMessage,
 		operationHash,
+		currentTestId,
 		setDiagram,
 		setProgress,
 		resetDiagram,
 		setSuccessful,
 		setErrorMessage,
 		setOperationHash,
+		cancelCurrentTest,
 	};
 }); 

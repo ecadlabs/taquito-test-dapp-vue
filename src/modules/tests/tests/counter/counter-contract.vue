@@ -41,7 +41,7 @@ onMounted(() => {
 	// Set the diagram for this test
 	const testMetadata = getTestById('counter-contract');
 	if (testMetadata?.diagram) {
-		diagramStore.setDiagram(testMetadata.diagram);
+		diagramStore.setDiagram(testMetadata.diagram, 'counter-contract');
 	}
 });
 </script>

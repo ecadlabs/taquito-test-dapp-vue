@@ -189,7 +189,7 @@ const getTestTitle = (testId: string): string => {
 };
 
 onUnmounted(() => {
-	// Reset diagram when leaving test
-	diagramStore.resetDiagram();
+	// Cancel current test when leaving test
+	diagramStore.cancelCurrentTest();
 });
 </script>

@@ -52,17 +52,50 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
 import { getTestById } from '@/modules/tests/tests';
-import { computed, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed, ref, watch, onBeforeUnmount, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { HeartCrack } from 'lucide-vue-next';
+import { useDiagramStore } from '@/stores/diagramStore';
 
 const route = useRoute();
+const router = useRouter();
 const scrollContainer = ref<HTMLElement>();
+const diagramStore = useDiagramStore();
 
-watch(() => route.params.test, () => {
+// Watch for route changes to reset diagram when navigating between tests or away from tests
+watch(() => route.params.test, (newTest, oldTest) => {
   if (scrollContainer.value) {
     scrollContainer.value.scrollTop = 0;
   }
+
+  // Cancel current test and reset diagram when test changes or when navigating away from tests
+  if (newTest !== oldTest) {
+    diagramStore.cancelCurrentTest();
+  }
+});
+
+// Watch for route path changes to reset diagram when leaving test routes
+watch(() => route.path, (newPath, oldPath) => {
+  // If navigating away from test routes (from /tests/* to something else)
+  if (oldPath?.startsWith('/tests/') && !newPath.startsWith('/tests/')) {
+    diagramStore.cancelCurrentTest();
+  }
+});
+
+// Handle navigation away from tests
+const handleNavigationAway = () => {
+  diagramStore.cancelCurrentTest();
+};
+
+onMounted(() => {
+  // Set up a listener for the custom navigation event
+  window.addEventListener('test-navigation-away', handleNavigationAway);
+});
+
+onBeforeUnmount(() => {
+  // Clean up the listener and cancel current test on component unmount
+  window.removeEventListener('test-navigation-away', handleNavigationAway);
+  diagramStore.cancelCurrentTest();
 });
 
 const currentTest = computed(() => {

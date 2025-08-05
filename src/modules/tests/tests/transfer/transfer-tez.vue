@@ -50,7 +50,7 @@ onMounted(() => {
 	// Set the diagram for this test
 	const testMetadata = getTestById('transfer');
 	if (testMetadata?.diagram) {
-		diagramStore.setDiagram(testMetadata.diagram);
+		diagramStore.setDiagram(testMetadata.diagram, 'transfer');
 	}
 });
 
