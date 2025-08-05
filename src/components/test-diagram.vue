@@ -25,13 +25,14 @@
 					<div
 						class="node-circle w-5 h-5 rounded-full bg-white border-2 border-gray-300 transition-all duration-300">
 					</div>
-					<!-- Text label below or below -->
+					<!-- Text label -->
 					<div class="text-xs absolute font-medium text-gray-700 text-center leading-[1.2]"
 						:class="node.type === 'error' ? 'top-6' : 'bottom-6'">
-						<a v-if="node.type === 'success' && diagramStatus === 'completed'" :href="`https://${networkType}.tzkt.io/${operationHash}/operations`" target="_blank">
+						<a v-if="node.type === 'success' && diagramStatus === 'completed'"
+							:href="`${indexerUrl}/${operationHash}/operations`" target="_blank">
 							<Badge variant="secondary" class="mb-1">
-								<Hash/>
-								<p>View on Tzkt</p>
+								<Hash />
+								<p>View on {{ selectedIndexerName }}</p>
 							</Badge>
 						</a>
 						<p>
@@ -53,8 +54,12 @@ import { useDiagramStore } from '@/stores/diagramStore';
 import type { DiagramNode } from '@/modules/tests/test';
 import { Hash } from 'lucide-vue-next';
 import { Badge } from '@/components/ui/badge'
+import { buildIndexerUrl } from '@/lib/utils';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 const diagramStore = useDiagramStore();
+const settingsStore = useSettingsStore();
+
 const diagramContainer = useTemplateRef('diagram-container');
 
 const verticalSpacing = 50;
@@ -70,6 +75,9 @@ const errorMessage = computed(() => diagramStore.errorMessage);
 const operationHash = computed(() => diagramStore.operationHash);
 
 const networkType = import.meta.env.VITE_NETWORK_TYPE;
+
+const indexerUrl = computed(() => buildIndexerUrl(settingsStore.settings.indexer, networkType));
+const selectedIndexerName = computed(() => settingsStore.settings.indexer.name);
 
 const positionedNodes = computed(() => {
 	if (!diagram.value?.nodes) return [];

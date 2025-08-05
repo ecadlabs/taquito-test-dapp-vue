@@ -44,10 +44,9 @@
     </DropdownMenu>
   </div>
 
-  <Dialog v-model:open="showSettingsDialog" @update:open="showSettingsDialog = $event">
-    <SettingsDialog />
+  <Dialog v-model:open="showSettingsDialog">
+    <SettingsDialog @close="showSettingsDialog = false" />
   </Dialog>
-
 </template>
 
 <script setup lang="ts">

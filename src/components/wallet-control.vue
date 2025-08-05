@@ -152,8 +152,11 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'vue-sonner';
+import { buildIndexerUrl } from '@/lib/utils';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 const walletStore = useWalletStore();
+const settingsStore = useSettingsStore();
 
 const address = computed(() => walletStore.getAddress)
 const walletName = computed(() => walletStore.getWalletName)
@@ -178,8 +181,11 @@ const copyAddress = () => {
 	toast.success('Address copied to clipboard');
 }
 
+const networkType = import.meta.env.VITE_NETWORK_TYPE;
+const indexerUrl = computed(() => buildIndexerUrl(settingsStore.settings.indexer, networkType));
+
 const openExplorer = () => {
-	window.open(`https://seoulnet.tzkt.io/${address.value}/operations`, '_blank');
+	window.open(`${indexerUrl.value}/${address.value}/operations`, '_blank');
 }
 
 const connect = async () => {
