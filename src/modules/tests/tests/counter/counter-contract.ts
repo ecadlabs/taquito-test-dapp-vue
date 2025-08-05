@@ -21,7 +21,6 @@ const increment = async (amount: number): Promise<void> => {
 	const Tezos = walletStore.getTezos;
 
 	try {
-		// Set progress: Getting contract
 		diagramStore.setProgress('get-contract', 'running');
 
 		const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
@@ -29,15 +28,11 @@ const increment = async (amount: number): Promise<void> => {
 
 		diagramStore.setProgress('execute-operation', 'running');
 
-		// Set progress: Executing operation
 		const operation = await contract.methodsObject.increment(amount).send();
 
 		diagramStore.setProgress('wait-confirmation', 'running');
-
-		// Set progress: Waiting for confirmation
-		console.log(`Waiting for ${operation.opHash} to be confirmed...`);
-		const operationHash = await operation.confirmation(3);
-		console.log(`Operation injected: https://ghost.tzstats.com/${operationHash}`)
+		const confirmation = await operation.confirmation(3);
+		if (confirmation?.block.hash) diagramStore.setOperationHash(confirmation?.block.hash);
 		diagramStore.setProgress('success', 'completed');
 
 	} catch (error) {
@@ -66,13 +61,11 @@ const decrement = async (amount: number): Promise<void> => {
 	try {
 		diagramStore.setProgress('get-contract', 'running');
 		const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
-		console.log(`Decrementing storage value by ${amount}...`);
 		diagramStore.setProgress('execute-operation', 'running');
 		const operation = await contract.methodsObject.decrement(amount).send();
 		diagramStore.setProgress('wait-confirmation', 'running');
-		console.log(`Waiting for ${operation.opHash} to be confirmed...`);
-		const operationHash = await operation.confirmation(3);
-		console.log(`Operation injected: https://ghost.tzstats.com/${operationHash}`)
+		const confirmation = await operation.confirmation(3);
+		if (confirmation?.block.hash) diagramStore.setOperationHash(confirmation?.block.hash);
 		diagramStore.setProgress('success', 'completed');
 
 	} catch (error) {
@@ -100,9 +93,8 @@ const reset = async (): Promise<void> => {
 		diagramStore.setProgress('execute-operation', 'running');
 		const operation = await contract.methodsObject.reset().send();
 		diagramStore.setProgress('wait-confirmation', 'running');
-		console.log(`Waiting for ${operation.opHash} to be confirmed...`);
-		const operationHash = await operation.confirmation(3);
-		console.log(`Operation injected: https://ghost.tzstats.com/${operationHash}`)
+		const confirmation = await operation.confirmation(3);
+		if (confirmation?.block.hash) diagramStore.setOperationHash(confirmation?.block.hash);
 		diagramStore.setProgress('success', 'completed');
 
 	} catch (error) {

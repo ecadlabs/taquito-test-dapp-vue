@@ -38,29 +38,23 @@ export const AvailableTests: Record<string, TestMetadata> = {
 					id: 'start',
 					label: 'Start',
 					type: 'start',
-					next: 'validate-input'
+					next: 'estimate-fees'
 				},
 				{
-					id: 'validate-input',
-					label: 'Validate Input',
+					id: 'estimate-fees',
+					label: 'Estimate Fees',
 					type: 'process',
-					next: 'create-transaction'
+					next: 'wait-for-user'
 				},
 				{
-					id: 'create-transaction',
-					label: 'Create Transaction',
+					id: 'wait-for-user',
+					label: 'Wait for User Confirmation',
 					type: 'process',
-					next: 'send-transaction'
+					next: 'wait-for-chain-confirmation'
 				},
 				{
-					id: 'send-transaction',
-					label: 'Send Transaction',
-					type: 'process',
-					next: 'wait-confirmation'
-				},
-				{
-					id: 'wait-confirmation',
-					label: 'Wait for Confirmation',
+					id: 'wait-for-chain-confirmation',
+					label: 'Wait for Chain Confirmation',
 					type: 'process',
 				},
 			],

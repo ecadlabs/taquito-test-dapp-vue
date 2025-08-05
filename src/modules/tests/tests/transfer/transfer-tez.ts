@@ -7,22 +7,27 @@ const send = async (to: string, amount: number) => {
 	const Tezos = walletStore.getTezos;
 
 	try {
-		diagramStore.setProgress('validate-input', 'running');
-
 		// Validate input parameters
 		if (!to || amount <= 0) {
 			throw new Error('Invalid recipient address or amount');
 		}
 
-		diagramStore.setProgress('create-transaction', 'running');
+		diagramStore.setProgress('estimate-fees', 'running');
+
+		await new Promise(resolve => setTimeout(resolve, 2000));
+
+		// const estimate = await Tezos.estimate.transfer({ to, amount });
+		// console.log(estimate);
+
+		diagramStore.setProgress('wait-for-user', 'running');
 		const transfer = await Tezos.wallet.transfer({ to, amount }).send();
 
-		diagramStore.setProgress('send-transaction', 'running');
-		diagramStore.setProgress('wait-confirmation', 'running');
-		const operation = await transfer.confirmation();
-		if(operation?.block.hash) diagramStore.setOperationHash(operation?.block.hash);
-		diagramStore.setProgress('success', 'completed');
+		diagramStore.setProgress('wait-for-chain-confirmation', 'running');
+		const confirmation = await transfer.confirmation();
 
+		if (confirmation?.block.hash) diagramStore.setOperationHash(confirmation?.block.hash);
+
+		diagramStore.setProgress('success', 'completed');
 		await walletStore.fetchBalance();
 	} catch (error) {
 		console.error(`Failed to send transfer to '${to}': ${error}`);
