@@ -1,6 +1,5 @@
 <template>
 	<div class="overflow-auto w-full relative" ref="diagram-container">
-		{{ diagramStatus }}
 		<div class="min-w-full h-[150px] relative min-w-max">
 			<!-- Connections layer -->
 			<div class="absolute top-0 left-0 w-full h-full pointer-events-none z-[1]">
@@ -29,6 +28,12 @@
 					<!-- Text label below or below -->
 					<div class="text-xs absolute font-medium text-gray-700 text-center leading-[1.2]"
 						:class="node.type === 'error' ? 'top-6' : 'bottom-6'">
+						<a v-if="node.type === 'success' && diagramStatus === 'completed'" :href="`https://${networkType}.tzkt.io/${operationHash}/operations`" target="_blank">
+							<Badge variant="secondary" class="mb-1">
+								<Hash/>
+								<p>View on Tzkt</p>
+							</Badge>
+						</a>
 						<p>
 							{{ node.label }}
 						</p>
@@ -46,19 +51,25 @@
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
 import { useDiagramStore } from '@/stores/diagramStore';
 import type { DiagramNode } from '@/modules/tests/test';
+import { Hash } from 'lucide-vue-next';
+import { Badge } from '@/components/ui/badge'
 
 const diagramStore = useDiagramStore();
 const diagramContainer = useTemplateRef('diagram-container');
 
 const verticalSpacing = 50;
-const margin = 40;
-const NODE_SPACING_MINIMUM = 80;
+const horizontalMargin = 80;
+const verticalMargin = 50;
+const NODE_SPACING_MINIMUM = 100;
 
 const diagram = computed(() => diagramStore.currentDiagram);
 const currentStep = computed(() => diagramStore.currentStep);
 const diagramStatus = computed(() => diagramStore.diagramStatus);
 const errored = computed(() => diagramStore.errored);
 const errorMessage = computed(() => diagramStore.errorMessage);
+const operationHash = computed(() => diagramStore.operationHash);
+
+const networkType = import.meta.env.VITE_NETWORK_TYPE;
 
 const positionedNodes = computed(() => {
 	if (!diagram.value?.nodes) return [];
@@ -67,8 +78,8 @@ const positionedNodes = computed(() => {
 	const positionedMainNodes = diagram.value.nodes.map((node, index) => ({
 		...node,
 		position: {
-			x: margin + (index * (nodeSpacing.value ?? NODE_SPACING_MINIMUM)),
-			y: margin
+			x: horizontalMargin + (index * (nodeSpacing.value ?? NODE_SPACING_MINIMUM)),
+			y: verticalMargin,
 		}
 	}));
 
@@ -92,7 +103,7 @@ const positionedNodes = computed(() => {
 		type: 'error',
 		position: {
 			x: errorNodeX,
-			y: margin + verticalSpacing
+			y: verticalMargin + verticalSpacing
 		}
 	};
 
@@ -104,7 +115,7 @@ const positionedNodes = computed(() => {
 		type: 'success',
 		position: {
 			x: successNodeX,
-			y: margin
+			y: verticalMargin
 		}
 	};
 
@@ -137,7 +148,7 @@ const nodeSpacing = computed(() => {
 
 	if (nodeCount <= 1) return 100;
 
-	const availableWidth = width - (margin * 2);
+	const availableWidth = width - (horizontalMargin * 2);
 	return Math.max(NODE_SPACING_MINIMUM, availableWidth / (nodeCount - 1));
 });
 onMounted(() => {
@@ -275,7 +286,7 @@ function getNodeClass(node: DiagramNode): string {
 	const classes = ['node'];
 
 	// Error nodes should never be the current step
-	if (node.id === currentStep.value && node.type !== 'error') {
+	if (node.id === currentStep.value && node.type !== 'error' && node.type !== 'success') {
 		if (diagramStatus.value === 'errored') {
 			classes.push('current');
 		} else {

@@ -19,7 +19,8 @@ const send = async (to: string, amount: number) => {
 
 		diagramStore.setProgress('send-transaction', 'running');
 		diagramStore.setProgress('wait-confirmation', 'running');
-		await transfer.confirmation();
+		const operation = await transfer.confirmation();
+		if(operation?.block.hash) diagramStore.setOperationHash(operation?.block.hash);
 		diagramStore.setProgress('success', 'completed');
 
 		await walletStore.fetchBalance();

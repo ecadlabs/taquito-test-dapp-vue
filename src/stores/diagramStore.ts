@@ -9,6 +9,7 @@ export const useDiagramStore = defineStore('diagram', () => {
 	const errored = ref<boolean>(false);
 	const errorMessage = ref();
 	const successful = ref<boolean>(false);
+	const operationHash = ref<string>();
 
 	const setDiagram = (diagram: TestDiagram) => {
 		currentDiagram.value = diagram;
@@ -46,6 +47,10 @@ export const useDiagramStore = defineStore('diagram', () => {
 		diagramStatus.value = 'errored'
 	}
 
+	const setOperationHash = (hash: string) => {
+		operationHash.value = hash;
+	}
+
 	const resetDiagram = () => {
 		if (currentDiagram.value) {
 			diagramStatus.value = 'idle';
@@ -61,12 +66,14 @@ export const useDiagramStore = defineStore('diagram', () => {
 		currentStep,
 		diagramStatus,
 		errored,
+		errorMessage,
+		operationHash,
 		setDiagram,
 		setProgress,
 		setErrored,
 		resetDiagram,
 		setSuccessful,
 		setErrorMessage,
-		errorMessage,
+		setOperationHash,
 	};
 }); 
