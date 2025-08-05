@@ -20,10 +20,6 @@ export interface TestMetadata {
 	learningGoals: string[];
 	prerequisites: string[];
 	setup: string[];
-	operationalFlow: {
-		description: string;
-		diagram?: string;
-	};
 	stepByStepNarrative: string[];
 	relatedTests: string[];
 	sourceCode: {

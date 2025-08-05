@@ -21,10 +21,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
 			'Set up a Tezos wallet and fund it with some TEZ',
 			'Connect your wallet to Taquito Playground',
 		],
-		operationalFlow: {
-			description: 'description',
-			diagram: 'diagram'
-		},
 		stepByStepNarrative: [
 			'Step 1',
 			'Step 2',
@@ -88,10 +84,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
 			'Set up a Tezos wallet and fund it with some TEZ',
 			'Connect your wallet to Taquito Playground',
 		],
-		operationalFlow: {
-			description: 'description',
-			diagram: 'diagram'
-		},
 		stepByStepNarrative: [
 			'Step 1',
 			'Step 2',
@@ -151,10 +143,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
 			'Connect your wallet to Taquito Playground',
 			'Obtain your wallet key for signing'
 		],
-		operationalFlow: {
-			description: 'description',
-			diagram: 'diagram'
-		},
 		stepByStepNarrative: [
 			'Step 1',
 			'Step 2',
@@ -188,10 +176,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
 			'Connect your wallet to Taquito Playground',
 			'Obtain your wallet key for signing'
 		],
-		operationalFlow: {
-			description: 'description',
-			diagram: 'diagram'
-		},
 		stepByStepNarrative: [
 			'Step 1',
 			'Step 2',
@@ -225,10 +209,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
 			'Connect your wallet to Taquito Playground',
 			'Obtain your wallet key for signing'
 		],
-		operationalFlow: {
-			description: 'description',
-			diagram: 'diagram'
-		},
 		stepByStepNarrative: [
 			'Step 1',
 			'Step 2',
