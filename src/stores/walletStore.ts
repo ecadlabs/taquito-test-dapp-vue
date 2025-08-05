@@ -12,11 +12,13 @@ export const useWalletStore = defineStore('wallet', () => {
 	const wallet = ref<BeaconWallet | WalletConnect>();
 	const address = ref<string>();
 	const balance = ref<BigNumber>();
+	const walletName = ref<string>();
 
 	const getTezos = computed(() => Tezos.value);
 	const getWallet = computed(() => wallet.value);
 	const getAddress = computed(() => address.value);
 	const getBalance = computed(() => balance.value);
+	const getWalletName = computed(() => walletName.value);
 
 	/**
 	 * Initializes a wallet using the network configuration from environment variables.
@@ -56,6 +58,10 @@ export const useWalletStore = defineStore('wallet', () => {
 				if (cachedAccount === undefined) {
 					await wallet.value.requestPermissions();
 				}
+
+				// There must be a better way to do this
+				const peers = await wallet.value.client.getPeers();
+				walletName.value = peers[0].name;
 
 				localStorage.setItem('wallet-provider', 'beacon');
 			} else if (provider === 'walletconnect') {
@@ -226,6 +232,7 @@ export const useWalletStore = defineStore('wallet', () => {
 		getAddress,
 		getBalance,
 		getWallet,
+		getWalletName,
 		initializeWallet,
 		disconnectWallet,
 		fetchBalance,
