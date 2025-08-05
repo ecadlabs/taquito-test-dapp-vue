@@ -33,6 +33,7 @@ export const useWalletStore = defineStore('wallet', () => {
 	 * @throws {Error} If wallet initialization or permission request fails (e.g., user cancels the wallet popup).
 	 */
 	const initializeWallet = async (provider: WalletProvider): Promise<void> => {
+		console.log('Starting initialization of wallet using provider:', provider);
 		try {
 			if (wallet.value) {
 				console.error("Failed to initialize wallet due to a wallet already being initialized in this session.")
@@ -50,12 +51,13 @@ export const useWalletStore = defineStore('wallet', () => {
 					},
 					enableMetrics: true,
 				};
+				console.log('Using Beacon options object:', options);
 
 				wallet.value = new BeaconWallet(options);
 
 				const cachedAccount = await wallet.value.client.getActiveAccount();
-
 				if (cachedAccount === undefined) {
+					console.log('No cached account found, requesting permissions from selected wallet.');
 					await wallet.value.requestPermissions();
 				}
 
