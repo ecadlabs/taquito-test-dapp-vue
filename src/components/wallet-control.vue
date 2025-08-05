@@ -96,22 +96,26 @@
 			</DialogHeader>
 
 			<div class="text-sm">
-				<div class="flex items-center">
-					<p class="mr-1">Address: {{ address }}</p>
-					<Button variant="ghost" size="icon" @click="copyAddress()">
-						<Copy class="size-4" />
-						<p class="sr-only">Copy wallet address</p>
-					</Button>
-					<Button variant="ghost" size="icon" @click="openExplorer()">
-						<ExternalLink class="size-4" />
-						<p class="sr-only">Open wallet in explorer</p>
-					</Button>
+				<div class="flex items-center gap-1">
+					<div class="min-w-0">
+						<p class="break-all">Address: {{ address }}</p>
+					</div>
+					<div class="flex gap-1 flex-shrink-0">
+						<Button variant="ghost" size="icon" @click="copyAddress()">
+							<Copy class="size-4" />
+							<p class="sr-only">Copy wallet address</p>
+						</Button>
+						<Button variant="ghost" size="icon" @click="openExplorer()">
+							<ExternalLink class="size-4" />
+							<p class="sr-only">Open wallet in explorer</p>
+						</Button>
+					</div>
 				</div>
 
 				<p>Balance: {{ balance }} ꜩ</p>
 			</div>
 
-			<DialogFooter>
+			<DialogFooter class="flex flex-col gap-2">
 				<Button variant="secondary" @click="change()" :disabled="loading">
 					<Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
 					<p>Change Wallet</p>
