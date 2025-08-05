@@ -35,6 +35,10 @@ export const useWalletStore = defineStore('wallet', () => {
 	const initializeWallet = async (provider: WalletProvider): Promise<void> => {
 		console.log('Starting initialization of wallet using provider:', provider);
 		try {
+			// There is currently a bug in the Beacon SDK where no event is fired when the popup is closed, 
+			// resulting in a hanging promise, and causing the wallet state to never be cleared in our code.
+			// Once an event for this is added, we can properly handle the user closing the popup.
+			// https://github.com/airgap-it/beacon-sdk/issues/905
 			if (wallet.value) {
 				console.error("Failed to initialize wallet due to a wallet already being initialized in this session.")
 				throw new ReferenceError("Failed to initialize wallet: a wallet is already initialized.")
