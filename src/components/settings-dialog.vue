@@ -28,6 +28,7 @@
                     Version {{ version }}
                 </p>
                 <Separator orientation="vertical" class="h-4" />
+                <p>Network: {{ network }}</p>
                 <p>Git SHA: {{ gitSha }}</p>
             </div>
             <Button variant="secondary" @click="emit('close')" class="ml-auto">
@@ -64,4 +65,5 @@ const indexers: IndexerOption[] = availableIndexers;
 
 const gitSha = import.meta.env.VITE_GIT_SHA;
 const version = import.meta.env.VITE_VERSION;
+const network = import.meta.env.VITE_NETWORK_TYPE;
 </script>
