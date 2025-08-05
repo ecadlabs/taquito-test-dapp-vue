@@ -22,8 +22,15 @@
             </div>
         </div>
 
-        <DialogFooter>
-            <Button variant="secondary" @click="emit('close')">
+        <DialogFooter class="flex items-center">
+            <div class="text-xs text-muted-foreground">
+                <p>
+                    Version {{ version }}
+                </p>
+                <Separator orientation="vertical" class="h-4" />
+                <p>Git SHA: {{ gitSha }}</p>
+            </div>
+            <Button variant="secondary" @click="emit('close')" class="ml-auto">
                 <p>Close</p>
             </Button>
         </DialogFooter>
@@ -47,10 +54,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { Separator } from '@/components/ui/separator';
 
 const emit = defineEmits(['close']);
 
 const settingsStore = useSettingsStore();
 
 const indexers: IndexerOption[] = availableIndexers;
+
+const gitSha = import.meta.env.VITE_GIT_SHA;
+const version = import.meta.env.VITE_VERSION;
 </script>
