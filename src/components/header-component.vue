@@ -24,6 +24,10 @@
     </NavigationMenu>
 
     <WalletControl />
+    <Button size="icon" variant="outline" class="ml-2" @click="showSettingsDialog = true">
+      <p class="sr-only">Settings</p>
+      <Settings class="size-5" />
+    </Button>
 
     <DropdownMenu>
       <DropdownMenuTrigger class="block md:hidden hover:cursor-pointer">
@@ -40,12 +44,18 @@
     </DropdownMenu>
   </div>
 
+  <Dialog v-model:open="showSettingsDialog" @update:open="showSettingsDialog = $event">
+    <SettingsDialog />
+  </Dialog>
 
 </template>
 
 <script setup lang="ts">
 import WalletControl from '@/components/wallet-control.vue';
+import SettingsDialog from '@/components/settings-dialog.vue';
 
+import { Button } from '@/components/ui/button';
+import { Dialog } from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,8 +70,10 @@ import {
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu'
 import { AvailableTests } from '@/modules/tests/tests';
-import { computed } from 'vue';
-import { Menu } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
+import { Menu, Settings } from 'lucide-vue-next';
+
+const showSettingsDialog = ref<boolean>(false);
 
 const firstTestId = computed(() => {
   return Object.values(AvailableTests)[0].id
