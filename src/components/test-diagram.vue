@@ -70,7 +70,6 @@ const NODE_SPACING_MINIMUM = 100;
 const diagram = computed(() => diagramStore.currentDiagram);
 const currentStep = computed(() => diagramStore.currentStep);
 const diagramStatus = computed(() => diagramStore.diagramStatus);
-const errored = computed(() => diagramStore.errored);
 const errorMessage = computed(() => diagramStore.errorMessage);
 const operationHash = computed(() => diagramStore.operationHash);
 
@@ -307,7 +306,7 @@ function getNodeClass(node: DiagramNode): string {
 	}
 
 	// Error nodes should show error styling when diagram is errored
-	if (errored.value && node.type === 'error') {
+	if (errorMessage.value && node.type === 'error') {
 		classes.push('error');
 	}
 
@@ -333,7 +332,7 @@ function getConnectionClass(connection: { type: 'success' | 'error' | 'next'; fr
 		// For neutral paths, check if both nodes are completed
 		if (bothCompleted) {
 			classes.push('success-path');
-		} else if (!isToCompleted && isFromCompleted && errored.value) {
+		} else if (!isToCompleted && isFromCompleted && errorMessage.value) {
 			classes.push('caution-path')
 		} else {
 			classes.push('neutral-path')
@@ -346,14 +345,14 @@ function getConnectionClass(connection: { type: 'success' | 'error' | 'next'; fr
 const isConnectionActive = (connection: { from: string; to: string }): boolean => {
 	const toNode = nodeMap.value.get(connection.to);
 
-	return currentStep.value === connection.to && toNode !== undefined && !errored.value;
+	return currentStep.value === connection.to && toNode !== undefined && !errorMessage.value;
 }
 
 const inProgressConnectionErroredClasses = (connection: { from: string; to: string }): string => {
 	const toNode = nodeMap.value.get(connection.to);
 
 	const classes = [];
-	if (currentStep.value === connection.to && toNode !== undefined && errored.value) {
+	if (currentStep.value === connection.to && toNode !== undefined && errorMessage.value) {
 		classes.push('caution-path');
 	}
 
@@ -366,7 +365,7 @@ const isConnectionErrored = (connection: { from: string; to: string }): boolean 
 
 	const isTargetErrorNode = toNode?.type === 'error';
 
-	if (errored.value && isTargetErrorNode && currentStep.value === fromNode?.id) return true;
+	if (errorMessage.value && isTargetErrorNode && currentStep.value === fromNode?.id) return true;
 	return false;
 }
 
@@ -374,7 +373,7 @@ function isNodeCompleted(node: DiagramNode | undefined): boolean {
 	if (!node || node.type === 'error') return false;
 
 	// For running state, check if we've passed this node
-	if (diagramStatus.value === 'running' || errored.value && currentStep.value) {
+	if (diagramStatus.value === 'running' || errorMessage.value && currentStep.value) {
 		const currentNodeIndex = positionedNodes.value.findIndex(n => n.id === currentStep.value);
 		const nodeIndex = positionedNodes.value.findIndex(n => n.id === node.id);
 

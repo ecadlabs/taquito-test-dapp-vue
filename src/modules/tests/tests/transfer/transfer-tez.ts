@@ -31,7 +31,6 @@ const send = async (to: string, amount: number) => {
 		await walletStore.fetchBalance();
 	} catch (error) {
 		console.error(`Failed to send transfer to '${to}': ${error}`);
-		diagramStore.setErrored();
 		diagramStore.setErrorMessage(error);
 		throw error;
 	}
