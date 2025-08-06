@@ -1,6 +1,8 @@
+import type { TestMetadata, TestDiagram } from '@/modules/tests/test';
+
 import TransferTez from "@/modules/tests/tests/transfer/transfer-tez.vue";
 import CounterContract from "@/modules/tests/tests/counter/counter-contract.vue";
-import type { TestMetadata, TestDiagram } from '@/modules/tests/test';
+import IncreasePaidStorage from "@/modules/tests/tests/increase-paid-storage/increase-paid-storage.vue";
 
 export const AvailableTests: Record<string, TestMetadata> = {
 	'transfer': {
@@ -20,11 +22,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
 		setup: [
 			'Set up a Tezos wallet and fund it with some TEZ',
 			'Connect your wallet to Taquito Playground',
-		],
-		stepByStepNarrative: [
-			'Step 1',
-			'Step 2',
-			'Step 3'
 		],
 		relatedTests: ['counter-contract'],
 		sourceCode: {
@@ -68,11 +65,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
 		setup: [
 			'Set up a Tezos wallet and fund it with some TEZ',
 			'Connect your wallet to Taquito Playground',
-		],
-		stepByStepNarrative: [
-			'Step 1',
-			'Step 2',
-			'Step 3'
 		],
 		relatedTests: ['transfer'],
 		sourceCode: {
@@ -144,15 +136,14 @@ export const AvailableTests: Record<string, TestMetadata> = {
 			},
 		}
 	},
-	'contract-origination': {
-		id: 'contract-origination',
-		title: 'Smart Contract Origination',
-		description: 'Deploying a test contract to the blockchain with basic methods and storage.',
+	'increase-paid-storage': {
+		id: 'increase-paid-storage',
+		title: 'Increasing Paid Storage',
+		description: 'Paying a fee to increase the storage of a smart contract.',
 		category: 'Smart Contracts',
 		learningGoals: [
-			'Understand smart contract deployment patterns',
-			'Learn about keys and the signing process',
-			'Learn about the confirmation process'
+			'Understand how to increase the paid storage of a smart contract',
+			'Learn about the storage of a smart contract',
 		],
 		prerequisites: [
 			'Basic understanding of smart contracts',
@@ -161,86 +152,33 @@ export const AvailableTests: Record<string, TestMetadata> = {
 		setup: [
 			'Set up a Tezos wallet and fund it with some TEZ',
 			'Connect your wallet to Taquito Playground',
-			'Obtain your wallet key for signing'
+			'Obtain the contract address of a smart contract'
 		],
-		stepByStepNarrative: [
-			'Step 1',
-			'Step 2',
-			'Step 3'
-		],
-		relatedTests: ['transfer'],
+		relatedTests: ['counter-contract'],
 		sourceCode: {
 			contract: 'https://example.com',
 			script: 'https://example.com',
-			documentation: 'https://taquito.io/docs/originate'
+			documentation: 'https://taquito.io/docs/increase_paid_storage'
 		},
-		// component: CounterContract
-	},
-	// Not fully written yet
-	'delegation': {
-		id: 'delegation',
-		title: 'Baking Delegation',
-		description: 'Deploying a test contract to the blockchain with basic methods and storage.',
-		category: 'Advanced Features',
-		learningGoals: [
-			'Understand smart contract deployment patterns',
-			'Learn about keys and the signing process',
-			'Learn about the confirmation process'
-		],
-		prerequisites: [
-			'Basic understanding of smart contracts',
-			'Familiarity with Promises/Async functions in JavaScript'
-		],
-		setup: [
-			'Set up a Tezos wallet and fund it with some TEZ',
-			'Connect your wallet to Taquito Playground',
-			'Obtain your wallet key for signing'
-		],
-		stepByStepNarrative: [
-			'Step 1',
-			'Step 2',
-			'Step 3'
-		],
-		relatedTests: ['transfer'],
-		sourceCode: {
-			contract: 'https://example.com',
-			script: 'https://example.com',
-			documentation: 'https://taquito.io/docs/originate'
-		},
-		// component: CounterContract
-	},
-	// Not fully written yet
-	'staking': {
-		id: 'staking',
-		title: 'Staking Operations',
-		description: 'Deploying a test contract to the blockchain with basic methods and storage.',
-		category: 'Advanced Features',
-		learningGoals: [
-			'Understand smart contract deployment patterns',
-			'Learn about keys and the signing process',
-			'Learn about the confirmation process'
-		],
-		prerequisites: [
-			'Basic understanding of smart contracts',
-			'Familiarity with Promises/Async functions in JavaScript'
-		],
-		setup: [
-			'Set up a Tezos wallet and fund it with some TEZ',
-			'Connect your wallet to Taquito Playground',
-			'Obtain your wallet key for signing'
-		],
-		stepByStepNarrative: [
-			'Step 1',
-			'Step 2',
-			'Step 3'
-		],
-		relatedTests: ['transfer'],
-		sourceCode: {
-			contract: 'https://example.com',
-			script: 'https://example.com',
-			documentation: 'https://taquito.io/docs/originate'
-		},
-		// component: CounterContract
+		component: IncreasePaidStorage,
+		diagrams: {
+			'increase': {
+				nodes: [
+					{
+						id: 'estimate-fees',
+						label: 'Estimate Fees'
+					},
+					{
+						id: 'wait-for-user',
+						label: 'Wait for User Confirmation'
+					},
+					{
+						id: 'wait-for-chain-confirmation',
+						label: 'Wait for Chain Confirmation'
+					},
+				],
+			}
+		}
 	},
 };
 

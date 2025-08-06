@@ -53,7 +53,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { getTestById } from '@/modules/tests/tests';
 import { computed, ref, watch, onBeforeUnmount, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { HeartCrack } from 'lucide-vue-next';
 import { useDiagramStore } from '@/stores/diagramStore';
 

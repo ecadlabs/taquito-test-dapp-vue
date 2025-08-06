@@ -22,7 +22,6 @@ export interface TestMetadata {
 	learningGoals: string[];
 	prerequisites: string[];
 	setup: string[];
-	stepByStepNarrative: string[];
 	relatedTests: string[];
 	sourceCode: {
 		contract?: string;
