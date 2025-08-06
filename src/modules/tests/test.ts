@@ -3,9 +3,7 @@ import type { Component } from "vue";
 export interface DiagramNode {
 	id: string;
 	label: string;
-	type: 'start' | 'process' | 'decision' | 'success' | 'error' | 'end';
 	position?: { x: number; y: number };
-	next?: string;
 }
 
 export interface TestDiagram {

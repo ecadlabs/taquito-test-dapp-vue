@@ -57,6 +57,9 @@ import { Badge } from '@/components/ui/badge'
 import { buildIndexerUrl } from '@/lib/utils';
 import { useSettingsStore } from '@/stores/settingsStore';
 
+// Extended node type for internal use
+type TypedNode = DiagramNode & { type: 'start' | 'process' | 'error' | 'success' };
+
 const diagramStore = useDiagramStore();
 const settingsStore = useSettingsStore();
 
@@ -78,14 +81,26 @@ const networkType = import.meta.env.VITE_NETWORK_TYPE;
 const indexerUrl = computed(() => buildIndexerUrl(settingsStore.settings.indexer, networkType));
 const selectedIndexerName = computed(() => settingsStore.settings.indexer.name);
 
-const positionedNodes = computed(() => {
+const positionedNodes = computed((): TypedNode[] => {
 	if (!diagram.value?.nodes) return [];
 
-	// Position main flow nodes horizontally
-	const positionedMainNodes = diagram.value.nodes.map((node, index) => ({
-		...node,
+	// Always create a start node at the beginning
+	const startNode: TypedNode = {
+		id: 'start',
+		label: 'Start',
+		type: 'start',
 		position: {
-			x: horizontalMargin + (index * (nodeSpacing.value ?? NODE_SPACING_MINIMUM)),
+			x: horizontalMargin,
+			y: verticalMargin,
+		}
+	};
+
+	// Position main flow nodes horizontally, starting after the start node
+	const positionedMainNodes: TypedNode[] = diagram.value.nodes.map((node, index) => ({
+		...node,
+		type: 'process' as const, // All main flow nodes are process nodes
+		position: {
+			x: horizontalMargin + ((index + 1) * (nodeSpacing.value ?? NODE_SPACING_MINIMUM)),
 			y: verticalMargin,
 		}
 	}));
@@ -98,13 +113,14 @@ const positionedNodes = computed(() => {
 		const firstErrorPathNode = dynamicNodes[0];
 		const lastErrorPathNode = dynamicNodes[dynamicNodes.length - 1];
 
-		const firstX = firstErrorPathNode.position.x;
-		const lastX = lastErrorPathNode.position.x;
-
-		errorNodeX = (firstX + lastX) / 2;
+		if (firstErrorPathNode.position && lastErrorPathNode.position) {
+			const firstX = firstErrorPathNode.position.x;
+			const lastX = lastErrorPathNode.position.x;
+			errorNodeX = (firstX + lastX) / 2;
+		}
 	}
 
-	const errorNode: DiagramNode = {
+	const errorNode: TypedNode = {
 		id: 'error',
 		label: 'Error',
 		type: 'error',
@@ -114,9 +130,19 @@ const positionedNodes = computed(() => {
 		}
 	};
 
-	let successNodeX = positionedMainNodes[positionedMainNodes.length - 1].position.x + (nodeSpacing.value ?? NODE_SPACING_MINIMUM);
+	let successNodeX = 0;
+	if (positionedMainNodes.length > 0) {
+		const lastMainNode = positionedMainNodes[positionedMainNodes.length - 1];
+		if (lastMainNode.position) {
+			successNodeX = lastMainNode.position.x + (nodeSpacing.value ?? NODE_SPACING_MINIMUM);
+		} else {
+			successNodeX = startNode.position?.x ?? horizontalMargin + (nodeSpacing.value ?? NODE_SPACING_MINIMUM);
+		}
+	} else {
+		successNodeX = startNode.position?.x ?? horizontalMargin + (nodeSpacing.value ?? NODE_SPACING_MINIMUM);
+	}
 
-	const successNode: DiagramNode = {
+	const successNode: TypedNode = {
 		id: 'success',
 		label: 'Success',
 		type: 'success',
@@ -126,12 +152,12 @@ const positionedNodes = computed(() => {
 		}
 	};
 
-	return [...positionedMainNodes, errorNode, successNode];
+	return [startNode, ...positionedMainNodes, errorNode, successNode];
 });
 
 // Allows for quickly looking up keys without having to run expensive find operations on positionedNodes
 const nodeMap = computed(() => {
-	const map = new Map();
+	const map = new Map<string, TypedNode>();
 	positionedNodes.value.forEach(node => {
 		map.set(node.id, node);
 	});
@@ -150,8 +176,8 @@ const nodeSpacing = computed(() => {
 
 	if (!diagram.value?.nodes.length) return;
 
-	// The +1 accounts for the success node at the end, which is in every diagram
-	const nodeCount: number = diagram.value.nodes.length + 1;
+	// The +2 accounts for the start node at the beginning and success node at the end, which are in every diagram
+	const nodeCount: number = diagram.value.nodes.length + 2;
 
 	if (nodeCount <= 1) return 100;
 
@@ -193,20 +219,28 @@ const connections = computed(() => {
 		vertical?: { left: string; top: string; height: string };
 	}> = [];
 
-	positionedNodes.value.forEach(node => {
-		if (node.next) {
-			const targetNode = nodeMap.value.get(node.next);
-			if (targetNode) {
-				const connection = createConnection(node, targetNode, 'next');
-				conns.push(connection);
-			}
-		} else if (node.type !== 'error' && node.type !== 'success') {
-			if (successNode.value) {
-				const connection = createConnection(node, successNode.value, 'next');
-				conns.push(connection);
-			}
-		}
+	// Get all nodes except error and success nodes for sequential connections
+	const mainFlowNodes = positionedNodes.value.filter(node => node.type !== 'error' && node.type !== 'success');
 
+	// Connect nodes sequentially
+	for (let i = 0; i < mainFlowNodes.length - 1; i++) {
+		const fromNode = mainFlowNodes[i];
+		const toNode = mainFlowNodes[i + 1];
+		const connection = createConnection(fromNode, toNode, 'next');
+		conns.push(connection);
+	}
+
+	// Connect the last main flow node to success (if there are main flow nodes)
+	if (mainFlowNodes.length > 0) {
+		const lastMainNode = mainFlowNodes[mainFlowNodes.length - 1];
+		if (successNode.value) {
+			const connection = createConnection(lastMainNode, successNode.value, 'next');
+			conns.push(connection);
+		}
+	}
+
+	// Handle error connections for process nodes
+	positionedNodes.value.forEach(node => {
 		if (node.type === 'process') {
 			if (errorNode.value) {
 				const connection = createConnection(node, errorNode.value, 'error');
@@ -218,7 +252,7 @@ const connections = computed(() => {
 	return conns;
 });
 
-function createConnection(from: DiagramNode, to: DiagramNode, type: 'success' | 'error' | 'next') {
+function createConnection(from: TypedNode, to: TypedNode, type: 'success' | 'error' | 'next') {
 	if (!from.position || !to.position) return { id: '', from: '', to: '', type };
 
 	const NODE_RADIUS = 10;
@@ -280,7 +314,7 @@ function createConnection(from: DiagramNode, to: DiagramNode, type: 'success' | 
 	return connection;
 }
 
-function getNodeStyle(node: DiagramNode) {
+function getNodeStyle(node: TypedNode) {
 	if (!node.position) return {};
 
 	return {
@@ -289,7 +323,7 @@ function getNodeStyle(node: DiagramNode) {
 	};
 }
 
-function getNodeClass(node: DiagramNode): string {
+function getNodeClass(node: TypedNode): string {
 	const classes = ['node'];
 
 	// Error nodes should never be the current step
@@ -369,7 +403,7 @@ const isConnectionErrored = (connection: { from: string; to: string }): boolean 
 	return false;
 }
 
-function isNodeCompleted(node: DiagramNode | undefined): boolean {
+function isNodeCompleted(node: TypedNode | undefined): boolean {
 	if (!node || node.type === 'error') return false;
 
 	// For running state, check if we've passed this node

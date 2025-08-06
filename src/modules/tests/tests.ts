@@ -35,27 +35,16 @@ export const AvailableTests: Record<string, TestMetadata> = {
 		diagram: {
 			nodes: [
 				{
-					id: 'start',
-					label: 'Start',
-					type: 'start',
-					next: 'estimate-fees'
-				},
-				{
 					id: 'estimate-fees',
-					label: 'Estimate Fees',
-					type: 'process',
-					next: 'wait-for-user'
+					label: 'Estimate Fees'
 				},
 				{
 					id: 'wait-for-user',
-					label: 'Wait for User Confirmation',
-					type: 'process',
-					next: 'wait-for-chain-confirmation'
+					label: 'Wait for User Confirmation'
 				},
 				{
 					id: 'wait-for-chain-confirmation',
-					label: 'Wait for Chain Confirmation',
-					type: 'process',
+					label: 'Wait for Chain Confirmation'
 				},
 			],
 		}
@@ -93,27 +82,16 @@ export const AvailableTests: Record<string, TestMetadata> = {
 		diagram: {
 			nodes: [
 				{
-					id: 'start',
-					label: 'Start',
-					type: 'start',
-					next: 'get-contract'
-				},
-				{
 					id: 'get-contract',
-					label: 'Get Contract',
-					type: 'process',
-					next: 'execute-operation'
+					label: 'Get Contract'
 				},
 				{
 					id: 'execute-operation',
-					label: 'Execute Operation',
-					type: 'process',
-					next: 'wait-confirmation'
+					label: 'Execute Operation'
 				},
 				{
 					id: 'wait-confirmation',
-					label: 'Wait for Confirmation',
-					type: 'process',
+					label: 'Wait for Confirmation'
 				},
 			],
 		}
