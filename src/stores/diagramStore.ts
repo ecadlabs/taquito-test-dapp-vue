@@ -3,6 +3,12 @@ import { ref } from 'vue';
 import type { TestDiagram } from '@/modules/tests/test';
 import { getTestDiagram } from '@/modules/tests/tests';
 
+export interface DialogContent {
+	title: string;
+	description?: string;
+	content: string | (() => any); // Can be a string or a function that returns JSX/Vue component
+}
+
 export const useDiagramStore = defineStore('diagram', () => {
 	const currentDiagram = ref<TestDiagram | null>(null);
 	const currentStep = ref<string | null>(null);
@@ -12,6 +18,13 @@ export const useDiagramStore = defineStore('diagram', () => {
 	const operationHash = ref<string | number>();
 	const currentTestId = ref<string | null>(null);
 	const currentDiagramKey = ref<string | null>(null);
+
+	// Button state management
+	const nodeButtons = ref<Map<string, { icon: any; text: string; onClick: () => void }>>(new Map());
+
+	// Dialog state management
+	const showDialog = ref<boolean>(false);
+	const dialogContent = ref<DialogContent | null>(null);
 
 	const setDiagram = (diagram: TestDiagram, testId: string, diagramKey?: string) => {
 		resetDiagram();
@@ -28,6 +41,9 @@ export const useDiagramStore = defineStore('diagram', () => {
 	const setTestDiagram = (testId: string, diagramKey?: string) => {
 		const diagram = getTestDiagram(testId, diagramKey);
 		if (diagram) {
+			diagram.nodes.forEach(node => {
+				removeNodeButton(node.id);
+			});
 			setDiagram(diagram, testId, diagramKey);
 		}
 	};
@@ -72,6 +88,48 @@ export const useDiagramStore = defineStore('diagram', () => {
 		operationHash.value = hash;
 	}
 
+	/**
+	 * Set a button for a specific node
+	 * @param nodeId - The node ID to add the button to
+	 * @param button - The button configuration
+	 */
+	const setNodeButton = (nodeId: string, button: { icon: any; text: string; onClick: () => void }) => {
+		nodeButtons.value.set(nodeId, button);
+	};
+
+	/**
+	 * Remove a button from a specific node
+	 * @param nodeId - The node ID to remove the button from
+	 */
+	const removeNodeButton = (nodeId: string) => {
+		nodeButtons.value.delete(nodeId);
+	};
+
+	/**
+	 * Get a button for a specific node
+	 * @param nodeId - The node ID to get the button for
+	 */
+	const getNodeButton = (nodeId: string) => {
+		return nodeButtons.value.get(nodeId);
+	};
+
+	/**
+	 * Show a dialog with custom content
+	 * @param content - The dialog content configuration
+	 */
+	const openDialog = (content: DialogContent) => {
+		dialogContent.value = content;
+		showDialog.value = true;
+	};
+
+	/**
+	 * Hide the dialog
+	 */
+	const closeDialog = () => {
+		showDialog.value = false;
+		dialogContent.value = null;
+	};
+
 	const resetDiagram = () => {
 		if (currentDiagram.value) {
 			currentDiagram.value = null;
@@ -82,6 +140,9 @@ export const useDiagramStore = defineStore('diagram', () => {
 			operationHash.value = undefined;
 			currentTestId.value = null;
 			currentDiagramKey.value = null;
+			nodeButtons.value.clear();
+			showDialog.value = false;
+			dialogContent.value = null;
 		}
 	};
 
@@ -99,6 +160,9 @@ export const useDiagramStore = defineStore('diagram', () => {
 		operationHash,
 		currentTestId,
 		currentDiagramKey,
+		nodeButtons,
+		showDialog,
+		dialogContent,
 		setDiagram,
 		setTestDiagram,
 		setProgress,
@@ -106,6 +170,11 @@ export const useDiagramStore = defineStore('diagram', () => {
 		setSuccessful,
 		setErrorMessage,
 		setOperationHash,
+		setNodeButton,
+		removeNodeButton,
+		getNodeButton,
+		openDialog,
+		closeDialog,
 		cancelCurrentTest,
 	};
 }); 

@@ -29,12 +29,23 @@
 					<div class="text-xs absolute font-medium text-gray-700 text-center leading-[1.2]"
 						:class="node.type === 'error' ? 'top-6' : 'bottom-6'">
 						<a v-if="node.type === 'success' && diagramStatus === 'completed'"
-							:href="`${indexerUrl}/${operationHash}/operations`" target="_blank">
+							:href="`${indexerUrl}/${operationHash}/operations`" target="_blank"
+							class="hover:opacity-80 transition-opacity cursor-pointer">
 							<Badge variant="secondary" class="mb-1">
 								<Hash />
 								<p>View on {{ selectedIndexerName }}</p>
 							</Badge>
 						</a>
+
+						<button v-if="diagramStore.getNodeButton(node.id)"
+							@click="diagramStore.getNodeButton(node.id)?.onClick"
+							class="hover:opacity-80 transition-opacity cursor-pointer">
+							<Badge variant="secondary" class="mb-1">
+								<component :is="diagramStore.getNodeButton(node.id)?.icon" />
+								<p>{{ diagramStore.getNodeButton(node.id)?.text }}</p>
+							</Badge>
+						</button>
+
 						<p>
 							{{ node.label }}
 						</p>
