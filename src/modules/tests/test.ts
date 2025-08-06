@@ -30,5 +30,5 @@ export interface TestMetadata {
 		documentation?: string;
 	};
 	component?: Component;
-	diagram?: TestDiagram;
+	diagrams?: TestDiagrams;
 }

@@ -32,21 +32,23 @@ export const AvailableTests: Record<string, TestMetadata> = {
 			documentation: 'https://taquito.io/docs/making_transfers'
 		},
 		component: TransferTez,
-		diagram: {
-			nodes: [
-				{
-					id: 'estimate-fees',
-					label: 'Estimate Fees'
-				},
-				{
-					id: 'wait-for-user',
-					label: 'Wait for User Confirmation'
-				},
-				{
-					id: 'wait-for-chain-confirmation',
-					label: 'Wait for Chain Confirmation'
-				},
-			],
+		diagrams: {
+			'transfer': {
+				nodes: [
+					{
+						id: 'estimate-fees',
+						label: 'Estimate Fees'
+					},
+					{
+						id: 'wait-for-user',
+						label: 'Wait for User Confirmation'
+					},
+					{
+						id: 'wait-for-chain-confirmation',
+						label: 'Wait for Chain Confirmation'
+					},
+				],
+			}
 		}
 	},
 	'counter-contract': {
@@ -276,5 +278,5 @@ export const getTestDiagram = (testId: string, diagramKey?: string): TestDiagram
 	}
 
 	// Return single diagram if available
-	return test.diagram;
+	return test.diagrams?.[Object.keys(test.diagrams)[0]];
 };

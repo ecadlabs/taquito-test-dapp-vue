@@ -58,7 +58,6 @@ import { HeartCrack } from 'lucide-vue-next';
 import { useDiagramStore } from '@/stores/diagramStore';
 
 const route = useRoute();
-const router = useRouter();
 const scrollContainer = ref<HTMLElement>();
 const diagramStore = useDiagramStore();
 
