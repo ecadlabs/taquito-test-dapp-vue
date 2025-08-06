@@ -5,7 +5,6 @@ import { TezosToolkit } from "@taquito/taquito"
 import type { WalletProvider } from "@/types/wallet"
 import { PermissionScopeMethods, WalletConnect } from '@taquito/wallet-connect'
 import { NetworkType } from "@airgap/beacon-types"
-import { InMemorySigner } from "@taquito/signer"
 
 export const useWalletStore = defineStore('wallet', () => {
 	let Tezos = new TezosToolkit(import.meta.env.VITE_RPC_URL);
@@ -67,8 +66,13 @@ export const useWalletStore = defineStore('wallet', () => {
 				}
 
 				// There must be a better way to do this
-				const peers = await wallet.value.client.getPeers();
-				walletName.value = peers[0].name;
+				try {
+					const peers = await wallet.value.client.getPeers();
+					walletName.value = peers[0].name;
+				} catch (error) {
+					walletName.value = 'unknown';
+				}
+
 
 				localStorage.setItem('wallet-provider', 'beacon');
 			} else if (provider === 'walletconnect') {
@@ -110,7 +114,7 @@ export const useWalletStore = defineStore('wallet', () => {
 			if (wallet.value) {
 				address.value = await wallet.value.getPKH();
 				await fetchBalance();
-				Tezos.setProvider({ wallet: wallet.value, signer: new InMemorySigner(import.meta.env.VITE_WALLET_PRIVATE_KEY) });
+				Tezos.setProvider({ wallet: wallet.value });
 			} else {
 				throw ReferenceError("Wallet was not found after initialization should have finished.")
 			}
