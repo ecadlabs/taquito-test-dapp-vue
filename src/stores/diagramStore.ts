@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import type { TestDiagram } from '@/modules/tests/test';
+import { getTestDiagram } from '@/modules/tests/tests';
 
 export const useDiagramStore = defineStore('diagram', () => {
 	const currentDiagram = ref<TestDiagram | null>(null);
@@ -10,11 +11,25 @@ export const useDiagramStore = defineStore('diagram', () => {
 	const successful = ref<boolean>(false);
 	const operationHash = ref<string>();
 	const currentTestId = ref<string | null>(null);
+	const currentDiagramKey = ref<string | null>(null);
 
-	const setDiagram = (diagram: TestDiagram, testId: string) => {
+	const setDiagram = (diagram: TestDiagram, testId: string, diagramKey?: string) => {
 		resetDiagram();
 		currentDiagram.value = diagram;
 		currentTestId.value = testId;
+		currentDiagramKey.value = diagramKey || null;
+	};
+
+	/**
+	 * Helper function to set the diagram for a specific test and operation
+	 * @param testId - The test ID
+	 * @param diagramKey - Optional diagram key for multi-diagram tests
+	 */
+	const setTestDiagram = (testId: string, diagramKey?: string) => {
+		const diagram = getTestDiagram(testId, diagramKey);
+		if (diagram) {
+			setDiagram(diagram, testId, diagramKey);
+		}
 	};
 
 	const setProgress = (stepId: string, status: 'running' | 'completed', testId?: string) => {
@@ -66,6 +81,7 @@ export const useDiagramStore = defineStore('diagram', () => {
 			successful.value = false;
 			operationHash.value = undefined;
 			currentTestId.value = null;
+			currentDiagramKey.value = null;
 		}
 	};
 
@@ -82,7 +98,9 @@ export const useDiagramStore = defineStore('diagram', () => {
 		errorMessage,
 		operationHash,
 		currentTestId,
+		currentDiagramKey,
 		setDiagram,
+		setTestDiagram,
 		setProgress,
 		resetDiagram,
 		setSuccessful,

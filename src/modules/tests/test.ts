@@ -10,6 +10,10 @@ export interface TestDiagram {
 	nodes: DiagramNode[];
 }
 
+export interface TestDiagrams {
+	[key: string]: TestDiagram;
+}
+
 export interface TestMetadata {
 	id: string;
 	title: string;

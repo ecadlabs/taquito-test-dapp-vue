@@ -1,6 +1,6 @@
 import TransferTez from "@/modules/tests/tests/transfer/transfer-tez.vue";
 import CounterContract from "@/modules/tests/tests/counter/counter-contract.vue";
-import type { TestMetadata } from '@/modules/tests/test';
+import type { TestMetadata, TestDiagram } from '@/modules/tests/test';
 
 export const AvailableTests: Record<string, TestMetadata> = {
 	'transfer': {
@@ -79,21 +79,67 @@ export const AvailableTests: Record<string, TestMetadata> = {
 			documentation: 'https://taquito.io/docs/smartcontracts'
 		},
 		component: CounterContract,
-		diagram: {
-			nodes: [
-				{
-					id: 'get-contract',
-					label: 'Get Contract'
-				},
-				{
-					id: 'execute-operation',
-					label: 'Execute Operation'
-				},
-				{
-					id: 'wait-confirmation',
-					label: 'Wait for Confirmation'
-				},
-			],
+		diagrams: {
+			'increment': {
+				nodes: [
+					{
+						id: 'get-contract',
+						label: 'Get Contract'
+					},
+					{
+						id: 'execute-operation',
+						label: 'Execute Increment'
+					},
+					{
+						id: 'wait-confirmation',
+						label: 'Wait for Confirmation'
+					},
+				],
+			},
+			'decrement': {
+				nodes: [
+					{
+						id: 'get-contract',
+						label: 'Get Contract'
+					},
+					{
+						id: 'execute-operation',
+						label: 'Execute Decrement'
+					},
+					{
+						id: 'wait-confirmation',
+						label: 'Wait for Confirmation'
+					},
+				],
+			},
+			'reset': {
+				nodes: [
+					{
+						id: 'get-contract',
+						label: 'Get Contract'
+					},
+					{
+						id: 'execute-operation',
+						label: 'Execute Reset'
+					},
+					{
+						id: 'wait-confirmation',
+						label: 'Wait for Confirmation'
+					},
+				],
+			},
+			'get-storage': {
+				nodes: [
+					{
+						id: 'get-contract',
+						label: 'Get Contract'
+					},
+					{
+						id: 'read-storage',
+						label: 'Read Storage'
+					},
+				],
+			},
 		}
 	},
 	'contract-origination': {
@@ -206,4 +252,29 @@ export const getTestsByCategory = (category: string): TestMetadata[] => {
 
 export const getAllCategories = (): string[] => {
 	return [...new Set(Object.values(AvailableTests).map(test => test.category))];
+};
+
+/**
+ * Get a diagram for a test, supporting both single and multiple diagrams
+ * @param testId - The test ID
+ * @param diagramKey - Optional diagram key for multi-diagram tests
+ * @returns The diagram or undefined if not found
+ */
+export const getTestDiagram = (testId: string, diagramKey?: string): TestDiagram | undefined => {
+	const test = getTestById(testId);
+	if (!test) return undefined;
+
+	// If diagramKey is provided and test has multiple diagrams
+	if (diagramKey && test.diagrams) {
+		return test.diagrams[diagramKey];
+	}
+
+	// If no diagramKey but test has multiple diagrams, return the first one
+	if (test.diagrams && Object.keys(test.diagrams).length > 0) {
+		const firstKey = Object.keys(test.diagrams)[0];
+		return test.diagrams[firstKey];
+	}
+
+	// Return single diagram if available
+	return test.diagram;
 };

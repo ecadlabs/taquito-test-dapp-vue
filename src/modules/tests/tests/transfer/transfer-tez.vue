@@ -24,7 +24,6 @@
 
 <script setup lang='ts'>
 import { useDiagramStore } from '@/stores/diagramStore';
-import { getTestById } from '@/modules/tests/tests';
 import { ref, onMounted } from 'vue';
 import { send } from '@/modules/tests/tests/transfer/transfer-tez';
 import { Input } from '@/components/ui/input'
@@ -47,11 +46,7 @@ const sending = ref<boolean>(false);
 const diagramStore = useDiagramStore();
 
 onMounted(() => {
-	// Set the diagram for this test
-	const testMetadata = getTestById('transfer');
-	if (testMetadata?.diagram) {
-		diagramStore.setDiagram(testMetadata.diagram, 'transfer');
-	}
+	diagramStore.setTestDiagram('transfer');
 });
 
 const sendTransfer = async () => {

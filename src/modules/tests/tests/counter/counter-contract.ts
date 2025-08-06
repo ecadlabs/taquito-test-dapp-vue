@@ -19,6 +19,8 @@ const increment = async (amount: number): Promise<void> => {
 
 	if (amount <= 0 || amount > 100) throw new Error('Incrementation value must be between 1 and 100 inclusive.');
 
+	diagramStore.setTestDiagram(TEST_ID, 'increment');
+
 	const walletStore = useWalletStore();
 	const Tezos = walletStore.getTezos;
 
@@ -56,6 +58,8 @@ const decrement = async (amount: number): Promise<void> => {
 
 	if (amount <= 0 || amount > 100) throw new Error('Decrementation value must be between 1 and 100 inclusive.');
 
+	diagramStore.setTestDiagram(TEST_ID, 'decrement');
+
 	const walletStore = useWalletStore();
 	const Tezos = walletStore.getTezos;
 
@@ -83,6 +87,8 @@ const decrement = async (amount: number): Promise<void> => {
  */
 const reset = async (): Promise<void> => {
 	const diagramStore = useDiagramStore();
+
+	diagramStore.setTestDiagram(TEST_ID, 'reset');
 
 	const walletStore = useWalletStore();
 	const Tezos = walletStore.getTezos;
@@ -112,6 +118,8 @@ const reset = async (): Promise<void> => {
 const getContractStorage = async (): Promise<void> => {
 	const diagramStore = useDiagramStore();
 
+	diagramStore.setTestDiagram(TEST_ID, 'get-storage');
+
 	const walletStore = useWalletStore();
 	const Tezos = walletStore.getTezos;
 
@@ -121,6 +129,7 @@ const getContractStorage = async (): Promise<void> => {
 		const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 		const storage = await contract.storage();
 		console.log(`Current storage value: ${storage}`);
+		diagramStore.setProgress('read-storage', 'running', TEST_ID);
 		diagramStore.setProgress('success', 'completed', TEST_ID);
 
 	} catch (error) {

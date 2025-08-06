@@ -497,6 +497,7 @@ function isNodeCompleted(node: TypedNode | undefined): boolean {
 	50% {
 		border-color: #3b82f6
 	}
+
 }
 
 /* Node state coloring */
