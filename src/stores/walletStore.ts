@@ -5,16 +5,17 @@ import { TezosToolkit } from "@taquito/taquito"
 import type { WalletProvider } from "@/types/wallet"
 import { PermissionScopeMethods, WalletConnect } from '@taquito/wallet-connect'
 import { NetworkType } from "@airgap/beacon-types"
+import { InMemorySigner } from "@taquito/signer"
 
 export const useWalletStore = defineStore('wallet', () => {
-	const Tezos = ref<TezosToolkit>(new TezosToolkit(import.meta.env.VITE_RPC_URL));
+	let Tezos = new TezosToolkit(import.meta.env.VITE_RPC_URL);
 
 	const wallet = ref<BeaconWallet | WalletConnect>();
 	const address = ref<string>();
 	const balance = ref<BigNumber>();
 	const walletName = ref<string>();
 
-	const getTezos = computed(() => Tezos.value);
+	const getTezos = computed(() => Tezos);
 	const getWallet = computed(() => wallet.value);
 	const getAddress = computed(() => address.value);
 	const getBalance = computed(() => balance.value);
@@ -109,7 +110,7 @@ export const useWalletStore = defineStore('wallet', () => {
 			if (wallet.value) {
 				address.value = await wallet.value.getPKH();
 				await fetchBalance();
-				Tezos.value.setProvider({ wallet: wallet.value });
+				Tezos.setProvider({ wallet: wallet.value, signer: new InMemorySigner(import.meta.env.VITE_WALLET_PRIVATE_KEY) });
 			} else {
 				throw ReferenceError("Wallet was not found after initialization should have finished.")
 			}
@@ -167,7 +168,7 @@ export const useWalletStore = defineStore('wallet', () => {
 		}
 
 		try {
-			balance.value = await Tezos.value.tz.getBalance(address.value);
+			balance.value = await Tezos.tz.getBalance(address.value);
 		} catch (error) {
 			console.error("Error fetching balance:", error);
 			throw error;
