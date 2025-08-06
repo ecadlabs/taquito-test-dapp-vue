@@ -11,6 +11,9 @@
 
   <!-- Global Test Dialog -->
   <TestDialog />
+
+  <!-- Global Command Palette -->
+  <CommandMenu />
 </template>
 
 <script setup lang="ts">
@@ -20,6 +23,7 @@ import { Toaster } from '@/components/ui/sonner'
 import TestDialog from '@/components/test-dialog.vue';
 import { onMounted } from 'vue';
 import { useWalletStore } from '@/stores/walletStore';
+import CommandMenu from '@/components/command-menu.vue';
 
 const walletStore = useWalletStore();
 
@@ -39,7 +43,6 @@ onMounted(async () => {
     if (walletConnectActiveSession !== undefined) {
       walletStore.initializeWallet('walletconnect');
     }
-
   }
 })
 </script>
