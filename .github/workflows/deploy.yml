@@ -1,4 +1,4 @@
-name: taquito.io pages deploy
+name: taquito dapp pages deploy
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.ref != 'refs/heads/master' || github.run_number }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.ref != 'refs/heads/main' || github.run_number }}
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
 env:
   VITE_NETWORK_TYPE: ${{ vars.NETWORK_TYPE }}
