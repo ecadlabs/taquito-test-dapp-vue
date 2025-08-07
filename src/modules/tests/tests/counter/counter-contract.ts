@@ -1,9 +1,8 @@
 import { useWalletStore } from "@/stores/walletStore"
 import { useDiagramStore } from "@/stores/diagramStore"
+import contracts from '@/contracts/contract-config.json';
 
-// const CONTRACT_ADDRESS = 'KT1AoX6862rfFB5F1yxiE6Y8EwTQz8G1WEBb';
-const CONTRACT_ADDRESS = 'KT1RLWdB5zJcN7RVqu5MRWp3gvkMUGEpuc1d'
-
+const CONTRACT_ADDRESS = contracts.find(contract => contract.contractName === 'counter')?.address;
 const TEST_ID = 'counter-contract';
 
 /**
