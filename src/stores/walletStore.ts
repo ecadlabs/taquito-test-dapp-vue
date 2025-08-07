@@ -5,6 +5,7 @@ import { TezosToolkit } from "@taquito/taquito"
 import type { WalletProvider } from "@/types/wallet"
 import { PermissionScopeMethods, WalletConnect } from '@taquito/wallet-connect'
 import { NetworkType } from "@airgap/beacon-types"
+import { NetworkType as WalletConnectNetworkType } from '@taquito/wallet-connect'
 
 export const useWalletStore = defineStore('wallet', () => {
 	let Tezos = new TezosToolkit(import.meta.env.VITE_RPC_URL);
@@ -49,7 +50,7 @@ export const useWalletStore = defineStore('wallet', () => {
 					name: 'Taquito Playground',
 					iconUrl: 'https://tezostaquito.io/img/favicon.svg',
 					network: {
-						type: NetworkType.CUSTOM,
+						type: NetworkType.SEOULNET,
 						name: import.meta.env.VITE_NETWORK_TYPE,
 						rpcUrl: import.meta.env.VITE_RPC_URL,
 					},
@@ -95,14 +96,14 @@ export const useWalletStore = defineStore('wallet', () => {
 				} else {
 					await wallet.value.requestPermissions({
 						permissionScope: {
-							networks: [import.meta.env.VITE_NETWORK_TYPE],
+							networks: [WalletConnectNetworkType.SEOULNET],
 							events: [],
 							methods: [
 								PermissionScopeMethods.TEZOS_SEND,
 								PermissionScopeMethods.TEZOS_SIGN,
 								PermissionScopeMethods.TEZOS_GET_ACCOUNTS
 							],
-						}
+						},
 					});
 				}
 
