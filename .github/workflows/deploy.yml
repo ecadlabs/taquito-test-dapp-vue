@@ -13,6 +13,7 @@ env:
   VITE_RPC_URL: ${{ vars.RPC_URL }}
   VITE_GITHUB_SHA: ${{ github.sha }}
   VITE_VERSION: ${{ github.head_ref }}
+  VITE_REOWN_PROJECT_ID: ${{ secrets.REOWN_PROJECT_ID }}
   NODE_OPTIONS: "\"--max-old-space-size=2048\""
 jobs:
   publish-website:
