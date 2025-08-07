@@ -6,7 +6,7 @@ import { importKey } from '@taquito/signer';
 
 config();
 
-export interface ContractConfig {
+interface ContractConfig {
 	address: string;
 	originatedAt: string;
 	network: string;
