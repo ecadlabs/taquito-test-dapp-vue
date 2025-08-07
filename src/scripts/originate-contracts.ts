@@ -127,12 +127,12 @@ export const originateContracts = async (key: string): Promise<OriginationResult
 
 	// Save contract configuration
 	if (results.length > 0) {
-		const contractConfig: ContractConfig = {
-			address: results[0].contractAddress,
+		const contractConfig: ContractConfig[] = results.map(result => ({
+			address: result.contractAddress,
 			originatedAt: new Date().toISOString(),
 			network: networkType,
-			contractName: results[0].contractName
-		};
+			contractName: result.contractName
+		}))
 
 		const configPath = join(process.cwd(), 'src', 'contracts', 'contract-config.json');
 		writeFileSync(configPath, JSON.stringify(contractConfig, null, 2));
