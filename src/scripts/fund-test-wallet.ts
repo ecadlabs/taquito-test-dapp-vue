@@ -15,11 +15,9 @@ const getAccountBalance = async (address: string): Promise<number> => {
         throw new Error('RPC URL is required. Received ' + rpcUrl);
     }
 
-    // Initialize Tezos toolkit
     const Tezos = new TezosToolkit(rpcUrl);
 
     try {
-        // Get balance using tz.getBalance (no wallet connection required)
         const balance = await Tezos.tz.getBalance(address);
 
         return balance.toNumber() / 1000000;
@@ -44,7 +42,6 @@ const fundAccount = async (address: string, amount: number) => {
     return transactionHash;
 }
 
-// If running this script directly
 if (import.meta.url === `file://${process.argv[1]}`) {
     const address = process.argv[2];
     let balance = 0;
