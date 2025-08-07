@@ -2,7 +2,7 @@ import { useWalletStore } from "@/stores/walletStore"
 import { useDiagramStore } from "@/stores/diagramStore"
 import contracts from '@/contracts/contract-config.json';
 
-const CONTRACT_ADDRESS = contracts.find(contract => contract.contractName === 'counter')?.address;
+const CONTRACT_ADDRESS = contracts.find(contract => contract.contractName === 'counter')?.address ?? '';
 const TEST_ID = 'counter-contract';
 
 /**
@@ -13,7 +13,7 @@ const TEST_ID = 'counter-contract';
  * @throws {Error} If the amount is not within the valid range.
  * @returns {Promise<void>}
  */
-const increment = async (amount: number): Promise<void> => {
+const increment = async (amount: number): Promise<number | undefined> => {
 	const diagramStore = useDiagramStore();
 
 	if (amount <= 0 || amount > 100) throw new Error('Incrementation value must be between 1 and 100 inclusive.');
@@ -35,9 +35,10 @@ const increment = async (amount: number): Promise<void> => {
 
 		diagramStore.setProgress('wait-confirmation', 'running', TEST_ID);
 		const confirmation = await operation.confirmation(3);
+
 		if (confirmation?.block.hash) diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
 		diagramStore.setProgress('success', 'completed', TEST_ID);
-
+		return await getContractStorage(true);
 	} catch (error) {
 		console.log(`Error: ${JSON.stringify(error, null, 2)}`)
 		diagramStore.setErrorMessage(error, TEST_ID);
@@ -52,7 +53,7 @@ const increment = async (amount: number): Promise<void> => {
  * @throws {Error} If the amount is not within the valid range.
  * @returns {Promise<void>}
  */
-const decrement = async (amount: number): Promise<void> => {
+const decrement = async (amount: number): Promise<number | undefined> => {
 	const diagramStore = useDiagramStore();
 
 	if (amount <= 0 || amount > 100) throw new Error('Decrementation value must be between 1 and 100 inclusive.');
@@ -71,7 +72,7 @@ const decrement = async (amount: number): Promise<void> => {
 		const confirmation = await operation.confirmation(3);
 		if (confirmation?.block.hash) diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
 		diagramStore.setProgress('success', 'completed', TEST_ID);
-
+		return await getContractStorage(true);
 	} catch (error) {
 		console.log(`Error: ${JSON.stringify(error, null, 2)}`)
 		diagramStore.setErrorMessage(error, TEST_ID);
@@ -101,7 +102,6 @@ const reset = async (): Promise<void> => {
 		const confirmation = await operation.confirmation(3);
 		if (confirmation?.block.hash) diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
 		diagramStore.setProgress('success', 'completed', TEST_ID);
-
 	} catch (error) {
 		console.log(`Error: ${JSON.stringify(error, null, 2)}`)
 		diagramStore.setErrorMessage(error, TEST_ID);
@@ -114,29 +114,27 @@ const reset = async (): Promise<void> => {
  * @async
  * @returns {Promise<void>}
  */
-const getContractStorage = async (): Promise<void> => {
+const getContractStorage = async (noDiagram?: boolean): Promise<number | undefined> => {
 	const diagramStore = useDiagramStore();
 
-	diagramStore.setTestDiagram(TEST_ID, 'get-storage');
+	if (!noDiagram) diagramStore.setTestDiagram(TEST_ID, 'get-storage');
 
 	const walletStore = useWalletStore();
 	const Tezos = walletStore.getTezos;
 
 	try {
-		diagramStore.setProgress('get-contract', 'running', TEST_ID);
+		if (!noDiagram) diagramStore.setProgress('get-contract', 'running', TEST_ID);
 
 		const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 		const storage = await contract.storage();
 		console.log(`Current storage value: ${storage}`);
-		diagramStore.setProgress('read-storage', 'running', TEST_ID);
-		diagramStore.setProgress('success', 'completed', TEST_ID);
-
+		if (!noDiagram) diagramStore.setProgress('read-storage', 'running', TEST_ID);
+		if (!noDiagram) diagramStore.setProgress('success', 'completed', TEST_ID);
+		return storage as number;
 	} catch (error) {
 		console.log(`Error: ${error}`)
 		diagramStore.setErrorMessage(error, TEST_ID);
 	}
-
-	return;
 }
 
 /**
