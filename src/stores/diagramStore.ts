@@ -57,7 +57,9 @@ export const useDiagramStore = defineStore('diagram', () => {
 		// and should only run when the user interacts with something, since
 		// if the diagram has errored, no more progress can be made.
 		if (errorMessage.value) {
-			resetDiagram();
+			errorMessage.value = undefined;
+			currentStep.value = stepId;
+			diagramStatus.value = status;
 		}
 
 		if (currentDiagram.value && currentTestId.value) {
