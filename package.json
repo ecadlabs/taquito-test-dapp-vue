@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "lint": "npx eslint .",
     "lint:fix": "npx eslint . --fix",
-    "originate": "tsx src/scripts/originate-contracts.ts"
+    "originate": "tsx src/scripts/originate-contracts.ts",
+    "fund-wallet": "tsx src/scripts/fund-test-wallet.ts"
   },
   "dependencies": {
     "@airgap/beacon-types": "^4.6.1-beta.2",
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@tacoinfra/get-tez": "^1.0.8",
     "@types/node": "^24.1.0",
     "@vitejs/plugin-vue": "^6.0.0",
     "@vue/tsconfig": "^0.7.0",
