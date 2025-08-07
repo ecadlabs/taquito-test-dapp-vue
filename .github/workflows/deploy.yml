@@ -27,6 +27,7 @@ jobs:
           node-version: 22.18.0
       - run: npm ci
       - run: npm run build
+      - run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
 
       - name: Publish to Cloudflare Pages
         id: cloudflare_publish

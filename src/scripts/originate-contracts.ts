@@ -1,76 +1,172 @@
-import { InMemorySigner } from '@taquito/signer';
 import { TezosToolkit } from '@taquito/taquito';
-import { writeFileSync, readFileSync } from 'fs';
+import { writeFileSync, readFileSync, existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { config } from 'dotenv';
+import { importKey } from '@taquito/signer';
 
 config();
 
-export const originateContracts = async (): Promise<string> => {
+interface ContractConfig {
+	address: string;
+	originatedAt: string;
+	network: string;
+	contractName?: string;
+}
+
+interface OriginationResult {
+	contractAddress: string;
+	contractName: string;
+	operationHash: string;
+	storage: any;
+}
+
+interface ContractDefinition {
+	name: string;
+	path: string;
+	storage: any;
+}
+
+export const originateContracts = async (key: string): Promise<OriginationResult[]> => {
+	// Validate environment variables
 	const rpcUrl = process.env.VITE_RPC_URL;
 	const networkType = process.env.VITE_NETWORK_TYPE;
 
 	if (!rpcUrl || !networkType) {
-		throw new Error('RPC Url or Network Type could not be read from the env or are empty.')
+		throw new Error('VITE_RPC_URL and VITE_NETWORK_TYPE must be set in environment variables.');
 	}
 
-	console.log(`Using RPC URL: ${rpcUrl}`);
-	console.log(`Using network: ${networkType}`);
+	console.log(`🚀 Starting contract origination...`);
+	console.log(`📡 Using RPC URL: ${rpcUrl}`);
+	console.log(`🌐 Using network: ${networkType}`);
 
+	// Initialize Tezos toolkit
 	const Tezos = new TezosToolkit(rpcUrl);
-	const key = process.env.WALLET_PRIVATE_KEY;
 
-	if (!key) {
-		throw new ReferenceError('Wallet private key could not be read from the env file.');
+	if (key) {
+		await importKey(Tezos, key);
+	} else {
+		throw new Error('Wallet private key must be passed in as an argument.');
 	}
-	const signer = new InMemorySigner(key);
-	Tezos.setProvider({ signer });
 
-	const contractPath = join(process.cwd(), 'src', 'contracts', 'compiled', 'counter.tz');
-	const counterCode = readFileSync(contractPath, 'utf8');
+	console.log(`✅ Signer configured successfully`);
 
-	try {
-		const originationOp = await Tezos.contract.originate({
-			code: counterCode,
-			storage: 0,
-		});
+	// Discover contracts in the compiled directory
+	const compiledDir = join(process.cwd(), 'src', 'contracts', 'compiled');
+	const contracts: ContractDefinition[] = [];
 
-		console.log(`Waiting for confirmation of origination for ${originationOp.contractAddress}...`);
+	if (existsSync(compiledDir)) {
+		const files = readdirSync(compiledDir).filter(file => file.endsWith('.tz'));
 
-		await originationOp.contract();
-		console.log(`Origination completed. Contract address: ${originationOp.contractAddress}`);
-
-		const contractAddress = originationOp.contractAddress;
-		if (!contractAddress) {
-			throw new Error('Contract address is undefined after origination');
+		for (const file of files) {
+			const contractName = file.replace('.tz', '');
+			contracts.push({
+				name: contractName,
+				path: join(compiledDir, file),
+				storage: getDefaultStorage(contractName)
+			});
 		}
+	}
 
-		const contractConfig = {
-			address: contractAddress,
+	if (contracts.length === 0) {
+		throw new Error('No contracts found to originiate. Did you forget to compile?');
+	}
+
+	console.log(`📄 Found ${contracts.length} contract(s) to originate`);
+
+	const results: OriginationResult[] = [];
+
+	// Originate each contract
+	for (const contract of contracts) {
+		try {
+			console.log(`\n📄 Originating ${contract.name} contract...`);
+
+			// Check if contract file exists
+			if (!existsSync(contract.path)) {
+				console.warn(`⚠️  Contract file not found: ${contract.path}, skipping...`);
+				continue;
+			}
+
+			// Read contract code
+			const contractCode = readFileSync(contract.path, 'utf8');
+			console.log(`📖 Contract code loaded from: ${contract.path}`);
+
+			// Originate the contract
+			console.log(`⏳ Initiating origination for ${contract.name}...`);
+			const originationOp = await Tezos.contract.originate({
+				code: contractCode,
+				storage: contract.storage,
+			});
+
+			if (!originationOp.contractAddress) {
+				throw new Error('Contract address is undefined after origination');
+			}
+
+			console.log(`⏳ Waiting for confirmation of origination for ${originationOp.contractAddress}...`);
+
+			// Wait for confirmation
+			await originationOp.contract();
+			console.log(`✅ Origination completed for ${contract.name}`);
+			console.log(`📍 Contract address: ${originationOp.contractAddress}`);
+
+			// Get operation hash
+			const operationHash = originationOp.hash;
+			console.log(`🔗 Operation hash: ${operationHash}`);
+
+			results.push({
+				contractAddress: originationOp.contractAddress,
+				contractName: contract.name,
+				operationHash: operationHash,
+				storage: contract.storage
+			});
+
+		} catch (error) {
+			console.error(`❌ Error originating ${contract.name} contract:`, error);
+			throw error;
+		}
+	}
+
+	// Save contract configuration
+	if (results.length > 0) {
+		const contractConfig: ContractConfig = {
+			address: results[0].contractAddress,
 			originatedAt: new Date().toISOString(),
-			network: networkType
+			network: networkType,
+			contractName: results[0].contractName
 		};
 
 		const configPath = join(process.cwd(), 'src', 'contracts', 'contract-config.json');
 		writeFileSync(configPath, JSON.stringify(contractConfig, null, 2));
-		console.log(`Contract configuration saved to: ${configPath}`);
+		console.log(`\n💾 Contract configuration saved to: ${configPath}`);
+	}
 
-		return contractAddress;
-	} catch (error) {
-		console.error(`Error originating contract: ${JSON.stringify(error, null, 2)}`);
-		throw error;
+	console.log(`\n🎉 All contracts originated successfully!`);
+	return results;
+};
+
+// Helper function to get default storage for different contracts
+function getDefaultStorage(contractName: string): any {
+	switch (contractName.toLowerCase()) {
+		case 'counter':
+			return 0;
+		default:
+			return 0;
 	}
 }
 
 // If running this script directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-	originateContracts()
-		.then(address => {
-			console.log(`Contract successfully originated at: ${address}`);
+	const key = process.argv[2];
+
+	originateContracts(key)
+		.then(results => {
+			console.log(`\n📋 Origination Summary:`);
+			results.forEach(result => {
+				console.log(`  - ${result.contractName}: ${result.contractAddress}`);
+			});
 			process.exit(0);
 		})
 		.catch(error => {
-			console.error(`Failed to originate contract:`, error);
+			console.error(`\n💥 Failed to originate contracts:`, error);
 			process.exit(1);
 		});
 }
