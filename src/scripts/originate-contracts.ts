@@ -51,7 +51,7 @@ export const originateContracts = async (key: string): Promise<OriginationResult
 	console.log(`✅ Signer configured successfully`);
 
 	// Discover contracts in the compiled directory
-	const compiledDir = join(process.cwd(), 'src', 'contracts', 'compiled');
+	const compiledDir = process.cwd() + '/src/contracts/compiled';
 	const contracts: ContractDefinition[] = [];
 
 	if (existsSync(compiledDir)) {
