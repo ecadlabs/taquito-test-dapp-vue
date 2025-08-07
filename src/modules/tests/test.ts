@@ -8,6 +8,7 @@ export interface DiagramNode {
 
 export interface TestDiagram {
 	nodes: DiagramNode[];
+	noIndexer?: boolean;
 }
 
 export interface TestDiagrams {

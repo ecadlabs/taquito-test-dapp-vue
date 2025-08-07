@@ -3,13 +3,14 @@ import type { TestMetadata, TestDiagram } from '@/modules/tests/test';
 import TransferTez from "@/modules/tests/tests/transfer/transfer-tez.vue";
 import CounterContract from "@/modules/tests/tests/counter/counter-contract.vue";
 import IncreasePaidStorage from "@/modules/tests/tests/increase-paid-storage/increase-paid-storage.vue";
+import EstimateFees from "@/modules/tests/tests/estimate-fees/estimate-fees.vue";
 
 export const AvailableTests: Record<string, TestMetadata> = {
 	'transfer': {
 		id: 'transfer',
 		title: 'Transfer TEZ Between Addresses',
 		description: 'Transferring a small amount of TEZ betwen two addresses.',
-		category: 'Wallet to Wallet Transactions',
+		category: 'Transactions',
 		learningGoals: [
 			'Understand how to create and send transactions',
 			'Learn about transaction parameters and fees',
@@ -175,6 +176,42 @@ export const AvailableTests: Record<string, TestMetadata> = {
 					{
 						id: 'wait-for-chain-confirmation',
 						label: 'Wait for Chain Confirmation'
+					},
+				],
+			}
+		}
+	},
+	'estimate-fees': {
+		id: 'estimate-fees',
+		title: 'Estimating Fees',
+		description: 'Estimating transaction fees before sending the transaction.',
+		category: 'Transactions',
+		learningGoals: [
+			'Understand how to get the transaction fees of a transaction before its sent or confirmed.',
+			'Learn about the fees for Tezos transactions.',
+		],
+		prerequisites: [
+			'Basic understanding of smart contracts',
+			'Familiarity with Promises/Async functions in JavaScript'
+		],
+		setup: [
+			'Set up a Tezos wallet and fund it with some TEZ',
+			'Connect your wallet to Taquito Playground',
+		],
+		relatedTests: ['transfer-tez'],
+		sourceCode: {
+			contract: 'https://example.com',
+			script: 'https://example.com',
+			documentation: 'https://taquito.io/docs/estimate'
+		},
+		component: EstimateFees,
+		diagrams: {
+			'estimate-fees': {
+				noIndexer: true,
+				nodes: [
+					{
+						id: 'estimate-fees',
+						label: 'Estimate Fees'
 					},
 				],
 			}

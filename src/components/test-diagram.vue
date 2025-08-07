@@ -28,7 +28,7 @@
 					<!-- Text label -->
 					<div class="text-xs absolute font-medium text-gray-700 text-center leading-[1.2]"
 						:class="node.type === 'error' ? 'top-6' : 'bottom-6'">
-						<a v-if="node.type === 'success' && diagramStatus === 'completed'"
+						<a v-if="node.type === 'success' && diagramStatus === 'completed' && !diagram?.noIndexer"
 							:href="`${indexerUrl}/${operationHash}/operations`" target="_blank"
 							class="hover:opacity-80 transition-opacity cursor-pointer">
 							<Badge variant="secondary" class="mb-1">
