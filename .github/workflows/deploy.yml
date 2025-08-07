@@ -1,0 +1,52 @@
+name: taquito dapp pages deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.ref != 'refs/heads/master' || github.run_number }}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+env:
+  VITE_NETWORK_TYPE: ${{ vars.NETWORK_TYPE }}
+  VITE_RPC_URL: ${{ vars.RPC_URL }}
+  VITE_GITHUB_SHA: ${{ github.sha }}
+  VITE_VERSION: ${{ github.head_ref }}
+  VITE_REOWN_PROJECT_ID: ${{ secrets.REOWN_PROJECT_ID }}
+  NODE_OPTIONS: "\"--max-old-space-size=2048\""
+jobs:
+  publish-website:
+    name: Publish test dApp to Cloudflare
+    permissions:
+      contents: read
+      deployments: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+      - run: npm ci
+      - run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
+      - run: npm run build
+
+      - name: Publish to Cloudflare Pages
+        id: cloudflare_publish
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: "b82a3212512073a1e1802d2323762d9d"
+          projectName: taquito-dapp
+          directory: dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          wranglerVersion: '3'
+
+
+      # Notify the PR of the deploy preview
+      - uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          header: Taquito Test dApp Preview
+          message: 'A new deploy preview for the test app is available on Cloudflare Pages at ${{ steps.cloudflare_publish.outputs.URL }}'
