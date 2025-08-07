@@ -63,7 +63,7 @@ const settingsStore = useSettingsStore();
 
 const indexers: IndexerOption[] = availableIndexers;
 
-const gitSha = import.meta.env.VITE_GIT_SHA;
+const gitSha = import.meta.env.VITE_GITHUB_SHA;
 const version = import.meta.env.VITE_VERSION;
 const network = import.meta.env.VITE_NETWORK_TYPE;
 </script>

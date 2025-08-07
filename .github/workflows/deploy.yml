@@ -11,6 +11,8 @@ concurrency:
 env:
   VITE_NETWORK_TYPE: ${{ vars.NETWORK_TYPE }}
   VITE_RPC_URL: ${{ vars.RPC_URL }}
+  VITE_GITHUB_SHA: ${{ github.sha }}
+  VITE_VERSION: ${{ github.head_ref }}
   NODE_OPTIONS: "\"--max-old-space-size=2048\""
 jobs:
   publish-website:
