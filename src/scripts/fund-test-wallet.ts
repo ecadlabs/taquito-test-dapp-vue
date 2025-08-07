@@ -46,7 +46,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const address = process.argv[2];
     let balance = 0;
     try {
-        console.log(`\n🔍 Checking if we need to fund wallet ${address}...`);
+        console.log(`🔍 Checking if we need to fund wallet ${address}...`);
         balance = await getAccountBalance(address);
         console.log(`📋 Test wallet balance: ${balance} ꜩ`);
     } catch (error) {
