@@ -50,7 +50,7 @@ export const useWalletStore = defineStore('wallet', () => {
 					name: 'Taquito Playground',
 					iconUrl: 'https://tezostaquito.io/img/favicon.svg',
 					network: {
-						type: NetworkType.SEOULNET,
+						type: NetworkType.CUSTOM,
 						name: import.meta.env.VITE_NETWORK_TYPE,
 						rpcUrl: import.meta.env.VITE_RPC_URL,
 					},
