@@ -18,5 +18,13 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['buffer', 'events']
+  },
+  build: {
+    rollupOptions: {
+      external: (id) => {
+        // Exclude the scripts directory from the build as they won't be used on the live site
+        return id.includes('/src/scripts/') || id.includes('\\src\\scripts\\')
+      }
+    }
   }
 })
