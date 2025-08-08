@@ -62,8 +62,9 @@ export const useWalletStore = defineStore('wallet', () => {
 				wallet.value = new BeaconWallet(options);
 
 				wallet.value.client.subscribeToEvent(BeaconEvent.ACTIVE_ACCOUNT_SET, (account) => {
-					if (!account) {
-						disconnectWallet();
+					// Beacon gets very upset if we don't subscribe to this event and do *something* with it
+					if (account) {
+						address.value = account.address;
 					}
 				});
 
@@ -81,7 +82,6 @@ export const useWalletStore = defineStore('wallet', () => {
 				} catch (error) {
 					walletName.value = 'unknown';
 				}
-
 
 				localStorage.setItem('wallet-provider', 'beacon');
 			} else if (provider === 'walletconnect') {
