@@ -451,6 +451,7 @@ function isNodeCompleted(node: TypedNode | undefined): boolean {
 
 .error-path .connection-line {
 	background: #ef4444 !important;
+	z-index: 2;
 }
 
 .caution-path .connection-line.horizontal {
