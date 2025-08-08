@@ -69,7 +69,7 @@ import {
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu'
 import { AvailableTests } from '@/modules/tests/tests';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Menu, Settings } from 'lucide-vue-next';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useWalletStore } from '@/stores/walletStore';
