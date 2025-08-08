@@ -1,14 +1,15 @@
 <template>
 	<div class="overflow-auto w-full relative" ref="diagram-container">
-		<div class="min-w-full h-[150px] relative min-w-max">
+		<div class="min-w-full h-[150px] relative">
 			<!-- Connections layer -->
 			<div class="absolute top-0 left-0 w-full h-full pointer-events-none z-[1]">
 				<div v-for="connection in connections" :key="connection.id"
 					class="absolute pointer-events-none transition-all duration-300"
 					:class="[getConnectionClass(connection), isConnectionErrored(connection) ? 'error-path' : '']">
+					<!-- The random z-index and bg-white is to prevent the connections from visually overlapping. This should be re-done. -->
 					<div v-if="connection.horizontal"
-						class="connection-line horizontal absolute rounded transition-all duration-300"
-						:class="[isConnectionActive(connection) ? 'animated' : '', inProgressConnectionErroredClasses(connection)]"
+						class="connection-line bg-white horizontal absolute rounded transition-all duration-300"
+						:class="[isConnectionActive(connection) ? 'animated' : '', inProgressConnectionErroredClasses(connection), `z-[${Math.floor(Math.random() * 1000)}]`]"
 						:style="connection.horizontal" />
 					<div v-if="connection.vertical"
 						class="connection-line vertical absolute rounded transition-all duration-300"
