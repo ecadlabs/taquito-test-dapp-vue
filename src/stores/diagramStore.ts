@@ -7,7 +7,7 @@ import type { Estimate } from '@taquito/taquito';
 export interface DialogContent {
 	title: string;
 	description?: string;
-	content: string | (() => any); // Can be a string or a function that returns JSX/Vue component
+	content: string // HTML string
 }
 
 export const useDiagramStore = defineStore('diagram', () => {
