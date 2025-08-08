@@ -5,7 +5,7 @@ import type { Estimate } from "@taquito/taquito";
 import { RpcClient } from "@taquito/rpc";
 
 const TEST_ID = 'delegation';
-let estimate: Estimate | undefined = undefined;
+let estimate: Estimate;
 
 const delegate = async (address: string) => {
 	const diagramStore = useDiagramStore();
@@ -24,7 +24,7 @@ const delegate = async (address: string) => {
 		diagramStore.setNodeButton('estimate-fees', {
 			icon: PiggyBank,
 			text: 'View Fees',
-			onClick: showFees
+			onClick: () => diagramStore.showFeeEstimationDialog(estimate)
 		});
 
 		diagramStore.setProgress('set-delegate', 'running', TEST_ID);
@@ -60,7 +60,7 @@ const undelegate = async () => {
 		diagramStore.setNodeButton('estimate-fees', {
 			icon: PiggyBank,
 			text: 'View Fees',
-			onClick: showFees
+			onClick: () => diagramStore.showFeeEstimationDialog(estimate)
 		});
 
 		diagramStore.setProgress('remove-delegation', 'running', TEST_ID);
@@ -86,47 +86,4 @@ const getDelegate = async (address: string): Promise<string> => {
 	return delegate as string;
 }
 
-const showFees = () => {
-	const diagramStore = useDiagramStore();
-	const dialogContent = {
-		title: 'Transaction Fees',
-		description: 'Transaction fee breakdown',
-		content: `
-				<div class="space-y-2">
-					<div class="flex justify-between">
-						<span class="font-medium">Burn Fee:</span>
-						<span>${estimate?.burnFeeMutez} mutez</span>
-					</div>
-					<div class="flex justify-between">
-						<span class="font-medium">Gas Limit:</span>
-						<span>${estimate?.gasLimit}</span>
-					</div>
-					<div class="flex justify-between">
-						<span class="font-medium">Minimal Fee:</span>
-						<span>${estimate?.minimalFeeMutez} mutez</span>
-					</div>
-					<div class="flex justify-between">
-						<span class="font-medium">Storage Limit:</span>
-						<span>${estimate?.storageLimit}</span>
-					</div>
-					<div class="flex justify-between">
-						<span class="font-medium">Suggested Fee:</span>
-						<span>${estimate?.suggestedFeeMutez} mutez</span>
-					</div>
-					<div class="flex justify-between">
-						<span class="font-medium">Total Cost:</span>
-						<span>${estimate?.totalCost} mutez</span>
-					</div>
-					<div class="flex justify-between">
-						<span class="font-medium">Using Base Fee:</span>
-						<span>${estimate?.usingBaseFeeMutez} mutez</span>
-					</div>
-				</div>
-			`
-	};
-
-	// Trigger the dialog with custom content
-	diagramStore.openDialog(dialogContent);
-}
-
-export { delegate, undelegate, showFees, getDelegate }
+export { delegate, undelegate, getDelegate }

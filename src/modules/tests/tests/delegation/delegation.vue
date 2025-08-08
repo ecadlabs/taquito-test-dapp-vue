@@ -50,7 +50,7 @@ import { ref, onMounted } from 'vue';
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label'
-import { Loader2, Users, CheckCircle, Unlink, Cookie } from 'lucide-vue-next';
+import { Loader2, CheckCircle, Unlink, Cookie } from 'lucide-vue-next';
 import { delegate, getDelegate, undelegate } from '@/modules/tests/tests/delegation/delegation';
 import { useWalletStore } from '@/stores/walletStore';
 

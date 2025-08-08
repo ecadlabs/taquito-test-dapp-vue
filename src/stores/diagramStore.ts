@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import type { TestDiagram } from '@/modules/tests/test';
 import { getTestDiagram } from '@/modules/tests/tests';
+import type { Estimate } from '@taquito/taquito';
 
 export interface DialogContent {
 	title: string;
@@ -154,6 +155,47 @@ export const useDiagramStore = defineStore('diagram', () => {
 		}
 	};
 
+	const showFeeEstimationDialog = (estimate: Estimate) => {
+		const dialogContent = {
+			title: 'Transaction Fees',
+			description: 'Transaction fee breakdown',
+			content: `
+					<div class="space-y-2">
+						<div class="flex justify-between">
+							<span class="font-medium">Burn Fee:</span>
+							<span>${estimate.burnFeeMutez} mutez</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Gas Limit:</span>
+							<span>${estimate.gasLimit}</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Minimal Fee:</span>
+							<span>${estimate.minimalFeeMutez} mutez</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Storage Limit:</span>
+							<span>${estimate.storageLimit}</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Suggested Fee:</span>
+							<span>${estimate.suggestedFeeMutez} mutez</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Total Cost:</span>
+							<span>${estimate.totalCost} mutez</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Using Base Fee:</span>
+							<span>${estimate.usingBaseFeeMutez} mutez</span>
+						</div>
+					</div>
+				`
+		};
+
+		openDialog(dialogContent);
+	}
+
 	return {
 		currentDiagram,
 		currentStep,
@@ -178,5 +220,6 @@ export const useDiagramStore = defineStore('diagram', () => {
 		openDialog,
 		closeDialog,
 		cancelCurrentTest,
+		showFeeEstimationDialog,
 	};
 }); 
