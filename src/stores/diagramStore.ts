@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import type { TestDiagram } from '@/modules/tests/test';
 import { getTestDiagram } from '@/modules/tests/tests';
 import type { Estimate } from '@taquito/taquito';
+import { useWalletStore } from './walletStore';
 
 export interface DialogContent {
 	title: string;
@@ -69,11 +70,12 @@ export const useDiagramStore = defineStore('diagram', () => {
 		}
 	};
 
-	const setSuccessful = (testId?: string) => {
+	const setSuccessful = async (testId?: string) => {
 		if (testId && currentTestId.value !== testId) {
 			return;
 		}
 		successful.value = true;
+		await useWalletStore().fetchBalance();
 	}
 
 	const setErrorMessage = (error: unknown, testId?: string) => {

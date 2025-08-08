@@ -83,6 +83,10 @@ export const AvailableTests: Record<string, TestMetadata> = {
 						label: 'Get Contract'
 					},
 					{
+						id: 'estimate-fees',
+						label: 'Estimate Fees'
+					},
+					{
 						id: 'execute-operation',
 						label: 'Execute Increment'
 					},
@@ -99,6 +103,10 @@ export const AvailableTests: Record<string, TestMetadata> = {
 						label: 'Get Contract'
 					},
 					{
+						id: 'estimate-fees',
+						label: 'Estimate Fees'
+					},
+					{
 						id: 'execute-operation',
 						label: 'Execute Decrement'
 					},
@@ -113,6 +121,10 @@ export const AvailableTests: Record<string, TestMetadata> = {
 					{
 						id: 'get-contract',
 						label: 'Get Contract'
+					},
+					{
+						id: 'estimate-fees',
+						label: 'Estimate Fees'
 					},
 					{
 						id: 'execute-operation',
