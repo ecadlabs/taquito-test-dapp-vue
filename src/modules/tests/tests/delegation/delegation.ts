@@ -2,6 +2,7 @@ import { useWalletStore } from "@/stores/walletStore";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { PiggyBank } from 'lucide-vue-next';
 import type { Estimate } from "@taquito/taquito";
+import { RpcClient } from "@taquito/rpc";
 
 const TEST_ID = 'delegation';
 let estimate: Estimate | undefined = undefined;
@@ -79,6 +80,12 @@ const undelegate = async () => {
 	}
 }
 
+const getDelegate = async (address: string): Promise<string> => {
+	const rpc = new RpcClient(import.meta.env.VITE_RPC_URL);
+	const delegate = await rpc.getDelegate(address);
+	return delegate as string;
+}
+
 const showFees = () => {
 	const diagramStore = useDiagramStore();
 	const dialogContent = {
@@ -122,4 +129,4 @@ const showFees = () => {
 	diagramStore.openDialog(dialogContent);
 }
 
-export { delegate, undelegate, showFees }
+export { delegate, undelegate, showFees, getDelegate }

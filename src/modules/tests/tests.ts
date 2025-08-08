@@ -239,7 +239,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
 		sourceCode: {
 			contract: 'https://example.com',
 			script: 'https://example.com',
-			documentation: 'https://taquito.io/docs/estimate'
+			documentation: 'https://taquito.io/docs/set_delegate'
 		},
 		component: Delegation,
 		diagrams: {
