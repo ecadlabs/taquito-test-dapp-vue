@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="relative">
 		<!-- Large Screens -->
 		<div class="hidden md:block">
 			<div v-if="!address" class="flex items-center gap-2">
@@ -17,6 +17,7 @@
 					<p v-else>...</p>
 					<Separator v-if="address" orientation="vertical" class="h-4" />
 					<p v-if="address">{{ address.slice(0, 6) }}...{{ address.slice(-4) }}</p>
+					<AlertTriangle v-if="!settingsStore.getIsRevealed" class="size-4 text-red-600 flex-shrink-0" />
 				</Button>
 			</div>
 		</div>
@@ -95,6 +96,26 @@
 				</DialogDescription>
 			</DialogHeader>
 
+			<!-- Warning for unrevealed wallet -->
+			<div v-if="!settingsStore.getIsRevealed" class="bg-yellow-50 border border-yellow-200 rounded-lg p-2.5">
+				<div class="flex items-start gap-1.5">
+					<AlertTriangle class="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+					<div>
+						<p class="text-sm font-medium text-yellow-800">Wallet key not revealed</p>
+						<div class="text-xs text-yellow-700 mt-1">
+							<p>
+								Your wallets public key has not been revealed on the blockchain. Most operations will
+								fail.
+								Reveal your key by sending a transaction to yourself via your wallet.
+							</p>
+							<p class="mt-1">Learn more from the <a
+									href="https://docs.tezos.com/tutorials/build-your-first-app/wallets-tokens"
+									target="_blank" class="text-blue-400 hover:underline">Tezos documentation</a>.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
 			<div class="text-sm">
 				<div class="flex items-center gap-1">
 					<div class="min-w-0">
@@ -133,7 +154,7 @@
 import { useWalletStore } from '@/stores/walletStore';
 import { computed, ref, watch } from 'vue';
 import type { WalletProvider } from '@/types/wallet';
-import { Loader2, Wallet, Unplug, Copy, ExternalLink } from 'lucide-vue-next'
+import { Loader2, Wallet, Unplug, Copy, ExternalLink, AlertTriangle } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import {
 	Dialog,
