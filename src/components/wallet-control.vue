@@ -1,0 +1,225 @@
+<template>
+	<div>
+		<!-- Large Screens -->
+		<div class="hidden md:block">
+			<div v-if="!address" class="flex items-center gap-2">
+				<div class="size-3 rounded-full bg-red-400" />
+				<p class="sr-only">Wallet Disconnected</p>
+				<Button variant="outline" @click="showConnectDialog = true">
+					Connect Wallet
+				</Button>
+			</div>
+			<div v-else class="flex items-center gap-2">
+				<div class="size-3 rounded-full bg-green-400" />
+				<p class="sr-only">Wallet Connected</p>
+				<Button variant="outline" @click="showDisconnectDialog = true" class="flex items-center gap-2">
+					<p v-if="balance">{{ `${balance} ꜩ` }}</p>
+					<p v-else>...</p>
+					<Separator v-if="address" orientation="vertical" class="h-4" />
+					<p v-if="address">{{ address.slice(0, 6) }}...{{ address.slice(-4) }}</p>
+				</Button>
+			</div>
+		</div>
+		<!-- Small Screens -->
+		<div class="block md:hidden">
+			<div v-if="!address" class="flex items-center gap-2">
+				<div class="size-3 rounded-full bg-red-400" />
+				<p class="sr-only">Wallet Disconnected</p>
+				<Button size="icon" variant="outline" @click="showConnectDialog = true">
+					<p class="sr-only">Connect Wallet</p>
+					<Wallet class="size-5" />
+				</Button>
+			</div>
+			<div v-else class="flex items-center gap-2">
+				<div class="size-3 rounded-full bg-green-400" />
+				<p class="sr-only">Wallet Connected</p>
+				<Button size="icon" variant="outline" @click="showDisconnectDialog = true">
+					<p class="sr-only">Disconnect Wallet</p>
+					<Unplug class="size-5" />
+				</Button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Connection Dialog -->
+	<Dialog :open="showConnectDialog" @update:open="showConnectDialog = $event">
+		<DialogContent>
+			<DialogHeader>
+				<DialogTitle>Connect Wallet</DialogTitle>
+				<DialogDescription>
+					<div class="flex items-center space-x-1 flex-wrap">
+						<span>Taquito Playground supports both</span>
+						<a href="https://www.walletbeacon.io/" target="_blank"
+							class="text-blue-400 hover:underline">Beacon</a>
+						<span>and</span>
+						<a href="https://walletconnect.network/" target="_blank"
+							class="text-blue-400 hover:underline">WalletConnect.</a>
+						<p>Select your preference and hit connect to get started.</p>
+					</div>
+				</DialogDescription>
+			</DialogHeader>
+
+			<div>
+				<Select v-model="provider">
+					<SelectTrigger class="w-[150px]">
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="beacon">
+							Beacon
+						</SelectItem>
+						<SelectItem value="walletconnect">
+							WalletConnect
+						</SelectItem>
+					</SelectContent>
+				</Select>
+			</div>
+
+			<DialogFooter>
+				<Button variant="secondary" @click="connect()" :disabled="loading || !provider">
+					<Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
+					<p>Connect</p>
+				</Button>
+			</DialogFooter>
+		</DialogContent>
+	</Dialog>
+
+	<!-- Disconnection Dialog -->
+	<Dialog :open="showDisconnectDialog" @update:open="showDisconnectDialog = $event">
+		<DialogContent>
+			<DialogHeader>
+				<DialogTitle>Connected Wallet</DialogTitle>
+				<DialogDescription class="flex gap-1">
+					<p>Connected to</p>
+					<p class="font-medium">{{ walletName }}</p>
+				</DialogDescription>
+			</DialogHeader>
+
+			<div class="text-sm">
+				<div class="flex items-center gap-1">
+					<div class="min-w-0">
+						<p class="break-all">Address: {{ address }}</p>
+					</div>
+					<div class="flex gap-1 flex-shrink-0">
+						<Button variant="ghost" size="icon" @click="copyAddress()">
+							<Copy class="size-4" />
+							<p class="sr-only">Copy wallet address</p>
+						</Button>
+						<Button variant="ghost" size="icon" @click="openExplorer()">
+							<ExternalLink class="size-4" />
+							<p class="sr-only">Open wallet in explorer</p>
+						</Button>
+					</div>
+				</div>
+
+				<p>Balance: {{ balance }} ꜩ</p>
+			</div>
+
+			<DialogFooter class="flex flex-col gap-2">
+				<Button variant="secondary" @click="change()" :disabled="loading">
+					<Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
+					<p>Change Wallet</p>
+				</Button>
+				<Button variant="destructive" @click="disconnect()" :disabled="loading">
+					<Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
+					<p>Disconnect</p>
+				</Button>
+			</DialogFooter>
+		</DialogContent>
+	</Dialog>
+</template>
+
+<script setup lang="ts">
+import { useWalletStore } from '@/stores/walletStore';
+import { computed, ref, watch } from 'vue';
+import type { WalletProvider } from '@/types/wallet';
+import { Loader2, Wallet, Unplug, Copy, ExternalLink } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog'
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator';
+import { toast } from 'vue-sonner';
+import { buildIndexerUrl } from '@/lib/utils';
+import { useSettingsStore } from '@/stores/settingsStore';
+
+const walletStore = useWalletStore();
+const settingsStore = useSettingsStore();
+
+const address = computed(() => walletStore.getAddress)
+const walletName = computed(() => walletStore.getWalletName)
+const balance = computed(() => {
+	if (walletStore.getBalance) {
+		const balanceTez = walletStore.getBalance.toNumber() / 1000000;
+		return balanceTez.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+	}
+
+	return 0
+})
+
+const provider = ref<WalletProvider>('beacon')
+const loading = ref<boolean>(false);
+const showConnectDialog = ref<boolean>(false);
+const showDisconnectDialog = ref<boolean>(false);
+
+watch([showConnectDialog, showDisconnectDialog], ([newValue]) => { if (newValue === false) { loading.value = false } })
+
+const copyAddress = () => {
+	navigator.clipboard.writeText(address.value ?? '');
+	toast.success('Address copied to clipboard');
+}
+
+const networkType = import.meta.env.VITE_NETWORK_TYPE;
+const indexerUrl = computed(() => buildIndexerUrl(settingsStore.settings.indexer, networkType));
+
+const openExplorer = () => {
+	window.open(`${indexerUrl.value}/${address.value}/operations`, '_blank');
+}
+
+const connect = async () => {
+	try {
+		loading.value = true;
+		await walletStore.initializeWallet(provider.value);
+		toast.success('Wallet connected');
+	} catch (error) {
+		toast.error('Wallet connection failed', {
+			description: error instanceof Error ? error.message : String(error),
+		})
+	} finally {
+		showConnectDialog.value = false;
+		loading.value = false;
+	}
+}
+
+const disconnect = async () => {
+	try {
+		loading.value = true;
+		await walletStore.disconnectWallet();
+		toast.success('Wallet disconnected');
+	} catch (error) {
+		toast.error('Wallet disconnection failed', {
+			description: error instanceof Error ? error.message : String(error),
+		})
+	} finally {
+		showDisconnectDialog.value = false;
+		loading.value = false;
+	}
+}
+
+const change = async () => {
+	await disconnect();
+	showConnectDialog.value = true;
+}
+</script>
