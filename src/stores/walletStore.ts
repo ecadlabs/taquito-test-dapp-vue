@@ -6,6 +6,7 @@ import type { WalletProvider } from "@/types/wallet"
 import { PermissionScopeMethods, WalletConnect } from '@taquito/wallet-connect'
 import { NetworkType } from "@airgap/beacon-types"
 import { NetworkType as WalletConnectNetworkType } from '@taquito/wallet-connect'
+import { BeaconEvent } from "@airgap/beacon-dapp"
 
 export const useWalletStore = defineStore('wallet', () => {
 	let Tezos = new TezosToolkit(import.meta.env.VITE_RPC_URL);
@@ -60,7 +61,14 @@ export const useWalletStore = defineStore('wallet', () => {
 
 				wallet.value = new BeaconWallet(options);
 
+				wallet.value.client.subscribeToEvent(BeaconEvent.ACTIVE_ACCOUNT_SET, (account) => {
+					if (!account) {
+						disconnectWallet();
+					}
+				});
+
 				const cachedAccount = await wallet.value.client.getActiveAccount();
+
 				if (cachedAccount === undefined) {
 					console.log('No cached account found, requesting permissions from selected wallet.');
 					await wallet.value.requestPermissions();
