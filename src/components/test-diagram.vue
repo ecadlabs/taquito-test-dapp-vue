@@ -9,7 +9,7 @@
 					<!-- The random z-index and bg-white is to prevent the connections from visually overlapping. This should be re-done. -->
 					<div v-if="connection.horizontal"
 						class="connection-line bg-white horizontal absolute rounded transition-all duration-300"
-						:class="[isConnectionActive(connection) ? 'animated' : '', inProgressConnectionErroredClasses(connection), `z-[${Math.floor(Math.random() * 1000)}]`]"
+						:class="[isConnectionActive(connection) ? 'animated' : '', inProgressConnectionErroredClasses(connection), `z-[${connections.indexOf(connection)}]`]"
 						:style="connection.horizontal" />
 					<div v-if="connection.vertical"
 						class="connection-line vertical absolute rounded transition-all duration-300"
