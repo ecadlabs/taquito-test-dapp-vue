@@ -41,6 +41,7 @@ const delegate = async (address: string) => {
 	} catch (error) {
 		console.error(`Failed to delegate to '${address}': ${error}`);
 		diagramStore.setErrorMessage(error, TEST_ID);
+		throw error;
 	}
 }
 
@@ -77,6 +78,7 @@ const undelegate = async () => {
 	} catch (error) {
 		console.error(`Failed to undelegate: ${error}`);
 		diagramStore.setErrorMessage(error, TEST_ID);
+		throw error;
 	}
 }
 
