@@ -38,11 +38,14 @@ const increment = async (amount: number): Promise<number | undefined> => {
 		const transferParams = await contract.methodsObject.increment(amount).toTransferParams();
 		estimate = await Tezos.estimate.transfer(transferParams);
 
-		diagramStore.setNodeButton('estimate-fees', {
-			icon: PiggyBank,
-			text: 'View Fees',
-			onClick: () => diagramStore.showFeeEstimationDialog(estimate)
-		});
+		if (estimate) {
+			diagramStore.setNodeButton('estimate-fees', {
+				icon: PiggyBank,
+				text: 'View Fees',
+				onClick: () => diagramStore.showFeeEstimationDialog(estimate)
+			});
+		}
+
 
 		diagramStore.setProgress('execute-operation', 'running', TEST_ID);
 
@@ -86,11 +89,13 @@ const decrement = async (amount: number): Promise<number | undefined> => {
 		const transferParams = await contract.methodsObject.decrement(amount).toTransferParams();
 		estimate = await Tezos.estimate.transfer(transferParams);
 
-		diagramStore.setNodeButton('estimate-fees', {
-			icon: PiggyBank,
-			text: 'View Fees',
-			onClick: () => diagramStore.showFeeEstimationDialog(estimate)
-		});
+		if (estimate) {
+			diagramStore.setNodeButton('estimate-fees', {
+				icon: PiggyBank,
+				text: 'View Fees',
+				onClick: () => diagramStore.showFeeEstimationDialog(estimate)
+			});
+		}
 
 		diagramStore.setProgress('execute-operation', 'running', TEST_ID);
 		const operation = await contract.methodsObject.decrement(amount).send();
@@ -127,11 +132,13 @@ const reset = async (): Promise<void> => {
 		const transferParams = await contract.methodsObject.reset().toTransferParams();
 		estimate = await Tezos.estimate.transfer(transferParams);
 
-		diagramStore.setNodeButton('estimate-fees', {
-			icon: PiggyBank,
-			text: 'View Fees',
-			onClick: () => diagramStore.showFeeEstimationDialog(estimate)
-		});
+		if (estimate) {
+			diagramStore.setNodeButton('estimate-fees', {
+				icon: PiggyBank,
+				text: 'View Fees',
+				onClick: () => diagramStore.showFeeEstimationDialog(estimate)
+			});
+		}
 
 		diagramStore.setProgress('execute-operation', 'running', TEST_ID);
 		const operation = await contract.methodsObject.reset().send();

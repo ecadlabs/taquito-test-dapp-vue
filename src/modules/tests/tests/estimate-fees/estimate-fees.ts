@@ -17,12 +17,13 @@ const estimateFees = async () => {
 		diagramStore.setProgress('estimate-fees', 'running', TEST_ID);
 		estimate = await Tezos.estimate.transfer({ to: address, amount: 1 });
 
-		// Set the button for the estimate-fees node
-		diagramStore.setNodeButton('estimate-fees', {
-			icon: PiggyBank,
-			text: 'View Fees',
-			onClick: () => diagramStore.showFeeEstimationDialog(estimate)
-		});
+		if (estimate) {
+			diagramStore.setNodeButton('estimate-fees', {
+				icon: PiggyBank,
+				text: 'View Fees',
+				onClick: () => diagramStore.showFeeEstimationDialog(estimate)
+			});
+		}
 
 		diagramStore.setProgress('success', 'completed', TEST_ID);
 		await walletStore.fetchBalance();

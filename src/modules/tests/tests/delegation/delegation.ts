@@ -21,11 +21,13 @@ const delegate = async (address: string) => {
 		diagramStore.setProgress('estimate-fees', 'running', TEST_ID);
 		estimate = await Tezos.estimate.setDelegate({ source: walletStore.getAddress, delegate: address });
 
-		diagramStore.setNodeButton('estimate-fees', {
-			icon: PiggyBank,
-			text: 'View Fees',
-			onClick: () => diagramStore.showFeeEstimationDialog(estimate)
-		});
+		if (estimate) {
+			diagramStore.setNodeButton('estimate-fees', {
+				icon: PiggyBank,
+				text: 'View Fees',
+				onClick: () => diagramStore.showFeeEstimationDialog(estimate)
+			});
+		}
 
 		diagramStore.setProgress('set-delegate', 'running', TEST_ID);
 		diagramStore.setProgress('wait-for-user', 'running', TEST_ID);
@@ -58,11 +60,13 @@ const undelegate = async () => {
 		diagramStore.setProgress('estimate-fees', 'running', TEST_ID);
 		estimate = await Tezos.estimate.setDelegate({ source: walletStore.getAddress });
 
-		diagramStore.setNodeButton('estimate-fees', {
-			icon: PiggyBank,
-			text: 'View Fees',
-			onClick: () => diagramStore.showFeeEstimationDialog(estimate)
-		});
+		if (estimate) {
+			diagramStore.setNodeButton('estimate-fees', {
+				icon: PiggyBank,
+				text: 'View Fees',
+				onClick: () => diagramStore.showFeeEstimationDialog(estimate)
+			});
+		}
 
 		diagramStore.setProgress('remove-delegation', 'running', TEST_ID);
 		diagramStore.setProgress('wait-for-user', 'running', TEST_ID);
