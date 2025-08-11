@@ -1,95 +1,106 @@
 import { useWalletStore } from "@/stores/walletStore";
 import { useDiagramStore } from "@/stores/diagramStore";
-import { PiggyBank } from 'lucide-vue-next';
+import { PiggyBank } from "lucide-vue-next";
 import type { Estimate } from "@taquito/taquito";
 import { RpcClient } from "@taquito/rpc";
 
-const TEST_ID = 'delegation';
+const TEST_ID = "delegation";
 let estimate: Estimate;
 
 const delegate = async (address: string) => {
-	const diagramStore = useDiagramStore();
-	diagramStore.setTestDiagram(TEST_ID, 'set-delegate');
+  const diagramStore = useDiagramStore();
+  diagramStore.setTestDiagram(TEST_ID, "set-delegate");
 
-	const walletStore = useWalletStore();
-	const Tezos = walletStore.getTezos;
+  const walletStore = useWalletStore();
+  const Tezos = walletStore.getTezos;
 
-	try {
-		if (!address) throw new Error('No address found to delegate to');
-		if (!walletStore.getAddress) throw new Error('No address found to delegate from');
+  try {
+    if (!address) throw new Error("No address found to delegate to");
+    if (!walletStore.getAddress)
+      throw new Error("No address found to delegate from");
 
-		diagramStore.setProgress('estimate-fees', 'running', TEST_ID);
-		estimate = await Tezos.estimate.setDelegate({ source: walletStore.getAddress, delegate: address });
+    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
+    estimate = await Tezos.estimate.setDelegate({
+      source: walletStore.getAddress,
+      delegate: address,
+    });
 
-		if (estimate) {
-			diagramStore.setNodeButton('estimate-fees', {
-				icon: PiggyBank,
-				text: 'View Fees',
-				onClick: () => diagramStore.showFeeEstimationDialog(estimate)
-			});
-		}
+    if (estimate) {
+      diagramStore.setNodeButton("estimate-fees", {
+        icon: PiggyBank,
+        text: "View Fees",
+        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
+      });
+    }
 
-		diagramStore.setProgress('set-delegate', 'running', TEST_ID);
-		diagramStore.setProgress('wait-for-user', 'running', TEST_ID);
-		const delegation = await Tezos.wallet.setDelegate({ delegate: address }).send();
+    diagramStore.setProgress("set-delegate", "running", TEST_ID);
+    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    const delegation = await Tezos.wallet
+      .setDelegate({ delegate: address })
+      .send();
 
-		diagramStore.setProgress('wait-for-chain-confirmation', 'running', TEST_ID);
-		const confirmation = await delegation.confirmation();
+    diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
+    const confirmation = await delegation.confirmation();
 
-		if (confirmation?.block.hash) diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
+    if (confirmation?.block.hash)
+      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
 
-		diagramStore.setProgress('success', 'completed', TEST_ID);
-		await walletStore.fetchBalance();
-	} catch (error) {
-		console.error(`Failed to delegate to '${address}': ${error}`);
-		diagramStore.setErrorMessage(error, TEST_ID);
-		throw error;
-	}
-}
+    diagramStore.setProgress("success", "completed", TEST_ID);
+    await walletStore.fetchBalance();
+  } catch (error) {
+    console.error(`Failed to delegate to '${address}': ${error}`);
+    diagramStore.setErrorMessage(error, TEST_ID);
+    throw error;
+  }
+};
 
 const undelegate = async () => {
-	const diagramStore = useDiagramStore();
-	diagramStore.setTestDiagram(TEST_ID, 'remove-delegation');
+  const diagramStore = useDiagramStore();
+  diagramStore.setTestDiagram(TEST_ID, "remove-delegation");
 
-	const walletStore = useWalletStore();
-	const Tezos = walletStore.getTezos;
+  const walletStore = useWalletStore();
+  const Tezos = walletStore.getTezos;
 
-	try {
-		if (!walletStore.getAddress) throw new Error('No address found remove delegation for');
+  try {
+    if (!walletStore.getAddress)
+      throw new Error("No address found remove delegation for");
 
-		diagramStore.setProgress('estimate-fees', 'running', TEST_ID);
-		estimate = await Tezos.estimate.setDelegate({ source: walletStore.getAddress });
+    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
+    estimate = await Tezos.estimate.setDelegate({
+      source: walletStore.getAddress,
+    });
 
-		if (estimate) {
-			diagramStore.setNodeButton('estimate-fees', {
-				icon: PiggyBank,
-				text: 'View Fees',
-				onClick: () => diagramStore.showFeeEstimationDialog(estimate)
-			});
-		}
+    if (estimate) {
+      diagramStore.setNodeButton("estimate-fees", {
+        icon: PiggyBank,
+        text: "View Fees",
+        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
+      });
+    }
 
-		diagramStore.setProgress('remove-delegation', 'running', TEST_ID);
-		diagramStore.setProgress('wait-for-user', 'running', TEST_ID);
-		const delegation = await Tezos.wallet.setDelegate({}).send();
+    diagramStore.setProgress("remove-delegation", "running", TEST_ID);
+    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    const delegation = await Tezos.wallet.setDelegate({}).send();
 
-		diagramStore.setProgress('wait-for-chain-confirmation', 'running', TEST_ID);
-		const confirmation = await delegation.confirmation();
+    diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
+    const confirmation = await delegation.confirmation();
 
-		if (confirmation?.block.hash) diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
+    if (confirmation?.block.hash)
+      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
 
-		diagramStore.setProgress('success', 'completed', TEST_ID);
-		await walletStore.fetchBalance();
-	} catch (error) {
-		console.error(`Failed to undelegate: ${error}`);
-		diagramStore.setErrorMessage(error, TEST_ID);
-		throw error;
-	}
-}
+    diagramStore.setProgress("success", "completed", TEST_ID);
+    await walletStore.fetchBalance();
+  } catch (error) {
+    console.error(`Failed to undelegate: ${error}`);
+    diagramStore.setErrorMessage(error, TEST_ID);
+    throw error;
+  }
+};
 
 const getDelegate = async (address: string): Promise<string | null> => {
-	const rpc = new RpcClient(import.meta.env.VITE_RPC_URL);
-	const delegate = await rpc.getDelegate(address);
-	return delegate;
-}
+  const rpc = new RpcClient(import.meta.env.VITE_RPC_URL);
+  const delegate = await rpc.getDelegate(address);
+  return delegate;
+};
 
-export { delegate, undelegate, getDelegate }
+export { delegate, undelegate, getDelegate };

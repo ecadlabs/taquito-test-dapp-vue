@@ -1,3 +1,3 @@
-type WalletProvider = 'beacon' | 'walletconnect';
+type WalletProvider = "beacon" | "walletconnect";
 
-export type { WalletProvider }
+export type { WalletProvider };

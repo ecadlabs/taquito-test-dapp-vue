@@ -1,7 +1,10 @@
 <template>
   <div class="flex md:justify-between p-4">
-    <RouterLink :to="{ name: 'home' }" class="font-medium leading-none flex gap-1.5 items-center p-2">
-      <img src="@/assets/logo.svg" alt="Taquito Logo" class="size-5">
+    <RouterLink
+      :to="{ name: 'home' }"
+      class="font-medium leading-none flex gap-1.5 items-center p-2"
+    >
+      <img src="@/assets/logo.svg" alt="Taquito Logo" class="size-5" />
       <p>Taquito Playground</p>
     </RouterLink>
 
@@ -16,7 +19,10 @@
           </RouterLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <NavigationMenuLink href="https://taquito.io/docs/quick_start" :class="navigationMenuTriggerStyle()">
+          <NavigationMenuLink
+            href="https://taquito.io/docs/quick_start"
+            :class="navigationMenuTriggerStyle()"
+          >
             Taquito Documentation
           </NavigationMenuLink>
         </NavigationMenuItem>
@@ -24,7 +30,12 @@
     </NavigationMenu>
 
     <WalletControl />
-    <Button size="icon" variant="outline" class="ml-2" @click="showSettingsDialog = true">
+    <Button
+      size="icon"
+      variant="outline"
+      class="ml-2"
+      @click="showSettingsDialog = true"
+    >
       <p class="sr-only">Settings</p>
       <Settings class="size-5" />
     </Button>
@@ -36,9 +47,14 @@
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <RouterLink :to="{ name: 'tests', params: { test: firstTestId } }">
-          <DropdownMenuItem class="hover:cursor-pointer">Examples</DropdownMenuItem>
+          <DropdownMenuItem class="hover:cursor-pointer"
+            >Examples</DropdownMenuItem
+          >
         </RouterLink>
-        <DropdownMenuItem @click.stop="openDocumentation" class="hover:cursor-pointer">Taquito Documentation
+        <DropdownMenuItem
+          @click.stop="openDocumentation"
+          class="hover:cursor-pointer"
+          >Taquito Documentation
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -50,30 +66,30 @@
 </template>
 
 <script setup lang="ts">
-import WalletControl from '@/components/wallet-control.vue';
-import SettingsDialog from '@/components/settings-dialog.vue';
+import WalletControl from "@/components/wallet-control.vue";
+import SettingsDialog from "@/components/settings-dialog.vue";
 
-import { Button } from '@/components/ui/button';
-import { Dialog } from '@/components/ui/dialog';
+import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from "@/components/ui/dropdown-menu";
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
   navigationMenuTriggerStyle,
-} from '@/components/ui/navigation-menu'
-import { AvailableTests } from '@/modules/tests/tests';
-import { computed, ref, watch } from 'vue';
-import { Menu, Settings } from 'lucide-vue-next';
-import { useSettingsStore } from '@/stores/settingsStore';
-import { useWalletStore } from '@/stores/walletStore';
-import { isRevealed } from '@/lib/utils';
+} from "@/components/ui/navigation-menu";
+import { AvailableTests } from "@/modules/tests/tests";
+import { computed, ref, watch } from "vue";
+import { Menu, Settings } from "lucide-vue-next";
+import { useSettingsStore } from "@/stores/settingsStore";
+import { useWalletStore } from "@/stores/walletStore";
+import { isRevealed } from "@/lib/utils";
 
 const settingsStore = useSettingsStore();
 const walletStore = useWalletStore();
@@ -81,12 +97,12 @@ const walletStore = useWalletStore();
 const showSettingsDialog = ref<boolean>(false);
 
 const firstTestId = computed(() => {
-  return Object.values(AvailableTests)[0].id
-})
+  return Object.values(AvailableTests)[0].id;
+});
 
 const openDocumentation = () => {
-  window.open('https://taquito.io/docs/quick_start')
-}
+  window.open("https://taquito.io/docs/quick_start");
+};
 
 const updateRevealedStatus = async (address: string | undefined) => {
   if (!address) {
@@ -103,8 +119,10 @@ const updateRevealedStatus = async (address: string | undefined) => {
 };
 
 // Watch for wallet address changes and update revealed status
-watch(() => walletStore.getAddress, async (newAddress) => {
-  await updateRevealedStatus(newAddress);
-});
-
+watch(
+  () => walletStore.getAddress,
+  async (newAddress) => {
+    await updateRevealedStatus(newAddress);
+  },
+);
 </script>

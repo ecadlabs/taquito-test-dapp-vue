@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
 
 declare global {
-	var Buffer: typeof import('buffer').Buffer;
+  var Buffer: typeof import("buffer").Buffer;
 }
