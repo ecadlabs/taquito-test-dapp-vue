@@ -60,7 +60,7 @@ const unstake = async (amount: number) => {
 
   try {
     diagramStore.setProgress("estimate-fees", "running", TEST_ID);
-    estimate = await Tezos.estimate.stake({
+    estimate = await Tezos.estimate.unstake({
       amount,
       mutez: false,
     });

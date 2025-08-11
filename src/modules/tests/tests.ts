@@ -297,7 +297,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
   staking: {
     id: "staking",
     title: "Staking Tokens",
-    description: "Stake your tokens to a delgator.",
+    description: "Stake your tokens to a delegator.",
     category: "Earning Rewards",
     learningGoals: ["...", "..."],
     prerequisites: ["...", "..."],

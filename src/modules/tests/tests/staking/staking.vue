@@ -151,6 +151,8 @@ const currentDelegate = ref<string | null>();
 const acceptsStaking = ref<boolean>();
 
 onMounted(async () => {
+  diagramStore.setTestDiagram("staking");
+
   if (!walletStore.getAddress) {
     throw new Error("No current address found");
   }
@@ -166,10 +168,6 @@ onMounted(async () => {
 
   loadingDelegateInformation.value = false;
   await getStakedBalance();
-});
-
-onMounted(async () => {
-  diagramStore.setTestDiagram("staking");
 });
 
 const stakingLoading = ref<boolean>(false);
