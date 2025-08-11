@@ -61,22 +61,32 @@
       <DialogHeader>
         <DialogTitle>Connect Wallet</DialogTitle>
         <DialogDescription>
-          <div class="flex items-center space-x-1 flex-wrap">
-            <span>Taquito Playground supports both</span>
-            <a
-              href="https://www.walletbeacon.io/"
-              target="_blank"
-              class="text-blue-400 hover:underline"
-              >Beacon</a
-            >
-            <span>and</span>
-            <a
-              href="https://walletconnect.network/"
-              target="_blank"
-              class="text-blue-400 hover:underline"
-              >WalletConnect.</a
-            >
-            <p>Select your preference and hit connect to get started.</p>
+          <div>
+            <div class="flex space-x-1 items-center flex-wrap">
+              <span>Taquito Playground supports both</span>
+              <a
+                href="https://www.walletbeacon.io/"
+                target="_blank"
+                class="text-blue-400 hover:underline"
+                >Beacon</a
+              >
+              <span>and</span>
+              <a
+                href="https://walletconnect.network/"
+                target="_blank"
+                class="text-blue-400 hover:underline"
+                >WalletConnect.</a
+              >
+              <p>Select your preference and hit connect to get started.</p>
+            </div>
+
+            <p class="mt-2 italic">
+              Just a note: when building your own dApp, you shouldn't use both
+              Beacon and WalletConnect. Instead, you should pick one that works
+              best for your use-case. We use both here for testing and
+              illustration purposes, but this is not best practice in production
+              applications.
+            </p>
           </div>
         </DialogDescription>
       </DialogHeader>
