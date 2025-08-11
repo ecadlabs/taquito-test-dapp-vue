@@ -89,7 +89,10 @@ const undelegate = async () => {
 const getDelegate = async (address: string): Promise<string> => {
 	const rpc = new RpcClient(import.meta.env.VITE_RPC_URL);
 	const delegate = await rpc.getDelegate(address);
-	return delegate as string;
+const getDelegate = async (address: string): Promise<string | null> => {
+	const rpc = new RpcClient(import.meta.env.VITE_RPC_URL);
+	const delegate = await rpc.getDelegate(address);
+	return delegate;
 }
 
 export { delegate, undelegate, getDelegate }
