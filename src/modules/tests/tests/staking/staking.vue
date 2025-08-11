@@ -55,7 +55,7 @@
         </div>
 
         <Label class="mt-4 mb-1.5">Amount (XTZ)</Label>
-        <Input v-model="amount" type="number" :min="1" :max="balance" />
+        <Input v-model="amount" type="number" :min="0.00001" :max="balance" />
         <div class="flex flex-col gap-2 mt-4">
           <Button
             class="w-full"
