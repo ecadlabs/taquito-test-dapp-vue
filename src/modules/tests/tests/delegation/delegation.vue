@@ -59,7 +59,7 @@ const walletStore = useWalletStore();
 
 const toAddress = ref<string>('tz1cjyja1TU6fiyiFav3mFAdnDsCReJ12hPD')
 const sending = ref<boolean>(false);
-const currentDelegate = ref<string | undefined>();
+const currentDelegate = ref<string | null>();
 
 onMounted(async () => {
 	diagramStore.setTestDiagram('delegation');
