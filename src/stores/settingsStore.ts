@@ -30,9 +30,11 @@ const defaultSettings: Settings = {
 
 export const useSettingsStore = defineStore('settings', () => {
 	const settings = ref<Settings>(JSON.parse(localStorage.getItem('playground-settings') ?? JSON.stringify(defaultSettings)) as Settings);
+	const isRevealed = ref(true);
 
 	const getSettings = computed(() => settings.value);
 	const getIndexer = computed(() => settings.value.indexer);
+	const getIsRevealed = computed(() => isRevealed.value);
 
 	// Update the settings in localStorage when the settings change so they persist across sessions
 	watch(settings, (newValue) => {
@@ -40,8 +42,10 @@ export const useSettingsStore = defineStore('settings', () => {
 	}, { deep: true, immediate: true });
 
 	return {
+		isRevealed,
 		settings,
 		getSettings,
 		getIndexer,
+		getIsRevealed,
 	}
 })

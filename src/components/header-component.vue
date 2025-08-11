@@ -69,8 +69,14 @@ import {
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu'
 import { AvailableTests } from '@/modules/tests/tests';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Menu, Settings } from 'lucide-vue-next';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { useWalletStore } from '@/stores/walletStore';
+import { isRevealed } from '@/lib/utils';
+
+const settingsStore = useSettingsStore();
+const walletStore = useWalletStore();
 
 const showSettingsDialog = ref<boolean>(false);
 
@@ -82,5 +88,23 @@ const openDocumentation = () => {
   window.open('https://taquito.io/docs/quick_start')
 }
 
+const updateRevealedStatus = async (address: string | undefined) => {
+  if (!address) {
+    settingsStore.isRevealed = false;
+    return;
+  }
+
+  try {
+    const revealed = await isRevealed(address);
+    settingsStore.isRevealed = revealed;
+  } catch (error) {
+    settingsStore.isRevealed = false;
+  }
+};
+
+// Watch for wallet address changes and update revealed status
+watch(() => walletStore.getAddress, async (newAddress) => {
+  await updateRevealedStatus(newAddress);
+});
 
 </script>

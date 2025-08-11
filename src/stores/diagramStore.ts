@@ -2,11 +2,12 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import type { TestDiagram } from '@/modules/tests/test';
 import { getTestDiagram } from '@/modules/tests/tests';
+import type { Estimate } from '@taquito/taquito';
 
 export interface DialogContent {
 	title: string;
 	description?: string;
-	content: string | (() => any); // Can be a string or a function that returns JSX/Vue component
+	content: string // HTML string
 }
 
 export const useDiagramStore = defineStore('diagram', () => {
@@ -67,13 +68,6 @@ export const useDiagramStore = defineStore('diagram', () => {
 			diagramStatus.value = status;
 		}
 	};
-
-	const setSuccessful = (testId?: string) => {
-		if (testId && currentTestId.value !== testId) {
-			return;
-		}
-		successful.value = true;
-	}
 
 	const setErrorMessage = (error: unknown, testId?: string) => {
 		if (testId && currentTestId.value !== testId) {
@@ -154,6 +148,47 @@ export const useDiagramStore = defineStore('diagram', () => {
 		}
 	};
 
+	const showFeeEstimationDialog = (estimate: Estimate) => {
+		const dialogContent = {
+			title: 'Transaction Fees',
+			description: 'Transaction fee breakdown',
+			content: `
+					<div class="space-y-2">
+						<div class="flex justify-between">
+							<span class="font-medium">Burn Fee:</span>
+							<span>${estimate.burnFeeMutez} mutez</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Gas Limit:</span>
+							<span>${estimate.gasLimit}</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Minimal Fee:</span>
+							<span>${estimate.minimalFeeMutez} mutez</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Storage Limit:</span>
+							<span>${estimate.storageLimit}</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Suggested Fee:</span>
+							<span>${estimate.suggestedFeeMutez} mutez</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Total Cost:</span>
+							<span>${estimate.totalCost} mutez</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Using Base Fee:</span>
+							<span>${estimate.usingBaseFeeMutez} mutez</span>
+						</div>
+					</div>
+				`
+		};
+
+		openDialog(dialogContent);
+	}
+
 	return {
 		currentDiagram,
 		currentStep,
@@ -169,7 +204,6 @@ export const useDiagramStore = defineStore('diagram', () => {
 		setTestDiagram,
 		setProgress,
 		resetDiagram,
-		setSuccessful,
 		setErrorMessage,
 		setOperationHash,
 		setNodeButton,
@@ -178,5 +212,6 @@ export const useDiagramStore = defineStore('diagram', () => {
 		openDialog,
 		closeDialog,
 		cancelCurrentTest,
+		showFeeEstimationDialog,
 	};
 }); 

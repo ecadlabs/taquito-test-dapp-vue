@@ -15,7 +15,7 @@
 
                 <!-- Render component content -->
                 <component v-else-if="typeof diagramStore.dialogContent?.content === 'function'"
-                    :is="diagramStore.dialogContent.content()" />
+                    :is="diagramStore.dialogContent.content" />
             </div>
 
             <DialogFooter>

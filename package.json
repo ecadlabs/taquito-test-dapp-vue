@@ -10,7 +10,8 @@
     "lint": "npx eslint .",
     "lint:fix": "npx eslint . --fix",
     "originate": "tsx src/scripts/originate-contracts.ts",
-    "fund-wallet": "tsx src/scripts/fund-test-wallet.ts"
+    "fund-wallet": "tsx src/scripts/fund-test-wallet.ts",
+    "reveal-key": "tsx src/scripts/reveal-public-key.ts"
   },
   "dependencies": {
     "@airgap/beacon-types": "^4.6.1-beta.2",

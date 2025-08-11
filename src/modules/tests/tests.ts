@@ -4,6 +4,7 @@ import TransferTez from "@/modules/tests/tests/transfer/transfer-tez.vue";
 import CounterContract from "@/modules/tests/tests/counter/counter-contract.vue";
 import IncreasePaidStorage from "@/modules/tests/tests/increase-paid-storage/increase-paid-storage.vue";
 import EstimateFees from "@/modules/tests/tests/estimate-fees/estimate-fees.vue";
+import Delegation from '@/modules/tests/tests/delegation/delegation.vue';
 
 export const AvailableTests: Record<string, TestMetadata> = {
 	'transfer': {
@@ -82,6 +83,10 @@ export const AvailableTests: Record<string, TestMetadata> = {
 						label: 'Get Contract'
 					},
 					{
+						id: 'estimate-fees',
+						label: 'Estimate Fees'
+					},
+					{
 						id: 'execute-operation',
 						label: 'Execute Increment'
 					},
@@ -98,6 +103,10 @@ export const AvailableTests: Record<string, TestMetadata> = {
 						label: 'Get Contract'
 					},
 					{
+						id: 'estimate-fees',
+						label: 'Estimate Fees'
+					},
+					{
 						id: 'execute-operation',
 						label: 'Execute Decrement'
 					},
@@ -112,6 +121,10 @@ export const AvailableTests: Record<string, TestMetadata> = {
 					{
 						id: 'get-contract',
 						label: 'Get Contract'
+					},
+					{
+						id: 'estimate-fees',
+						label: 'Estimate Fees'
 					},
 					{
 						id: 'execute-operation',
@@ -212,6 +225,73 @@ export const AvailableTests: Record<string, TestMetadata> = {
 					{
 						id: 'estimate-fees',
 						label: 'Estimate Fees'
+					},
+				],
+			}
+		}
+	},
+	'delegation': {
+		id: 'delegation',
+		title: 'Delegation',
+		description: 'Delegating baking rights to another person.',
+		category: 'Unknown',
+		learningGoals: [
+			'...',
+			'...',
+		],
+		prerequisites: [
+			'...',
+			'...'
+		],
+		setup: [
+			'Set up a Tezos wallet and fund it with some TEZ',
+			'Connect your wallet to Taquito Playground',
+		],
+		relatedTests: [],
+		sourceCode: {
+			contract: 'https://example.com',
+			script: 'https://example.com',
+			documentation: 'https://taquito.io/docs/set_delegate'
+		},
+		component: Delegation,
+		diagrams: {
+			'set-delegate': {
+				nodes: [
+					{
+						id: 'estimate-fees',
+						label: 'Estimate Fees'
+					},
+					{
+						id: 'set-delegate',
+						label: 'Set Delegate'
+					},
+					{
+						id: 'wait-for-user',
+						label: 'Wait for User Confirmation'
+					},
+					{
+						id: 'wait-for-chain-confirmation',
+						label: 'Wait for Chain Confirmation'
+					},
+				],
+			},
+			'remove-delegation': {
+				nodes: [
+					{
+						id: 'estimate-fees',
+						label: 'Estimate Fees'
+					},
+					{
+						id: 'remove-delegation',
+						label: 'Remove Delegation'
+					},
+					{
+						id: 'wait-for-user',
+						label: 'Wait for User Confirmation'
+					},
+					{
+						id: 'wait-for-chain-confirmation',
+						label: 'Wait for Chain Confirmation'
 					},
 				],
 			}
