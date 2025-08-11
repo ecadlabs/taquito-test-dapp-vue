@@ -5,6 +5,7 @@ import CounterContract from "@/modules/tests/tests/counter/counter-contract.vue"
 import IncreasePaidStorage from "@/modules/tests/tests/increase-paid-storage/increase-paid-storage.vue";
 import EstimateFees from "@/modules/tests/tests/estimate-fees/estimate-fees.vue";
 import Delegation from "@/modules/tests/tests/delegation/delegation.vue";
+import Staking from "@/modules/tests/tests/staking/staking.vue";
 
 export const AvailableTests: Record<string, TestMetadata> = {
   transfer: {
@@ -236,7 +237,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     id: "delegation",
     title: "Delegation",
     description: "Delegating baking rights to another person.",
-    category: "Unknown",
+    category: "Earning Rewards",
     learningGoals: ["...", "..."],
     prerequisites: ["...", "..."],
     setup: [
@@ -280,6 +281,87 @@ export const AvailableTests: Record<string, TestMetadata> = {
           {
             id: "remove-delegation",
             label: "Remove Delegation",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+    },
+  },
+  staking: {
+    id: "staking",
+    title: "Staking Tokens",
+    description: "Stake your tokens to a delegator.",
+    category: "Earning Rewards",
+    learningGoals: ["...", "..."],
+    prerequisites: ["...", "..."],
+    setup: [
+      "Set up a Tezos wallet and fund it with some TEZ",
+      "Connect your wallet to Taquito Playground",
+    ],
+    relatedTests: [],
+    sourceCode: {
+      contract: "https://example.com",
+      script: "https://example.com",
+      documentation: "https://taquito.io/docs/staking",
+    },
+    component: Staking,
+    diagrams: {
+      stake: {
+        nodes: [
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "stake",
+            label: "Stake Funds",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+      unstake: {
+        nodes: [
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "unstake",
+            label: "Unstake Funds",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+      "finalize-unstake": {
+        nodes: [
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "finalize-unstake",
+            label: "Finalize Unstake",
           },
           {
             id: "wait-for-user",
