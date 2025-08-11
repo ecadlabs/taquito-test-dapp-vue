@@ -13,7 +13,8 @@
     "format:check": "npx prettier . --check",
     "originate": "tsx src/scripts/originate-contracts.ts",
     "fund-wallet": "tsx src/scripts/fund-test-wallet.ts",
-    "reveal-key": "tsx src/scripts/reveal-public-key.ts"
+    "reveal-key": "tsx src/scripts/reveal-public-key.ts",
+    "prepare": "husky"
   },
   "dependencies": {
     "@airgap/beacon-types": "^4.6.1-beta.2",
@@ -47,7 +48,9 @@
     "eslint-plugin-vue": "^10.3.0",
     "events": "^3.3.0",
     "globals": "^16.3.0",
+    "husky": "^9.1.7",
     "jiti": "^2.5.1",
+    "lint-staged": "^16.1.5",
     "prettier": "3.6.2",
     "tsx": "^4.19.2",
     "typescript": "~5.8.3",
@@ -55,5 +58,8 @@
     "vite": "^7.0.4",
     "vite-compatible-readable-stream": "^3.6.1",
     "vue-tsc": "^2.2.12"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   }
 }
