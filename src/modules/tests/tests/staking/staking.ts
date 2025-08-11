@@ -152,4 +152,30 @@ const getStakingInfo = async (address: string) => {
   }
 };
 
-export { stake, unstake, finalizeUnstake, getStakingInfo };
+const getDelegateAcceptsStaking = async (address: string): Promise<boolean> => {
+  try {
+    const rpcUrl = import.meta.env.VITE_RPC_URL;
+    const response = await fetch(
+      `${rpcUrl}/chains/main/blocks/head/context/delegates/${address}/active_staking_parameters`,
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const stakingData = await response.json();
+    const { limit_of_staking_over_baking_millionth } = stakingData;
+    return limit_of_staking_over_baking_millionth > 0;
+  } catch (error) {
+    console.error("Failed to get staking parameters:", error);
+    throw error;
+  }
+};
+
+export {
+  stake,
+  unstake,
+  finalizeUnstake,
+  getStakingInfo,
+  getDelegateAcceptsStaking,
+};

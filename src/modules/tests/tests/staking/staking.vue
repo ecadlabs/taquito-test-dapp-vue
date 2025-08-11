@@ -1,12 +1,103 @@
 <template>
   <div class="w-fit mx-auto flex flex-col items-center gap-6 px-6">
-    <Input v-model="amount" type="number" :min="1" :max="balance" />
-    <Button @click="stakeTokens">Stake</Button>
-    <Button @click="unstakeTokens">Unstake</Button>
-    <Button @click="finalizeUnstakeTokens">Finalize Unstake</Button>
+    <Card class="w-full lg:w-1/2 lg:min-w-[500px]">
+      <CardContent>
+        <Alert
+          v-if="!currentDelegate && !loadingDelegateInformation"
+          class="mb-2"
+        >
+          <TriangleAlert class="size-4" />
+          <AlertTitle>Heads up!</AlertTitle>
+          <AlertDescription>
+            You don't have a delegate set, so you can't stake any tokens. Please
+            go to the Delegation test and set a delegate that accepts staking.
+          </AlertDescription>
+        </Alert>
+        <Alert
+          v-if="
+            currentDelegate && !acceptsStaking && !loadingDelegateInformation
+          "
+          class="mb-2"
+        >
+          <TriangleAlert class="size-4" />
+          <AlertTitle>Heads up!</AlertTitle>
+          <AlertDescription>
+            You're currently delegating to a baker that doesn't accept staking.
+            Please go to the Delegation test and set a baker that accepts
+            staking.
+          </AlertDescription>
+        </Alert>
 
-    <Button @click="getStakedBalance">Get Staked Balance</Button>
-    <p>Staked Balance: {{ stakedBalance ?? "..." }}</p>
+        <div
+          class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-[#F4F4F6] py-3 pl-5 pr-3 rounded-md"
+        >
+          <div class="flex items-center gap-2">
+            <Wallet class="size-4 text-muted-foreground mt-0.5" />
+            <p class="text-muted-foreground text-sm">Staked Balance</p>
+          </div>
+          <div class="flex items-center gap-2 text-xl font-bold">
+            <p
+              v-if="typeof stakedBalance === 'number' && !isNaN(stakedBalance)"
+            >
+              {{ stakedBalance }} ꜩ
+            </p>
+            <p v-else-if="stakedBalance === undefined">...</p>
+            <p v-else>0 ꜩ</p>
+            <Button
+              variant="ghost"
+              size="icon"
+              @click="getStakedBalance"
+              :disabled="loadingBalance"
+            >
+              <RotateCcw class="size-4 mt-1" />
+            </Button>
+          </div>
+        </div>
+
+        <Label class="mt-4 mb-1.5">Amount (XTZ)</Label>
+        <Input v-model="amount" type="number" :min="1" :max="balance" />
+        <div class="flex flex-col gap-2 mt-4">
+          <Button
+            class="w-full"
+            :disabled="
+              !currentDelegate ||
+              !acceptsStaking ||
+              stakingLoading ||
+              anyOperationLoading
+            "
+            @click="stakeTokens"
+          >
+            <Beef class="size-4 mt-0.5" />
+            <span v-if="stakingLoading">Staking...</span>
+            <span v-else>Stake</span>
+          </Button>
+          <Button
+            class="w-full"
+            variant="secondary"
+            :disabled="
+              !currentDelegate || unstakingLoading || anyOperationLoading
+            "
+            @click="unstakeTokens"
+          >
+            <LockKeyholeOpen class="size-4 mt-0.5" />
+            <span v-if="unstakingLoading">Unstaking...</span>
+            <span v-else>Unstake</span>
+          </Button>
+        </div>
+        <Separator class="my-4" />
+        <Button
+          class="w-full"
+          :disabled="
+            !currentDelegate || finalizingLoading || anyOperationLoading
+          "
+          @click="finalizeUnstakeTokens"
+        >
+          <LockKeyholeOpen class="size-4 mt-0.5" />
+          <span v-if="finalizingLoading">Finalizing...</span>
+          <span v-else>Finalize Unstake</span>
+        </Button>
+      </CardContent>
+    </Card>
   </div>
 </template>
 
@@ -16,17 +107,29 @@ import { ref, onMounted, computed } from "vue";
 import { Button } from "@/components/ui/button";
 import {
   finalizeUnstake,
+  getDelegateAcceptsStaking,
   getStakingInfo,
   stake,
   unstake,
 } from "@/modules/tests/tests/staking/staking";
 import { Input } from "@/components/ui/input";
 import { useWalletStore } from "@/stores/walletStore";
+import { getDelegate } from "@/modules/tests/tests/delegation/delegation";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Beef,
+  LockKeyholeOpen,
+  RotateCcw,
+  TriangleAlert,
+  Wallet,
+} from "lucide-vue-next";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
 
-const loading = ref<boolean>(false);
 const amount = ref<number>(1);
 const stakedBalance = ref<number>();
 const balance = computed(() => {
@@ -37,49 +140,86 @@ const balance = computed(() => {
   return 0;
 });
 
+const anyOperationLoading = computed(() => {
+  return (
+    stakingLoading.value || unstakingLoading.value || finalizingLoading.value
+  );
+});
+
+const loadingDelegateInformation = ref<boolean>(true);
+const currentDelegate = ref<string | null>();
+const acceptsStaking = ref<boolean>();
+
+onMounted(async () => {
+  if (!walletStore.getAddress) {
+    throw new Error("No current address found");
+  }
+
+  const delegate = await getDelegate(walletStore.getAddress);
+  currentDelegate.value = delegate;
+
+  if (currentDelegate.value) {
+    acceptsStaking.value = await getDelegateAcceptsStaking(
+      currentDelegate.value,
+    );
+  }
+
+  loadingDelegateInformation.value = false;
+  await getStakedBalance();
+});
+
 onMounted(async () => {
   diagramStore.setTestDiagram("staking");
 });
 
+const stakingLoading = ref<boolean>(false);
 const stakeTokens = async () => {
   try {
-    loading.value = true;
+    stakingLoading.value = true;
     await stake(amount.value);
+    await getStakedBalance();
   } catch (error) {
     console.error(error);
   } finally {
-    loading.value = false;
+    stakingLoading.value = false;
   }
 };
 
+const unstakingLoading = ref<boolean>(false);
 const unstakeTokens = async () => {
   try {
-    loading.value = true;
+    unstakingLoading.value = true;
     await unstake(amount.value);
+    await getStakedBalance();
   } catch (error) {
     console.error(error);
   } finally {
-    loading.value = false;
+    unstakingLoading.value = false;
   }
 };
 
+const finalizingLoading = ref<boolean>(false);
 const finalizeUnstakeTokens = async () => {
   try {
-    loading.value = true;
+    finalizingLoading.value = true;
     await finalizeUnstake();
+    await getStakedBalance();
   } catch (error) {
     console.error(error);
   } finally {
-    loading.value = false;
+    finalizingLoading.value = false;
   }
 };
 
+const loadingBalance = ref<boolean>(false);
 const getStakedBalance = async (): Promise<void> => {
   if (!walletStore.getAddress) {
     throw new Error("No address found");
   }
 
+  loadingBalance.value = true;
   const stakingInfo = await getStakingInfo(walletStore.getAddress);
-  stakedBalance.value = stakingInfo.stakedBalance;
+  stakedBalance.value = stakingInfo.stakedBalance / 1000000;
+  loadingBalance.value = false;
 };
 </script>
