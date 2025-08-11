@@ -237,7 +237,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     id: "delegation",
     title: "Delegation",
     description: "Delegating baking rights to another person.",
-    category: "Unknown",
+    category: "Earning Rewards",
     learningGoals: ["...", "..."],
     prerequisites: ["...", "..."],
     setup: [
@@ -296,9 +296,9 @@ export const AvailableTests: Record<string, TestMetadata> = {
   },
   staking: {
     id: "staking",
-    title: "Staking",
+    title: "Staking Tokens",
     description: "Stake your tokens to a delgator.",
-    category: "Unknown",
+    category: "Earning Rewards",
     learningGoals: ["...", "..."],
     prerequisites: ["...", "..."],
     setup: [

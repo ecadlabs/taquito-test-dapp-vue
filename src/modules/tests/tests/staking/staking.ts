@@ -2,6 +2,7 @@ import { useWalletStore } from "@/stores/walletStore";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { PiggyBank } from "lucide-vue-next";
 import type { Estimate } from "@taquito/taquito";
+import { RpcClient } from "@taquito/rpc";
 
 const TEST_ID = "staking";
 let estimate: Estimate;
@@ -90,7 +91,7 @@ const unstake = async (amount: number) => {
     diagramStore.setProgress("success", "completed", TEST_ID);
     await walletStore.fetchBalance();
   } catch (error) {
-    console.error(`Failed to stake '${amount}': ${error}`);
+    console.error(`Failed to unstake '${amount}': ${error}`);
     diagramStore.setErrorMessage(error, TEST_ID);
     throw error;
   }
@@ -127,10 +128,28 @@ const finalizeUnstake = async () => {
     diagramStore.setProgress("success", "completed", TEST_ID);
     await walletStore.fetchBalance();
   } catch (error) {
-    console.error(`Failed to finalize unstake '${amount}': ${error}`);
+    console.error(`Failed to finalize unstake: ${error}`);
     diagramStore.setErrorMessage(error, TEST_ID);
     throw error;
   }
 };
 
-export { stake, unstake, finalizeUnstake };
+const getStakingInfo = async (address: string) => {
+  const rpc = new RpcClient(import.meta.env.VITE_RPC_URL);
+
+  try {
+    const staked = await rpc.getStakedBalance(address);
+    const stakedBalance =
+      typeof staked === "object" && "toNumber" in staked
+        ? staked.toNumber()
+        : staked;
+
+    const totalBalance = (await rpc.getBalance(address)).toNumber() / 1000000;
+    return { stakedBalance, totalBalance };
+  } catch (error) {
+    console.error(`Failed to get staking info for ${address}: ${error}`);
+    throw error;
+  }
+};
+
+export { stake, unstake, finalizeUnstake, getStakingInfo };
