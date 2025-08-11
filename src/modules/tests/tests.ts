@@ -137,6 +137,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
 				],
 			},
 			'get-storage': {
+				noIndexer: true,
 				nodes: [
 					{
 						id: 'get-contract',
