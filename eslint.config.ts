@@ -1,7 +1,7 @@
 // @ts-check
 
-import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
+import eslint from "@eslint/js";
+import tseslint from "typescript-eslint";
 import pluginVue from "eslint-plugin-vue";
 import globals from "globals";
 
@@ -15,15 +15,15 @@ export default tseslint.config(
       parserOptions: {
         parser: tseslint.parser,
         extraFileExtensions: [".vue"],
-        sourceType: "module"
-      }
-    }
+        sourceType: "module",
+      },
+    },
   },
   {
     languageOptions: {
       globals: {
-        ...globals.browser
-      }
-    }
-  }
+        ...globals.browser,
+      },
+    },
+  },
 );

@@ -15,7 +15,7 @@ env:
   VITE_GITHUB_SHA: ${{ github.sha }}
   VITE_VERSION: ${{ github.head_ref }}
   VITE_REOWN_PROJECT_ID: ${{ secrets.REOWN_PROJECT_ID }}
-  NODE_OPTIONS: "\"--max-old-space-size=2048\""
+  NODE_OPTIONS: '"--max-old-space-size=2048"'
 jobs:
   publish-website:
     name: Publish test dApp to Cloudflare
@@ -43,12 +43,11 @@ jobs:
           projectName: taquito-dapp
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          wranglerVersion: '3'
-
+          wranglerVersion: "3"
 
       # Notify the PR of the deploy preview
       - uses: marocchino/sticky-pull-request-comment@v2
         if: github.event_name == 'pull_request'
         with:
           header: Taquito Test dApp Preview
-          message: 'A new deploy preview for the test app is available on Cloudflare Pages at ${{ steps.cloudflare_publish.outputs.URL }}'
+          message: "A new deploy preview for the test app is available on Cloudflare Pages at ${{ steps.cloudflare_publish.outputs.URL }}"

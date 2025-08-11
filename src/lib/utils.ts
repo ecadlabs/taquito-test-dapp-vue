@@ -1,14 +1,17 @@
-import type { IndexerOption } from '@/stores/settingsStore';
-import { type ClassValue, clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-import { RpcClient } from '@taquito/rpc';
+import type { IndexerOption } from "@/stores/settingsStore";
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+import { RpcClient } from "@taquito/rpc";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
-export const buildIndexerUrl = (indexer: IndexerOption, networkType: string) => {
-  return indexer.url.replace('[networkType]', networkType);
+export const buildIndexerUrl = (
+  indexer: IndexerOption,
+  networkType: string,
+) => {
+  return indexer.url.replace("[networkType]", networkType);
 };
 
 export const isRevealed = async (address: string): Promise<boolean> => {
