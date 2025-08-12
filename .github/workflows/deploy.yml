@@ -47,6 +47,15 @@ jobs:
           node-version: 22.18.0
       - run: npm ci
       - run: npm run format:check
+      
+      # Debug environment variables
+      - name: Debug Environment Variables
+        run: |
+          echo "Environment: ${{ matrix.environment }}"
+          echo "RPC_URL: ${{ vars.RPC_URL }}"
+          echo "ALICE_WALLET_ADDRESS: ${{ vars.ALICE_WALLET_ADDRESS }}"
+          echo "REOWN_PROJECT_ID: ${{ secrets.REOWN_PROJECT_ID }}"
+      
       - run: npm run fund-wallet ${{ vars.ALICE_WALLET_ADDRESS }}
       - run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
       - run: npm run build
