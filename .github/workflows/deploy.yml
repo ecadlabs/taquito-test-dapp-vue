@@ -31,6 +31,12 @@ jobs:
             project_name: taquito-dapp
           - environment: ghostnet
             project_name: taquito-dapp-ghostnet
+    env:
+      VITE_NETWORK_TYPE: ${{ matrix.environment }}
+      VITE_RPC_URL: ${{ vars.RPC_URL }}
+      VITE_GITHUB_SHA: ${{ github.sha }}
+      VITE_VERSION: ${{ github.head_ref }}
+      VITE_REOWN_PROJECT_ID: ${{ secrets.REOWN_PROJECT_ID }}
     outputs:
       preview-url: ${{ steps.cloudflare_publish.outputs.URL }}
       environment: ${{ matrix.environment }}
@@ -44,12 +50,6 @@ jobs:
       - run: npm run fund-wallet ${{ vars.ALICE_WALLET_ADDRESS }}
       - run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
       - run: npm run build
-        env:
-          VITE_NETWORK_TYPE: ${{ matrix.environment }}
-          VITE_RPC_URL: ${{ vars.RPC_URL }}
-          VITE_GITHUB_SHA: ${{ github.sha }}
-          VITE_VERSION: ${{ github.head_ref }}
-          VITE_REOWN_PROJECT_ID: ${{ secrets.REOWN_PROJECT_ID }}
 
       - name: Publish to Cloudflare Pages
         id: cloudflare_publish
