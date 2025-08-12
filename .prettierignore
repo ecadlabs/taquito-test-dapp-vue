@@ -1,3 +1,6 @@
 # Ignore artifacts:
 build
 coverage
+
+# Ignore GitHub workflows (YAML formatting can conflict with Prettier)
+.github/workflows/
