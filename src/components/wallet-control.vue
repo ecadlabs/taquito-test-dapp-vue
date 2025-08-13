@@ -99,6 +99,9 @@
           <SelectContent>
             <SelectItem value="beacon"> Beacon </SelectItem>
             <SelectItem value="walletconnect"> WalletConnect </SelectItem>
+            <SelectItem value="programmatic">
+              Programmatic (Testing)
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>

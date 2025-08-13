@@ -7,6 +7,7 @@ import { PermissionScopeMethods, WalletConnect } from "@taquito/wallet-connect";
 import { NetworkType } from "@airgap/beacon-types";
 import { NetworkType as WalletConnectNetworkType } from "@taquito/wallet-connect";
 import { BeaconEvent } from "@airgap/beacon-dapp";
+import { generateWallet } from "programmatic-wallet";
 
 export const useWalletStore = defineStore("wallet", () => {
   let Tezos = new TezosToolkit(import.meta.env.VITE_RPC_URL);
@@ -132,6 +133,39 @@ export const useWalletStore = defineStore("wallet", () => {
         }
 
         localStorage.setItem("wallet-provider", "walletconnect");
+      } else if (provider === "programmatic") {
+        const generatedWallet = await generateWallet();
+        try {
+          // Create a mock wallet object that implements the required interface
+          // This will be replaced when the programmatic wallet package is fully implemented
+          const mockWallet = {
+            getPKH: async () => {
+              return generatedWallet.address;
+            },
+            // Add other required methods as needed
+            requestPermissions: async () => Promise.resolve(),
+            disconnect: async () => Promise.resolve(),
+            client: {
+              subscribeToEvent: () => {},
+              getActiveAccount: async () => ({
+                address: generatedWallet.address,
+              }),
+              getPeers: async () => [{ name: "Programmatic Wallet" }],
+              disconnect: async () => Promise.resolve(),
+              clearActiveAccount: async () => Promise.resolve(),
+            },
+            getAllExistingSessionKeys: async () => [],
+            configureWithExistingSessionKey: async () => Promise.resolve(),
+          };
+          wallet.value = mockWallet as any;
+          address.value = await mockWallet.getPKH();
+          walletName.value = "Programmatic Wallet";
+        } catch (error) {
+          console.error("Failed to initialize programmatic wallet:", error);
+          throw new Error(
+            `Programmatic wallet initialization failed: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
       } else {
         throw new TypeError(`Unknown wallet provider: ${provider}`);
       }
@@ -180,6 +214,12 @@ export const useWalletStore = defineStore("wallet", () => {
       } else if (wallet.value instanceof WalletConnect) {
         await wallet.value.disconnect();
         await deleteWalletConnectSessionFromIndexedDB();
+      } else if ((wallet.value as any)?.client?.disconnect) {
+        // Handle programmatic wallet or other wallet types
+        await (wallet.value as any).client.disconnect();
+        if ((wallet.value as any)?.client?.clearActiveAccount) {
+          await (wallet.value as any).client.clearActiveAccount();
+        }
       }
 
       wallet.value = undefined;
