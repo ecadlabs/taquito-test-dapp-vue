@@ -1,12 +1,18 @@
 <template>
-  <div class="flex md:justify-between p-4">
-    <RouterLink
-      :to="{ name: 'home' }"
-      class="font-medium leading-none flex gap-1.5 items-center p-2"
-    >
-      <img src="@/assets/logo.svg" alt="Taquito Logo" class="size-5" />
-      <p>Taquito Playground</p>
-    </RouterLink>
+  <div class="flex md:justify-between p-4 items-center">
+    <div class="flex items-center flex-col sm:flex-row">
+      <RouterLink
+        :to="{ name: 'home' }"
+        class="font-medium leading-none flex gap-1.5 items-center p-2"
+      >
+        <img src="@/assets/logo.svg" alt="Taquito Logo" class="size-5" />
+        <p>Taquito Playground</p>
+      </RouterLink>
+
+      <Badge v-if="network" variant="outline" class="h-fit">
+        <p>{{ network }}</p>
+      </Badge>
+    </div>
 
     <div class="mr-auto" />
     <NavigationMenu class="hidden md:block mr-4">
@@ -70,6 +76,7 @@ import WalletControl from "@/components/wallet-control.vue";
 import SettingsDialog from "@/components/settings-dialog.vue";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Dialog } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -95,6 +102,8 @@ const settingsStore = useSettingsStore();
 const walletStore = useWalletStore();
 
 const showSettingsDialog = ref<boolean>(false);
+
+const network = ref<string>(import.meta.env.VITE_NETWORK_TYPE);
 
 const firstTestId = computed(() => {
   return Object.values(AvailableTests)[0].id;
