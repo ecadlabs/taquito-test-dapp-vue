@@ -9,21 +9,37 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.ref != 'refs/heads/master' || github.run_number }}
   cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+
 env:
-  VITE_NETWORK_TYPE: ${{ vars.NETWORK_TYPE }}
-  VITE_RPC_URL: ${{ vars.RPC_URL }}
-  VITE_GITHUB_SHA: ${{ github.sha }}
-  VITE_VERSION: ${{ github.head_ref }}
-  VITE_REOWN_PROJECT_ID: ${{ secrets.REOWN_PROJECT_ID }}
   NODE_OPTIONS: '"--max-old-space-size=2048"'
+
 jobs:
-  publish-website:
-    name: Publish test dApp to Cloudflare
+  deploy:
+    name: Deploy to ${{ matrix.environment }}
+    environment: ${{ matrix.environment }}
     permissions:
       contents: read
       deployments: write
       pull-requests: write
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - environment: rionet
+            project_name: taquito-dapp-rionet
+          - environment: seoulnet
+            project_name: taquito-dapp
+          - environment: ghostnet
+            project_name: taquito-dapp-ghostnet
+    env:
+      VITE_NETWORK_TYPE: ${{ matrix.environment }}
+      VITE_RPC_URL: ${{ vars.RPC_URL }}
+      VITE_GITHUB_SHA: ${{ github.sha }}
+      VITE_VERSION: ${{ github.head_ref }}
+      VITE_REOWN_PROJECT_ID: ${{ secrets.REOWN_PROJECT_ID }}
+    outputs:
+      preview-url: ${{ steps.cloudflare_publish.outputs.URL }}
+      environment: ${{ matrix.environment }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,24 +47,44 @@ jobs:
           node-version: 22.18.0
       - run: npm ci
       - run: npm run format:check
+      
+      # Debug environment variables
+      - name: Debug Environment Variables
+        run: |
+          echo "Environment: ${{ matrix.environment }}"
+          echo "RPC_URL: ${{ vars.RPC_URL }}"
+          echo "ALICE_WALLET_ADDRESS: ${{ vars.ALICE_WALLET_ADDRESS }}"
+          echo "REOWN_PROJECT_ID: ${{ secrets.REOWN_PROJECT_ID }}"
+      
       - run: npm run fund-wallet ${{ vars.ALICE_WALLET_ADDRESS }}
       - run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
       - run: npm run build
 
       - name: Publish to Cloudflare Pages
         id: cloudflare_publish
-        uses: cloudflare/pages-action@v1
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
-          accountId: "b82a3212512073a1e1802d2323762d9d"
-          projectName: taquito-dapp
-          directory: dist
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=${{ matrix.project_name }}
+          # Optional: Enable this if you want to have GitHub Deployments triggered
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          wranglerVersion: "3"
 
-      # Notify the PR of the deploy preview
+  # Single PR comment with all preview URLs
+  comment-pr:
+    name: Comment PR with Preview URLs
+    if: github.event_name == 'pull_request'
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
       - uses: marocchino/sticky-pull-request-comment@v2
-        if: github.event_name == 'pull_request'
         with:
-          header: Taquito Test dApp Preview
-          message: "A new deploy preview for the test app is available on Cloudflare Pages at ${{ steps.cloudflare_publish.outputs.URL }}"
+          header: Taquito Test dApp Preview URLs
+          message: |
+            🚀 **Deploy previews are ready!**
+            
+            ${{ join(needs.deploy.outputs.*.preview-url, '\n') }}
+            
+            Each environment has been deployed with chain-specific configurations.
