@@ -1,7 +1,11 @@
 import { useWalletStore } from "@/stores/walletStore";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { PiggyBank } from "lucide-vue-next";
-import type { Estimate } from "@taquito/taquito";
+import type {
+  Estimate,
+  TransactionOperation,
+  TransactionWalletOperation,
+} from "@taquito/taquito";
 
 const TEST_ID = "transfer";
 
@@ -30,13 +34,21 @@ const send = async (to: string, amount: number) => {
     }
 
     diagramStore.setProgress("wait-for-user", "running", TEST_ID);
-    const transfer = await Tezos.wallet.transfer({ to, amount }).send();
+    let transfer: TransactionOperation | TransactionWalletOperation;
+    if (walletStore.getWalletName === "Programmatic Wallet") {
+      transfer = await Tezos.contract.transfer({ to, amount });
+    } else {
+      transfer = await Tezos.wallet.transfer({ to, amount }).send();
+    }
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
     const confirmation = await transfer.confirmation();
+    diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
 
-    if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
+    diagramStore.setOperationHash(
+      (confirmation as any)?.block?.hash ??
+        (typeof confirmation === "number" ? confirmation : ""),
+      TEST_ID,
+    );
 
     diagramStore.setProgress("success", "completed", TEST_ID);
     await walletStore.fetchBalance();

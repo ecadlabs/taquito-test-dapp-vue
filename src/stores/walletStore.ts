@@ -2,16 +2,13 @@ import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { TezosToolkit } from "@taquito/taquito";
+import { InMemorySigner } from "@taquito/signer";
 import type { WalletProvider } from "@/types/wallet";
 import { PermissionScopeMethods, WalletConnect } from "@taquito/wallet-connect";
 import { NetworkType } from "@airgap/beacon-types";
 import { NetworkType as WalletConnectNetworkType } from "@taquito/wallet-connect";
 import { BeaconEvent } from "@airgap/beacon-dapp";
-import {
-  generateWallet,
-  importWallet,
-  revealWallet,
-} from "programmatic-wallet";
+import { importWallet, revealWallet } from "programmatic-wallet";
 
 export const useWalletStore = defineStore("wallet", () => {
   let Tezos = new TezosToolkit(import.meta.env.VITE_RPC_URL);
@@ -138,10 +135,21 @@ export const useWalletStore = defineStore("wallet", () => {
 
         localStorage.setItem("wallet-provider", "walletconnect");
       } else if (provider === "programmatic") {
-        const importedWallet = await importWallet(
-          import.meta.env.VITE_PROGRAMMATIC_PRIVATE_KEY,
-        );
+        const response = await fetch("https://keygen.ecadinfra.com/seoulnet", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            Authorization: "Bearer taquito-example",
+          },
+        });
+
+        const privateKey = await response.text();
+        const importedWallet = await importWallet(privateKey);
+        await revealWallet();
+
         try {
+          const signer = await InMemorySigner.fromSecretKey(privateKey);
+
           // Create a mock wallet object that implements the required interface
           // This will be replaced when the programmatic wallet package is fully implemented
           const mockWallet = {
@@ -164,6 +172,7 @@ export const useWalletStore = defineStore("wallet", () => {
           wallet.value = mockWallet as any;
           address.value = await mockWallet.getPKH();
           walletName.value = "Programmatic Wallet";
+          Tezos.setProvider({ signer });
         } catch (error) {
           console.error("Failed to initialize programmatic wallet:", error);
           throw new Error(
@@ -177,7 +186,11 @@ export const useWalletStore = defineStore("wallet", () => {
       if (wallet.value) {
         address.value = await wallet.value.getPKH();
         await fetchBalance();
-        Tezos.setProvider({ wallet: wallet.value });
+
+        // Only set the wallet provider if we haven't already set a signer for programmatic wallet
+        if (provider !== "programmatic") {
+          Tezos.setProvider({ wallet: wallet.value });
+        }
       } else {
         throw ReferenceError(
           "Wallet was not found after initialization should have finished.",
