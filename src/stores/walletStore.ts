@@ -7,7 +7,11 @@ import { PermissionScopeMethods, WalletConnect } from "@taquito/wallet-connect";
 import { NetworkType } from "@airgap/beacon-types";
 import { NetworkType as WalletConnectNetworkType } from "@taquito/wallet-connect";
 import { BeaconEvent } from "@airgap/beacon-dapp";
-import { generateWallet } from "programmatic-wallet";
+import {
+  generateWallet,
+  importWallet,
+  revealWallet,
+} from "programmatic-wallet";
 
 export const useWalletStore = defineStore("wallet", () => {
   let Tezos = new TezosToolkit(import.meta.env.VITE_RPC_URL);
@@ -134,21 +138,21 @@ export const useWalletStore = defineStore("wallet", () => {
 
         localStorage.setItem("wallet-provider", "walletconnect");
       } else if (provider === "programmatic") {
-        const generatedWallet = await generateWallet();
+        const importedWallet = await importWallet(
+          import.meta.env.VITE_PROGRAMMATIC_PRIVATE_KEY,
+        );
         try {
           // Create a mock wallet object that implements the required interface
           // This will be replaced when the programmatic wallet package is fully implemented
           const mockWallet = {
             getPKH: async () => {
-              return generatedWallet.address;
+              return importedWallet.address;
             },
-            // Add other required methods as needed
             requestPermissions: async () => Promise.resolve(),
             disconnect: async () => Promise.resolve(),
             client: {
-              subscribeToEvent: () => {},
               getActiveAccount: async () => ({
-                address: generatedWallet.address,
+                address: importedWallet.address,
               }),
               getPeers: async () => [{ name: "Programmatic Wallet" }],
               disconnect: async () => Promise.resolve(),

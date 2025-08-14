@@ -35,38 +35,27 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
+      name: "setup wallet",
+      testMatch: /global\.setup\.ts/,
+    },
+    {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
+      dependencies: ["setup wallet"],
     },
-
-    {
-      name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
-    },
-
-    {
-      name: "webkit",
-      use: { ...devices["Desktop Safari"] },
-    },
-
-    /* Test against mobile viewports. */
+    // Hiding these for now because we're not doing actual visual testing, just using
+    // this as a way to test Taquito automatically and programmatically
+    //
     // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
+    //   name: "firefox",
+    //   use: { ...devices["Desktop Firefox"] },
+    //   dependencies: ["setup wallet"],
     // },
 
-    /* Test against branded browsers. */
     // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
+    //   name: "webkit",
+    //   use: { ...devices["Desktop Safari"] },
+    //   dependencies: ["setup wallet"],
     // },
   ],
 
