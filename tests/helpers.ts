@@ -15,8 +15,8 @@ export const connectToWallet = async ({ page }) => {
 };
 
 export const goToTest = async ({ page, testName }) => {
-  await page.getByRole("link", { name: "Examples" }).click();
-  await page.getByRole("link", { name: testName }).click();
+  await page.getByRole("link", { name: "Examples" }).first().click();
+  await page.getByRole("link", { name: testName }).first().click();
   await page.waitForSelector(`h1:has-text("${testName}")`);
 };
 

@@ -2,19 +2,23 @@
   <div class="flex items-center w-full justify-center gap-4">
     <Button @click="decrementCounter()">
       <Minus class="size-6" />
+      <p class="sr-only">Decrement</p>
     </Button>
     <div class="flex flex-col items-center gap-2">
       <Button variant="ghost" @click="getStorageValue()">
         <RefreshCw class="size-4" />
+        <p class="sr-only">Get Storage Value</p>
       </Button>
       <p class="text-5xl font-bold">{{ storageValue ?? "..." }}</p>
       <p class="text-sm text-muted-foreground">Storage Value</p>
       <Button variant="ghost" @click="resetCounter()">
         <Trash class="size-4" />
+        <p class="sr-only">Reset</p>
       </Button>
     </div>
     <Button @click="incrementCounter()">
       <Plus class="size-6" />
+      <p class="sr-only">Increment</p>
     </Button>
   </div>
 </template>
