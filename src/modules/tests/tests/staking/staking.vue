@@ -50,12 +50,19 @@
               :disabled="loadingBalance"
             >
               <RotateCcw class="size-4 mt-1" />
+              <p class="sr-only">Refresh Staked Balance</p>
             </Button>
           </div>
         </div>
 
         <Label class="mt-4 mb-1.5">Amount (XTZ)</Label>
-        <Input v-model="amount" type="number" :min="0.00001" :max="balance" />
+        <Input
+          v-model="amount"
+          type="number"
+          :min="0.00001"
+          :max="balance"
+          :step="0.00001"
+        />
         <div class="flex flex-col gap-2 mt-4">
           <Button
             class="w-full"
