@@ -6,16 +6,16 @@ import {
 } from "./shared-context.ts";
 import { goToTest, waitForSuccess } from "./helpers.ts";
 
-test.describe("Transfers", () => {
+test.describe("Estimating Fees", () => {
   test.beforeAll(async () => {
     await cleanupSharedContext();
     await setupSharedContext();
   });
 
-  test("should transfer tokens to another address", async () => {
+  test("should estimate fees for a transfer", async () => {
     const page = getSharedPage();
-    await goToTest({ page, testName: "Transfer Tez Between Addresses" });
-    await page.getByRole("button", { name: "Send Transfer" }).click();
+    await goToTest({ page, testName: "Estimating Fees" });
+    await page.getByRole("button", { name: "Estimate Fees" }).click();
     await waitForSuccess({ page });
   });
 
