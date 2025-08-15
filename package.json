@@ -22,6 +22,7 @@
     "@airgap/beacon-types": "^4.6.1-beta.2",
     "@tailwindcss/vite": "^4.1.11",
     "@taquito/beacon-wallet": "^23.0.0-beta.0",
+    "@taquito/remote-signer": "^22.0.0",
     "@taquito/signer": "^23.0.0-beta.0",
     "@taquito/taquito": "^23.0.0-beta.0",
     "@taquito/wallet-connect": "^23.0.0-beta.0",

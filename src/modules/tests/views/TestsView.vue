@@ -19,10 +19,8 @@
                   {{ selectedTestFriendlyCategory }}
                 </BreadcrumbItem>
                 <BreadcrumbSeparator class="hidden sm:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{{
-                    selectedTestFriendlyName
-                  }}</BreadcrumbPage>
+                <BreadcrumbItem class="text-black">
+                  {{ selectedTestFriendlyName }}
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
