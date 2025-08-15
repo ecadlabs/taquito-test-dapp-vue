@@ -35,8 +35,18 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
+      name: "setup wallet address",
+      testMatch: /global\.setup\.ts/,
+    },
+    {
+      name: "cleanup shared context",
+      testMatch: /global\.teardown\.ts/,
+    },
+    {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
+      dependencies: ["setup wallet address"],
+      teardown: "cleanup shared context",
     },
     // Hiding these for now because we're not doing actual visual testing, just using
     // this as a way to test Taquito automatically and programmatically

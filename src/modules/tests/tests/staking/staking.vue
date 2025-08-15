@@ -164,13 +164,20 @@ onMounted(async () => {
     throw new Error("No current address found");
   }
 
-  const delegate = await getDelegate(walletStore.getAddress);
-  currentDelegate.value = delegate;
+  try {
+    const delegate = await getDelegate(walletStore.getAddress);
+    currentDelegate.value = delegate;
 
-  if (currentDelegate.value) {
-    acceptsStaking.value = await getDelegateAcceptsStaking(
-      currentDelegate.value,
-    );
+    if (currentDelegate.value) {
+      acceptsStaking.value = await getDelegateAcceptsStaking(
+        currentDelegate.value,
+      );
+    }
+  } catch (error) {
+    console.error("Failed to get delegate information:", error);
+    // Set fallback values for testing
+    currentDelegate.value = null;
+    acceptsStaking.value = false;
   }
 
   loadingDelegateInformation.value = false;
@@ -223,8 +230,15 @@ const getStakedBalance = async (): Promise<void> => {
   }
 
   loadingBalance.value = true;
-  const stakingInfo = await getStakingInfo(walletStore.getAddress);
-  stakedBalance.value = stakingInfo.stakedBalance / 1000000;
-  loadingBalance.value = false;
+  try {
+    const stakingInfo = await getStakingInfo(walletStore.getAddress);
+    stakedBalance.value = stakingInfo.stakedBalance / 1000000;
+  } catch (error) {
+    console.error("Failed to get staked balance:", error);
+    // Set fallback value when RPC fails
+    stakedBalance.value = 0;
+  } finally {
+    loadingBalance.value = false;
+  }
 };
 </script>

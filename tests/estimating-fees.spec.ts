@@ -1,14 +1,9 @@
 import { test } from "@playwright/test";
-import {
-  cleanupSharedContext,
-  getSharedPage,
-  setupSharedContext,
-} from "./shared-context.ts";
+import { getSharedPage, setupSharedContext } from "./shared-context.ts";
 import { goToTest, waitForSuccess } from "./helpers.ts";
 
 test.describe("Estimating Fees", () => {
   test.beforeAll(async () => {
-    await cleanupSharedContext();
     await setupSharedContext();
   });
 
@@ -17,9 +12,5 @@ test.describe("Estimating Fees", () => {
     await goToTest({ page, testName: "Estimating Fees" });
     await page.getByRole("button", { name: "Estimate Fees" }).click();
     await waitForSuccess({ page });
-  });
-
-  test.afterAll(async () => {
-    await cleanupSharedContext();
   });
 });

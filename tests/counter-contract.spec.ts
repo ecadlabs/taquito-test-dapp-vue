@@ -1,14 +1,9 @@
 import { test } from "@playwright/test";
-import {
-  cleanupSharedContext,
-  getSharedPage,
-  setupSharedContext,
-} from "./shared-context.ts";
+import { getSharedPage, setupSharedContext } from "./shared-context.ts";
 import { goToTest, waitForSuccess } from "./helpers.ts";
 
 test.describe("Counter Smart Contract", () => {
   test.beforeAll(async () => {
-    await cleanupSharedContext();
     await setupSharedContext();
   });
 
@@ -38,9 +33,5 @@ test.describe("Counter Smart Contract", () => {
     await goToTest({ page, testName: "Counter Smart Contract" });
     await page.getByRole("button", { name: "Reset" }).click();
     await waitForSuccess({ page });
-  });
-
-  test.afterAll(async () => {
-    await cleanupSharedContext();
   });
 });

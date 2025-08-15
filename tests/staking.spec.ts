@@ -1,20 +1,21 @@
 import { test } from "@playwright/test";
+import { getSharedPage, setupSharedContext } from "./shared-context.ts";
 import {
-  cleanupSharedContext,
-  getSharedPage,
-  setupSharedContext,
-} from "./shared-context.ts";
-import { goToTest, waitForSuccess } from "./helpers.ts";
+  goToTest,
+  waitForSuccess,
+  waitForBalanceLoaded,
+  delegate,
+} from "./helpers.ts";
 
 test.describe("Staking", () => {
   test.beforeAll(async () => {
-    await cleanupSharedContext();
     await setupSharedContext();
   });
 
   test("should stake tez", async () => {
     const page = getSharedPage();
     await goToTest({ page, testName: "Staking Tokens" });
+    await waitForBalanceLoaded({ page });
 
     const delegateAlert = await page.getByText(
       "You don't have a delegate set",
@@ -25,13 +26,11 @@ test.describe("Staking", () => {
       .catch(() => false);
     const isDelegateSet = !isDelegateAlertVisible;
     if (!isDelegateSet) {
-      await goToTest({ page, testName: "Delegation" });
-      await page.getByRole("button", { name: "Delegate" }).click();
-      await waitForSuccess({ page });
+      await delegate({ page });
     }
 
     await goToTest({ page, testName: "Staking Tokens" });
-    await page.waitForSelector("text=0");
+
     await page.getByRole("button", { name: "Stake", exact: true }).click();
     await waitForSuccess({ page });
   });
@@ -39,20 +38,20 @@ test.describe("Staking", () => {
   test("should unstake tez", async () => {
     const page = getSharedPage();
     await goToTest({ page, testName: "Staking Tokens" });
-    await page.waitForSelector("text=0");
-    await page.getByRole("button", { name: "Unstake" }).click();
+
+    await waitForBalanceLoaded({ page });
+
+    await page.getByRole("button", { name: "Unstake", exact: true }).click();
     await waitForSuccess({ page });
   });
 
   test("should finalize unstake", async () => {
     const page = getSharedPage();
     await goToTest({ page, testName: "Staking Tokens" });
-    await page.waitForSelector("text=0");
+
+    await waitForBalanceLoaded({ page });
+
     await page.getByRole("button", { name: "Finalize Unstake" }).click();
     await waitForSuccess({ page });
-  });
-
-  test.afterAll(async () => {
-    await cleanupSharedContext();
   });
 });

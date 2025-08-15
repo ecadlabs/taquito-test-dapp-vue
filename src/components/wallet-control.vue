@@ -104,13 +104,23 @@
             </SelectItem>
           </SelectContent>
         </Select>
+
+        <Input
+          v-if="provider === 'programmatic'"
+          v-model="privateKey"
+          type="text"
+          placeholder="Private Key"
+          class="w-1/2 mt-2"
+        />
       </div>
 
       <DialogFooter>
         <Button
           variant="secondary"
           @click="connect()"
-          :disabled="loading || !provider"
+          :disabled="
+            loading || !provider || (provider === 'programmatic' && !privateKey)
+          "
         >
           <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
           <p>Connect</p>
@@ -230,6 +240,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "vue-sonner";
 import { buildIndexerUrl } from "@/lib/utils";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { Input } from "@/components/ui/input";
 
 const walletStore = useWalletStore();
 const settingsStore = useSettingsStore();
@@ -252,6 +263,7 @@ const provider = ref<WalletProvider>("beacon");
 const loading = ref<boolean>(false);
 const showConnectDialog = ref<boolean>(false);
 const showDisconnectDialog = ref<boolean>(false);
+const privateKey = ref<string>("");
 
 watch([showConnectDialog, showDisconnectDialog], ([newValue]) => {
   if (newValue === false) {
@@ -276,7 +288,7 @@ const openExplorer = () => {
 const connect = async () => {
   try {
     loading.value = true;
-    await walletStore.initializeWallet(provider.value);
+    await walletStore.initializeWallet(provider.value, privateKey.value);
     toast.success("Wallet connected");
   } catch (error) {
     toast.error("Wallet connection failed", {

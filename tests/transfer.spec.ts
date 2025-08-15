@@ -1,14 +1,9 @@
 import { test } from "@playwright/test";
-import {
-  cleanupSharedContext,
-  getSharedPage,
-  setupSharedContext,
-} from "./shared-context.ts";
+import { getSharedPage, setupSharedContext } from "./shared-context.ts";
 import { goToTest, waitForSuccess } from "./helpers.ts";
 
 test.describe("Transfers", () => {
   test.beforeAll(async () => {
-    await cleanupSharedContext();
     await setupSharedContext();
   });
 
@@ -17,9 +12,5 @@ test.describe("Transfers", () => {
     await goToTest({ page, testName: "Transfer Tez Between Addresses" });
     await page.getByRole("button", { name: "Send Transfer" }).click();
     await waitForSuccess({ page });
-  });
-
-  test.afterAll(async () => {
-    await cleanupSharedContext();
   });
 });

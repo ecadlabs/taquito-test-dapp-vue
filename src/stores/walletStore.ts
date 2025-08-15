@@ -8,11 +8,7 @@ import { PermissionScopeMethods, WalletConnect } from "@taquito/wallet-connect";
 import { NetworkType } from "@airgap/beacon-types";
 import { NetworkType as WalletConnectNetworkType } from "@taquito/wallet-connect";
 import { BeaconEvent } from "@airgap/beacon-dapp";
-import {
-  generateWallet,
-  importWallet,
-  revealWallet,
-} from "programmatic-wallet";
+import { importWallet } from "programmatic-wallet";
 
 export const useWalletStore = defineStore("wallet", () => {
   let Tezos = new TezosToolkit(import.meta.env.VITE_RPC_URL);
@@ -40,7 +36,10 @@ export const useWalletStore = defineStore("wallet", () => {
    * @throws {ReferenceError} If a wallet is already initialized in this session.
    * @throws {Error} If wallet initialization or permission request fails (e.g., user cancels the wallet popup).
    */
-  const initializeWallet = async (provider: WalletProvider): Promise<void> => {
+  const initializeWallet = async (
+    provider: WalletProvider,
+    privateKey?: string,
+  ): Promise<void> => {
     console.log("Starting initialization of wallet using provider:", provider);
     try {
       // There is a wontfix issue in the Beacon SDK where no event is fired when the popup is closed,
@@ -138,30 +137,15 @@ export const useWalletStore = defineStore("wallet", () => {
         }
 
         localStorage.setItem("wallet-provider", "walletconnect");
-      } else if (provider === "programmatic") {
-        // const response = await fetch("https://keygen.ecadinfra.com/seoulnet", {
-        //   method: "POST",
-        //   headers: {
-        //     Accept: "application/json",
-        //     Authorization: "Bearer taquito-example",
-        //   },
-        // });
-
-        // const importedWallet = await generateWallet();
-
-        // VERY TEMPORARY! Not for production
-        const pk = import.meta.env.VITE_WALLET_PRIVATE_KEY;
-
-        if (!pk) {
+      } else if (provider === "programmatic" && privateKey) {
+        if (!privateKey) {
           throw new Error("No private key found");
         }
 
-        // const privateKey = await response.text();
-        const importedWallet = await importWallet(pk);
-        // await revealWallet();
+        const importedWallet = await importWallet(privateKey);
 
         try {
-          const signer = await InMemorySigner.fromSecretKey(pk);
+          const signer = await InMemorySigner.fromSecretKey(privateKey);
 
           // Create a mock wallet object that implements the required interface
           // This will be replaced when the programmatic wallet package is fully implemented
