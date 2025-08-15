@@ -92,6 +92,18 @@
       </DialogHeader>
 
       <div>
+        <Alert v-if="provider === 'programmatic'" class="mb-2">
+          <TriangleAlert class="size-4 !text-red-500" />
+          <AlertTitle>
+            <p>Important!</p>
+          </AlertTitle>
+          <AlertDescription>
+            The programmatic wallet is designed for testing purposes only, such
+            as automated test scripts. It has less security measures and will
+            NOT ask for confirmation before carrying out operations. This should
+            not be used with a real, personally owned wallet key.
+          </AlertDescription>
+        </Alert>
         <Select v-model="provider">
           <SelectTrigger class="w-[150px]">
             <SelectValue />
@@ -218,8 +230,9 @@ import {
   Unplug,
   Copy,
   ExternalLink,
-  AlertTriangle,
+  TriangleAlert,
 } from "lucide-vue-next";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -241,6 +254,7 @@ import { toast } from "vue-sonner";
 import { buildIndexerUrl } from "@/lib/utils";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { Input } from "@/components/ui/input";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const walletStore = useWalletStore();
 const settingsStore = useSettingsStore();
