@@ -2,13 +2,12 @@ import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { TezosToolkit } from "@taquito/taquito";
-import { InMemorySigner } from "@taquito/signer";
+import { importKey, InMemorySigner } from "@taquito/signer";
 import type { WalletProvider } from "@/types/wallet";
 import { PermissionScopeMethods, WalletConnect } from "@taquito/wallet-connect";
 import { NetworkType } from "@airgap/beacon-types";
 import { NetworkType as WalletConnectNetworkType } from "@taquito/wallet-connect";
 import { BeaconEvent } from "@airgap/beacon-dapp";
-import { importWallet } from "programmatic-wallet";
 
 export const useWalletStore = defineStore("wallet", () => {
   let Tezos = new TezosToolkit(import.meta.env.VITE_RPC_URL);
@@ -142,7 +141,8 @@ export const useWalletStore = defineStore("wallet", () => {
           throw new Error("No private key found");
         }
 
-        const importedWallet = await importWallet(privateKey);
+        await importKey(Tezos, privateKey);
+        const importedAddress = await Tezos.signer.publicKeyHash();
 
         try {
           const signer = await InMemorySigner.fromSecretKey(privateKey);
@@ -151,13 +151,13 @@ export const useWalletStore = defineStore("wallet", () => {
           // This will be replaced when the programmatic wallet package is fully implemented
           const mockWallet = {
             getPKH: async () => {
-              return importedWallet.address;
+              return importedAddress;
             },
             requestPermissions: async () => Promise.resolve(),
             disconnect: async () => Promise.resolve(),
             client: {
               getActiveAccount: async () => ({
-                address: importedWallet.address,
+                address: importedAddress,
               }),
               getPeers: async () => [{ name: "Programmatic Wallet" }],
               disconnect: async () => Promise.resolve(),
