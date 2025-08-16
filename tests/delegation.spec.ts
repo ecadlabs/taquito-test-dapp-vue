@@ -1,4 +1,4 @@
-import { Page, test } from "@playwright/test";
+import { test } from "@playwright/test";
 import { getSharedPage, setupSharedContext } from "./shared-context.ts";
 import { delegate, goToTest, waitForSuccess } from "./helpers.ts";
 
@@ -15,8 +15,11 @@ test.describe("Delegation", () => {
   test("should undelegate from a baker", async () => {
     const page = getSharedPage();
     await goToTest({ page, testName: "Delegation" });
-    await page.waitForTimeout(1000);
-    await page.getByRole("button", { name: "Remove Delegation" }).click();
+    const removeDelegationButton = page.getByRole("button", {
+      name: "Remove Delegation",
+    });
+    await removeDelegationButton.waitFor({ state: "visible" });
+    await removeDelegationButton.click();
     await waitForSuccess({ page });
   });
 });

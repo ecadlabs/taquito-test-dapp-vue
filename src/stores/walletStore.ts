@@ -136,7 +136,7 @@ export const useWalletStore = defineStore("wallet", () => {
         }
 
         localStorage.setItem("wallet-provider", "walletconnect");
-      } else if (provider === "programmatic" && privateKey) {
+      } else if (provider === "programmatic") {
         if (!privateKey) {
           throw new Error("No private key found");
         }
