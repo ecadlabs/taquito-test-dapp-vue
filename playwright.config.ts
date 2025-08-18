@@ -28,7 +28,12 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: "http://localhost:5173",
     trace: "retain-on-failure",
-    video: "retain-on-failure",
+    video: "on",
+    contextOptions: {
+      recordVideo: {
+        dir: "test-results",
+      },
+    },
   },
 
   /* Configure projects for major browsers */
