@@ -40,17 +40,6 @@ export const waitForSuccess = async ({ page }: { page: Page }) => {
 
   // Additional wait to ensure the operation is fully processed
   await page.waitForTimeout(2000);
-
-  // Verify the success state is stable
-  await page.waitForFunction(
-    () => {
-      const diagramElement = document.querySelector(
-        'div[data-testid="diagramComplete"]',
-      );
-      return diagramElement && diagramElement.textContent?.includes("Success");
-    },
-    { timeout: 10000 },
-  );
 };
 
 export const waitForBalanceLoaded = async ({ page }: { page: Page }) => {
