@@ -28,13 +28,6 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: "http://localhost:5173",
     trace: "retain-on-failure",
-    video: "on",
-    contextOptions: {
-      recordVideo: {
-        dir: "test-results",
-        size: { width: 1280, height: 720 },
-      },
-    },
     // Increase timeouts for blockchain operations
     actionTimeout: 60000,
     navigationTimeout: 60000,
@@ -55,23 +48,8 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
       dependencies: ["setup wallet address"],
       teardown: "cleanup shared context",
-      // Additional timeout settings for the main test project
-      timeout: 300000, // 5 minutes total timeout
+      timeout: 300000,
     },
-    // Hiding these for now because we're not doing actual visual testing, just using
-    // this as a way to test Taquito automatically and programmatically
-    //
-    // {
-    //   name: "firefox",
-    //   use: { ...devices["Desktop Firefox"] },
-    //   dependencies: ["setup wallet"],
-    // },
-
-    // {
-    //   name: "webkit",
-    //   use: { ...devices["Desktop Safari"] },
-    //   dependencies: ["setup wallet"],
-    // },
   ],
 
   /* Run your local dev server before starting the tests */
