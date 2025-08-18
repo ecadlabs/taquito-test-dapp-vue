@@ -32,8 +32,12 @@ export default defineConfig({
     contextOptions: {
       recordVideo: {
         dir: "test-results",
+        size: { width: 1280, height: 720 },
       },
     },
+    // Increase timeouts for blockchain operations
+    actionTimeout: 60000,
+    navigationTimeout: 60000,
   },
 
   /* Configure projects for major browsers */
@@ -51,6 +55,8 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
       dependencies: ["setup wallet address"],
       teardown: "cleanup shared context",
+      // Additional timeout settings for the main test project
+      timeout: 300000, // 5 minutes total timeout
     },
     // Hiding these for now because we're not doing actual visual testing, just using
     // this as a way to test Taquito automatically and programmatically
@@ -75,4 +81,7 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },
+
+  // Global timeout for all tests
+  globalTimeout: 600000, // 10 minutes
 });

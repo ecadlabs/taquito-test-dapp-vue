@@ -32,7 +32,25 @@ export const goToTest = async ({
 };
 
 export const waitForSuccess = async ({ page }: { page: Page }) => {
-  await page.waitForSelector('div[data-testid="diagramComplete"]');
+  // Wait for the diagram to complete with a longer timeout for blockchain operations
+  await page.waitForSelector('div[data-testid="diagramComplete"]', {
+    timeout: 60000, // Increased timeout for blockchain operations
+    state: "visible",
+  });
+
+  // Additional wait to ensure the operation is fully processed
+  await page.waitForTimeout(2000);
+
+  // Verify the success state is stable
+  await page.waitForFunction(
+    () => {
+      const diagramElement = document.querySelector(
+        'div[data-testid="diagramComplete"]',
+      );
+      return diagramElement && diagramElement.textContent?.includes("Success");
+    },
+    { timeout: 10000 },
+  );
 };
 
 export const waitForBalanceLoaded = async ({ page }: { page: Page }) => {

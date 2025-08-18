@@ -73,6 +73,7 @@
               anyOperationLoading
             "
             @click="stakeTokens"
+            data-testid="stake-button"
           >
             <Beef class="size-4 mt-0.5" />
             <span v-if="stakingLoading">Staking...</span>
@@ -85,6 +86,7 @@
               !currentDelegate || unstakingLoading || anyOperationLoading
             "
             @click="unstakeTokens"
+            data-testid="unstake-button"
           >
             <LockKeyholeOpen class="size-4 mt-0.5" />
             <span v-if="unstakingLoading">Unstaking...</span>
@@ -98,6 +100,7 @@
             !currentDelegate || finalizingLoading || anyOperationLoading
           "
           @click="finalizeUnstakeTokens"
+          data-testid="finalize-button"
         >
           <LockKeyholeOpen class="size-4 mt-0.5" />
           <span v-if="finalizingLoading">Finalizing...</span>
