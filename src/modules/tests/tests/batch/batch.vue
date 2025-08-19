@@ -27,8 +27,11 @@ onMounted(() => {
 
 const sending = ref(false);
 const sendBatchOperation = async () => {
-  sending.value = true;
-  await sendBatch();
-  sending.value = false;
+  try {
+    sending.value = true;
+    await sendBatch();
+  } finally {
+    sending.value = false;
+  }
 };
 </script>
