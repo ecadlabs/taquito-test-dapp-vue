@@ -4,8 +4,8 @@
       <DialogTitle>Settings</DialogTitle>
     </DialogHeader>
 
-    <div>
-      <div class="flex justify-between">
+    <div class="space-y-2">
+      <div class="flex justify-between items-center">
         <p>Indexer</p>
         <Select v-model="settingsStore.settings.indexer">
           <SelectTrigger class="w-[180px]">
@@ -19,6 +19,15 @@
             </SelectGroup>
           </SelectContent>
         </Select>
+      </div>
+      <div class="flex justify-between items-center">
+        <p>RPC URL</p>
+        <Input
+          v-model="settingsStore.settings.rpcUrl"
+          type="text"
+          placeholder="RPC URL"
+          class="w-2/3"
+        />
       </div>
     </div>
 
@@ -58,6 +67,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 
 const emit = defineEmits(["close"]);
 

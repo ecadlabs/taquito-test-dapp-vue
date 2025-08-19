@@ -8,9 +8,12 @@ import { PermissionScopeMethods, WalletConnect } from "@taquito/wallet-connect";
 import { NetworkType } from "@airgap/beacon-types";
 import { NetworkType as WalletConnectNetworkType } from "@taquito/wallet-connect";
 import { BeaconEvent } from "@airgap/beacon-dapp";
+import { useSettingsStore } from "@/stores/settingsStore";
 
 export const useWalletStore = defineStore("wallet", () => {
-  let Tezos = new TezosToolkit(import.meta.env.VITE_RPC_URL);
+  const settingsStore = useSettingsStore();
+
+  let Tezos = new TezosToolkit(settingsStore.settings.rpcUrl);
 
   const wallet = ref<BeaconWallet | WalletConnect>();
   const address = ref<string>();
@@ -64,7 +67,7 @@ export const useWalletStore = defineStore("wallet", () => {
           network: {
             type: NetworkType.CUSTOM,
             name: import.meta.env.VITE_NETWORK_TYPE,
-            rpcUrl: import.meta.env.VITE_RPC_URL,
+            rpcUrl: settingsStore.settings.rpcUrl,
           },
           enableMetrics: true,
         };

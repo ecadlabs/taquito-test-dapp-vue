@@ -134,4 +134,19 @@ watch(
     await updateRevealedStatus(newAddress);
   },
 );
+
+// Reload the page if the RPC URL has changed to re-initialize the wallet with the new URL
+const previousSettings = ref(settingsStore.settings);
+watch(
+  () => showSettingsDialog.value,
+  async (open) => {
+    if (open) {
+      previousSettings.value = { ...settingsStore.settings };
+    } else {
+      if (previousSettings.value.rpcUrl !== settingsStore.settings.rpcUrl) {
+        window.location.reload();
+      }
+    }
+  },
+);
 </script>
