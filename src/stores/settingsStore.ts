@@ -64,6 +64,10 @@ export const useSettingsStore = defineStore("settings", () => {
     { deep: true, immediate: true },
   );
 
+  const resetRpcUrl = () => {
+    settings.value.rpcUrl = import.meta.env.VITE_RPC_URL;
+  };
+
   return {
     isRevealed,
     settings,
@@ -71,5 +75,6 @@ export const useSettingsStore = defineStore("settings", () => {
     getIndexer,
     getIsRevealed,
     isUsingCustomRpcUrl,
+    resetRpcUrl,
   };
 });
