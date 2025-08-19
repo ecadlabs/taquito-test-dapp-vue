@@ -47,7 +47,7 @@
               variant="ghost"
               size="icon"
               @click="getStakedBalance"
-              :disabled="loadingBalance"
+              :disabled="loadingBalance || !walletConnected"
             >
               <RotateCcw class="size-4 mt-1" />
               <p class="sr-only">Refresh Staked Balance</p>
@@ -70,7 +70,8 @@
               !currentDelegate ||
               !acceptsStaking ||
               stakingLoading ||
-              anyOperationLoading
+              anyOperationLoading ||
+              !walletConnected
             "
             @click="stakeTokens"
             data-testid="stake-button"
@@ -83,7 +84,10 @@
             class="w-full"
             variant="secondary"
             :disabled="
-              !currentDelegate || unstakingLoading || anyOperationLoading
+              !currentDelegate ||
+              unstakingLoading ||
+              anyOperationLoading ||
+              !walletConnected
             "
             @click="unstakeTokens"
             data-testid="unstake-button"
@@ -97,7 +101,10 @@
         <Button
           class="w-full"
           :disabled="
-            !currentDelegate || finalizingLoading || anyOperationLoading
+            !currentDelegate ||
+            finalizingLoading ||
+            anyOperationLoading ||
+            !walletConnected
           "
           @click="finalizeUnstakeTokens"
           data-testid="finalize-button"
@@ -159,6 +166,7 @@ const anyOperationLoading = computed(() => {
 const loadingDelegateInformation = ref<boolean>(true);
 const currentDelegate = ref<string | null>();
 const acceptsStaking = ref<boolean>();
+const walletConnected = computed(() => !!walletStore.getAddress);
 
 onMounted(async () => {
   diagramStore.setTestDiagram("staking");

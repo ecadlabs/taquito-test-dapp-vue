@@ -15,7 +15,11 @@
         </NumberFieldContent>
       </NumberField>
     </div>
-    <Button @click="sendTransfer()" :disabled="sending" class="w-32">
+    <Button
+      @click="sendTransfer()"
+      :disabled="sending || !walletStore.getAddress"
+      class="w-32"
+    >
       <Loader2 v-if="sending" class="w-4 h-4 mr-2 animate-spin" />
       <p v-else>Send Transfer</p>
     </Button>
