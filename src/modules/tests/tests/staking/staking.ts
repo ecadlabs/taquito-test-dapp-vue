@@ -148,8 +148,7 @@ const getStakingInfo = async (address: string) => {
     return { stakedBalance, totalBalance };
   } catch (error) {
     console.error(`Failed to get staking info for ${address}: ${error}`);
-    // Return 0 as fallback when RPC fails
-    return { stakedBalance: 0, totalBalance: 0 };
+    throw error;
   }
 };
 

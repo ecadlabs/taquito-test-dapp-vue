@@ -166,7 +166,7 @@ export const useWalletStore = defineStore("wallet", () => {
             getAllExistingSessionKeys: async () => [],
             configureWithExistingSessionKey: async () => Promise.resolve(),
           };
-          wallet.value = mockWallet as any;
+          wallet.value = mockWallet as unknown as BeaconWallet;
           address.value = await mockWallet.getPKH();
           walletName.value = "Programmatic Wallet";
           Tezos.setProvider({ signer });

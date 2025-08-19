@@ -41,15 +41,17 @@ const send = async (to: string, amount: number) => {
       transfer = await Tezos.wallet.transfer({ to, amount }).send();
     }
 
-    const confirmation = await transfer.confirmation();
     diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
+    const confirmation = await transfer.confirmation();
 
-    diagramStore.setOperationHash(
-      (confirmation as any)?.block?.hash ??
-        (typeof confirmation === "number" ? confirmation : ""),
-      TEST_ID,
-    );
+    let opHash = "";
+    if (typeof confirmation === "object" && confirmation?.block?.hash) {
+      opHash = confirmation.block.hash;
+    } else if (typeof confirmation === "number") {
+      opHash = confirmation.toString();
+    }
 
+    diagramStore.setOperationHash(opHash, TEST_ID);
     diagramStore.setProgress("success", "completed", TEST_ID);
     await walletStore.fetchBalance();
   } catch (error) {

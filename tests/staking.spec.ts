@@ -12,7 +12,7 @@ test.describe("Staking", () => {
     await setupSharedContext();
   });
 
-  test("should stake tez", async ({ page }) => {
+  test("should stake tez", async () => {
     const sharedPage = getSharedPage();
     await delegate({ page: sharedPage });
     await sharedPage.waitForTimeout(2000);
@@ -28,7 +28,7 @@ test.describe("Staking", () => {
     await waitForSuccess({ page: sharedPage });
   });
 
-  test("should unstake tez", async ({ page }) => {
+  test("should unstake tez", async () => {
     const sharedPage = getSharedPage();
     await goToTest({ page: sharedPage, testName: "Staking Tokens" });
 
@@ -56,7 +56,7 @@ test.describe("Staking", () => {
     await sharedPage.waitForTimeout(2000);
   });
 
-  test("should finalize unstake", async ({ page }) => {
+  test("should finalize unstake", async () => {
     const sharedPage = getSharedPage();
     await goToTest({ page: sharedPage, testName: "Staking Tokens" });
 
