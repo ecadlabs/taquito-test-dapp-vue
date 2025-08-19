@@ -136,10 +136,18 @@ const runningHealthCheck = ref(false);
 
 watch(debouncedRpcUrl, (newRpcUrl: string) => {
   const checkRpcHealth = async (url: string) => {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return false;
+    }
+
     runningHealthCheck.value = true;
 
     try {
-      const response = await fetch(`${url}/chains/main/blocks/head/header`, {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const response = await fetch(`${parsed}/chains/main/blocks/head/header`, {
         method: "GET",
       });
       return response.ok;
@@ -151,10 +159,10 @@ watch(debouncedRpcUrl, (newRpcUrl: string) => {
   };
 
   (async () => {
-    const startTime = new Date();
+    const startTime = performance.now();
     isRpcHealthy.value = await checkRpcHealth(newRpcUrl);
-    const endTime = new Date();
-    const duration = endTime.getTime() - startTime.getTime();
+    const endTime = performance.now();
+    const duration = endTime - startTime;
     rpcHealthCheckDuration.value = duration;
   })();
 });
