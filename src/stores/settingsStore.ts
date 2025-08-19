@@ -51,6 +51,9 @@ export const useSettingsStore = defineStore("settings", () => {
   const getSettings = computed(() => settings.value);
   const getIndexer = computed(() => settings.value.indexer);
   const getIsRevealed = computed(() => isRevealed.value);
+  const isUsingCustomRpcUrl = computed(() => {
+    return settings.value.rpcUrl !== import.meta.env.VITE_RPC_URL;
+  });
 
   // Update the settings in localStorage when the settings change so they persist across sessions
   watch(
@@ -67,5 +70,6 @@ export const useSettingsStore = defineStore("settings", () => {
     getSettings,
     getIndexer,
     getIsRevealed,
+    isUsingCustomRpcUrl,
   };
 });

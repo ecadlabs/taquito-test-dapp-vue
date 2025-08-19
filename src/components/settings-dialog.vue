@@ -20,14 +20,23 @@
           </SelectContent>
         </Select>
       </div>
-      <div class="flex justify-between items-center">
-        <p>RPC URL</p>
-        <Input
-          v-model="settingsStore.settings.rpcUrl"
-          type="text"
-          placeholder="RPC URL"
-          class="w-2/3"
-        />
+      <div class="flex flex-col gap-1 justify-end">
+        <div class="flex justify-between items-center">
+          <p>RPC URL</p>
+          <Input
+            v-model="settingsStore.settings.rpcUrl"
+            type="text"
+            placeholder="RPC URL"
+            class="w-2/3"
+          />
+        </div>
+        <div
+          v-if="settingsStore.isUsingCustomRpcUrl"
+          class="ml-auto flex items-center gap-1"
+        >
+          <TriangleAlert class="size-3 text-red-500" />
+          <p class="text-xs text-muted-foreground">Using custom RPC URL</p>
+        </div>
       </div>
     </div>
 
@@ -68,6 +77,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
+import { TriangleAlert } from "lucide-vue-next";
 
 const emit = defineEmits(["close"]);
 

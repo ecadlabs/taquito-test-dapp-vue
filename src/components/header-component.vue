@@ -39,9 +39,13 @@
     <Button
       size="icon"
       variant="outline"
-      class="ml-2"
+      class="ml-2 relative"
       @click="showSettingsDialog = true"
     >
+      <div
+        v-if="settingsStore.isUsingCustomRpcUrl"
+        class="bg-orange-400 size-3 absolute -top-1 -right-1 rounded-full"
+      />
       <p class="sr-only">Settings</p>
       <Settings class="size-5" />
     </Button>
