@@ -126,7 +126,7 @@ const updateRevealedStatus = async (address: string | undefined) => {
   try {
     const revealed = await isRevealed(address);
     settingsStore.isRevealed = revealed;
-  } catch (error) {
+  } catch {
     settingsStore.isRevealed = false;
   }
 };

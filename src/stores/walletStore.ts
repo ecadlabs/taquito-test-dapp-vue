@@ -13,7 +13,7 @@ import { useSettingsStore } from "@/stores/settingsStore";
 export const useWalletStore = defineStore("wallet", () => {
   const settingsStore = useSettingsStore();
 
-  let Tezos = new TezosToolkit(settingsStore.settings.rpcUrl);
+  const Tezos = new TezosToolkit(settingsStore.settings.rpcUrl);
 
   const wallet = ref<BeaconWallet | WalletConnect>();
   const address = ref<string>();
@@ -98,7 +98,7 @@ export const useWalletStore = defineStore("wallet", () => {
         try {
           const peers = await wallet.value.client.getPeers();
           walletName.value = peers[0].name;
-        } catch (error) {
+        } catch {
           walletName.value = "unknown";
         }
 

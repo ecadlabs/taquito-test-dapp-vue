@@ -3,6 +3,7 @@ import { writeFileSync, readFileSync, existsSync, readdirSync } from "fs";
 import { join } from "path";
 import { config } from "dotenv";
 import { importKey } from "@taquito/signer";
+import type { CounterStorage } from "@/types/contract";
 
 config();
 
@@ -17,13 +18,13 @@ interface OriginationResult {
   contractAddress: string;
   contractName: string;
   operationHash: string;
-  storage: any;
+  storage: CounterStorage;
 }
 
 interface ContractDefinition {
   name: string;
   path: string;
-  storage: any;
+  storage: CounterStorage;
 }
 
 export const originateContracts = async (
@@ -160,7 +161,7 @@ export const originateContracts = async (
 };
 
 // Helper function to get default storage for different contracts
-function getDefaultStorage(contractName: string): any {
+function getDefaultStorage(contractName: string): CounterStorage {
   switch (contractName.toLowerCase()) {
     case "counter":
       return 0;
