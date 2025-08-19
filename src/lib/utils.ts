@@ -23,7 +23,7 @@ export const isRevealed = async (address: string): Promise<boolean> => {
 
     // If managerKey exists and is not null/undefined, the public key is revealed
     return !!managerKey;
-  } catch (error) {
+  } catch {
     return false;
   }
 };

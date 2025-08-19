@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, type Component } from "vue";
 import type { TestDiagram } from "@/modules/tests/test";
 import { getTestDiagram } from "@/modules/tests/tests";
 import type { Estimate } from "@taquito/taquito";
@@ -33,7 +33,7 @@ export const useDiagramStore = defineStore("diagram", () => {
 
   // Button state management
   const nodeButtons = ref<
-    Map<string, { icon: any; text: string; onClick: () => void }>
+    Map<string, { icon: Component; text: string; onClick: () => void }>
   >(new Map());
 
   // Dialog state management
@@ -146,7 +146,7 @@ export const useDiagramStore = defineStore("diagram", () => {
    */
   const setNodeButton = (
     nodeId: string,
-    button: { icon: any; text: string; onClick: () => void },
+    button: { icon: Component; text: string; onClick: () => void },
   ) => {
     nodeButtons.value.set(nodeId, button);
   };

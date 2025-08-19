@@ -7,6 +7,7 @@
         <RouterLink
           :to="{ name: 'tests', params: { test: test.value } }"
           v-for="test in tests"
+          :key="test.value"
         >
           <CommandItem :value="test.value" @click="open = false">
             {{ test.label }}

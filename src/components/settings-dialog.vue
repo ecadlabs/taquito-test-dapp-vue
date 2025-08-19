@@ -13,7 +13,11 @@
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem v-for="indexer in indexers" :value="indexer">
+              <SelectItem
+                v-for="indexer in indexers"
+                :value="indexer"
+                :key="indexer.name"
+              >
                 {{ indexer.name }}
               </SelectItem>
             </SelectGroup>
