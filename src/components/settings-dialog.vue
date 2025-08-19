@@ -145,7 +145,7 @@ watch(debouncedRpcUrl, (newRpcUrl: string) => {
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      setTimeout(() => controller.abort(), 10000);
 
       const response = await fetch(`${parsed}/chains/main/blocks/head/header`, {
         method: "GET",
