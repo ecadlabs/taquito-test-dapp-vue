@@ -19,10 +19,8 @@
                   {{ selectedTestFriendlyCategory }}
                 </BreadcrumbItem>
                 <BreadcrumbSeparator class="hidden sm:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{{
-                    selectedTestFriendlyName
-                  }}</BreadcrumbPage>
+                <BreadcrumbItem class="text-black">
+                  {{ selectedTestFriendlyName }}
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -62,7 +60,6 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";

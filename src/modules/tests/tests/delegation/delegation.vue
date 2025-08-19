@@ -44,10 +44,13 @@
           </div>
           <Button
             @click="delegateToCurrentAddress()"
-            :disabled="sending"
+            :disabled="sending || loadingCurrentDelegate"
             class="w-full"
           >
-            <Loader2 v-if="sending" class="w-4 h-4 mr-2 animate-spin" />
+            <Loader2
+              v-if="sending || loadingCurrentDelegate"
+              class="w-4 h-4 mr-2 animate-spin"
+            />
             <Cookie v-else class="w-4 h-4" />
             <span v-if="!sending" class="font-semibold">Delegate</span>
             <span v-else>Delegating...</span>
@@ -78,10 +81,12 @@ const walletStore = useWalletStore();
 const toAddress = ref<string>("tz1cjyja1TU6fiyiFav3mFAdnDsCReJ12hPD");
 const sending = ref<boolean>(false);
 const currentDelegate = ref<string | null>();
+const loadingCurrentDelegate = ref<boolean>(true);
 
 onMounted(async () => {
   diagramStore.setTestDiagram("delegation");
   currentDelegate.value = await getCurrentDelegate();
+  loadingCurrentDelegate.value = false;
 });
 
 const delegateToCurrentAddress = async () => {

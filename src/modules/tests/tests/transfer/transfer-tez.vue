@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { useDiagramStore } from "@/stores/diagramStore";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { send } from "@/modules/tests/tests/transfer/transfer-tez";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -37,11 +37,11 @@ import {
   NumberFieldInput,
 } from "@/components/ui/number-field";
 import { Loader2 } from "lucide-vue-next";
+import { useWalletStore } from "@/stores/walletStore";
 
-// Ghostnet
-// const toAddress = ref<string>('tz1h3rQ8wBxFd8L9B3d7Jhaawu6Z568XU3xY')
-// Seoulnet
-const toAddress = ref<string>("tz1VRj54TQDtUGgv6gF4AbGbXMphyDpVkCpf");
+const walletStore = useWalletStore();
+
+const toAddress = ref<string>(walletStore.getAddress ?? "");
 const amount = ref<number>(1);
 const sending = ref<boolean>(false);
 const diagramStore = useDiagramStore();
@@ -49,6 +49,15 @@ const diagramStore = useDiagramStore();
 onMounted(() => {
   diagramStore.setTestDiagram("transfer");
 });
+
+watch(
+  () => walletStore.getAddress,
+  (newAddress: string | undefined) => {
+    if (typeof newAddress === "string" && newAddress.length > 0) {
+      toAddress.value = newAddress;
+    }
+  },
+);
 
 const sendTransfer = async () => {
   if (!toAddress.value) return;

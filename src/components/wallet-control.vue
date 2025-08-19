@@ -92,6 +92,18 @@
       </DialogHeader>
 
       <div>
+        <Alert v-if="provider === 'programmatic'" class="mb-2">
+          <TriangleAlert class="size-4 !text-red-500" />
+          <AlertTitle>
+            <p>Important!</p>
+          </AlertTitle>
+          <AlertDescription>
+            The programmatic wallet is designed for testing purposes only, such
+            as automated test scripts. It has less security measures and will
+            NOT ask for confirmation before carrying out operations. This should
+            not be used with a real, personally owned wallet key.
+          </AlertDescription>
+        </Alert>
         <Select v-model="provider">
           <SelectTrigger class="w-[150px]">
             <SelectValue />
@@ -99,15 +111,28 @@
           <SelectContent>
             <SelectItem value="beacon"> Beacon </SelectItem>
             <SelectItem value="walletconnect"> WalletConnect </SelectItem>
+            <SelectItem value="programmatic">
+              Programmatic (Testing)
+            </SelectItem>
           </SelectContent>
         </Select>
+
+        <Input
+          v-if="provider === 'programmatic'"
+          v-model="privateKey"
+          type="text"
+          placeholder="Private Key"
+          class="w-1/2 mt-2"
+        />
       </div>
 
       <DialogFooter>
         <Button
           variant="secondary"
           @click="connect()"
-          :disabled="loading || !provider"
+          :disabled="
+            loading || !provider || (provider === 'programmatic' && !privateKey)
+          "
         >
           <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
           <p>Connect</p>
@@ -205,8 +230,9 @@ import {
   Unplug,
   Copy,
   ExternalLink,
-  AlertTriangle,
+  TriangleAlert,
 } from "lucide-vue-next";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -227,6 +253,8 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "vue-sonner";
 import { buildIndexerUrl } from "@/lib/utils";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const walletStore = useWalletStore();
 const settingsStore = useSettingsStore();
@@ -249,6 +277,7 @@ const provider = ref<WalletProvider>("beacon");
 const loading = ref<boolean>(false);
 const showConnectDialog = ref<boolean>(false);
 const showDisconnectDialog = ref<boolean>(false);
+const privateKey = ref<string>("");
 
 watch([showConnectDialog, showDisconnectDialog], ([newValue]) => {
   if (newValue === false) {
@@ -273,7 +302,7 @@ const openExplorer = () => {
 const connect = async () => {
   try {
     loading.value = true;
-    await walletStore.initializeWallet(provider.value);
+    await walletStore.initializeWallet(provider.value, privateKey.value);
     toast.success("Wallet connected");
   } catch (error) {
     toast.error("Wallet connection failed", {

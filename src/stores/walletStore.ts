@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { TezosToolkit } from "@taquito/taquito";
+import { importKey, InMemorySigner } from "@taquito/signer";
 import type { WalletProvider } from "@/types/wallet";
 import { PermissionScopeMethods, WalletConnect } from "@taquito/wallet-connect";
 import { NetworkType } from "@airgap/beacon-types";
@@ -34,7 +35,10 @@ export const useWalletStore = defineStore("wallet", () => {
    * @throws {ReferenceError} If a wallet is already initialized in this session.
    * @throws {Error} If wallet initialization or permission request fails (e.g., user cancels the wallet popup).
    */
-  const initializeWallet = async (provider: WalletProvider): Promise<void> => {
+  const initializeWallet = async (
+    provider: WalletProvider,
+    privateKey?: string,
+  ): Promise<void> => {
     console.log("Starting initialization of wallet using provider:", provider);
     try {
       // There is a wontfix issue in the Beacon SDK where no event is fired when the popup is closed,
@@ -132,6 +136,46 @@ export const useWalletStore = defineStore("wallet", () => {
         }
 
         localStorage.setItem("wallet-provider", "walletconnect");
+      } else if (provider === "programmatic") {
+        if (!privateKey) {
+          throw new Error("No private key found");
+        }
+
+        await importKey(Tezos, privateKey);
+        const importedAddress = await Tezos.signer.publicKeyHash();
+
+        try {
+          const signer = await InMemorySigner.fromSecretKey(privateKey);
+
+          // Create a mock wallet object that implements the required interface
+          // This will be replaced when the programmatic wallet package is fully implemented
+          const mockWallet = {
+            getPKH: async () => {
+              return importedAddress;
+            },
+            requestPermissions: async () => Promise.resolve(),
+            disconnect: async () => Promise.resolve(),
+            client: {
+              getActiveAccount: async () => ({
+                address: importedAddress,
+              }),
+              getPeers: async () => [{ name: "Programmatic Wallet" }],
+              disconnect: async () => Promise.resolve(),
+              clearActiveAccount: async () => Promise.resolve(),
+            },
+            getAllExistingSessionKeys: async () => [],
+            configureWithExistingSessionKey: async () => Promise.resolve(),
+          };
+          wallet.value = mockWallet as unknown as BeaconWallet;
+          address.value = await mockWallet.getPKH();
+          walletName.value = "Programmatic Wallet";
+          Tezos.setProvider({ signer });
+        } catch (error) {
+          console.error("Failed to initialize programmatic wallet:", error);
+          throw new Error(
+            `Programmatic wallet initialization failed: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
       } else {
         throw new TypeError(`Unknown wallet provider: ${provider}`);
       }
@@ -139,7 +183,11 @@ export const useWalletStore = defineStore("wallet", () => {
       if (wallet.value) {
         address.value = await wallet.value.getPKH();
         await fetchBalance();
-        Tezos.setProvider({ wallet: wallet.value });
+
+        // Only set the wallet provider if we haven't already set a signer for programmatic wallet
+        if (provider !== "programmatic") {
+          Tezos.setProvider({ wallet: wallet.value });
+        }
       } else {
         throw ReferenceError(
           "Wallet was not found after initialization should have finished.",

@@ -53,6 +53,14 @@
             class="text-xs absolute font-medium text-gray-700 text-center leading-[1.2]"
             :class="node.type === 'error' ? 'top-6' : 'bottom-6'"
           >
+            <!-- Locator for automated tests to know when an example is completed -->
+            <div
+              v-if="node.type === 'success' && diagramStatus === 'completed'"
+              class="absolute top-0 left-0 sr-only"
+              aria-hidden="true"
+              data-testid="diagramComplete"
+              tabindex="-1"
+            />
             <a
               v-if="
                 node.type === 'success' &&

@@ -27,3 +27,9 @@ dist-ssr
 .ligo
 src/contracts/contract-config.json
 .cursor
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

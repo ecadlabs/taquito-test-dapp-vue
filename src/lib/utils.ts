@@ -2,6 +2,7 @@ import type { IndexerOption } from "@/stores/settingsStore";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { RpcClient } from "@taquito/rpc";
+import type { Confirmation } from "@/types/wallet";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -24,4 +25,14 @@ export const isRevealed = async (address: string): Promise<boolean> => {
   } catch (error) {
     return false;
   }
+};
+
+export const getOperationHash = (confirmation: Confirmation) => {
+  let opHash = "";
+  if (typeof confirmation === "object" && confirmation?.block?.hash) {
+    opHash = confirmation.block.hash;
+  } else if (typeof confirmation === "number") {
+    opHash = confirmation.toString();
+  }
+  return opHash;
 };
