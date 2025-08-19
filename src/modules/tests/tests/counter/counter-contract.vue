@@ -1,22 +1,30 @@
 <template>
   <div class="flex items-center w-full justify-center gap-4">
-    <Button @click="decrementCounter()">
+    <Button @click="decrementCounter()" :disabled="!walletConnected">
       <Minus class="size-6" />
       <p class="sr-only">Decrement</p>
     </Button>
     <div class="flex flex-col items-center gap-2">
-      <Button variant="ghost" @click="getStorageValue()">
+      <Button
+        variant="ghost"
+        @click="getStorageValue()"
+        :disabled="!walletConnected"
+      >
         <RefreshCw class="size-4" />
         <p class="sr-only">Get Storage Value</p>
       </Button>
       <p class="text-5xl font-bold">{{ storageValue ?? "..." }}</p>
       <p class="text-sm text-muted-foreground">Storage Value</p>
-      <Button variant="ghost" @click="resetCounter()">
+      <Button
+        variant="ghost"
+        @click="resetCounter()"
+        :disabled="!walletConnected"
+      >
         <Trash class="size-4" />
         <p class="sr-only">Reset</p>
       </Button>
     </div>
-    <Button @click="incrementCounter()">
+    <Button @click="incrementCounter()" :disabled="!walletConnected">
       <Plus class="size-6" />
       <p class="sr-only">Increment</p>
     </Button>
@@ -32,10 +40,14 @@ import {
   reset,
   getContractStorage,
 } from "@/modules/tests/tests/counter/counter-contract";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { Minus, Plus, RefreshCw, Trash } from "lucide-vue-next";
+import { useWalletStore } from "@/stores/walletStore";
 
 const diagramStore = useDiagramStore();
+const walletStore = useWalletStore();
+
+const walletConnected = computed(() => !!walletStore.getAddress);
 
 const storageValue = ref<number>();
 

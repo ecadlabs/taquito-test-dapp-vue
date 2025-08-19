@@ -4,7 +4,10 @@
       Batch operation will send a transfer of 1 tez to yourself, and increment
       the counter contract storage by 1.
     </p>
-    <Button @click="sendBatchOperation()" :disabled="sending">
+    <Button
+      @click="sendBatchOperation()"
+      :disabled="sending || !walletStore.getAddress"
+    >
       <Group v-if="!sending" class="size-6" />
       <LoaderCircle v-else class="size-5 animate-spin" />
       <p>Send Batch Operation</p>
@@ -18,8 +21,10 @@ import Button from "@/components/ui/button/Button.vue";
 import { onMounted, ref } from "vue";
 import { Group, LoaderCircle } from "lucide-vue-next";
 import { sendBatch } from "@/modules/tests/tests/batch/batch";
+import { useWalletStore } from "@/stores/walletStore";
 
 const diagramStore = useDiagramStore();
+const walletStore = useWalletStore();
 
 onMounted(() => {
   diagramStore.setTestDiagram("batch");

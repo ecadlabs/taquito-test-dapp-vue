@@ -12,7 +12,7 @@
         </div>
         <Button
           @click="removeDelegation()"
-          :disabled="sending"
+          :disabled="sending || !walletStore.getAddress"
           variant="destructive"
           class="w-full mt-4"
         >
@@ -44,11 +44,15 @@
           </div>
           <Button
             @click="delegateToCurrentAddress()"
-            :disabled="sending || loadingCurrentDelegate"
+            :disabled="
+              sending || loadingCurrentDelegate || !walletStore.getAddress
+            "
             class="w-full"
           >
             <Loader2
-              v-if="sending || loadingCurrentDelegate"
+              v-if="
+                sending || (loadingCurrentDelegate && walletStore.getAddress)
+              "
               class="w-4 h-4 mr-2 animate-spin"
             />
             <Cookie v-else class="w-4 h-4" />
@@ -63,7 +67,7 @@
 
 <script setup lang="ts">
 import { useDiagramStore } from "@/stores/diagramStore";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -85,9 +89,24 @@ const loadingCurrentDelegate = ref<boolean>(true);
 
 onMounted(async () => {
   diagramStore.setTestDiagram("delegation");
+  await loadCurrentDelegate();
+});
+
+watch(
+  () => walletStore.getAddress,
+  async (newAddress) => {
+    if (newAddress === undefined) {
+      currentDelegate.value = undefined;
+    }
+
+    await loadCurrentDelegate();
+  },
+);
+
+const loadCurrentDelegate = async () => {
   currentDelegate.value = await getCurrentDelegate();
   loadingCurrentDelegate.value = false;
-});
+};
 
 const delegateToCurrentAddress = async () => {
   try {

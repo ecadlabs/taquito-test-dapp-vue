@@ -19,7 +19,11 @@
         </NumberFieldContent>
       </NumberField>
     </div>
-    <Button @click="increase()" :disabled="processing" class="w-32">
+    <Button
+      @click="increase()"
+      :disabled="processing || !walletStore.getAddress"
+      class="w-32"
+    >
       <Loader2 v-if="processing" class="w-4 h-4 mr-2 animate-spin" />
       <p v-else>Increase Storage</p>
     </Button>
@@ -41,14 +45,25 @@ import {
 } from "@/components/ui/number-field";
 import { Loader2 } from "lucide-vue-next";
 import { increaseStorage } from "@/modules/tests/tests/increase-paid-storage/increase-paid-storage";
-// Seoulnet
-const contractAddress = ref<string>("KT1RLWdB5zJcN7RVqu5MRWp3gvkMUGEpuc1d");
+import { useWalletStore } from "@/stores/walletStore";
+import type { ContractConfig } from "@/types/contract";
+import contracts from "@/contracts/contract-config.json";
+
+const contractAddress = ref<string>();
 const bytes = ref<number>(1);
 const processing = ref<boolean>(false);
 const diagramStore = useDiagramStore();
+const walletStore = useWalletStore();
 
 onMounted(() => {
   diagramStore.setTestDiagram("transfer");
+
+  const CONTRACT_ADDRESS =
+    (contracts as ContractConfig[]).find(
+      (contract: ContractConfig) => contract.contractName === "counter",
+    )?.address ?? "";
+
+  contractAddress.value = CONTRACT_ADDRESS;
 });
 
 const increase = async () => {
