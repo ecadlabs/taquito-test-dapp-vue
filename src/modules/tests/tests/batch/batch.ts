@@ -19,9 +19,6 @@ const CONTRACT_ADDRESS =
  */
 const sendBatch = async (): Promise<void> => {
   const diagramStore = useDiagramStore();
-
-  diagramStore.setTestDiagram(TEST_ID, "batch");
-
   const walletStore = useWalletStore();
   const Tezos = walletStore.getTezos;
 
