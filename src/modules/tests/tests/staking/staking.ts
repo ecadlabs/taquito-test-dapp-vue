@@ -3,6 +3,7 @@ import { useDiagramStore } from "@/stores/diagramStore";
 import { PiggyBank } from "lucide-vue-next";
 import type { Estimate } from "@taquito/taquito";
 import { RpcClient } from "@taquito/rpc";
+import { useSettingsStore } from "@/stores/settingsStore";
 
 const TEST_ID = "staking";
 let estimate: Estimate;
@@ -135,7 +136,8 @@ const finalizeUnstake = async () => {
 };
 
 const getStakingInfo = async (address: string) => {
-  const rpc = new RpcClient(import.meta.env.VITE_RPC_URL);
+  const settingsStore = useSettingsStore();
+  const rpc = new RpcClient(settingsStore.settings.rpcUrl);
 
   try {
     const staked = await rpc.getStakedBalance(address);
@@ -153,8 +155,9 @@ const getStakingInfo = async (address: string) => {
 };
 
 const getDelegateAcceptsStaking = async (address: string): Promise<boolean> => {
+  const settingsStore = useSettingsStore();
   try {
-    const rpcUrl = import.meta.env.VITE_RPC_URL;
+    const rpcUrl = settingsStore.settings.rpcUrl;
     const response = await fetch(
       `${rpcUrl}/chains/main/blocks/head/context/delegates/${address}/active_staking_parameters`,
     );

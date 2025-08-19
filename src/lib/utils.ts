@@ -1,4 +1,4 @@
-import type { IndexerOption } from "@/stores/settingsStore";
+import { useSettingsStore, type IndexerOption } from "@/stores/settingsStore";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { RpcClient } from "@taquito/rpc";
@@ -16,8 +16,9 @@ export const buildIndexerUrl = (
 };
 
 export const isRevealed = async (address: string): Promise<boolean> => {
+  const settingsStore = useSettingsStore();
   try {
-    const rpc = new RpcClient(import.meta.env.VITE_RPC_URL);
+    const rpc = new RpcClient(settingsStore.settings.rpcUrl);
     const managerKey = await rpc.getManagerKey(address);
 
     // If managerKey exists and is not null/undefined, the public key is revealed

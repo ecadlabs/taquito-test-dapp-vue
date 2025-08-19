@@ -22,24 +22,38 @@ export const availableIndexers: IndexerOption[] = [
 
 export type Settings = {
   indexer: IndexerOption;
+  rpcUrl: string;
 };
 
 const defaultSettings: Settings = {
   indexer: availableIndexers[0],
+  rpcUrl: import.meta.env.VITE_RPC_URL,
 };
 
 export const useSettingsStore = defineStore("settings", () => {
-  const settings = ref<Settings>(
-    JSON.parse(
-      localStorage.getItem("playground-settings") ??
-        JSON.stringify(defaultSettings),
-    ) as Settings,
-  );
+  const getMergedSettings = (): Settings => {
+    const stored = localStorage.getItem("playground-settings");
+    if (!stored) return { ...defaultSettings };
+    try {
+      const parsed = JSON.parse(stored) as Partial<Settings>;
+      return {
+        ...defaultSettings,
+        ...parsed,
+      };
+    } catch {
+      return { ...defaultSettings };
+    }
+  };
+
+  const settings = ref<Settings>(getMergedSettings());
   const isRevealed = ref(true);
 
   const getSettings = computed(() => settings.value);
   const getIndexer = computed(() => settings.value.indexer);
   const getIsRevealed = computed(() => isRevealed.value);
+  const isUsingCustomRpcUrl = computed(() => {
+    return settings.value.rpcUrl !== import.meta.env.VITE_RPC_URL;
+  });
 
   // Update the settings in localStorage when the settings change so they persist across sessions
   watch(
@@ -50,11 +64,17 @@ export const useSettingsStore = defineStore("settings", () => {
     { deep: true, immediate: true },
   );
 
+  const resetRpcUrl = () => {
+    settings.value.rpcUrl = import.meta.env.VITE_RPC_URL;
+  };
+
   return {
     isRevealed,
     settings,
     getSettings,
     getIndexer,
     getIsRevealed,
+    isUsingCustomRpcUrl,
+    resetRpcUrl,
   };
 });

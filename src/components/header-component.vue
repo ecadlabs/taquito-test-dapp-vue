@@ -39,9 +39,13 @@
     <Button
       size="icon"
       variant="outline"
-      class="ml-2"
+      class="ml-2 relative"
       @click="showSettingsDialog = true"
     >
+      <div
+        v-if="settingsStore.isUsingCustomRpcUrl"
+        class="bg-orange-400 size-3 absolute -top-1 -right-1 rounded-full"
+      />
       <p class="sr-only">Settings</p>
       <Settings class="size-5" />
     </Button>
@@ -132,6 +136,21 @@ watch(
   () => walletStore.getAddress,
   async (newAddress) => {
     await updateRevealedStatus(newAddress);
+  },
+);
+
+// Reload the page if the RPC URL has changed to re-initialize the wallet with the new URL
+const previousSettings = ref(settingsStore.settings);
+watch(
+  () => showSettingsDialog.value,
+  async (open) => {
+    if (open) {
+      previousSettings.value = { ...settingsStore.settings };
+    } else {
+      if (previousSettings.value.rpcUrl !== settingsStore.settings.rpcUrl) {
+        window.location.reload();
+      }
+    }
   },
 );
 </script>

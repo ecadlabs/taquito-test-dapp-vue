@@ -165,8 +165,9 @@ export const useDiagramStore = defineStore("diagram", () => {
 
   const showFeeEstimationDialog = (estimate: Estimate) => {
     const dialogContent = {
-      title: "Transaction Fees",
-      description: "Transaction fee breakdown",
+      title: "Transaction Fee Estimate",
+      description:
+        "Transaction fee estimate breakdown for the current operation.",
       content: `
 					<div class="space-y-2">
 						<div class="flex justify-between">
