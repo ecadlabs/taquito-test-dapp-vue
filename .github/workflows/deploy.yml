@@ -58,8 +58,8 @@ jobs:
           echo "ALICE_WALLET_ADDRESS: ${{ vars.ALICE_WALLET_ADDRESS }}"
           echo "REOWN_PROJECT_ID: ${{ secrets.REOWN_PROJECT_ID }}"
       
-      - run: npm run fund-wallet ${{ vars.ALICE_WALLET_ADDRESS }}
-      - run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
+      # - run: npm run fund-wallet ${{ vars.ALICE_WALLET_ADDRESS }}
+      # - run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
       - run: npm run build
 
       - name: Publish to Cloudflare Pages
