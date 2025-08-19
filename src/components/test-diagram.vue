@@ -1,6 +1,6 @@
 <template>
   <div class="overflow-auto w-full relative" ref="diagram-container">
-    <div class="min-w-full h-[150px] relative">
+    <div class="min-w-full h-[180px] relative">
       <!-- Connections layer -->
       <div
         class="absolute top-0 left-0 w-full h-full pointer-events-none z-[1]"
@@ -94,6 +94,17 @@
             <p v-if="node.type === 'error'" class="text-red-400 mt-1">
               {{ errorMessage }}
             </p>
+
+            <!-- Timing badge -->
+            <div v-if="node.type === 'process'" class="mt-1">
+              <Badge
+                v-if="getStepTiming(node.id)?.duration !== undefined"
+                variant="outline"
+                class="text-xs font-mono"
+              >
+                {{ getStepTiming(node.id)?.duration }}ms
+              </Badge>
+            </div>
           </div>
         </div>
       </div>
@@ -122,7 +133,7 @@ const diagramContainer = useTemplateRef("diagram-container");
 
 const verticalSpacing = 50;
 const horizontalMargin = 80;
-const verticalMargin = 50;
+const verticalMargin = 75;
 const NODE_SPACING_MINIMUM = 100;
 
 const diagram = computed(() => diagramStore.currentDiagram);
@@ -130,6 +141,10 @@ const currentStep = computed(() => diagramStore.currentStep);
 const diagramStatus = computed(() => diagramStore.diagramStatus);
 const errorMessage = computed(() => diagramStore.errorMessage);
 const operationHash = computed(() => diagramStore.operationHash);
+
+const getStepTiming = (stepId: string) => {
+  return diagramStore.getStepTiming(stepId);
+};
 
 const networkType = import.meta.env.VITE_NETWORK_TYPE;
 
@@ -252,6 +267,7 @@ const nodeSpacing = computed(() => {
   const availableWidth = width - horizontalMargin * 2;
   return Math.max(NODE_SPACING_MINIMUM, availableWidth / (nodeCount - 1));
 });
+
 onMounted(() => {
   let lastUpdate = 0;
   const throttleMs = 100;

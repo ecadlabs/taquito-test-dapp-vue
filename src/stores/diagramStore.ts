@@ -10,6 +10,12 @@ export interface DialogContent {
   content: string; // HTML string
 }
 
+export interface StepTiming {
+  startTime: DOMHighResTimeStamp;
+  endTime?: DOMHighResTimeStamp;
+  duration?: number;
+}
+
 export const useDiagramStore = defineStore("diagram", () => {
   const currentDiagram = ref<TestDiagram | null>(null);
   const currentStep = ref<string | null>(null);
@@ -21,6 +27,9 @@ export const useDiagramStore = defineStore("diagram", () => {
   const operationHash = ref<string | number>();
   const currentTestId = ref<string | null>(null);
   const currentDiagramKey = ref<string | null>(null);
+
+  // Timing tracking for each step
+  const stepTimings = ref<Map<string, StepTiming>>(new Map());
 
   // Button state management
   const nodeButtons = ref<
@@ -62,9 +71,7 @@ export const useDiagramStore = defineStore("diagram", () => {
     status: "running" | "completed",
     testId?: string,
   ) => {
-    if (testId && currentTestId.value !== testId) {
-      return;
-    }
+    if (testId && currentTestId.value !== testId) return;
 
     // Reset diagram if there was an error - this allows users to retry
     // and should only run when the user interacts with something, since
@@ -76,6 +83,15 @@ export const useDiagramStore = defineStore("diagram", () => {
     }
 
     if (currentDiagram.value && currentTestId.value) {
+      if (currentStep.value && currentStep.value !== stepId) {
+        const prevTiming = stepTimings.value.get(currentStep.value);
+        if (prevTiming?.startTime && !prevTiming.endTime) {
+          prevTiming.endTime = performance.now();
+          prevTiming.duration = prevTiming.endTime - prevTiming.startTime;
+        }
+      }
+      stepTimings.value.set(stepId, { startTime: performance.now() });
+
       currentStep.value = stepId;
       diagramStatus.value = status;
     }
@@ -85,6 +101,16 @@ export const useDiagramStore = defineStore("diagram", () => {
     if (testId && currentTestId.value !== testId) {
       return;
     }
+
+    // Track timing for the current step when it errors
+    if (currentStep.value) {
+      const timing = stepTimings.value.get(currentStep.value);
+      if (timing) {
+        timing.endTime = performance.now();
+        timing.duration = timing.endTime - timing.startTime;
+      }
+    }
+
     errorMessage.value = error;
     diagramStatus.value = "errored";
   };
@@ -94,6 +120,23 @@ export const useDiagramStore = defineStore("diagram", () => {
       return;
     }
     operationHash.value = hash;
+  };
+
+  /**
+   * Get timing information for a specific step
+   * @param stepId - The step ID to get timing for
+   * @returns StepTiming object or undefined if not found
+   */
+  const getStepTiming = (stepId: string): StepTiming | undefined => {
+    return stepTimings.value.get(stepId);
+  };
+
+  /**
+   * Get all step timings for the current diagram
+   * @returns Map of step ID to timing information
+   */
+  const getAllStepTimings = (): Map<string, StepTiming> => {
+    return stepTimings.value;
   };
 
   /**
@@ -151,6 +194,7 @@ export const useDiagramStore = defineStore("diagram", () => {
       operationHash.value = undefined;
       currentTestId.value = null;
       currentDiagramKey.value = null;
+      stepTimings.value.clear();
       nodeButtons.value.clear();
       showDialog.value = false;
       dialogContent.value = null;
@@ -213,6 +257,7 @@ export const useDiagramStore = defineStore("diagram", () => {
     operationHash,
     currentTestId,
     currentDiagramKey,
+    stepTimings,
     nodeButtons,
     showDialog,
     dialogContent,
@@ -222,6 +267,8 @@ export const useDiagramStore = defineStore("diagram", () => {
     resetDiagram,
     setErrorMessage,
     setOperationHash,
+    getStepTiming,
+    getAllStepTimings,
     setNodeButton,
     removeNodeButton,
     getNodeButton,

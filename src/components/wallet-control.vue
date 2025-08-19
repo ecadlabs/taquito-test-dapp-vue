@@ -93,7 +93,7 @@
 
       <div>
         <Alert v-if="provider === 'programmatic'" class="mb-2">
-          <TriangleAlert class="size-4 !text-red-500" />
+          <AlertTriangle class="size-4 !text-red-500" />
           <AlertTitle>
             <p>Important!</p>
           </AlertTitle>
@@ -230,7 +230,7 @@ import {
   Unplug,
   Copy,
   ExternalLink,
-  TriangleAlert,
+  AlertTriangle,
 } from "lucide-vue-next";
 
 import { Button } from "@/components/ui/button";
