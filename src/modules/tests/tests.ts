@@ -6,6 +6,7 @@ import IncreasePaidStorage from "@/modules/tests/tests/increase-paid-storage/inc
 import EstimateFees from "@/modules/tests/tests/estimate-fees/estimate-fees.vue";
 import Delegation from "@/modules/tests/tests/delegation/delegation.vue";
 import Staking from "@/modules/tests/tests/staking/staking.vue";
+import Batch from "@/modules/tests/tests/batch/batch.vue";
 
 export const AvailableTests: Record<string, TestMetadata> = {
   transfer: {
@@ -362,6 +363,53 @@ export const AvailableTests: Record<string, TestMetadata> = {
           {
             id: "finalize-unstake",
             label: "Finalize Unstake",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+    },
+  },
+  batch: {
+    id: "batch",
+    title: "Batching Operations",
+    description: "Batching multiple operations together.",
+    category: "Other",
+    learningGoals: [
+      "Understand how to batch multiple operations together",
+      "Learn about the benefits of batching operations",
+      "Handle batch operation confirmation and errors",
+    ],
+    prerequisites: [
+      "Basic understanding of Tezos wallet addresses",
+      "Familiarity with Promises/Async functions in JavaScript",
+    ],
+    setup: [
+      "Set up a Tezos wallet and fund it with some TEZ",
+      "Connect your wallet to Taquito Playground",
+    ],
+    relatedTests: [],
+    sourceCode: {
+      script: "https://example.com",
+      documentation: "https://taquito.io/docs/batch_API/",
+    },
+    component: Batch,
+    diagrams: {
+      batch: {
+        nodes: [
+          {
+            id: "create-batch",
+            label: "Create Batch",
+          },
+          {
+            id: "add-operations",
+            label: "Add Operations to Batch",
           },
           {
             id: "wait-for-user",
