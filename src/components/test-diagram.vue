@@ -102,7 +102,7 @@
                 variant="outline"
                 class="text-xs font-mono"
               >
-                {{ getStepTiming(node.id)?.duration }}ms
+                {{ Math.round(getStepTiming(node.id)?.duration ?? 0) }}ms
               </Badge>
             </div>
           </div>
