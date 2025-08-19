@@ -31,6 +31,8 @@ jobs:
             project_name: taquito-dapp
           - environment: ghostnet
             project_name: taquito-dapp-ghostnet
+          - environment: shadownet
+            project_name: taquito-dapp-shadownet
     env:
       VITE_NETWORK_TYPE: ${{ matrix.environment }}
       VITE_RPC_URL: ${{ vars.RPC_URL }}

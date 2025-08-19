@@ -6,7 +6,7 @@ import { PiggyBank } from "lucide-vue-next";
 import type { Estimate } from "@taquito/taquito";
 
 const CONTRACT_ADDRESS =
-  contracts.find(
+  (contracts as ContractConfig[]).find(
     (contract: ContractConfig) => contract.contractName === "counter",
   )?.address ?? "";
 const TEST_ID = "counter-contract";

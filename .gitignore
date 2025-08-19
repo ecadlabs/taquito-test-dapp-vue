@@ -25,7 +25,6 @@ dist-ssr
 
 .env
 .ligo
-src/contracts/contract-config.json
 .cursor
 
 # Playwright
