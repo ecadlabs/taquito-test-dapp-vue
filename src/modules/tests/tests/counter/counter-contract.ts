@@ -1,14 +1,15 @@
 import { useWalletStore } from "@/stores/walletStore";
 import { useDiagramStore } from "@/stores/diagramStore";
-import contracts from "@/contracts/contract-config.json";
-import { type ContractConfig } from "@/types/contract";
+// import contracts from "@/contracts/contract-config.json";
+// import { type ContractConfig } from "@/types/contract";
 import { PiggyBank } from "lucide-vue-next";
 import type { Estimate } from "@taquito/taquito";
 
-const CONTRACT_ADDRESS =
-  contracts.find(
-    (contract: ContractConfig) => contract.contractName === "counter",
-  )?.address ?? "";
+const CONTRACT_ADDRESS = "KT1example";
+// const CONTRACT_ADDRESS =
+//   contracts.find(
+//     (contract: ContractConfig) => contract.contractName === "counter",
+//   )?.address ?? "";
 const TEST_ID = "counter-contract";
 
 let estimate: Estimate;
