@@ -6,6 +6,7 @@ import type {
   TransactionOperation,
   TransactionWalletOperation,
 } from "@taquito/taquito";
+import { getOperationHash } from "@/lib/utils";
 
 const TEST_ID = "transfer";
 
@@ -44,13 +45,7 @@ const send = async (to: string, amount: number) => {
     diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
     const confirmation = await transfer.confirmation();
 
-    let opHash = "";
-    if (typeof confirmation === "object" && confirmation?.block?.hash) {
-      opHash = confirmation.block.hash;
-    } else if (typeof confirmation === "number") {
-      opHash = confirmation.toString();
-    }
-
+    const opHash = getOperationHash(confirmation);
     diagramStore.setOperationHash(opHash, TEST_ID);
     diagramStore.setProgress("success", "completed", TEST_ID);
     await walletStore.fetchBalance();

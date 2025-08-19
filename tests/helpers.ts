@@ -37,9 +37,6 @@ export const waitForSuccess = async ({ page }: { page: Page }) => {
     timeout: 60000, // Increased timeout for blockchain operations
     state: "visible",
   });
-
-  // Additional wait to ensure the operation is fully processed
-  await page.waitForTimeout(2000);
 };
 
 export const waitForBalanceLoaded = async ({ page }: { page: Page }) => {
@@ -53,9 +50,6 @@ export const waitForBalanceLoaded = async ({ page }: { page: Page }) => {
     },
     { timeout: 15000 },
   );
-
-  // Additional wait to ensure the balance is stable
-  await page.waitForTimeout(1000);
 };
 
 export const delegate = async ({ page }: { page: Page }) => {

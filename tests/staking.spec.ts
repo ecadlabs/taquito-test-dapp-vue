@@ -15,7 +15,7 @@ test.describe("Staking", () => {
   test("should stake tez", async () => {
     const sharedPage = getSharedPage();
     await delegate({ page: sharedPage });
-    await sharedPage.waitForTimeout(2000);
+
     await goToTest({ page: sharedPage, testName: "Staking Tokens" });
     await waitForBalanceLoaded({ page: sharedPage });
 
@@ -51,9 +51,6 @@ test.describe("Staking", () => {
 
     await unstakeButton.click();
     await waitForSuccess({ page: sharedPage });
-
-    // Wait for balance to update after unstaking
-    await sharedPage.waitForTimeout(2000);
   });
 
   test("should finalize unstake", async () => {
@@ -78,8 +75,5 @@ test.describe("Staking", () => {
 
     await finalizeButton.click();
     await waitForSuccess({ page: sharedPage });
-
-    // Wait for balance to update after finalizing
-    await sharedPage.waitForTimeout(2000);
   });
 });
