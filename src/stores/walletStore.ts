@@ -156,6 +156,9 @@ export const useWalletStore = defineStore("wallet", () => {
             getPKH: async () => {
               return importedAddress;
             },
+            getPK: async () => {
+              return Tezos.signer.publicKey();
+            },
             requestPermissions: async () => Promise.resolve(),
             disconnect: async () => Promise.resolve(),
             client: {

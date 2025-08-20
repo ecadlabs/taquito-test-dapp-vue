@@ -7,6 +7,7 @@ import EstimateFees from "@/modules/tests/tests/estimate-fees/estimate-fees.vue"
 import Delegation from "@/modules/tests/tests/delegation/delegation.vue";
 import Staking from "@/modules/tests/tests/staking/staking.vue";
 import Batch from "@/modules/tests/tests/batch/batch.vue";
+import SignPayload from "@/modules/tests/tests/sign-payload/sign-payload.vue";
 
 export const AvailableTests: Record<string, TestMetadata> = {
   transfer: {
@@ -418,6 +419,87 @@ export const AvailableTests: Record<string, TestMetadata> = {
           {
             id: "wait-for-chain-confirmation",
             label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+    },
+  },
+  "sign-payload": {
+    id: "sign-payload",
+    title: "Signing Data",
+    description: "Signing a payload.",
+    category: "Other",
+    learningGoals: ["Understand how to sign payloads"],
+    prerequisites: [
+      "Basic understanding of Tezos wallet addresses",
+      "Familiarity with Promises/Async functions in JavaScript",
+    ],
+    setup: [
+      "Set up a Tezos wallet and fund it with some TEZ",
+      "Connect your wallet to Taquito Playground",
+    ],
+    relatedTests: [],
+    sourceCode: {
+      script: "https://example.com",
+      documentation: "https://taquito.io/docs/signing/",
+    },
+    component: SignPayload,
+    diagrams: {
+      sign: {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "join-payload",
+            label: "Join Payload",
+          },
+          {
+            id: "convert-to-bytes",
+            label: "Convert to Bytes",
+          },
+          {
+            id: "request-wallet-sign",
+            label: "Request Wallet Sign",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
+          },
+          {
+            id: "verify-signature",
+            label: "Verify Signature",
+          },
+        ],
+      },
+      signMichelson: {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "parse-micheline-expression",
+            label: "Parse Micheline Expression",
+          },
+          {
+            id: "pack-data-bytes",
+            label: "Pack Data Bytes",
+          },
+          {
+            id: "join-payload",
+            label: "Join Payload",
+          },
+          {
+            id: "convert-to-bytes",
+            label: "Convert to Bytes",
+          },
+          {
+            id: "request-wallet-sign",
+            label: "Request Wallet Sign",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
+          },
+          {
+            id: "verify-signature",
+            label: "Verify Signature",
           },
         ],
       },

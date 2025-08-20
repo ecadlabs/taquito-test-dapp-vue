@@ -19,14 +19,16 @@
     "test:ui": "npx playwright test --ui"
   },
   "dependencies": {
+    "@airgap/beacon-sdk": "^4.6.0",
     "@airgap/beacon-types": "^4.6.1-beta.2",
     "@tailwindcss/vite": "^4.1.11",
     "@taquito/beacon-wallet": "^23.0.0-beta.0",
+    "@taquito/michel-codec": "^22.0.0",
     "@taquito/remote-signer": "^22.0.0",
     "@taquito/signer": "^23.0.0-beta.0",
     "@taquito/taquito": "^23.0.0-beta.0",
     "@taquito/wallet-connect": "^23.0.0-beta.0",
-    "@vueuse/core": "^13.6.0",
+    "@vueuse/core": "^13.7.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-vue-next": "^0.534.0",
