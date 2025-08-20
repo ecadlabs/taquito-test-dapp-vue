@@ -22,4 +22,11 @@ test.describe("Signing Payloads", () => {
     await page.getByTestId("sign-tzip32-payload-button").click();
     await waitForSuccess({ page });
   });
+
+  test("should sign a michelson payload", async () => {
+    const page = getSharedPage();
+    await goToTest({ page, testName: "Signing Data" });
+    await page.getByTestId("sign-michelson-data-button").click();
+    await waitForSuccess({ page });
+  });
 });

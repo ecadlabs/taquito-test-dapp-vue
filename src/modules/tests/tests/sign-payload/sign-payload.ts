@@ -5,21 +5,33 @@ import { type RequestSignPayloadInput } from "@airgap/beacon-sdk";
 import { SigningType } from "@airgap/beacon-types";
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { WalletConnect } from "@taquito/wallet-connect";
+import {
+  Parser,
+  packDataBytes,
+  type MichelsonData,
+  type MichelsonType,
+} from "@taquito/michel-codec";
 
 const TEST_ID = "sign-payload";
 
-const sign = async (input: string) => {
+const sign = async (
+  input: string,
+  alreadyBytes: boolean = false,
+  noDiagram: boolean = false,
+) => {
   const diagramStore = useDiagramStore();
   const walletStore = useWalletStore();
   const Tezos = walletStore.getTezos;
-  diagramStore.setTestDiagram(TEST_ID, "sign");
+  if (!noDiagram) {
+    diagramStore.setTestDiagram(TEST_ID, "sign");
+  }
 
   try {
     diagramStore.setProgress("join-payload", "running", TEST_ID);
     const formattedInput: string = ["Tezos Signed Message:", input].join(" ");
 
     diagramStore.setProgress("convert-to-bytes", "running", TEST_ID);
-    const bytes = stringToBytes(formattedInput);
+    const bytes = alreadyBytes ? input : stringToBytes(formattedInput);
     const bytesLength = (bytes.length / 2).toString(16);
     const addPadding = `00000000${bytesLength}`;
     const paddedBytesLength = addPadding.slice(addPadding.length - 8);
@@ -61,7 +73,9 @@ const sign = async (input: string) => {
       throw new Error("Signature verification failed");
     }
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    if (!noDiagram) {
+      diagramStore.setProgress("success", "completed", TEST_ID);
+    }
 
     return signature;
   } catch (error) {
@@ -126,6 +140,33 @@ const signTzip32 = async (input: string) => {
     diagramStore.setErrorMessage(error, TEST_ID);
     return null;
   }
+};
+
+export const signMichelsonData = async (
+  data: string,
+  type: string,
+): Promise<string> => {
+  const diagramStore = useDiagramStore();
+  diagramStore.setTestDiagram(TEST_ID, "signMichelson");
+
+  diagramStore.setProgress("parse-micheline-expression", "running", TEST_ID);
+  const p = new Parser();
+  const dataJSON = p.parseMichelineExpression(data);
+  const typeJSON = p.parseMichelineExpression(type);
+
+  diagramStore.setProgress("pack-data-bytes", "running", TEST_ID);
+  const packed = packDataBytes(
+    dataJSON as MichelsonData,
+    typeJSON as MichelsonType,
+  );
+
+  const signature = await sign(packed.bytes, true, true);
+  if (!signature) {
+    throw new Error("Failed to sign Michelson data");
+  }
+
+  diagramStore.setProgress("success", "completed", TEST_ID);
+  return signature;
 };
 
 export { sign, signTzip32 };

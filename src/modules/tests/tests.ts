@@ -470,6 +470,39 @@ export const AvailableTests: Record<string, TestMetadata> = {
           },
         ],
       },
+      signMichelson: {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "parse-micheline-expression",
+            label: "Parse Micheline Expression",
+          },
+          {
+            id: "pack-data-bytes",
+            label: "Pack Data Bytes",
+          },
+          {
+            id: "join-payload",
+            label: "Join Payload",
+          },
+          {
+            id: "convert-to-bytes",
+            label: "Convert to Bytes",
+          },
+          {
+            id: "request-wallet-sign",
+            label: "Request Wallet Sign",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
+          },
+          {
+            id: "verify-signature",
+            label: "Verify Signature",
+          },
+        ],
+      },
     },
   },
 };
