@@ -19,6 +19,7 @@
     "test:ui": "npx playwright test --ui"
   },
   "dependencies": {
+    "@airgap/beacon-sdk": "^4.6.0",
     "@airgap/beacon-types": "^4.6.1-beta.2",
     "@tailwindcss/vite": "^4.1.11",
     "@taquito/beacon-wallet": "^23.0.0-beta.0",
