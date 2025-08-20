@@ -1,6 +1,6 @@
 import { useWalletStore } from "@/stores/walletStore";
 import { useDiagramStore } from "@/stores/diagramStore";
-import { stringToBytes } from "@taquito/utils";
+import { stringToBytes, verifySignature } from "@taquito/utils";
 import { type RequestSignPayloadInput } from "@airgap/beacon-sdk";
 import { SigningType } from "@airgap/beacon-types";
 import { BeaconWallet } from "@taquito/beacon-wallet";
@@ -53,6 +53,14 @@ const sign = async (input: string) => {
     }
 
     const { signature } = signedPayload;
+
+    diagramStore.setProgress("verify-signature", "running", TEST_ID);
+    const publicKey = await walletStore.getWallet.getPK();
+    const verified = await verifySignature(payloadBytes, publicKey, signature);
+    if (!verified) {
+      throw new Error("Signature verification failed");
+    }
+
     diagramStore.setProgress("success", "completed", TEST_ID);
 
     return signature;

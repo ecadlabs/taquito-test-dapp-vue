@@ -446,6 +446,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     component: SignPayload,
     diagrams: {
       sign: {
+        noIndexer: true,
         nodes: [
           {
             id: "join-payload",
@@ -462,6 +463,10 @@ export const AvailableTests: Record<string, TestMetadata> = {
           {
             id: "wait-for-user",
             label: "Wait for User Confirmation",
+          },
+          {
+            id: "verify-signature",
+            label: "Verify Signature",
           },
         ],
       },
