@@ -1,6 +1,6 @@
 import { useWalletStore } from "@/stores/walletStore";
 import { useDiagramStore } from "@/stores/diagramStore";
-import { stringToBytes, verifySignature } from "@taquito/utils";
+import { num2PaddedHex, stringToBytes, verifySignature } from "@taquito/utils";
 import { type RequestSignPayloadInput } from "@airgap/beacon-sdk";
 import { SigningType } from "@airgap/beacon-types";
 import { BeaconWallet } from "@taquito/beacon-wallet";
@@ -71,4 +71,61 @@ const sign = async (input: string) => {
   }
 };
 
-export { sign };
+const signTzip32 = async (input: string) => {
+  const diagramStore = useDiagramStore();
+  const walletStore = useWalletStore();
+  const Tezos = walletStore.getTezos;
+  diagramStore.setTestDiagram(TEST_ID, "sign-tzip32");
+
+  try {
+    let magicByte = "0x80";
+    let magicString = "tezos signed offchain message";
+    let interface_ = "tzip://32";
+    let characterEncoding = "0";
+    let message = input;
+
+    let payloadBytes =
+      stringToBytes(magicString) +
+      num2PaddedHex(interface_.length, 8) +
+      stringToBytes(interface_) +
+      num2PaddedHex(Number(characterEncoding), 8) +
+      num2PaddedHex(message.length, 16) +
+      stringToBytes(message);
+
+    const payload = {
+      signingType: SigningType.RAW,
+      payload: magicByte + payloadBytes,
+    };
+
+    const wallet = walletStore.getWallet;
+
+    if (!wallet) {
+      throw new Error("No wallet found");
+    }
+
+    diagramStore.setProgress("request-wallet-sign", "running", TEST_ID);
+    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    // Different wallets have different ways of signing payloads
+    let signedPayload;
+    if (wallet instanceof BeaconWallet) {
+      signedPayload = await wallet.client.requestSignPayload(payload);
+    } else if (wallet instanceof WalletConnect) {
+      const signature = await wallet.sign(payload.payload);
+      signedPayload = { signature };
+    } else {
+      const signature = await Tezos.signer.sign(payloadBytes);
+      signedPayload = { signature: signature.prefixSig };
+    }
+
+    const { signature } = signedPayload;
+    diagramStore.setProgress("success", "completed", TEST_ID);
+
+    return signature;
+  } catch (error) {
+    console.error(`Failed to sign payload: ${error}`);
+    diagramStore.setErrorMessage(error, TEST_ID);
+    return null;
+  }
+};
+
+export { sign, signTzip32 };
