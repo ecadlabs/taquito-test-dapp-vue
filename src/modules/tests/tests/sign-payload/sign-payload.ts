@@ -92,13 +92,13 @@ const signTzip32 = async (input: string) => {
   diagramStore.setTestDiagram(TEST_ID, "sign-tzip32");
 
   try {
-    let magicByte = "0x80";
-    let magicString = "tezos signed offchain message";
-    let interface_ = "tzip://32";
-    let characterEncoding = "0";
-    let message = input;
+    const magicByte = "0x80";
+    const magicString = "tezos signed offchain message";
+    const interface_ = "tzip://32";
+    const characterEncoding = "0";
+    const message = input;
 
-    let payloadBytes =
+    const payloadBytes =
       stringToBytes(magicString) +
       num2PaddedHex(interface_.length, 8) +
       stringToBytes(interface_) +

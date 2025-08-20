@@ -88,8 +88,12 @@ const signing = ref<boolean>(false);
 const signingTzip32 = ref<boolean>(false);
 const signingMichelson = ref<boolean>(false);
 
-const michelsonData = `(Pair (Pair { Elt 1 (Pair (Pair "tz1gjaF81ZRRvdzjobyfVNsAeSC6PScjfQwN" "tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx") 0x0501000000026869) } 10000000) (Pair 2 333))`;
-const michelsonType = `(pair (pair (map int (pair (pair address address) bytes)) int) (pair int int))`;
+const michelsonData = ref<string>(
+  `(Pair (Pair { Elt 1 (Pair (Pair "tz1gjaF81ZRRvdzjobyfVNsAeSC6PScjfQwN" "tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx") 0x0501000000026869) } 10000000) (Pair 2 333))`,
+);
+const michelsonType = ref<string>(
+  `(pair (pair (map int (pair (pair address address) bytes)) int) (pair int int))`,
+);
 
 const anySigningInProgress = computed(() => {
   return signing.value || signingTzip32.value || signingMichelson.value;
@@ -124,7 +128,10 @@ const signTzip32Payload = async () => {
 const signMichelson = async () => {
   try {
     signingMichelson.value = true;
-    signature.value = await signMichelsonData(michelsonData, michelsonType);
+    signature.value = await signMichelsonData(
+      michelsonData.value,
+      michelsonType.value,
+    );
   } catch (error) {
     console.error(error);
   } finally {
