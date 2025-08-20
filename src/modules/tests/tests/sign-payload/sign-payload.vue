@@ -139,10 +139,15 @@ const signMichelson = async () => {
   }
 };
 
-const copySignature = () => {
+const copySignature = async () => {
   if (signature.value) {
-    navigator.clipboard.writeText(signature.value);
-    toast.success("Signature copied to clipboard");
+    try {
+      await navigator.clipboard.writeText(signature.value);
+      toast.success("Signature copied to clipboard");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to copy signature to clipboard");
+    }
   }
 };
 </script>
