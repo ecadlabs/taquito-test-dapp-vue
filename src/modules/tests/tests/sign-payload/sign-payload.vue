@@ -58,6 +58,54 @@
         </Button>
       </div>
     </div>
+    <div class="w-1/2">
+      <Separator class="my-4" />
+    </div>
+    <div>
+      <Label class="mb-1">String Payload</Label>
+      <Input
+        placeholder="Payload..."
+        v-model="payloadToSendToContract"
+        class="w-48"
+        data-testid="contract-payload-input"
+      />
+    </div>
+    <div>
+      <Label class="mb-1">Signature</Label>
+      <Input
+        placeholder="Signature..."
+        v-model="signatureToSendToContract"
+        class="w-48"
+        data-testid="contract-signature-input"
+      />
+    </div>
+    <div>
+      <Label class="mb-1">Public Key</Label>
+      <Input
+        placeholder="Public Key..."
+        v-model="publicKeyToSendToContract"
+        class="w-48"
+        data-testid="contract-public-key-input"
+      />
+    </div>
+    <Button
+      @click="verifyPayloadOnContract()"
+      :disabled="
+        anySigningInProgress ||
+        !walletStore.getAddress ||
+        !payloadToSendToContract ||
+        !signatureToSendToContract ||
+        !publicKeyToSendToContract
+      "
+      class="w-32"
+      data-testid="verify-payload-button"
+    >
+      <Loader2 v-if="verifyingOnContract" class="w-4 h-4 mr-2 animate-spin" />
+      <p v-else>Verify Payload via Contract</p>
+    </Button>
+    <p v-if="payloadVerifiedOnContract !== undefined">
+      Payload verified on contract: {{ payloadVerifiedOnContract }}
+    </p>
   </div>
 </template>
 
@@ -73,6 +121,7 @@ import {
   sign,
   signTzip32,
   signMichelsonData,
+  verifyPayloadViaContract,
 } from "@/modules/tests/tests/sign-payload/sign-payload";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
@@ -87,6 +136,11 @@ const signature = ref<string | null>(null);
 const signing = ref<boolean>(false);
 const signingTzip32 = ref<boolean>(false);
 const signingMichelson = ref<boolean>(false);
+const verifyingOnContract = ref<boolean>(false);
+
+const signatureToSendToContract = ref<string>();
+const publicKeyToSendToContract = ref<string>();
+const payloadToSendToContract = ref<string>();
 
 const michelsonData = ref<string>(
   `(Pair (Pair { Elt 1 (Pair (Pair "tz1gjaF81ZRRvdzjobyfVNsAeSC6PScjfQwN" "tz1KqTpEZ7Yob7QbPE4Hy4Wo8fHG8LhKxZSx") 0x0501000000026869) } 10000000) (Pair 2 333))`,
@@ -96,11 +150,17 @@ const michelsonType = ref<string>(
 );
 
 const anySigningInProgress = computed(() => {
-  return signing.value || signingTzip32.value || signingMichelson.value;
+  return (
+    signing.value ||
+    signingTzip32.value ||
+    signingMichelson.value ||
+    verifyingOnContract.value
+  );
 });
 
-onMounted(() => {
+onMounted(async () => {
   diagramStore.setTestDiagram("sign-payload");
+  publicKeyToSendToContract.value = await walletStore.getWallet?.getPK();
 });
 
 const signStandardPayload = async () => {
@@ -148,6 +208,33 @@ const copySignature = async () => {
       console.error(error);
       toast.error("Failed to copy signature to clipboard");
     }
+  }
+};
+
+const payloadVerifiedOnContract = ref<boolean>();
+const verifyPayloadOnContract = async () => {
+  try {
+    verifyingOnContract.value = true;
+
+    if (
+      !payloadToSendToContract.value ||
+      !signatureToSendToContract.value ||
+      !publicKeyToSendToContract.value
+    ) {
+      return;
+    }
+
+    const verified = await verifyPayloadViaContract(
+      payloadToSendToContract.value,
+      signatureToSendToContract.value,
+      publicKeyToSendToContract.value,
+    );
+
+    console.log(verified);
+
+    payloadVerifiedOnContract.value = verified;
+  } finally {
+    verifyingOnContract.value = false;
   }
 };
 </script>

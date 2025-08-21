@@ -11,8 +11,13 @@ import {
   type MichelsonData,
   type MichelsonType,
 } from "@taquito/michel-codec";
+import type { ContractConfig } from "@/types/contract";
+import contracts from "@/contracts/contract-config.json";
+import type { Estimate } from "@taquito/taquito";
+import { PiggyBank } from "lucide-vue-next";
 
 const TEST_ID = "sign-payload";
+let estimate: Estimate;
 
 const sign = async (
   input: string,
@@ -169,4 +174,69 @@ export const signMichelsonData = async (
   return signature;
 };
 
-export { sign, signTzip32 };
+const SIGNATURE_CONTRACT_ADDRESS =
+  (contracts as ContractConfig[]).find(
+    (contract: ContractConfig) => contract.contractName === "signature",
+  )?.address ?? "";
+
+const verifyPayloadViaContract = async (
+  payload: string,
+  signature: string,
+  publicKey: string,
+) => {
+  const walletStore = useWalletStore();
+  const diagramStore = useDiagramStore();
+  const Tezos = walletStore.getTezos;
+  diagramStore.setTestDiagram(TEST_ID, "verify-payload-via-contract");
+
+  try {
+    diagramStore.setProgress("join-payload", "running", TEST_ID);
+    const formattedInput: string = ["Tezos Signed Message:", payload].join(" ");
+
+    diagramStore.setProgress("convert-to-bytes", "running", TEST_ID);
+    const bytes = stringToBytes(formattedInput);
+    const bytesLength = (bytes.length / 2).toString(16);
+    const addPadding = `00000000${bytesLength}`;
+    const paddedBytesLength = addPadding.slice(addPadding.length - 8);
+    const payloadBytes = "05" + "01" + paddedBytesLength + bytes;
+
+    diagramStore.setProgress("get-contract", "running", TEST_ID);
+    const contract = await Tezos.wallet.at(SIGNATURE_CONTRACT_ADDRESS);
+
+    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
+    const parameter = {
+      public_key: publicKey,
+      signature: signature,
+      payload_bytes: payloadBytes,
+    };
+
+    const transferParams = await contract.methodsObject
+      .default(parameter)
+      .toTransferParams();
+    estimate = await Tezos.estimate.transfer(transferParams);
+
+    if (estimate) {
+      diagramStore.setNodeButton("estimate-fees", {
+        icon: PiggyBank,
+        text: "View Fees",
+        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
+      });
+    }
+
+    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    const operation = await contract.methodsObject.default(parameter).send();
+
+    diagramStore.setProgress("wait-confirmation", "running", TEST_ID);
+    const confirmation = await operation.confirmation(1);
+    if (confirmation?.block.hash)
+      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
+    diagramStore.setProgress("success", "completed", TEST_ID);
+    return true;
+  } catch (error) {
+    console.error(`Failed to verify payload via contract: ${error}`);
+    diagramStore.setErrorMessage(error, TEST_ID);
+    return false;
+  }
+};
+
+export { sign, signTzip32, verifyPayloadViaContract };

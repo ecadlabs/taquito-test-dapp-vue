@@ -503,6 +503,34 @@ export const AvailableTests: Record<string, TestMetadata> = {
           },
         ],
       },
+      "verify-payload-via-contract": {
+        nodes: [
+          {
+            id: "join-payload",
+            label: "Join Payload",
+          },
+          {
+            id: "convert-to-bytes",
+            label: "Convert to Bytes",
+          },
+          {
+            id: "get-contract",
+            label: "Get Contract",
+          },
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
+          },
+          {
+            id: "wait-confirmation",
+            label: "Wait for Confirmation",
+          },
+        ],
+      },
     },
   },
 };
