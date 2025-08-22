@@ -54,7 +54,9 @@
     <div v-if="signature" class="text-center">
       <p class="mb-1 text-sm font-bold">Signature</p>
       <div class="flex items-center gap-2">
-        <p class="text-sm text-wrap break-all">{{ signature }}</p>
+        <p class="text-sm text-wrap break-all" data-testid="signature-output">
+          {{ signature }}
+        </p>
         <Button size="icon" variant="ghost" @click="copySignature()">
           <Copy class="w-4 h-4" />
           <p class="sr-only">Copy Signature</p>
