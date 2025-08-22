@@ -121,9 +121,19 @@
       <Loader2 v-if="verifyingOnContract" class="w-4 h-4 mr-2 animate-spin" />
       <p v-else>Verify Signature (Tzip32 Compatible)</p>
     </Button>
-    <p v-if="payloadVerifiedOnContract !== undefined">
-      Payload verified on contract: {{ payloadVerifiedOnContract }}
-    </p>
+    <div v-if="payloadVerifiedOnContract !== undefined">
+      <div
+        v-if="payloadVerifiedOnContract"
+        class="flex items-center gap-2 text-green-500"
+      >
+        <Check class="size-4" />
+        <p>Signature verified</p>
+      </div>
+      <div v-else class="flex items-center gap-2 text-red-500">
+        <X class="size-4" />
+        <p>Invalid signature</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -133,7 +143,7 @@ import { ref, onMounted, computed } from "vue";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-vue-next";
+import { Check, Loader2, X } from "lucide-vue-next";
 import { useWalletStore } from "@/stores/walletStore";
 import {
   sign,
@@ -185,6 +195,10 @@ const signStandardPayload = async () => {
   try {
     signing.value = true;
     signature.value = await sign(payload.value);
+    if (signature.value) {
+      signatureToSendToContract.value = signature.value;
+    }
+    payloadToSendToContract.value = payload.value;
   } catch (error) {
     console.error(error);
   } finally {
@@ -196,6 +210,10 @@ const signTzip32Payload = async () => {
   try {
     signingTzip32.value = true;
     signature.value = await signTzip32(payload.value);
+    if (signature.value) {
+      signatureToSendToContract.value = signature.value;
+    }
+    payloadToSendToContract.value = payload.value;
   } catch (error) {
     console.error(error);
   } finally {
@@ -248,8 +266,6 @@ const verifyPayloadOnContract = async (tzip32: boolean = false) => {
       publicKeyToSendToContract.value,
       tzip32,
     );
-
-    console.log(verified);
 
     payloadVerifiedOnContract.value = verified;
   } finally {

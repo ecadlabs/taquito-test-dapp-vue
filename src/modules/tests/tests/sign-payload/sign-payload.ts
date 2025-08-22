@@ -205,8 +205,6 @@ const verifyPayloadViaContract = async (
   try {
     let payloadBytes: string;
 
-    console.log(tzip32);
-
     if (tzip32) {
       const magicString = "tezos signed offchain message";
       const interface_ = "tzip://32";
