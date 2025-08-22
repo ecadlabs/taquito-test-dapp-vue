@@ -9,24 +9,27 @@
         data-testid="string-payload-input"
       />
     </div>
-    <Button
-      @click="signStandardPayload()"
-      :disabled="anySigningInProgress || !walletStore.getAddress"
-      class="w-32"
-      data-testid="sign-payload-button"
-    >
-      <Loader2 v-if="signing" class="w-4 h-4 mr-2 animate-spin" />
-      <p v-else>Sign Payload</p>
-    </Button>
-    <Button
-      @click="signTzip32Payload()"
-      :disabled="anySigningInProgress || !walletStore.getAddress"
-      class="w-48"
-      data-testid="sign-tzip32-payload-button"
-    >
-      <Loader2 v-if="signingTzip32" class="w-4 h-4 mr-2 animate-spin" />
-      <p v-else>Sign Tzip32 Payload</p>
-    </Button>
+    <div class="flex items-center gap-2">
+      <Button
+        @click="signStandardPayload()"
+        :disabled="anySigningInProgress || !walletStore.getAddress"
+        class="w-32"
+        data-testid="sign-payload-button"
+      >
+        <Loader2 v-if="signing" class="w-4 h-4 mr-2 animate-spin" />
+        <p v-else>Sign</p>
+      </Button>
+      <Button
+        @click="signTzip32Payload()"
+        :disabled="anySigningInProgress || !walletStore.getAddress"
+        class="w-48"
+        data-testid="sign-tzip32-payload-button"
+      >
+        <Loader2 v-if="signingTzip32" class="w-4 h-4 mr-2 animate-spin" />
+        <p v-else>Sign (Tzip32 Compatible)</p>
+      </Button>
+    </div>
+
     <div class="w-1/2">
       <Separator class="my-4" />
     </div>
@@ -97,11 +100,26 @@
         !signatureToSendToContract ||
         !publicKeyToSendToContract
       "
-      class="w-32"
+      class="w-52"
       data-testid="verify-payload-button"
     >
       <Loader2 v-if="verifyingOnContract" class="w-4 h-4 mr-2 animate-spin" />
-      <p v-else>Verify Payload via Contract</p>
+      <p v-else>Verify Signature</p>
+    </Button>
+    <Button
+      @click="verifyPayloadOnContract(true)"
+      :disabled="
+        anySigningInProgress ||
+        !walletStore.getAddress ||
+        !payloadToSendToContract ||
+        !signatureToSendToContract ||
+        !publicKeyToSendToContract
+      "
+      class="w-72"
+      data-testid="verify-payload-tzip32-button"
+    >
+      <Loader2 v-if="verifyingOnContract" class="w-4 h-4 mr-2 animate-spin" />
+      <p v-else>Verify Signature (Tzip32 Compatible)</p>
     </Button>
     <p v-if="payloadVerifiedOnContract !== undefined">
       Payload verified on contract: {{ payloadVerifiedOnContract }}
@@ -212,7 +230,7 @@ const copySignature = async () => {
 };
 
 const payloadVerifiedOnContract = ref<boolean>();
-const verifyPayloadOnContract = async () => {
+const verifyPayloadOnContract = async (tzip32: boolean = false) => {
   try {
     verifyingOnContract.value = true;
 
@@ -228,6 +246,7 @@ const verifyPayloadOnContract = async () => {
       payloadToSendToContract.value,
       signatureToSendToContract.value,
       publicKeyToSendToContract.value,
+      tzip32,
     );
 
     console.log(verified);

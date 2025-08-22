@@ -97,23 +97,35 @@ const signTzip32 = async (input: string) => {
   diagramStore.setTestDiagram(TEST_ID, "sign-tzip32");
 
   try {
-    const magicByte = "0x80";
     const magicString = "tezos signed offchain message";
     const interface_ = "tzip://32";
     const characterEncoding = "0";
     const message = input;
 
-    const payloadBytes =
-      stringToBytes(magicString) +
-      num2PaddedHex(interface_.length, 8) +
-      stringToBytes(interface_) +
-      num2PaddedHex(Number(characterEncoding), 8) +
-      num2PaddedHex(message.length, 16) +
-      stringToBytes(message);
+    const magicByteHex = "80";
+    const magicStringHex = stringToBytes(magicString);
+    const interfaceLengthHex = num2PaddedHex(interface_.length, 8);
+    const interfaceHex = stringToBytes(interface_);
+    const encodingHex = num2PaddedHex(Number(characterEncoding), 8);
+    const messageLengthHex = num2PaddedHex(message.length, 16);
+    const messageHex = stringToBytes(message);
+
+    const fullPayloadHex =
+      magicByteHex +
+      magicStringHex +
+      interfaceLengthHex +
+      interfaceHex +
+      encodingHex +
+      messageLengthHex +
+      messageHex;
+
+    // For TZIP-32, we need to wrap the payload in a Micheline structure
+    // The 05 prefix indicates a Micheline expression, 01 indicates bytes
+    const michelinePayload = "05" + "01" + fullPayloadHex;
 
     const payload = {
-      signingType: SigningType.RAW,
-      payload: magicByte + payloadBytes,
+      signingType: SigningType.MICHELINE,
+      payload: michelinePayload,
     };
 
     const wallet = walletStore.getWallet;
@@ -132,7 +144,7 @@ const signTzip32 = async (input: string) => {
       const signature = await wallet.sign(payload.payload);
       signedPayload = { signature };
     } else {
-      const signature = await Tezos.signer.sign(payloadBytes);
+      const signature = await Tezos.signer.sign(payload.payload);
       signedPayload = { signature: signature.prefixSig };
     }
 
@@ -183,6 +195,7 @@ const verifyPayloadViaContract = async (
   payload: string,
   signature: string,
   publicKey: string,
+  tzip32: boolean = false,
 ) => {
   const walletStore = useWalletStore();
   const diagramStore = useDiagramStore();
@@ -190,15 +203,51 @@ const verifyPayloadViaContract = async (
   diagramStore.setTestDiagram(TEST_ID, "verify-payload-via-contract");
 
   try {
-    diagramStore.setProgress("join-payload", "running", TEST_ID);
-    const formattedInput: string = ["Tezos Signed Message:", payload].join(" ");
+    let payloadBytes: string;
 
-    diagramStore.setProgress("convert-to-bytes", "running", TEST_ID);
-    const bytes = stringToBytes(formattedInput);
-    const bytesLength = (bytes.length / 2).toString(16);
-    const addPadding = `00000000${bytesLength}`;
-    const paddedBytesLength = addPadding.slice(addPadding.length - 8);
-    const payloadBytes = "05" + "01" + paddedBytesLength + bytes;
+    console.log(tzip32);
+
+    if (tzip32) {
+      const magicString = "tezos signed offchain message";
+      const interface_ = "tzip://32";
+      const characterEncoding = "0";
+      const message = payload;
+
+      diagramStore.setProgress("join-payload", "running", TEST_ID);
+      diagramStore.setProgress("convert-to-bytes", "running", TEST_ID);
+
+      // For TZIP-32 verification, we need to construct the same Micheline-wrapped payload
+      // that was used for signing: "05" + "01" + fullPayloadHex
+      const magicByteHex = "80";
+      const magicStringHex = stringToBytes(magicString);
+      const interfaceLengthHex = num2PaddedHex(interface_.length, 8);
+      const interfaceHex = stringToBytes(interface_);
+      const encodingHex = num2PaddedHex(Number(characterEncoding), 8);
+      const messageLengthHex = num2PaddedHex(message.length, 16);
+      const messageHex = stringToBytes(message);
+
+      const fullPayloadHex =
+        magicByteHex +
+        magicStringHex +
+        interfaceLengthHex +
+        interfaceHex +
+        encodingHex +
+        messageLengthHex +
+        messageHex;
+      payloadBytes = "05" + "01" + fullPayloadHex;
+    } else {
+      diagramStore.setProgress("join-payload", "running", TEST_ID);
+      const formattedInput: string = ["Tezos Signed Message:", payload].join(
+        " ",
+      );
+
+      diagramStore.setProgress("convert-to-bytes", "running", TEST_ID);
+      const bytes = stringToBytes(formattedInput);
+      const bytesLength = (bytes.length / 2).toString(16);
+      const addPadding = `00000000${bytesLength}`;
+      const paddedBytesLength = addPadding.slice(addPadding.length - 8);
+      payloadBytes = "05" + "01" + paddedBytesLength + bytes;
+    }
 
     diagramStore.setProgress("get-contract", "running", TEST_ID);
     const contract = await Tezos.wallet.at(SIGNATURE_CONTRACT_ADDRESS);
