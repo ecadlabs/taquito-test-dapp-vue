@@ -61,11 +61,16 @@ export const useWalletStore = defineStore("wallet", () => {
       }
 
       if (provider === "beacon") {
+        const networkType =
+          import.meta.env.VITE_NETWORK_TYPE === "seoulnet"
+            ? NetworkType.CUSTOM
+            : (import.meta.env.VITE_NETWORK_TYPE as NetworkType);
+
         const options = {
           name: "Taquito Playground",
           iconUrl: "https://tezostaquito.io/img/favicon.svg",
           network: {
-            type: NetworkType.CUSTOM,
+            type: networkType,
             name: import.meta.env.VITE_NETWORK_TYPE,
             rpcUrl: settingsStore.settings.rpcUrl,
           },
