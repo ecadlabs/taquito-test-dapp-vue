@@ -10,12 +10,13 @@ const CONTRACT_ADDRESS =
 const TEST_ID = "transaction-limit";
 
 /**
- * Increments the contract storage value by the specified amount.
+ * Interacts with the contract using custom transaction limits.
  *
  * @async
- * @param {number} amount - The amount to increment the storage by (must be between 1 and 100 inclusive).
- * @throws {Error} If the amount is not within the valid range.
- * @returns {Promise<void>}
+ * @param {number} storageLimit - The storage limit to set for the transaction.
+ * @param {number} gasLimit - The gas limit to set for the transaction.
+ * @param {number} fee - The fee (in mutez) to set for the transaction.
+ * @returns {Promise<void>} Resolves when the transaction is confirmed or fails with an error.
  */
 const interact = async (
   storageLimit: number,
