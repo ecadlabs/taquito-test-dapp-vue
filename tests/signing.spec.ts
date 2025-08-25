@@ -11,7 +11,7 @@ test.describe("Signing Payloads", () => {
 
   test("should sign a payload", async () => {
     const page = getSharedPage();
-    await goToTest({ page, testName: "Signing Data" });
+    await goToTest({ page, testName: "Sign and Verify Payloads" });
     await page.getByTestId("string-payload-input").fill("Hello, world!");
     await page.getByTestId("sign-payload-button").click();
     await waitForSuccess({ page });
@@ -26,7 +26,7 @@ test.describe("Signing Payloads", () => {
 
   test("should verify a payload", async () => {
     const page = getSharedPage();
-    await goToTest({ page, testName: "Signing Data" });
+    await goToTest({ page, testName: "Sign and Verify Payloads" });
     await page.getByTestId("contract-signature-input").fill(signature);
     await page.getByTestId("contract-payload-input").fill("Hello, world!");
     await page.getByTestId("verify-payload-button").click();
@@ -35,7 +35,7 @@ test.describe("Signing Payloads", () => {
 
   test("should sign a tzip32 payload", async () => {
     const page = getSharedPage();
-    await goToTest({ page, testName: "Signing Data" });
+    await goToTest({ page, testName: "Sign and Verify Payloads" });
     await page.getByTestId("string-payload-input").fill("Hello, world!");
     await page.getByTestId("sign-tzip32-payload-button").click();
     await waitForSuccess({ page });
@@ -50,7 +50,7 @@ test.describe("Signing Payloads", () => {
 
   test("should verify a tzip32 payload", async () => {
     const page = getSharedPage();
-    await goToTest({ page, testName: "Signing Data" });
+    await goToTest({ page, testName: "Sign and Verify Payloads" });
     await page.getByTestId("contract-signature-input").fill(signature);
     await page.getByTestId("contract-payload-input").fill("Hello, world!");
     await page.getByTestId("verify-payload-tzip32-button").click();
@@ -59,7 +59,7 @@ test.describe("Signing Payloads", () => {
 
   test("should sign a michelson payload", async () => {
     const page = getSharedPage();
-    await goToTest({ page, testName: "Signing Data" });
+    await goToTest({ page, testName: "Sign and Verify Payloads" });
     await page.getByTestId("sign-michelson-data-button").click();
     await waitForSuccess({ page });
   });
