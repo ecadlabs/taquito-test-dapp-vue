@@ -30,7 +30,6 @@ const increaseStorage = async (contract: string, bytes: number) => {
       diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
 
     diagramStore.setProgress("success", "completed", TEST_ID);
-    await walletStore.fetchBalance();
   } catch (error) {
     console.error(
       `Failed to increase paid storage on contract '${contract}': ${error}`,
