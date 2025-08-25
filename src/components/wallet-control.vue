@@ -265,8 +265,8 @@ const balance = computed(() => {
   if (walletStore.getBalance) {
     const balanceTez = walletStore.getBalance.toNumber() / 1000000;
     return balanceTez.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: 4,
+      maximumFractionDigits: 4,
     });
   }
 
