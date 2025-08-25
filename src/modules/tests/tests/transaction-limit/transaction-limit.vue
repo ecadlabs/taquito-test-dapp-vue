@@ -49,7 +49,7 @@ const walletConnected = computed(() => !!walletStore.getAddress);
 
 const storageLimit = ref<number>(800);
 const gasLimit = ref<number>(8000);
-const fee = ref<number>(800);
+const fee = ref<number>(3000);
 
 onMounted(() => {
   diagramStore.setTestDiagram("transaction-limit");
