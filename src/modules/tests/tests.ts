@@ -8,6 +8,7 @@ import Delegation from "@/modules/tests/tests/delegation/delegation.vue";
 import Staking from "@/modules/tests/tests/staking/staking.vue";
 import Batch from "@/modules/tests/tests/batch/batch.vue";
 import SignPayload from "@/modules/tests/tests/sign-payload/sign-payload.vue";
+import TransactionLimit from "@/modules/tests/tests/transaction-limit/transaction-limit.vue";
 
 export const AvailableTests: Record<string, TestMetadata> = {
   transfer: {
@@ -528,6 +529,59 @@ export const AvailableTests: Record<string, TestMetadata> = {
           {
             id: "wait-confirmation",
             label: "Wait for Confirmation",
+          },
+        ],
+      },
+    },
+  },
+  "transaction-limit": {
+    id: "transaction-limit",
+    title: "Transaction Limits",
+    description:
+      "Set a transaction limit to limit the storage and gas fees when calling a smart contract.",
+    category: "Smart Contracts",
+    learningGoals: [
+      "Understand how to set a transaction limit",
+      "Learn about transaction limits",
+      "Handle transaction limit confirmation and errors",
+    ],
+    prerequisites: [
+      "Basic understanding of smart contracts",
+      "Familiarity with Promises/Async functions in JavaScript",
+    ],
+    setup: [
+      "Set up a Tezos wallet and fund it with some TEZ",
+      "Connect your wallet to Taquito Playground",
+    ],
+    relatedTests: ["counter-contract"],
+    sourceCode: {
+      contract: "https://example.com",
+      script: "https://example.com",
+      documentation: "https://taquito.io/docs/transaction_limits/",
+    },
+    component: TransactionLimit,
+    diagrams: {
+      "set-transaction-limit": {
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get Contract",
+          },
+          {
+            id: "set-transaction-limit",
+            label: "Set Transaction Limit",
+          },
+          {
+            id: "execute-operation",
+            label: "Execute Operation",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
+          },
+          {
+            id: "wait-chain-confirmation",
+            label: "Wait for Chain Confirmation",
           },
         ],
       },
