@@ -47,7 +47,6 @@ const delegate = async (address: string) => {
       diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
 
     diagramStore.setProgress("success", "completed", TEST_ID);
-    await walletStore.fetchBalance();
   } catch (error) {
     console.error(`Failed to delegate to '${address}': ${error}`);
     diagramStore.setErrorMessage(error, TEST_ID);
@@ -90,7 +89,6 @@ const undelegate = async () => {
       diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
 
     diagramStore.setProgress("success", "completed", TEST_ID);
-    await walletStore.fetchBalance();
   } catch (error) {
     console.error(`Failed to undelegate: ${error}`);
     diagramStore.setErrorMessage(error, TEST_ID);

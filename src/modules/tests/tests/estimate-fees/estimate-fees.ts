@@ -26,7 +26,6 @@ const estimateFees = async () => {
     }
 
     diagramStore.setProgress("success", "completed", TEST_ID);
-    await walletStore.fetchBalance();
   } catch (error) {
     console.error(
       `Failed to estiimate fees for transfer to '${address}': ${error}`,

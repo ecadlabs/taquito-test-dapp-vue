@@ -3,6 +3,7 @@ import { ref, type Component } from "vue";
 import type { TestDiagram } from "@/modules/tests/test";
 import { getTestDiagram } from "@/modules/tests/tests";
 import type { Estimate } from "@taquito/taquito";
+import { useWalletStore } from "@/stores/walletStore";
 
 export interface DialogContent {
   title: string;
@@ -23,7 +24,6 @@ export const useDiagramStore = defineStore("diagram", () => {
     "idle",
   );
   const errorMessage = ref();
-  const successful = ref<boolean>(false);
   const operationHash = ref<string | number>();
   const currentTestId = ref<string | null>(null);
   const currentDiagramKey = ref<string | null>(null);
@@ -66,7 +66,7 @@ export const useDiagramStore = defineStore("diagram", () => {
     }
   };
 
-  const setProgress = (
+  const setProgress = async (
     stepId: string,
     status: "running" | "completed",
     testId?: string,
@@ -94,6 +94,10 @@ export const useDiagramStore = defineStore("diagram", () => {
 
       currentStep.value = stepId;
       diagramStatus.value = status;
+
+      if (status === "completed") {
+        await useWalletStore().fetchBalance();
+      }
     }
   };
 
@@ -190,7 +194,6 @@ export const useDiagramStore = defineStore("diagram", () => {
       currentStep.value = null;
       diagramStatus.value = "idle";
       errorMessage.value = undefined;
-      successful.value = false;
       operationHash.value = undefined;
       currentTestId.value = null;
       currentDiagramKey.value = null;
