@@ -1,15 +1,5 @@
 import type { TestMetadata, TestDiagram } from "@/modules/tests/test";
 
-import TransferTez from "@/modules/tests/tests/transfer/transfer-tez.vue";
-import CounterContract from "@/modules/tests/tests/counter/counter-contract.vue";
-import IncreasePaidStorage from "@/modules/tests/tests/increase-paid-storage/increase-paid-storage.vue";
-import EstimateFees from "@/modules/tests/tests/estimate-fees/estimate-fees.vue";
-import Delegation from "@/modules/tests/tests/delegation/delegation.vue";
-import Staking from "@/modules/tests/tests/staking/staking.vue";
-import Batch from "@/modules/tests/tests/batch/batch.vue";
-import SignPayload from "@/modules/tests/tests/sign-payload/sign-payload.vue";
-import TransactionLimit from "@/modules/tests/tests/transaction-limit/transaction-limit.vue";
-
 export const AvailableTests: Record<string, TestMetadata> = {
   transfer: {
     id: "transfer",
@@ -39,7 +29,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/transfer",
       documentation: "https://taquito.io/docs/making_transfers",
     },
-    component: TransferTez,
+    component: () => import("@/modules/tests/tests/transfer/transfer-tez.vue"),
     diagrams: {
       transfer: {
         nodes: [
@@ -97,7 +87,8 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/counter",
       documentation: "https://taquito.io/docs/smartcontracts",
     },
-    component: CounterContract,
+    component: () =>
+      import("@/modules/tests/tests/counter/counter-contract.vue"),
     diagrams: {
       increment: {
         nodes: [
@@ -204,7 +195,10 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/increase-paid-storage",
       documentation: "https://taquito.io/docs/increase_paid_storage",
     },
-    component: IncreasePaidStorage,
+    component: () =>
+      import(
+        "@/modules/tests/tests/increase-paid-storage/increase-paid-storage.vue"
+      ),
     diagrams: {
       increase: {
         nodes: [
@@ -258,7 +252,8 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/estimate-fees",
       documentation: "https://taquito.io/docs/estimate",
     },
-    component: EstimateFees,
+    component: () =>
+      import("@/modules/tests/tests/estimate-fees/estimate-fees.vue"),
     diagrams: {
       "estimate-fees": {
         noIndexer: true,
@@ -302,7 +297,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/delegation",
       documentation: "https://taquito.io/docs/set_delegate",
     },
-    component: Delegation,
+    component: () => import("@/modules/tests/tests/delegation/delegation.vue"),
     diagrams: {
       "set-delegate": {
         nodes: [
@@ -373,7 +368,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/staking",
       documentation: "https://taquito.io/docs/staking",
     },
-    component: Staking,
+    component: () => import("@/modules/tests/tests/staking/staking.vue"),
     diagrams: {
       stake: {
         nodes: [
@@ -472,7 +467,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/batch",
       documentation: "https://taquito.io/docs/batch_API/",
     },
-    component: Batch,
+    component: () => import("@/modules/tests/tests/batch/batch.vue"),
     diagrams: {
       batch: {
         nodes: [
@@ -526,7 +521,8 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/sign-payload",
       documentation: "https://taquito.io/docs/signing/",
     },
-    component: SignPayload,
+    component: () =>
+      import("@/modules/tests/tests/sign-payload/sign-payload.vue"),
     diagrams: {
       sign: {
         noIndexer: true,
@@ -650,7 +646,8 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/transaction-limit",
       documentation: "https://taquito.io/docs/transaction_limits/",
     },
-    component: TransactionLimit,
+    component: () =>
+      import("@/modules/tests/tests/transaction-limit/transaction-limit.vue"),
     diagrams: {
       "set-transaction-limit": {
         nodes: [
@@ -673,6 +670,59 @@ export const AvailableTests: Record<string, TestMetadata> = {
           {
             id: "wait-chain-confirmation",
             label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+    },
+  },
+  "failing-noop": {
+    id: "failing-noop",
+    title: "Failing Noop",
+    description:
+      "Learn to use the Failing Noop instruction in Tezos to deliberately fail an operation.",
+    category: "Smart Contracts",
+    learningGoals: [
+      "Understand the purpose and use cases of the Failing Noop instruction",
+      "Learn how to simulate operation failures in Tezos",
+      "Recognize how Failing Noop can be used for testing error handling and rollbacks",
+    ],
+    prerequisites: [
+      "Basic understanding of Michelson and Tezos smart contracts",
+      "Familiarity with operation flows and error handling in Tezos",
+      "Knowledge of Taquito and contract interaction patterns",
+    ],
+    setup: [
+      "Install Taquito: `npm install @taquito/taquito`",
+      "Set up a Tezos wallet with sufficient TEZ for gas fees",
+      "Configure Taquito with RPC endpoint and signer",
+    ],
+    relatedTests: ["counter-contract", "transaction-limit", "estimate-fees"],
+    sourceCode: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/failing-noop",
+      documentation: "https://taquito.io/docs/failing_noop/",
+    },
+    component: () =>
+      import("@/modules/tests/tests/failing-noop/failing-noop.vue"),
+    diagrams: {
+      "failing-noop-operation": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "signing-operation",
+            label: "Signing Operation",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
+          },
+          {
+            id: "get-public-key",
+            label: "Get Public Key",
+          },
+          {
+            id: "verify-signature",
+            label: "Verify Signature",
           },
         ],
       },

@@ -64,7 +64,14 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { getTestById } from "@/modules/tests/tests";
-import { computed, ref, watch, onBeforeUnmount, onMounted } from "vue";
+import {
+  computed,
+  ref,
+  watch,
+  onBeforeUnmount,
+  onMounted,
+  defineAsyncComponent,
+} from "vue";
 import { useRoute } from "vue-router";
 import { HeartCrack } from "lucide-vue-next";
 import { useDiagramStore } from "@/stores/diagramStore";
@@ -138,8 +145,8 @@ const selectedTestFriendlyName = computed(() => {
 });
 
 const currentTestComponent = computed(() => {
-  if (currentTest.value) {
-    return currentTest.value.component;
+  if (currentTest.value?.component) {
+    return defineAsyncComponent(currentTest.value.component);
   }
   return null;
 });
