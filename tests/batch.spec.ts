@@ -9,7 +9,7 @@ test.describe("Batch API", () => {
 
   test("should send a batch of operations", async () => {
     const page = getSharedPage();
-    await goToTest({ page, testName: "Batching Operations" });
+    await goToTest({ page, testName: "Batch Operations" });
     await page.getByRole("button", { name: "Send Batch Operation" }).click();
     await waitForSuccess({ page });
   });

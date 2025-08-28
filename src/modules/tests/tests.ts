@@ -3,12 +3,12 @@ import type { TestMetadata, TestDiagram } from "@/modules/tests/test";
 export const AvailableTests: Record<string, TestMetadata> = {
   transfer: {
     id: "transfer",
-    title: "Transfer TEZ Between Addresses",
+    title: "Transfer Tez Between Addresses",
     description:
-      "Learn how to transfer TEZ tokens between Tezos addresses using Taquito's Wallet API. This fundamental operation demonstrates the core transaction flow including fee estimation, user confirmation, and blockchain confirmation.",
+      "Learn how to transfer Tez tokens between Tezos addresses using Taquito's Wallet API. This fundamental operation demonstrates the core transaction flow including fee estimation, user confirmation, and blockchain confirmation.",
     category: "Core Operations",
     learningGoals: [
-      "Understand TEZ transfer operations using the Wallet API",
+      "Understand Tez transfer operations using the Wallet API",
       "Understand transaction parameters (amount, destination, fees)",
       "Learn proper error handling and transaction confirmation patterns",
       "Practice waiting for user wallet confirmation and blockchain confirmations",
@@ -21,7 +21,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     setup: [
       "Install and configure Taquito: `npm install @taquito/taquito`",
       "Set up a Tezos wallet (Temple, Kukai, or other supported wallet)",
-      "Use a faucet to fund your wallet with testnet TEZ from https://teztnets.com/",
+      "Use a faucet to fund your wallet with testnet Tez from https://teztnets.com/",
     ],
     relatedTests: ["estimate-fees", "batch", "counter-contract"],
     sourceCode: {
@@ -69,7 +69,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
-      "Set up a Tezos wallet with sufficient TEZ for gas fees",
+      "Set up a Tezos wallet with sufficient Tez for gas fees",
       "Deploy or obtain access to a counter contract (KT1 address)",
       "Configure Taquito with RPC endpoint and signer",
       "Understand the contract's entrypoints: increment, decrement, reset, get_storage",
@@ -185,7 +185,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
-      "Set up a Tezos wallet with sufficient TEZ for storage fees",
+      "Set up a Tezos wallet with sufficient Tez for storage fees",
       "Deploy a smart contract and keep track of the contract address",
       "Configure Taquito with RPC endpoint and signer",
     ],
@@ -287,7 +287,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
-      "Set up a Tezos wallet with sufficient TEZ",
+      "Set up a Tezos wallet with sufficient Tez",
       "Identify a trusted baker address for delegation",
       "Configure Taquito with RPC endpoint and signer",
     ],
@@ -355,11 +355,11 @@ export const AvailableTests: Record<string, TestMetadata> = {
     prerequisites: [
       "Understanding of Tezos staking and delegation concepts",
       "A Tezos wallet delegated to a baker",
-      "A Tezos wallet with sufficient TEZ for staking",
+      "A Tezos wallet with sufficient Tez for staking",
     ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
-      "Set up a Tezos wallet with sufficient TEZ for staking",
+      "Set up a Tezos wallet with sufficient Tez for staking",
       "Configure Taquito with RPC endpoint and signer",
     ],
     relatedTests: ["delegation", "counter-contract", "estimate-fees"],
@@ -451,7 +451,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
-      "Set up a Tezos wallet with sufficient TEZ for batch gas fees",
+      "Set up a Tezos wallet with sufficient Tez for batch gas fees",
       "Configure Taquito with RPC endpoint and signer",
       "Identify multiple operations to batch together",
       "Understand operation dependencies and execution order",
@@ -631,7 +631,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
-      "Set up a Tezos wallet with sufficient TEZ for gas fees",
+      "Set up a Tezos wallet with sufficient Tez for gas fees",
       "Configure Taquito with RPC endpoint and signer",
       "Have a smart contract address ready for interaction",
       "Understand the contract method you want to call and its complexity",
@@ -693,7 +693,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
-      "Set up a Tezos wallet with sufficient TEZ for gas fees",
+      "Set up a Tezos wallet with sufficient Tez for gas fees",
       "Configure Taquito with RPC endpoint and signer",
     ],
     relatedTests: ["counter-contract", "transaction-limit", "estimate-fees"],
