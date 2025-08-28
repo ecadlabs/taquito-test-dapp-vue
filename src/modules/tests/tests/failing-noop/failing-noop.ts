@@ -5,24 +5,24 @@ import { verifySignature } from "@taquito/utils";
 const TEST_ID = "failing-noop";
 
 /**
- * Interacts with the contract using custom transaction limits.
+ * Signs a failing noop operation and verifies the signature.
  *
  * @async
- * @param {number} storageLimit - The storage limit to set for the transaction.
- * @param {number} gasLimit - The gas limit to set for the transaction.
- * @param {number} fee - The fee (in mutez) to set for the transaction.
- * @returns {Promise<void>} Resolves when the transaction is confirmed or fails with an error.
+ * @returns {Promise<void>} Resolves when the operation is processed or fails with an error.
  */
 const failNoop = async (): Promise<void> => {
   const diagramStore = useDiagramStore();
   const walletStore = useWalletStore();
   const Tezos = walletStore.getTezos;
 
+  // This is a hex string of "Hello World"
+  const hex = "48656C6C6F20576F726C64";
+
   try {
     diagramStore.setProgress("signing-operation", "running", TEST_ID);
     diagramStore.setProgress("wait-for-user", "running", TEST_ID);
     const signed = await Tezos.wallet.signFailingNoop({
-      arbitrary: "48656C6C6F20576F726C64",
+      arbitrary: hex,
       basedOnBlock: 0,
     });
 
