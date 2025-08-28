@@ -29,6 +29,6 @@ export interface TestMetadata {
     script?: string;
     documentation?: string;
   };
-  component?: Component;
+  component?: () => Promise<{ default: Component }>;
   diagrams?: TestDiagrams;
 }

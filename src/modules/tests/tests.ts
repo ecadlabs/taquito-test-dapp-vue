@@ -1,24 +1,14 @@
 import type { TestMetadata, TestDiagram } from "@/modules/tests/test";
 
-import TransferTez from "@/modules/tests/tests/transfer/transfer-tez.vue";
-import CounterContract from "@/modules/tests/tests/counter/counter-contract.vue";
-import IncreasePaidStorage from "@/modules/tests/tests/increase-paid-storage/increase-paid-storage.vue";
-import EstimateFees from "@/modules/tests/tests/estimate-fees/estimate-fees.vue";
-import Delegation from "@/modules/tests/tests/delegation/delegation.vue";
-import Staking from "@/modules/tests/tests/staking/staking.vue";
-import Batch from "@/modules/tests/tests/batch/batch.vue";
-import SignPayload from "@/modules/tests/tests/sign-payload/sign-payload.vue";
-import TransactionLimit from "@/modules/tests/tests/transaction-limit/transaction-limit.vue";
-
 export const AvailableTests: Record<string, TestMetadata> = {
   transfer: {
     id: "transfer",
-    title: "Transfer TEZ Between Addresses",
+    title: "Transfer Tez Between Addresses",
     description:
-      "Learn how to transfer TEZ tokens between Tezos addresses using Taquito's Wallet API. This fundamental operation demonstrates the core transaction flow including fee estimation, user confirmation, and blockchain confirmation.",
+      "Learn how to transfer Tez tokens between Tezos addresses using Taquito's Wallet API. This fundamental operation demonstrates the core transaction flow including fee estimation, user confirmation, and blockchain confirmation.",
     category: "Core Operations",
     learningGoals: [
-      "Understand TEZ transfer operations using the Wallet API",
+      "Understand Tez transfer operations using the Wallet API",
       "Understand transaction parameters (amount, destination, fees)",
       "Learn proper error handling and transaction confirmation patterns",
       "Practice waiting for user wallet confirmation and blockchain confirmations",
@@ -31,7 +21,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     setup: [
       "Install and configure Taquito: `npm install @taquito/taquito`",
       "Set up a Tezos wallet (Temple, Kukai, or other supported wallet)",
-      "Use a faucet to fund your wallet with testnet TEZ from https://teztnets.com/",
+      "Use a faucet to fund your wallet with testnet Tez from https://teztnets.com/",
     ],
     relatedTests: ["estimate-fees", "batch", "counter-contract"],
     sourceCode: {
@@ -39,7 +29,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/transfer",
       documentation: "https://taquito.io/docs/making_transfers",
     },
-    component: TransferTez,
+    component: () => import("@/modules/tests/tests/transfer/transfer-tez.vue"),
     diagrams: {
       transfer: {
         nodes: [
@@ -79,7 +69,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
-      "Set up a Tezos wallet with sufficient TEZ for gas fees",
+      "Set up a Tezos wallet with sufficient Tez for gas fees",
       "Deploy or obtain access to a counter contract (KT1 address)",
       "Configure Taquito with RPC endpoint and signer",
       "Understand the contract's entrypoints: increment, decrement, reset, get_storage",
@@ -97,7 +87,8 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/counter",
       documentation: "https://taquito.io/docs/smartcontracts",
     },
-    component: CounterContract,
+    component: () =>
+      import("@/modules/tests/tests/counter/counter-contract.vue"),
     diagrams: {
       increment: {
         nodes: [
@@ -194,7 +185,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
-      "Set up a Tezos wallet with sufficient TEZ for storage fees",
+      "Set up a Tezos wallet with sufficient Tez for storage fees",
       "Deploy a smart contract and keep track of the contract address",
       "Configure Taquito with RPC endpoint and signer",
     ],
@@ -204,7 +195,10 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/increase-paid-storage",
       documentation: "https://taquito.io/docs/increase_paid_storage",
     },
-    component: IncreasePaidStorage,
+    component: () =>
+      import(
+        "@/modules/tests/tests/increase-paid-storage/increase-paid-storage.vue"
+      ),
     diagrams: {
       increase: {
         nodes: [
@@ -258,7 +252,8 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/estimate-fees",
       documentation: "https://taquito.io/docs/estimate",
     },
-    component: EstimateFees,
+    component: () =>
+      import("@/modules/tests/tests/estimate-fees/estimate-fees.vue"),
     diagrams: {
       "estimate-fees": {
         noIndexer: true,
@@ -292,7 +287,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
-      "Set up a Tezos wallet with sufficient TEZ",
+      "Set up a Tezos wallet with sufficient Tez",
       "Identify a trusted baker address for delegation",
       "Configure Taquito with RPC endpoint and signer",
     ],
@@ -302,7 +297,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/delegation",
       documentation: "https://taquito.io/docs/set_delegate",
     },
-    component: Delegation,
+    component: () => import("@/modules/tests/tests/delegation/delegation.vue"),
     diagrams: {
       "set-delegate": {
         nodes: [
@@ -360,11 +355,11 @@ export const AvailableTests: Record<string, TestMetadata> = {
     prerequisites: [
       "Understanding of Tezos staking and delegation concepts",
       "A Tezos wallet delegated to a baker",
-      "A Tezos wallet with sufficient TEZ for staking",
+      "A Tezos wallet with sufficient Tez for staking",
     ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
-      "Set up a Tezos wallet with sufficient TEZ for staking",
+      "Set up a Tezos wallet with sufficient Tez for staking",
       "Configure Taquito with RPC endpoint and signer",
     ],
     relatedTests: ["delegation", "counter-contract", "estimate-fees"],
@@ -373,7 +368,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/staking",
       documentation: "https://taquito.io/docs/staking",
     },
-    component: Staking,
+    component: () => import("@/modules/tests/tests/staking/staking.vue"),
     diagrams: {
       stake: {
         nodes: [
@@ -456,7 +451,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
-      "Set up a Tezos wallet with sufficient TEZ for batch gas fees",
+      "Set up a Tezos wallet with sufficient Tez for batch gas fees",
       "Configure Taquito with RPC endpoint and signer",
       "Identify multiple operations to batch together",
       "Understand operation dependencies and execution order",
@@ -472,7 +467,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/batch",
       documentation: "https://taquito.io/docs/batch_API/",
     },
-    component: Batch,
+    component: () => import("@/modules/tests/tests/batch/batch.vue"),
     diagrams: {
       batch: {
         nodes: [
@@ -526,7 +521,8 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/sign-payload",
       documentation: "https://taquito.io/docs/signing/",
     },
-    component: SignPayload,
+    component: () =>
+      import("@/modules/tests/tests/sign-payload/sign-payload.vue"),
     diagrams: {
       sign: {
         noIndexer: true,
@@ -635,7 +631,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
-      "Set up a Tezos wallet with sufficient TEZ for gas fees",
+      "Set up a Tezos wallet with sufficient Tez for gas fees",
       "Configure Taquito with RPC endpoint and signer",
       "Have a smart contract address ready for interaction",
       "Understand the contract method you want to call and its complexity",
@@ -650,7 +646,8 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/transaction-limit",
       documentation: "https://taquito.io/docs/transaction_limits/",
     },
-    component: TransactionLimit,
+    component: () =>
+      import("@/modules/tests/tests/transaction-limit/transaction-limit.vue"),
     diagrams: {
       "set-transaction-limit": {
         nodes: [
@@ -673,6 +670,59 @@ export const AvailableTests: Record<string, TestMetadata> = {
           {
             id: "wait-chain-confirmation",
             label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+    },
+  },
+  "failing-noop": {
+    id: "failing-noop",
+    title: "Failing Noop",
+    description:
+      "Learn to use the Failing Noop instruction in Tezos to deliberately fail an operation.",
+    category: "Smart Contracts",
+    learningGoals: [
+      "Understand the purpose and use cases of the Failing Noop instruction",
+      "Learn how to simulate operation failures in Tezos",
+      "Recognize how Failing Noop can be used for testing error handling and rollbacks",
+    ],
+    prerequisites: [
+      "Basic understanding of Michelson and Tezos smart contracts",
+      "Familiarity with operation flows and error handling in Tezos",
+      "Knowledge of Taquito and contract interaction patterns",
+    ],
+    setup: [
+      "Install Taquito: `npm install @taquito/taquito`",
+      "Set up a Tezos wallet with sufficient Tez for gas fees",
+      "Configure Taquito with RPC endpoint and signer",
+    ],
+    relatedTests: ["counter-contract", "transaction-limit", "estimate-fees"],
+    sourceCode: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/failing-noop",
+      documentation: "https://taquito.io/docs/failing_noop/",
+    },
+    component: () =>
+      import("@/modules/tests/tests/failing-noop/failing-noop.vue"),
+    diagrams: {
+      "failing-noop-operation": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "signing-operation",
+            label: "Signing Operation",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
+          },
+          {
+            id: "get-public-key",
+            label: "Get Public Key",
+          },
+          {
+            id: "verify-signature",
+            label: "Verify Signature",
           },
         ],
       },
