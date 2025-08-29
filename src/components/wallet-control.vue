@@ -92,7 +92,7 @@
       </DialogHeader>
 
       <div>
-        <Alert v-if="provider === 'ledger' && isChromium" class="mb-2">
+        <Alert v-if="provider === 'ledger' && hidSupported" class="mb-2">
           <AlertTriangle class="size-4 !text-yellow-500" />
           <AlertTitle>
             <p>Important</p>
@@ -111,7 +111,7 @@
             </a>
           </AlertDescription>
         </Alert>
-        <Alert v-if="provider === 'ledger' && !isChromium" class="mb-2">
+        <Alert v-if="provider === 'ledger' && !hidSupported" class="mb-2">
           <AlertTriangle class="size-4 !text-red-500" />
           <AlertTitle>
             <p>Heads up!</p>
@@ -165,7 +165,7 @@
             loading ||
             !provider ||
             (provider === 'programmatic' && !privateKey) ||
-            (provider === 'ledger' && !isChromium)
+            (provider === 'ledger' && !hidSupported)
           "
         >
           <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
@@ -368,7 +368,7 @@ const change = async () => {
   showConnectDialog.value = true;
 };
 
-const isChromium = computed(() => {
-  return window.chrome;
+const hidSupported = computed(() => {
+  return "hid" in navigator;
 });
 </script>
