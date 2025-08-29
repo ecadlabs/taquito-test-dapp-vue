@@ -3,7 +3,7 @@ import { computed, ref } from "vue";
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { TezosToolkit } from "@taquito/taquito";
 import { importKey, InMemorySigner } from "@taquito/signer";
-import type { WalletProvider } from "@/types/wallet";
+import type { WalletProvider, ProgrammaticWallet } from "@/types/wallet";
 import { PermissionScopeMethods, WalletConnect } from "@taquito/wallet-connect";
 import { NetworkType } from "@airgap/beacon-types";
 import { NetworkType as WalletConnectNetworkType } from "@taquito/wallet-connect";
@@ -17,7 +17,9 @@ export const useWalletStore = defineStore("wallet", () => {
 
   const Tezos = new TezosToolkit(settingsStore.settings.rpcUrl);
 
-  const wallet = ref<BeaconWallet | WalletConnect | LedgerSigner>();
+  const wallet = ref<
+    BeaconWallet | WalletConnect | LedgerSigner | ProgrammaticWallet
+  >();
   const address = ref<string>();
   const balance = ref<BigNumber>();
   const walletName = ref<string>();
@@ -41,8 +43,8 @@ export const useWalletStore = defineStore("wallet", () => {
       } else if (wallet.value instanceof LedgerSigner) {
         return await Tezos.signer.publicKeyHash();
       } else {
-        // Programmatic wallet (mock wallet)
-        return await (wallet.value as any).getPKH();
+        // Programmatic wallet
+        return await wallet.value.getPKH();
       }
     } catch (error) {
       console.error("Error getting address:", error);
@@ -182,7 +184,7 @@ export const useWalletStore = defineStore("wallet", () => {
 
       // Create a mock wallet object that implements the required interface
       // This will be replaced when the programmatic wallet package is fully implemented
-      const mockWallet = {
+      const mockWallet: ProgrammaticWallet = {
         getPKH: async () => {
           return importedAddress;
         },
@@ -202,7 +204,7 @@ export const useWalletStore = defineStore("wallet", () => {
         getAllExistingSessionKeys: async () => [],
         configureWithExistingSessionKey: async () => Promise.resolve(),
       };
-      wallet.value = mockWallet as unknown as BeaconWallet;
+      wallet.value = mockWallet;
       address.value = await mockWallet.getPKH();
       walletName.value = "Programmatic Wallet";
       Tezos.setProvider({ signer });
