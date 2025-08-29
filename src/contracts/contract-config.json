@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "address": "KT1J5AdYuttZdJ6VT1mhGzw5jBrsV1dJTsWr",
+    "originatedAt": "2025-08-28T17:53:45.961Z",
+    "network": "seoulnet",
+    "contractName": "counter"
+  },
+  {
+    "address": "KT1U5aJxjRRZPzbeKvbvPmRWSoRUSenyF5FE",
+    "originatedAt": "2025-08-28T17:53:45.963Z",
+    "network": "seoulnet",
+    "contractName": "signature"
+  }
+]

@@ -111,6 +111,7 @@
           <SelectContent>
             <SelectItem value="beacon"> Beacon </SelectItem>
             <SelectItem value="walletconnect"> WalletConnect </SelectItem>
+            <SelectItem value="ledger"> Ledger Device </SelectItem>
             <SelectItem value="programmatic">
               Programmatic (Testing)
             </SelectItem>

@@ -35,12 +35,8 @@ const send = async (to: string, amount: number) => {
     }
 
     diagramStore.setProgress("wait-for-user", "running", TEST_ID);
-    let transfer: TransactionOperation | TransactionWalletOperation;
-    if (walletStore.getWalletName === "Programmatic Wallet") {
-      transfer = await Tezos.contract.transfer({ to, amount });
-    } else {
-      transfer = await Tezos.wallet.transfer({ to, amount }).send();
-    }
+    let transfer: TransactionWalletOperation;
+    transfer = await Tezos.wallet.transfer({ to, amount }).send();
 
     diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
     const confirmation = await transfer.confirmation();

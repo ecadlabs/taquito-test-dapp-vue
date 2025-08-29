@@ -1,4 +1,4 @@
-type WalletProvider = "beacon" | "walletconnect" | "programmatic";
+type WalletProvider = "beacon" | "walletconnect" | "programmatic" | "ledger";
 
 export type { WalletProvider };
 

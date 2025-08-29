@@ -9,13 +9,15 @@ import { NetworkType } from "@airgap/beacon-types";
 import { NetworkType as WalletConnectNetworkType } from "@taquito/wallet-connect";
 import { BeaconEvent } from "@airgap/beacon-dapp";
 import { useSettingsStore } from "@/stores/settingsStore";
+import TransportWebHID from "@ledgerhq/hw-transport-webhid";
+import { LedgerSigner } from "@taquito/ledger-signer";
 
 export const useWalletStore = defineStore("wallet", () => {
   const settingsStore = useSettingsStore();
 
   const Tezos = new TezosToolkit(settingsStore.settings.rpcUrl);
 
-  const wallet = ref<BeaconWallet | WalletConnect>();
+  const wallet = ref<BeaconWallet | WalletConnect | LedgerSigner>();
   const address = ref<string>();
   const balance = ref<BigNumber>();
   const walletName = ref<string>();
@@ -187,17 +189,27 @@ export const useWalletStore = defineStore("wallet", () => {
             `Programmatic wallet initialization failed: ${error instanceof Error ? error.message : String(error)}`,
           );
         }
+      } else if (provider === "ledger") {
+        const transport = await TransportWebHID.create();
+        const ledgerSigner = new LedgerSigner(transport);
+
+        Tezos.setProvider({ signer: ledgerSigner });
+
+        wallet.value = ledgerSigner;
+        walletName.value = "Ledger Device";
       } else {
         throw new TypeError(`Unknown wallet provider: ${provider}`);
       }
 
       if (wallet.value) {
-        address.value = await wallet.value.getPKH();
+        address.value = await Tezos.signer.publicKeyHash();
         await fetchBalance();
 
         // Only set the wallet provider if we haven't already set a signer for programmatic wallet
-        if (provider !== "programmatic") {
-          Tezos.setProvider({ wallet: wallet.value });
+        if (provider !== "programmatic" && provider !== "ledger") {
+          Tezos.setProvider({
+            wallet: wallet.value as BeaconWallet | WalletConnect,
+          });
         }
       } else {
         throw ReferenceError(
@@ -239,6 +251,8 @@ export const useWalletStore = defineStore("wallet", () => {
       } else if (wallet.value instanceof WalletConnect) {
         await wallet.value.disconnect();
         await deleteWalletConnectSessionFromIndexedDB();
+      } else if (wallet.value instanceof LedgerSigner) {
+        Tezos.setProvider({ signer: undefined });
       }
 
       wallet.value = undefined;
