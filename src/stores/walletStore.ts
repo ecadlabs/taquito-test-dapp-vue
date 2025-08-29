@@ -51,6 +51,24 @@ export const useWalletStore = defineStore("wallet", () => {
       return undefined;
     }
   };
+
+  /**
+   * Gets the public key from the current wallet
+   */
+  const getWalletPublicKey = async (): Promise<string | undefined> => {
+    if (!wallet.value) return undefined;
+
+    try {
+      if (wallet.value instanceof LedgerSigner) {
+        return await Tezos.signer.publicKey();
+      } else {
+        return await wallet.value.getPK();
+      }
+    } catch (error) {
+      console.error("Error getting public key:", error);
+      return undefined;
+    }
+  };
   const getBalance = computed(() => balance.value);
   const getWalletName = computed(() => walletName.value);
 
@@ -450,5 +468,6 @@ export const useWalletStore = defineStore("wallet", () => {
     fetchBalance,
     getWalletConnectSessionFromIndexedDB,
     getWalletAddress,
+    getWalletPublicKey,
   };
 });

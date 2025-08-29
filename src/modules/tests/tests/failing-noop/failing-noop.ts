@@ -27,7 +27,7 @@ const failNoop = async (): Promise<void> => {
     });
 
     diagramStore.setProgress("get-public-key", "running", TEST_ID);
-    const pk = await walletStore.getWallet?.getPK();
+    const pk = await walletStore.getWalletPublicKey();
     if (!pk) throw new Error("No public key found");
 
     console.log("Signed data:", signed);
