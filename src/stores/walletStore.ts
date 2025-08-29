@@ -41,7 +41,7 @@ export const useWalletStore = defineStore("wallet", () => {
       } else if (wallet.value instanceof WalletConnect) {
         return await wallet.value.getPKH();
       } else if (wallet.value instanceof LedgerSigner) {
-        return await Tezos.signer.publicKeyHash();
+        return await wallet.value.publicKeyHash();
       } else {
         // Programmatic wallet
         return await wallet.value.getPKH();
@@ -60,7 +60,7 @@ export const useWalletStore = defineStore("wallet", () => {
 
     try {
       if (wallet.value instanceof LedgerSigner) {
-        return await Tezos.signer.publicKey();
+        return await wallet.value.publicKeyHash();
       } else {
         return await wallet.value.getPK();
       }
@@ -288,7 +288,10 @@ export const useWalletStore = defineStore("wallet", () => {
           await initializeWalletConnect();
           break;
         case "programmatic":
-          await initializeProgrammaticWallet(privateKey!);
+          if (!privateKey) {
+            throw new Error("No private key found for programmatic wallet");
+          }
+          await initializeProgrammaticWallet(privateKey);
           break;
         case "ledger":
           await initializeLedgerWallet();
