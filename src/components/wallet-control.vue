@@ -287,7 +287,7 @@ watch([showConnectDialog, showDisconnectDialog], ([newValue]) => {
 });
 
 const copyAddress = () => {
-  navigator.clipboard.writeText(address.value ?? "");
+  navigator.clipboard.writeText(walletStore.getAddress ?? "");
   toast.success("Address copied to clipboard");
 };
 
