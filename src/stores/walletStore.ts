@@ -60,7 +60,7 @@ export const useWalletStore = defineStore("wallet", () => {
 
     try {
       if (wallet.value instanceof LedgerSigner) {
-        return await wallet.value.publicKeyHash();
+        return await wallet.value.publicKey();
       } else {
         return await wallet.value.getPK();
       }
