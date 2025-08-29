@@ -1,5 +1,11 @@
 import { TezosToolkit } from "@taquito/taquito";
-import { writeFileSync, readFileSync, existsSync, readdirSync } from "fs";
+import {
+  writeFileSync,
+  readFileSync,
+  existsSync,
+  readdirSync,
+  mkdirSync,
+} from "fs";
 import { join } from "path";
 import { config } from "dotenv";
 import { importKey } from "@taquito/signer";
@@ -146,14 +152,18 @@ export const originateContracts = async (
       contractName: result.contractName,
     }));
 
-    const configPath = join(
-      process.cwd(),
-      "src",
-      "contracts",
-      "contract-config.json",
-    );
+    const configDir = join(process.cwd(), "src", "contracts");
+    const configPath = join(configDir, "contract-config.json");
+
+    // Ensure the directory exists
+    if (!existsSync(configDir)) {
+      mkdirSync(configDir, { recursive: true });
+    }
+
     writeFileSync(configPath, JSON.stringify(contractConfig, null, 2));
-    console.log(`\n💾 Contract configuration saved to: ${configPath}`);
+    console.log(
+      `\n💾 Contract configuration created or updated at: ${configPath}`,
+    );
   }
 
   console.log(`\n🎉 All contracts originated successfully!`);

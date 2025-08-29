@@ -3,19 +3,23 @@ import { computed, ref } from "vue";
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { TezosToolkit } from "@taquito/taquito";
 import { importKey, InMemorySigner } from "@taquito/signer";
-import type { WalletProvider } from "@/types/wallet";
+import type { WalletProvider, ProgrammaticWallet } from "@/types/wallet";
 import { PermissionScopeMethods, WalletConnect } from "@taquito/wallet-connect";
 import { NetworkType } from "@airgap/beacon-types";
 import { NetworkType as WalletConnectNetworkType } from "@taquito/wallet-connect";
 import { BeaconEvent } from "@airgap/beacon-dapp";
 import { useSettingsStore } from "@/stores/settingsStore";
+import TransportWebHID from "@ledgerhq/hw-transport-webhid";
+import { LedgerSigner } from "@taquito/ledger-signer";
 
 export const useWalletStore = defineStore("wallet", () => {
   const settingsStore = useSettingsStore();
 
   const Tezos = new TezosToolkit(settingsStore.settings.rpcUrl);
 
-  const wallet = ref<BeaconWallet | WalletConnect>();
+  const wallet = ref<
+    BeaconWallet | WalletConnect | LedgerSigner | ProgrammaticWallet
+  >();
   const address = ref<string>();
   const balance = ref<BigNumber>();
   const walletName = ref<string>();
@@ -23,8 +27,225 @@ export const useWalletStore = defineStore("wallet", () => {
   const getTezos = computed(() => Tezos);
   const getWallet = computed(() => wallet.value);
   const getAddress = computed(() => address.value);
+
+  /**
+   * Gets the address from the current wallet
+   */
+  const getWalletAddress = async (): Promise<string | undefined> => {
+    if (!wallet.value) return undefined;
+
+    try {
+      if (wallet.value instanceof BeaconWallet) {
+        const activeAccount = await wallet.value.client.getActiveAccount();
+        return activeAccount?.address;
+      } else if (wallet.value instanceof WalletConnect) {
+        return await wallet.value.getPKH();
+      } else if (wallet.value instanceof LedgerSigner) {
+        return await wallet.value.publicKeyHash();
+      } else {
+        // Programmatic wallet
+        return await wallet.value.getPKH();
+      }
+    } catch (error) {
+      console.error("Error getting address:", error);
+      return undefined;
+    }
+  };
+
+  /**
+   * Gets the public key from the current wallet
+   */
+  const getWalletPublicKey = async (): Promise<string | undefined> => {
+    if (!wallet.value) return undefined;
+
+    try {
+      if (wallet.value instanceof LedgerSigner) {
+        return await wallet.value.publicKey();
+      } else {
+        return await wallet.value.getPK();
+      }
+    } catch (error) {
+      console.error("Error getting public key:", error);
+      return undefined;
+    }
+  };
   const getBalance = computed(() => balance.value);
   const getWalletName = computed(() => walletName.value);
+
+  /**
+   * Resets all wallet state variables to undefined and clears the local storage
+   */
+  const resetWalletState = (): void => {
+    wallet.value = undefined;
+    address.value = undefined;
+    balance.value = undefined;
+    walletName.value = undefined;
+
+    // Clear any persisted wallet state
+    localStorage.removeItem("wallet-provider");
+
+    // Reset Tezos provider to clear any configured signers/wallets
+    Tezos.setProvider({ signer: undefined, wallet: undefined });
+  };
+
+  /**
+   * Initializes a Beacon wallet
+   */
+  const initializeBeaconWallet = async (): Promise<void> => {
+    const networkType =
+      import.meta.env.VITE_NETWORK_TYPE === "seoulnet"
+        ? NetworkType.CUSTOM
+        : (import.meta.env.VITE_NETWORK_TYPE as NetworkType);
+
+    const options = {
+      name: "Taquito Playground",
+      iconUrl: "https://tezostaquito.io/img/favicon.svg",
+      network: {
+        type: networkType,
+        name: import.meta.env.VITE_NETWORK_TYPE,
+        rpcUrl: settingsStore.settings.rpcUrl,
+      },
+      enableMetrics: true,
+    };
+
+    const beaconWallet = new BeaconWallet(options);
+    beaconWallet.client.subscribeToEvent(
+      BeaconEvent.ACTIVE_ACCOUNT_SET,
+      (account) => {
+        // Beacon gets very upset if we don't subscribe to this event and do *something* with it
+        if (account) {
+          address.value = account.address;
+        }
+      },
+    );
+
+    const cachedAccount = await beaconWallet.client.getActiveAccount();
+
+    if (cachedAccount === undefined) {
+      console.log(
+        "No cached account found, requesting permissions from selected wallet.",
+      );
+      await beaconWallet.requestPermissions();
+    }
+
+    // There must be a better way to do this
+    try {
+      const peers = await beaconWallet.client.getPeers();
+      walletName.value = peers[0].name;
+    } catch {
+      walletName.value = "unknown";
+    }
+
+    wallet.value = beaconWallet;
+    Tezos.setProvider({ wallet: beaconWallet });
+
+    localStorage.setItem("wallet-provider", "beacon");
+  };
+
+  /**
+   * Initializes a WalletConnect wallet
+   */
+  const initializeWalletConnect = async (): Promise<void> => {
+    const walletConnect = await WalletConnect.init({
+      projectId: import.meta.env.VITE_REOWN_PROJECT_ID,
+      metadata: {
+        name: "Taquito Playground",
+        description: "Learning and examples for the Taquito project",
+        icons: ["https://tezostaquito.io/img/favicon.svg"],
+        url: "",
+      },
+    });
+
+    if (!walletConnect)
+      throw ReferenceError(
+        "Wallet not found after WalletConnect initialization should have finished.",
+      );
+
+    const latestSessionKey =
+      await walletConnect.getAllExistingSessionKeys()?.[0];
+
+    if (latestSessionKey) {
+      await walletConnect.configureWithExistingSessionKey(latestSessionKey);
+    } else {
+      await walletConnect.requestPermissions({
+        permissionScope: {
+          networks: [WalletConnectNetworkType.SEOULNET],
+          events: [],
+          methods: [
+            PermissionScopeMethods.TEZOS_SEND,
+            PermissionScopeMethods.TEZOS_SIGN,
+            PermissionScopeMethods.TEZOS_GET_ACCOUNTS,
+          ],
+        },
+      });
+    }
+
+    wallet.value = walletConnect;
+    localStorage.setItem("wallet-provider", "walletconnect");
+  };
+
+  /**
+   * Initializes a programmatic wallet using a private key
+   */
+  const initializeProgrammaticWallet = async (
+    privateKey: string,
+  ): Promise<void> => {
+    if (!privateKey) {
+      throw new Error("No private key found");
+    }
+
+    await importKey(Tezos, privateKey);
+    const importedAddress = await Tezos.signer.publicKeyHash();
+
+    try {
+      const signer = await InMemorySigner.fromSecretKey(privateKey);
+
+      // Create a mock wallet object that implements the required interface
+      // This will be replaced when the programmatic wallet package is fully implemented
+      const mockWallet: ProgrammaticWallet = {
+        getPKH: async () => {
+          return importedAddress;
+        },
+        getPK: async () => {
+          return Tezos.signer.publicKey();
+        },
+        requestPermissions: async () => Promise.resolve(),
+        disconnect: async () => Promise.resolve(),
+        client: {
+          getActiveAccount: async () => ({
+            address: importedAddress,
+          }),
+          getPeers: async () => [{ name: "Programmatic Wallet" }],
+          disconnect: async () => Promise.resolve(),
+          clearActiveAccount: async () => Promise.resolve(),
+        },
+        getAllExistingSessionKeys: async () => [],
+        configureWithExistingSessionKey: async () => Promise.resolve(),
+      };
+      wallet.value = mockWallet;
+      address.value = await mockWallet.getPKH();
+      walletName.value = "Programmatic Wallet";
+      Tezos.setProvider({ signer });
+    } catch (error) {
+      console.error("Failed to initialize programmatic wallet:", error);
+      throw new Error(
+        `Programmatic wallet initialization failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  };
+
+  /**
+   * Initializes a Ledger hardware wallet
+   */
+  const initializeLedgerWallet = async (): Promise<void> => {
+    const transport = await TransportWebHID.create();
+    const ledgerSigner = new LedgerSigner(transport);
+
+    Tezos.setProvider({ signer: ledgerSigner });
+    wallet.value = ledgerSigner;
+    walletName.value = "Ledger Device";
+    localStorage.setItem("wallet-provider", "ledger");
+  };
 
   /**
    * Initializes a wallet using the network configuration from environment variables.
@@ -52,153 +273,51 @@ export const useWalletStore = defineStore("wallet", () => {
       // Until then, if the wallet variable has already been set by a previous session, we will reset the wallet state.
       // This should never be called unless the user wants to connect a new wallet, so this is safe.
       if (wallet.value) {
-        wallet.value = undefined;
-        address.value = undefined;
-        balance.value = undefined;
+        resetWalletState();
         console.warn(
           "A wallet seems to already be initialized in this session. Resetting wallet state and assuming it is a new session.",
         );
       }
 
-      if (provider === "beacon") {
-        const networkType =
-          import.meta.env.VITE_NETWORK_TYPE === "seoulnet"
-            ? NetworkType.CUSTOM
-            : (import.meta.env.VITE_NETWORK_TYPE as NetworkType);
-
-        const options = {
-          name: "Taquito Playground",
-          iconUrl: "https://tezostaquito.io/img/favicon.svg",
-          network: {
-            type: networkType,
-            name: import.meta.env.VITE_NETWORK_TYPE,
-            rpcUrl: settingsStore.settings.rpcUrl,
-          },
-          enableMetrics: true,
-        };
-        console.log("Using Beacon options object:", options);
-
-        wallet.value = new BeaconWallet(options);
-
-        wallet.value.client.subscribeToEvent(
-          BeaconEvent.ACTIVE_ACCOUNT_SET,
-          (account) => {
-            // Beacon gets very upset if we don't subscribe to this event and do *something* with it
-            if (account) {
-              address.value = account.address;
-            }
-          },
-        );
-
-        const cachedAccount = await wallet.value.client.getActiveAccount();
-
-        if (cachedAccount === undefined) {
-          console.log(
-            "No cached account found, requesting permissions from selected wallet.",
-          );
-          await wallet.value.requestPermissions();
-        }
-
-        // There must be a better way to do this
-        try {
-          const peers = await wallet.value.client.getPeers();
-          walletName.value = peers[0].name;
-        } catch {
-          walletName.value = "unknown";
-        }
-
-        localStorage.setItem("wallet-provider", "beacon");
-      } else if (provider === "walletconnect") {
-        wallet.value = await WalletConnect.init({
-          projectId: import.meta.env.VITE_REOWN_PROJECT_ID,
-          metadata: {
-            name: "Taquito Playground",
-            description: "Learning and examples for the Taquito project",
-            icons: ["https://tezostaquito.io/img/favicon.svg"],
-            url: "",
-          },
-        });
-
-        if (!wallet.value)
-          throw ReferenceError(
-            "Wallet not found after WalletConnect initialization should have finished.",
-          );
-
-        const latestSessionKey =
-          await wallet.value.getAllExistingSessionKeys()?.[0];
-
-        if (latestSessionKey) {
-          await wallet.value.configureWithExistingSessionKey(latestSessionKey);
-        } else {
-          await wallet.value.requestPermissions({
-            permissionScope: {
-              networks: [WalletConnectNetworkType.SEOULNET],
-              events: [],
-              methods: [
-                PermissionScopeMethods.TEZOS_SEND,
-                PermissionScopeMethods.TEZOS_SIGN,
-                PermissionScopeMethods.TEZOS_GET_ACCOUNTS,
-              ],
-            },
-          });
-        }
-
-        localStorage.setItem("wallet-provider", "walletconnect");
-      } else if (provider === "programmatic") {
-        if (!privateKey) {
-          throw new Error("No private key found");
-        }
-
-        await importKey(Tezos, privateKey);
-        const importedAddress = await Tezos.signer.publicKeyHash();
-
-        try {
-          const signer = await InMemorySigner.fromSecretKey(privateKey);
-
-          // Create a mock wallet object that implements the required interface
-          // This will be replaced when the programmatic wallet package is fully implemented
-          const mockWallet = {
-            getPKH: async () => {
-              return importedAddress;
-            },
-            getPK: async () => {
-              return Tezos.signer.publicKey();
-            },
-            requestPermissions: async () => Promise.resolve(),
-            disconnect: async () => Promise.resolve(),
-            client: {
-              getActiveAccount: async () => ({
-                address: importedAddress,
-              }),
-              getPeers: async () => [{ name: "Programmatic Wallet" }],
-              disconnect: async () => Promise.resolve(),
-              clearActiveAccount: async () => Promise.resolve(),
-            },
-            getAllExistingSessionKeys: async () => [],
-            configureWithExistingSessionKey: async () => Promise.resolve(),
-          };
-          wallet.value = mockWallet as unknown as BeaconWallet;
-          address.value = await mockWallet.getPKH();
-          walletName.value = "Programmatic Wallet";
-          Tezos.setProvider({ signer });
-        } catch (error) {
-          console.error("Failed to initialize programmatic wallet:", error);
-          throw new Error(
-            `Programmatic wallet initialization failed: ${error instanceof Error ? error.message : String(error)}`,
-          );
-        }
-      } else {
-        throw new TypeError(`Unknown wallet provider: ${provider}`);
+      // Initialize wallet based on provider
+      switch (provider) {
+        case "beacon":
+          await initializeBeaconWallet();
+          break;
+        case "walletconnect":
+          await initializeWalletConnect();
+          break;
+        case "programmatic":
+          if (!privateKey) {
+            throw new Error("No private key found for programmatic wallet");
+          }
+          await initializeProgrammaticWallet(privateKey);
+          break;
+        case "ledger":
+          await initializeLedgerWallet();
+          break;
+        default:
+          throw new TypeError(`Unknown wallet provider: ${provider}`);
       }
 
       if (wallet.value) {
-        address.value = await wallet.value.getPKH();
-        await fetchBalance();
-
         // Only set the wallet provider if we haven't already set a signer for programmatic wallet
-        if (provider !== "programmatic") {
-          Tezos.setProvider({ wallet: wallet.value });
+        // Note: Beacon wallet is already set as provider in initializeBeaconWallet
+        if (provider === "walletconnect") {
+          Tezos.setProvider({
+            wallet: wallet.value as WalletConnect,
+          });
         }
+
+        // Get the address using the wallet address function
+        const walletAddress = await getWalletAddress();
+        if (walletAddress) {
+          address.value = walletAddress;
+        } else {
+          throw new Error("Could not retrieve address from wallet");
+        }
+
+        await fetchBalance();
       } else {
         throw ReferenceError(
           "Wallet was not found after initialization should have finished.",
@@ -209,9 +328,7 @@ export const useWalletStore = defineStore("wallet", () => {
         "Failed to initialize wallet or request permissions:",
         error,
       );
-      wallet.value = undefined;
-      address.value = undefined;
-      balance.value = undefined;
+      resetWalletState();
       throw error;
     }
   };
@@ -226,26 +343,29 @@ export const useWalletStore = defineStore("wallet", () => {
    * @throws {Error} If an error occurs during disconnection.
    */
   const disconnectWallet = async () => {
-    if (!wallet.value) {
-      throw new ReferenceError(
-        "Failed to disconnect wallet. No wallet currently connected",
-      );
-    }
-
     try {
+      if (!wallet.value) {
+        throw new ReferenceError(
+          "Failed to disconnect wallet. No wallet currently connected",
+        );
+      }
+
       if (wallet.value instanceof BeaconWallet) {
         await wallet.value.client.disconnect();
         await wallet.value.client.clearActiveAccount();
       } else if (wallet.value instanceof WalletConnect) {
         await wallet.value.disconnect();
         await deleteWalletConnectSessionFromIndexedDB();
+      } else if (wallet.value instanceof LedgerSigner) {
+        // Ledger doesn't need explicit disconnection
       }
 
-      wallet.value = undefined;
-      address.value = undefined;
-      balance.value = undefined;
+      // Reset wallet state after disconnection
+      resetWalletState();
     } catch (error) {
       console.error("Error disconnecting wallet:", error);
+      // Still reset state even if disconnection fails
+      resetWalletState();
       throw error;
     }
   };
@@ -350,5 +470,7 @@ export const useWalletStore = defineStore("wallet", () => {
     disconnectWallet,
     fetchBalance,
     getWalletConnectSessionFromIndexedDB,
+    getWalletAddress,
+    getWalletPublicKey,
   };
 });

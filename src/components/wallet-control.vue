@@ -92,6 +92,36 @@
       </DialogHeader>
 
       <div>
+        <Alert v-if="provider === 'ledger' && hidSupported" class="mb-2">
+          <AlertTriangle class="size-4 !text-yellow-500" />
+          <AlertTitle>
+            <p>Important</p>
+          </AlertTitle>
+          <AlertDescription class="inline-block"
+            >Use of an HID (your Ledger device) within this browser requires the
+            <code class="px-1 py-0.5 rounded bg-muted text-xs font-mono"
+              >enable-experimental-web-platform-features</code
+            >
+            experimental flag to be enabled. Learn more
+            <a
+              href="https://developer.chrome.com/docs/web-platform/chrome-flags"
+              target="_blank"
+              class="text-blue-400 hover:underline"
+              >here.
+            </a>
+          </AlertDescription>
+        </Alert>
+        <Alert v-if="provider === 'ledger' && !hidSupported" class="mb-2">
+          <AlertTriangle class="size-4 !text-red-500" />
+          <AlertTitle>
+            <p>Heads up!</p>
+          </AlertTitle>
+          <AlertDescription>
+            The API's used to connect to the Ledger device are not supported on
+            this browser. Please use a Chromium-based browser to connect to the
+            Ledger device.
+          </AlertDescription>
+        </Alert>
         <Alert v-if="provider === 'programmatic'" class="mb-2">
           <AlertTriangle class="size-4 !text-red-500" />
           <AlertTitle>
@@ -111,6 +141,7 @@
           <SelectContent>
             <SelectItem value="beacon"> Beacon </SelectItem>
             <SelectItem value="walletconnect"> WalletConnect </SelectItem>
+            <SelectItem value="ledger"> Ledger Device </SelectItem>
             <SelectItem value="programmatic">
               Programmatic (Testing)
             </SelectItem>
@@ -131,7 +162,10 @@
           variant="secondary"
           @click="connect()"
           :disabled="
-            loading || !provider || (provider === 'programmatic' && !privateKey)
+            loading ||
+            !provider ||
+            (provider === 'programmatic' && !privateKey) ||
+            (provider === 'ledger' && !hidSupported)
           "
         >
           <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
@@ -286,7 +320,7 @@ watch([showConnectDialog, showDisconnectDialog], ([newValue]) => {
 });
 
 const copyAddress = () => {
-  navigator.clipboard.writeText(address.value ?? "");
+  navigator.clipboard.writeText(walletStore.getAddress ?? "");
   toast.success("Address copied to clipboard");
 };
 
@@ -333,4 +367,8 @@ const change = async () => {
   await disconnect();
   showConnectDialog.value = true;
 };
+
+const hidSupported = computed(() => {
+  return "hid" in navigator;
+});
 </script>

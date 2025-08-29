@@ -190,7 +190,7 @@ const anySigningInProgress = computed(() => {
 
 onMounted(async () => {
   diagramStore.setTestDiagram("sign-payload");
-  publicKeyToSendToContract.value = await walletStore.getWallet?.getPK();
+  publicKeyToSendToContract.value = await walletStore.getWalletPublicKey();
 });
 
 const signStandardPayload = async () => {

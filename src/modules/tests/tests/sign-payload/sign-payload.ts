@@ -72,7 +72,11 @@ const sign = async (
     const { signature } = signedPayload;
 
     diagramStore.setProgress("verify-signature", "running", TEST_ID);
-    const publicKey = await walletStore.getWallet.getPK();
+    const publicKey = await walletStore.getWalletPublicKey();
+    if (!publicKey) {
+      throw new Error("No public key found");
+    }
+
     const verified = await verifySignature(payloadBytes, publicKey, signature);
     if (!verified) {
       throw new Error("Signature verification failed");
