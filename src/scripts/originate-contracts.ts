@@ -160,15 +160,10 @@ export const originateContracts = async (
       mkdirSync(configDir, { recursive: true });
     }
 
-    // Only create the config file if it doesn't already exist
-    if (!existsSync(configPath)) {
-      writeFileSync(configPath, JSON.stringify(contractConfig, null, 2));
-      console.log(`\n💾 Contract configuration created at: ${configPath}`);
-    } else {
-      console.log(
-        `\nℹ️ Contract configuration already exists at: ${configPath}`,
-      );
-    }
+    writeFileSync(configPath, JSON.stringify(contractConfig, null, 2));
+    console.log(
+      `\n💾 Contract configuration created or updated at: ${configPath}`,
+    );
   }
 
   console.log(`\n🎉 All contracts originated successfully!`);
