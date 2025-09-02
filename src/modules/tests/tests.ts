@@ -13,10 +13,12 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "Use a faucet to fund your wallet with testnet Tez from https://teztnets.com/",
     ],
     relatedTests: ["estimate-fees", "batch", "counter-contract"],
-    sourceCode: {
+    documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/transfer",
-      documentation: "https://taquito.io/docs/making_transfers",
+      taqutioDocumentation: "https://taquito.io/docs/making_transfers",
+      tezosDocumentation:
+        "https://octez.tezos.com/docs/seoul/token_management.html",
     },
     component: () => import("@/modules/tests/tests/transfer/transfer-tez.vue"),
     diagrams: {
@@ -57,12 +59,14 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "transaction-limit",
       "increase-paid-storage",
     ],
-    sourceCode: {
+    documentation: {
       contract:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/counter.jsligo",
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/counter",
-      documentation: "https://taquito.io/docs/smartcontracts",
+      taqutioDocumentation: "https://taquito.io/docs/smartcontracts",
+      tezosDocumentation:
+        "https://octez.tezos.com/docs/seoul/accounts.html#smart-contracts",
     },
     component: () =>
       import("@/modules/tests/tests/counter/counter-contract.vue"),
@@ -155,10 +159,12 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "Configure Taquito with RPC endpoint and signer",
     ],
     relatedTests: ["counter-contract", "estimate-fees", "transaction-limit"],
-    sourceCode: {
+    documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/increase-paid-storage",
-      documentation: "https://taquito.io/docs/increase_paid_storage",
+      taqutioDocumentation: "https://taquito.io/docs/increase_paid_storage",
+      tezosDocumentation:
+        "https://octez.tezos.com/docs/alpha/blocks_ops.html#manager-operations",
     },
     component: () =>
       import(
@@ -203,10 +209,10 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "transaction-limit",
       "batch",
     ],
-    sourceCode: {
+    documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/estimate-fees",
-      documentation: "https://taquito.io/docs/estimate",
+      taqutioDocumentation: "https://taquito.io/docs/estimate",
     },
     component: () =>
       import("@/modules/tests/tests/estimate-fees/estimate-fees.vue"),
@@ -235,10 +241,12 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "Configure Taquito with RPC endpoint and signer",
     ],
     relatedTests: ["staking", "transfer", "estimate-fees"],
-    sourceCode: {
+    documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/delegation",
-      documentation: "https://taquito.io/docs/set_delegate",
+      taqutioDocumentation: "https://taquito.io/docs/set_delegate",
+      tezosDocumentation:
+        "https://octez.tezos.com/docs/seoul/baking_power.html#delegate-delegators-stakers",
     },
     component: () => import("@/modules/tests/tests/delegation/delegation.vue"),
     diagrams: {
@@ -296,10 +304,12 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "Configure Taquito with RPC endpoint and signer",
     ],
     relatedTests: ["delegation", "counter-contract", "estimate-fees"],
-    sourceCode: {
+    documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/staking",
-      documentation: "https://taquito.io/docs/staking",
+      taqutioDocumentation: "https://taquito.io/docs/staking",
+      tezosDocumentation:
+        "https://octez.tezos.com/docs/seoul/baking_power.html#delegate-delegators-stakers",
     },
     component: () => import("@/modules/tests/tests/staking/staking.vue"),
     diagrams: {
@@ -384,10 +394,12 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "estimate-fees",
       "delegation",
     ],
-    sourceCode: {
+    documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/batch",
-      documentation: "https://taquito.io/docs/batch_API/",
+      taqutioDocumentation: "https://taquito.io/docs/batch_API/",
+      tezosDocumentation:
+        "https://octez.tezos.com/docs/seoul/blocks_ops.html#manager-operation-batches",
     },
     component: () => import("@/modules/tests/tests/batch/batch.vue"),
     diagrams: {
@@ -426,10 +438,10 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "Understand the data you want to sign and its format",
     ],
     relatedTests: ["counter-contract", "estimate-fees"],
-    sourceCode: {
+    documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/sign-payload",
-      documentation: "https://taquito.io/docs/signing/",
+      taqutioDocumentation: "https://taquito.io/docs/signing/",
     },
     component: () =>
       import("@/modules/tests/tests/sign-payload/sign-payload.vue"),
@@ -540,10 +552,10 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "estimate-fees",
       "increase-paid-storage",
     ],
-    sourceCode: {
+    documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/transaction-limit",
-      documentation: "https://taquito.io/docs/transaction_limits/",
+      taqutioDocumentation: "https://taquito.io/docs/transaction_limits/",
     },
     component: () =>
       import("@/modules/tests/tests/transaction-limit/transaction-limit.vue"),
@@ -587,10 +599,12 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "Configure Taquito with RPC endpoint and signer",
     ],
     relatedTests: ["counter-contract", "transaction-limit", "estimate-fees"],
-    sourceCode: {
+    documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/failing-noop",
-      documentation: "https://taquito.io/docs/failing_noop/",
+      taqutioDocumentation: "https://taquito.io/docs/failing_noop/",
+      tezosDocumentation:
+        "https://octez.tezos.com/docs/seoul/blocks_ops.html#failing-noop-operation",
     },
     component: () =>
       import("@/modules/tests/tests/failing-noop/failing-noop.vue"),

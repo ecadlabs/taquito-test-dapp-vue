@@ -22,10 +22,11 @@ export interface TestMetadata {
   category: string;
   setup: string[];
   relatedTests: string[];
-  sourceCode: {
+  documentation: {
     contract?: string;
     script?: string;
-    documentation?: string;
+    taqutioDocumentation?: string;
+    tezosDocumentation?: string;
   };
   component?: () => Promise<{ default: Component }>;
   diagrams?: TestDiagrams;
