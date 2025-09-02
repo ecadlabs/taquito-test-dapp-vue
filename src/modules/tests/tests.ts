@@ -7,17 +7,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
     description:
       "Learn how to transfer Tez tokens between Tezos addresses using Taquito's Wallet API. This fundamental operation demonstrates the core transaction flow including fee estimation, user confirmation, and blockchain confirmation.",
     category: "Core Operations",
-    learningGoals: [
-      "Understand Tez transfer operations using the Wallet API",
-      "Understand transaction parameters (amount, destination, fees)",
-      "Learn proper error handling and transaction confirmation patterns",
-      "Practice waiting for user wallet confirmation and blockchain confirmations",
-    ],
-    prerequisites: [
-      "Basic understanding of Tezos wallet addresses and public key hashes",
-      "Familiarity with JavaScript Promises and async/await syntax",
-      "Knowledge of Tezos transaction structure and gas fees",
-    ],
     setup: [
       "Install and configure Taquito: `npm install @taquito/taquito`",
       "Set up a Tezos wallet (Temple, Kukai, or other supported wallet)",
@@ -55,18 +44,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
     description:
       "Interact with a deployed counter smart contract to understand smart contract interaction patterns. Learn how to call contract methods, read storage, and handle contract operations using Taquito.",
     category: "Smart Contracts",
-    learningGoals: [
-      "Understand smart contract interaction using Taquito's methodsObject",
-      "Understand contract storage reading and state management",
-      "Practice proper error handling for contract operations",
-      "Grasp the difference between read operations (storage) and write operations (method calls)",
-      "Learn to wait for contract operation confirmations",
-    ],
-    prerequisites: [
-      "Basic understanding of smart contract concepts and Michelson (or abstracts such as Jsligo)",
-      "Knowledge of contract addresses",
-      "Basic understanding of contract storage and parameter encoding",
-    ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
       "Set up a Tezos wallet with sufficient Tez for gas fees",
@@ -171,18 +148,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
     description:
       "Learn how to increase the paid storage allocation for smart contracts on Tezos. This operation allows you to expand a contract's storage capacity by paying additional fees.",
     category: "Smart Contracts",
-    learningGoals: [
-      "Understand Tezos storage model and paid storage concept",
-      "Learn to calculate and pay for additional storage allocation",
-      "Understand storage costs and fee calculation for storage operations",
-      "Learn to handle storage-related errors and confirmations",
-    ],
-    prerequisites: [
-      "Understanding of Tezos smart contract storage model",
-      "Knowledge of storage costs and fee structures",
-      "Familiarity with contract operations and confirmations",
-      "Understanding of contract addresses and ownership",
-    ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
       "Set up a Tezos wallet with sufficient Tez for storage fees",
@@ -224,16 +189,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     description:
       "Learn to estimate transaction fees, gas limits, and storage costs before executing operations.",
     category: "Core Operations",
-    learningGoals: [
-      "Understand gas limits, storage costs, and fee components",
-      "Learn to use Taquito's EstimateProvider for accurate cost calculations",
-    ],
-    prerequisites: [
-      "Basic understanding of Tezos transaction structure",
-      "Knowledge of gas fees, storage fees, and baker fees",
-      "Familiarity with operation types and their cost implications",
-      "Understanding of transaction limits and their importance",
-    ],
+
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
       "Configure Taquito with RPC endpoint",
@@ -272,19 +228,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
     description:
       "Learn to delegate your baking rights to another baker or remove delegation. Delegation allows you to participate in Tezos consensus and earn rewards without running your own baker infrastructure.",
     category: "Staking & Consensus",
-    learningGoals: [
-      "Understand Tezos delegation and baking rights",
-      "Understand setting a delegate using Taquito's delegation API",
-      "Learn to remove delegation and reclaim baking rights",
-      "Practice proper error handling for delegation operations",
-    ],
-    prerequisites: [
-      "A Tezos wallet not currently registered as a baker",
-      "Understanding of Tezos Proof of Stake consensus mechanism",
-      "Knowledge of baking rights and delegation concepts",
-      "Familiarity with baker addresses and delegation relationships",
-      "Understanding of account types and delegation requirements",
-    ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
       "Set up a Tezos wallet with sufficient Tez",
@@ -347,16 +290,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
     description:
       "Learn about staking operations including staking/unstaking tokens and finalizing unstaking operations.",
     category: "Staking & Consensus",
-    learningGoals: [
-      "Understand staking operations with proper parameter handling",
-      "Understand finalization of unstaking operations",
-      "Practice error handling for staking operations",
-    ],
-    prerequisites: [
-      "Understanding of Tezos staking and delegation concepts",
-      "A Tezos wallet delegated to a baker",
-      "A Tezos wallet with sufficient Tez for staking",
-    ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
       "Set up a Tezos wallet with sufficient Tez for staking",
@@ -438,17 +371,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
     description:
       "Learn to batch multiple Tezos operations into a single transaction.",
     category: "Advanced Operations",
-    learningGoals: [
-      "Understand Taquito's Batch API for combining multiple operations",
-      "Learn to handle different operation types in batches",
-      "Practice proper error handling for batch operations",
-      "Understand batch confirmation and atomic execution",
-    ],
-    prerequisites: [
-      "Understanding of individual Tezos operations (transfers, contract calls)",
-      "Knowledge of gas costs and fee structures",
-      "Familiarity with operation confirmation patterns",
-    ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
       "Set up a Tezos wallet with sufficient Tez for batch gas fees",
@@ -497,18 +419,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
     description:
       "Learn to sign data payloads using Tezos wallets and verify signatures. This includes signing Micheline expressions, packing data, and verifying signatures.",
     category: "Cryptography & Security",
-    learningGoals: [
-      "Learn to pack and sign Micheline expressions",
-      "Understand signature verification",
-      "Practice proper payload formatting and encoding",
-      "Learn to handle different payload types",
-    ],
-    prerequisites: [
-      "Understanding of cryptographic signatures and public key cryptography",
-      "Knowledge of Micheline data format and encoding",
-      "Familiarity with Tezos wallet signing capabilities",
-      "Understanding of payload packing and unpacking",
-    ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
       "Set up a Tezos wallet with signing capabilities",
@@ -618,17 +528,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
     description:
       "Learn to set transaction limits for smart contract interactions to control gas consumption and storage costs.",
     category: "Smart Contracts",
-    learningGoals: [
-      "Understand transaction limits and their importance in Tezos",
-      "Understand setting gas limits and storage limits for contract calls",
-      "Understand the relationship between limits and operation success",
-    ],
-    prerequisites: [
-      "Understanding of Tezos gas model and storage costs",
-      "Knowledge of smart contract interaction patterns",
-      "Familiarity with fee estimation and transaction parameters",
-      "Understanding of operation failure scenarios and rollbacks",
-    ],
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
       "Set up a Tezos wallet with sufficient Tez for gas fees",
@@ -681,16 +580,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     description:
       "Learn to use the Failing Noop instruction in Tezos to deliberately fail an operation.",
     category: "Smart Contracts",
-    learningGoals: [
-      "Understand the purpose and use cases of the Failing Noop instruction",
-      "Learn how to simulate operation failures in Tezos",
-      "Recognize how Failing Noop can be used for testing error handling and rollbacks",
-    ],
-    prerequisites: [
-      "Basic understanding of Michelson and Tezos smart contracts",
-      "Familiarity with operation flows and error handling in Tezos",
-      "Knowledge of Taquito and contract interaction patterns",
-    ],
+
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
       "Set up a Tezos wallet with sufficient Tez for gas fees",
