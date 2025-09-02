@@ -49,7 +49,7 @@
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div v-if="testMetadata.relatedTests.length > 0" class="space-y-2">
+            <div v-if="testMetadata.relatedTests.length > 0">
               <router-link
                 v-for="relatedTestId in testMetadata.relatedTests"
                 :key="relatedTestId"
