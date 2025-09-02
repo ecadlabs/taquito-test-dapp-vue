@@ -5,7 +5,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     id: "transfer",
     title: "Transfer Tez Between Addresses",
     description:
-      "Learn how to transfer Tez tokens between Tezos addresses using Taquito's Wallet API. This fundamental operation demonstrates the core transaction flow including fee estimation, user confirmation, and blockchain confirmation.",
+      "In Tezos, a transfer operation transfers tokens between two addresses. The transfer of tokens from a KT1 account is completed by calling the KT1's smart contract do method. The do method takes a lambda function, and it's the logic of this function that causes the desired transfer of tokens to happen.",
     category: "Core Operations",
     setup: [
       "Install and configure Taquito: `npm install @taquito/taquito`",
@@ -43,8 +43,12 @@ export const AvailableTests: Record<string, TestMetadata> = {
   "counter-contract": {
     id: "counter-contract",
     title: "Counter Smart Contract",
-    description:
-      "Interact with a deployed counter smart contract to understand smart contract interaction patterns. Learn how to call contract methods, read storage, and handle contract operations using Taquito.",
+    description: `Taquito allows developers to interact with Smart Contracts in a similar manner to standard Javascript objects.
+
+      The "Machine Language" of Tezos Smart Contracts is called Michelson. Michelson is a stack-based language that is human-readable. It's possible to author Smart-Contracts directly in Michelson, however, developers can opt to use high level languages (such as Ligo or SmartPy) to write smart contracts instead.
+
+      Michelson is a specialized language that isn't typical in Javascript or Typescript development contexts. Taquito helps to bridge the gap between the Tezos blockchain and a standard Javascript or Typescript development environment.
+    `,
     category: "Smart Contracts",
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
@@ -149,8 +153,9 @@ export const AvailableTests: Record<string, TestMetadata> = {
   "increase-paid-storage": {
     id: "increase-paid-storage",
     title: "Increasing Paid Storage",
-    description:
-      "Learn how to increase the paid storage allocation for smart contracts on Tezos. This operation allows you to expand a contract's storage capacity by paying additional fees.",
+    description: `Increase Paid Storage is an operation that enables a payer to increase the paid storage of a smart contract by a certain byte amount.
+
+    This helps resolve an issue where several operations on the same contract would fail when they are added at the same level due to the storage limit being lower than the 'paid_storage_size_diff'.`,
     category: "Smart Contracts",
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
@@ -192,8 +197,17 @@ export const AvailableTests: Record<string, TestMetadata> = {
   "estimate-fees": {
     id: "estimate-fees",
     title: "Estimating Fees",
-    description:
-      "Learn to estimate transaction fees, gas limits, and storage costs before executing operations.",
+    description: `Taquito's estimate method can be used to estimate fees, gas, and storage associated with an operation.
+      
+      An estimate has the following properties:
+      - burnFeeMutez: The number of mutez that will be burned for the storage of the operation. Type: number
+      - gasLimit: The limit on the amount of gas a given operation can consume. Type: number
+      - minimalFeeMutez: Minimum fees for the operation according to baker defaults. Type: number
+      - storageLimit: The limit on the amount of storage an operation can use. Type: number
+      - suggestedFeeMutez: The suggested fee for the operation, including minimal fees and a small buffer. Type: number
+      - totalCost: The sum of minimalFeeMutez and burnFeeMutez. Type: number
+      - usingBaseFeeMutez: Fees according to your specified base fee, ensuring at least minimum fees are used. Type: number
+      `,
     category: "Core Operations",
 
     setup: [
@@ -231,8 +245,9 @@ export const AvailableTests: Record<string, TestMetadata> = {
   delegation: {
     id: "delegation",
     title: "Delegation",
-    description:
-      "Learn to delegate your baking rights to another baker or remove delegation. Delegation allows you to participate in Tezos consensus and earn rewards without running your own baker infrastructure.",
+    description: `Delegation is when you give your baking rights to another person (baker). This mechanism in Tezos allows users to participate in staking and receive Tezos rewards without running their own node.
+
+    In Tezos, a delegation operation will set the delegate of an address. Calling the KT1's smart contract do method is required to set the delegate for a KT1 account. The do method takes a lambda function, and it is the logic of this function that causes the desired delegation to happen.`,
     category: "Staking & Consensus",
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
@@ -295,8 +310,11 @@ export const AvailableTests: Record<string, TestMetadata> = {
   staking: {
     id: "staking",
     title: "Staking Tokens",
-    description:
-      "Learn about staking operations including staking/unstaking tokens and finalizing unstaking operations.",
+    description: `Staking is an update to the "Proof of Stake" Mechanism in Tezos.
+
+Staking allows any user to participate in the "Proof of Stake" mechanism without setting up a baker. Users can stake their tokens to their delegates, and their staked tokens will be subject to slashing in case of delegate/baker's misbehaviour. This allows the total amount of staked Tez to be much higher than the amount of Tez that bakers themselves hold, which in turn increases the security of the network.
+
+Users can control their staked funds using the 'stake', 'unstake', and 'finalize_unstake' operations. These are implemented as pseudo-entrypoints, and the parameters are passed to a transfer operation with the same destination as the sender.`,
     category: "Staking & Consensus",
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
@@ -378,8 +396,12 @@ export const AvailableTests: Record<string, TestMetadata> = {
   batch: {
     id: "batch",
     title: "Batch Operations",
-    description:
-      "Learn to batch multiple Tezos operations into a single transaction.",
+    description: `Each Tezos account holds a counter that increments every time an operation is included in a block on the network. This feature prevents users from sending two or multiple transactions in a row.
+
+      A batch operation is used to group multiple operations together, avoiding this restriction.
+      
+      That being said, the limitations of batched operations are similar to the constraints of single processes. For example, the gas limit of the Tezos blockchain limits the number of functions that can batch together. In addition to that, only a single account can sign batched operations.
+      `,
     category: "Advanced Operations",
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
@@ -428,8 +450,12 @@ export const AvailableTests: Record<string, TestMetadata> = {
   "sign-payload": {
     id: "sign-payload",
     title: "Sign and Verify Payloads",
-    description:
-      "Learn to sign data payloads using Tezos wallets and verify signatures. This includes signing Micheline expressions, packing data, and verifying signatures.",
+    description: `Signing arbitrary chunks of data is a common practice in a blockchain environment and is usually done to prove that a user has access to a certain account or that a message comes from a certain account.
+
+A signature is a string that is usually based58 encoded for better readability and starts with 'edsig'. It requires a signer to hash the input bytes and thus can only be done if the signer has access to the private key of the account. Therefore, it is impossible to forge a signature for an account of which you don't have access to the private key. 
+
+Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to retrieve the public key of the account that created the signature.
+      `,
     category: "Cryptography & Security",
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
@@ -537,8 +563,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
   "transaction-limit": {
     id: "transaction-limit",
     title: "Transaction Limits",
-    description:
-      "Learn to set transaction limits for smart contract interactions to control gas consumption and storage costs.",
+    description: `Developers may wish to set themselves the different limits of a transaction before broadcasting it. This is useful in cases such as when you want to give it a better chance to be included first or to prevent the transaction from being backtracked due to an insufficient storage limit.`,
     category: "Smart Contracts",
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
@@ -589,8 +614,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
   "failing-noop": {
     id: "failing-noop",
     title: "Failing Noop",
-    description:
-      "Learn to use the Failing Noop instruction in Tezos to deliberately fail an operation.",
+    description: `There are use cases for allowing users to sign arbitrary data. It is important to ensure that data cannot be injected into the blockchain. The failing_noop (no-op) operation can wrap arbitrary data and is guaranteed to fail.`,
     category: "Smart Contracts",
 
     setup: [

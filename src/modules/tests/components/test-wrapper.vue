@@ -9,7 +9,9 @@
             {{ testMetadata.title }}
           </h1>
         </div>
-        <p class="text-base text-muted-foreground">
+        <p
+          class="text-base text-muted-foreground w-full xl:w-2/3 2xl:w-1/2 whitespace-pre-line"
+        >
           {{ testMetadata.description }}
         </p>
       </div>
