@@ -20,8 +20,6 @@ export interface TestMetadata {
   title: string;
   description: string;
   category: string;
-  learningGoals: string[];
-  prerequisites: string[];
   setup: string[];
   relatedTests: string[];
   sourceCode: {
