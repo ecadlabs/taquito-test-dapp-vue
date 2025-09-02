@@ -83,8 +83,6 @@ npm run lint         # Lint code
 npm run format       # Format code
 ```
 
-## 🤝 Contributing
-
 ### Project Structure
 
 ```
