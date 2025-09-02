@@ -4,7 +4,7 @@
       <!-- Header Section -->
       <div class="space-y-1">
         <div class="flex items-center gap-1">
-          <BookOpen class="size-6 mt-0.5 shrink-0" />
+          <BookOpenText class="size-6 mt-0.5 shrink-0" />
           <h1 class="text-2xl font-bold tracking-tight">
             {{ testMetadata.title }}
           </h1>
@@ -49,7 +49,7 @@
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div v-if="testMetadata.relatedTests.length > 0" class="space-y-2">
+            <div v-if="testMetadata.relatedTests.length > 0">
               <router-link
                 v-for="relatedTestId in testMetadata.relatedTests"
                 :key="relatedTestId"
@@ -79,12 +79,12 @@
           <CardContent>
             <div class="space-y-3">
               <div
-                v-if="testMetadata.sourceCode.contract"
+                v-if="testMetadata.documentation.contract"
                 class="flex items-center gap-2"
               >
                 <FileCode class="h-4 w-4 text-muted-foreground" />
                 <a
-                  :href="testMetadata.sourceCode.contract"
+                  :href="testMetadata.documentation.contract"
                   target="_blank"
                   rel="noopener noreferrer"
                   class="text-sm text-primary hover:underline"
@@ -93,12 +93,12 @@
                 </a>
               </div>
               <div
-                v-if="testMetadata.sourceCode.script"
+                v-if="testMetadata.documentation.script"
                 class="flex items-center gap-2"
               >
                 <FileText class="h-4 w-4 text-muted-foreground" />
                 <a
-                  :href="testMetadata.sourceCode.script"
+                  :href="testMetadata.documentation.script"
                   target="_blank"
                   rel="noopener noreferrer"
                   class="text-sm text-primary hover:underline"
@@ -107,17 +107,31 @@
                 </a>
               </div>
               <div
-                v-if="testMetadata.sourceCode.documentation"
+                v-if="testMetadata.documentation.taqutioDocumentation"
                 class="flex items-center gap-2"
               >
-                <BookOpen class="h-4 w-4 text-muted-foreground" />
+                <BookOpenText class="h-4 w-4 text-muted-foreground" />
                 <a
-                  :href="testMetadata.sourceCode.documentation"
+                  :href="testMetadata.documentation.taqutioDocumentation"
                   target="_blank"
                   rel="noopener noreferrer"
                   class="text-sm text-primary hover:underline"
                 >
-                  Documentation
+                  Taquito Documentation
+                </a>
+              </div>
+              <div
+                v-if="testMetadata.documentation.tezosDocumentation"
+                class="flex items-center gap-2"
+              >
+                <BookOpenText class="h-4 w-4 text-muted-foreground" />
+                <a
+                  :href="testMetadata.documentation.tezosDocumentation"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm text-primary hover:underline"
+                >
+                  Tezos Documentation
                 </a>
               </div>
             </div>
@@ -159,7 +173,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { onUnmounted } from "vue";
 import {
-  BookOpen,
   Settings,
   Link,
   ArrowRight,
@@ -167,6 +180,7 @@ import {
   FileCode,
   FileText,
   Workflow,
+  BookOpenText,
 } from "lucide-vue-next";
 
 const route = useRoute();
