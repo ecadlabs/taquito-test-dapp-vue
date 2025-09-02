@@ -2,8 +2,8 @@ name: taquito dapp pages deploy
 
 on:
   push:
-    branches: [main]
-  # pull_request:
+    tags:
+      - '*'
   workflow_dispatch:
 
 concurrency:
@@ -37,7 +37,7 @@ jobs:
       VITE_NETWORK_TYPE: ${{ matrix.environment }}
       VITE_RPC_URL: ${{ vars.RPC_URL }}
       VITE_GITHUB_SHA: ${{ github.sha }}
-      VITE_VERSION: ${{ github.head_ref }}
+      VITE_VERSION: ${{ github.ref }}
       VITE_REOWN_PROJECT_ID: ${{ secrets.REOWN_PROJECT_ID }}
     outputs:
       preview-url: ${{ steps.cloudflare_publish.outputs.URL }}
