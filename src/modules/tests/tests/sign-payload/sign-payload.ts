@@ -5,6 +5,9 @@ import type { ContractConfig } from "@/types/contract";
 import contracts from "@/contracts/contract-config.json";
 import type { Estimate } from "@taquito/taquito";
 import { PiggyBankIcon } from "lucide-vue-next";
+import { BeaconWallet } from "@taquito/beacon-wallet";
+import { WalletConnect } from "@taquito/wallet-connect";
+import { LedgerSigner } from "@taquito/ledger-signer";
 
 const TEST_ID = "sign-payload";
 let estimate: Estimate;
@@ -57,15 +60,18 @@ const sign = async (
     diagramStore.setProgress("wait-for-user", "running", TEST_ID);
 
     // Dynamic wallet type checking and signing
-    let signedPayload;
-    const walletType = wallet.constructor.name;
+    let signedPayload: { signature: string };
 
-    if (walletType === "BeaconWallet") {
-      signedPayload = await (wallet as any).client.requestSignPayload(payload);
-    } else if (walletType === "WalletConnect") {
-      const signature = await (wallet as any).sign(payloadBytes);
+    if (wallet instanceof BeaconWallet) {
+      signedPayload = await wallet.client.requestSignPayload(payload);
+    } else if (wallet instanceof WalletConnect) {
+      const signature = await wallet.sign(payloadBytes);
       signedPayload = { signature };
+    } else if (wallet instanceof LedgerSigner) {
+      const signature = await Tezos.signer.sign(payloadBytes);
+      signedPayload = { signature: signature.prefixSig };
     } else {
+      // Programmatic wallet
       const signature = await Tezos.signer.sign(payloadBytes);
       signedPayload = { signature: signature.prefixSig };
     }
@@ -154,15 +160,18 @@ const signTzip32 = async (input: string) => {
     diagramStore.setProgress("wait-for-user", "running", TEST_ID);
 
     // Dynamic wallet type checking and signing
-    let signedPayload;
-    const walletType = wallet.constructor.name;
+    let signedPayload: { signature: string };
 
-    if (walletType === "BeaconWallet") {
-      signedPayload = await (wallet as any).client.requestSignPayload(payload);
-    } else if (walletType === "WalletConnect") {
-      const signature = await (wallet as any).sign(payload.payload);
+    if (wallet instanceof BeaconWallet) {
+      signedPayload = await wallet.client.requestSignPayload(payload);
+    } else if (wallet instanceof WalletConnect) {
+      const signature = await wallet.sign(payload.payload);
       signedPayload = { signature };
+    } else if (wallet instanceof LedgerSigner) {
+      const signature = await Tezos.signer.sign(payload.payload);
+      signedPayload = { signature: signature.prefixSig };
     } else {
+      // Programmatic wallet
       const signature = await Tezos.signer.sign(payload.payload);
       signedPayload = { signature: signature.prefixSig };
     }
@@ -194,8 +203,17 @@ export const signMichelsonData = async (
   const dataJSON = p.parseMichelineExpression(data);
   const typeJSON = p.parseMichelineExpression(type);
 
+  if (!dataJSON || !typeJSON) {
+    throw new Error("Failed to parse Micheline expression");
+  }
+
   diagramStore.setProgress("pack-data-bytes", "running", TEST_ID);
-  const packed = michelCodec.packDataBytes(dataJSON as any, typeJSON as any);
+  // Type assertion is necessary here because parseMichelineExpression returns Expr
+  // but packDataBytes expects more specific Micheline types. This is safe since we're parsing valid Micheline.
+  const packed = michelCodec.packDataBytes(
+    dataJSON as Parameters<typeof michelCodec.packDataBytes>[0],
+    typeJSON as Parameters<typeof michelCodec.packDataBytes>[1],
+  );
 
   const signature = await sign(packed.bytes, true, true);
   if (!signature) {
