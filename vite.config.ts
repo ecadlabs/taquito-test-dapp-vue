@@ -29,10 +29,10 @@ export default defineConfig({
         manualChunks: {
           // Separate Taquito core from signing utilities
           "taquito-core": ["@taquito/taquito"],
-          "taquito-signing": [
-            "@taquito/utils",
-            "@taquito/michel-codec",
-            "@taquito/signer",
+          // Split signing utilities into focused chunks
+          "taquito-utils": ["@taquito/utils", "@taquito/michel-codec"],
+          "taquito-signers": ["@taquito/signer"],
+          "taquito-wallets": [
             "@taquito/beacon-wallet",
             "@taquito/wallet-connect",
             "@taquito/ledger-signer",
