@@ -38,13 +38,10 @@ export default defineConfig({
             "@taquito/ledger-signer",
             "@taquito/remote-signer",
           ],
-          // Separate beacon/wallet connect dependencies
-          "wallet-providers": [
-            "@airgap/beacon-sdk",
-            "@airgap/beacon-types",
-            "@airgap/beacon-ui",
-            "@airgap/beacon-dapp",
-          ],
+          // Split wallet provider dependencies into focused chunks
+          "beacon-core": ["@airgap/beacon-sdk", "@airgap/beacon-dapp"],
+          "beacon-ui": ["@airgap/beacon-ui"],
+          "beacon-types": ["@airgap/beacon-types"],
           // Crypto dependencies
           "crypto-libs": ["@noble/hashes"],
           // UI components (excluding lucide-vue-next to allow tree-shaking)
