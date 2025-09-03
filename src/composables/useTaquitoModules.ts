@@ -26,15 +26,9 @@ export const useTaquitoModules = () => {
     };
   };
 
-  const loadLucideIcon = async (iconName: string) => {
-    const { loadIcon } = await import("@/lib/icons");
-    return loadIcon(iconName);
-  };
-
   return {
     loadUtils,
     loadBeaconTypes,
     loadMichelCodec,
-    loadLucideIcon,
   };
 };

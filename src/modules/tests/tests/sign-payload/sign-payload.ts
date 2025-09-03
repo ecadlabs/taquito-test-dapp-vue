@@ -4,6 +4,7 @@ import { useTaquitoModules } from "@/composables/useTaquitoModules";
 import type { ContractConfig } from "@/types/contract";
 import contracts from "@/contracts/contract-config.json";
 import type { Estimate } from "@taquito/taquito";
+import { PiggyBankIcon } from "lucide-vue-next";
 
 const TEST_ID = "sign-payload";
 let estimate: Estimate;
@@ -218,7 +219,7 @@ const verifyPayloadViaContract = async (
 ) => {
   const walletStore = useWalletStore();
   const diagramStore = useDiagramStore();
-  const { loadUtils, loadLucideIcon } = useTaquitoModules();
+  const { loadUtils } = useTaquitoModules();
   const Tezos = walletStore.getTezos;
   diagramStore.setTestDiagram(TEST_ID, "verify-payload-via-contract");
 
@@ -286,9 +287,8 @@ const verifyPayloadViaContract = async (
 
     if (estimate) {
       // Load icon only when needed
-      const PiggyBank = await loadLucideIcon("PiggyBank");
       diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
+        icon: PiggyBankIcon,
         text: "View Fees",
         onClick: () => diagramStore.showFeeEstimationDialog(estimate),
       });
