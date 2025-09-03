@@ -147,12 +147,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Check, Loader2, X } from "lucide-vue-next";
 import { useWalletStore } from "@/stores/walletStore";
-import {
-  sign,
-  signTzip32,
-  signMichelsonData,
-  verifyPayloadViaContract,
-} from "@/modules/tests/tests/sign-payload/sign-payload";
+// Dynamic imports for signing functions to reduce initial bundle size
+const loadSigningFunctions = async () => {
+  return await import("@/modules/tests/tests/sign-payload/sign-payload");
+};
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Copy } from "lucide-vue-next";
@@ -196,6 +194,7 @@ onMounted(async () => {
 const signStandardPayload = async () => {
   try {
     signing.value = true;
+    const { sign } = await loadSigningFunctions();
     signature.value = await sign(payload.value);
     if (signature.value) {
       signatureToSendToContract.value = signature.value;
@@ -211,6 +210,7 @@ const signStandardPayload = async () => {
 const signTzip32Payload = async () => {
   try {
     signingTzip32.value = true;
+    const { signTzip32 } = await loadSigningFunctions();
     signature.value = await signTzip32(payload.value);
     if (signature.value) {
       signatureToSendToContract.value = signature.value;
@@ -226,6 +226,7 @@ const signTzip32Payload = async () => {
 const signMichelson = async () => {
   try {
     signingMichelson.value = true;
+    const { signMichelsonData } = await loadSigningFunctions();
     signature.value = await signMichelsonData(
       michelsonData.value,
       michelsonType.value,
@@ -262,6 +263,7 @@ const verifyPayloadOnContract = async (tzip32: boolean = false) => {
       return;
     }
 
+    const { verifyPayloadViaContract } = await loadSigningFunctions();
     const verified = await verifyPayloadViaContract(
       payloadToSendToContract.value,
       signatureToSendToContract.value,
