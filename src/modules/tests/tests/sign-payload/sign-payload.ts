@@ -8,6 +8,7 @@ import { PiggyBankIcon } from "lucide-vue-next";
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { WalletConnect } from "@taquito/wallet-connect";
 import { LedgerSigner } from "@taquito/ledger-signer";
+import type { MichelsonData, MichelsonType } from "@taquito/michel-codec";
 
 const TEST_ID = "sign-payload";
 let estimate: Estimate;
@@ -211,8 +212,8 @@ export const signMichelsonData = async (
   // Type assertion is necessary here because parseMichelineExpression returns Expr
   // but packDataBytes expects more specific Micheline types. This is safe since we're parsing valid Micheline.
   const packed = michelCodec.packDataBytes(
-    dataJSON as Parameters<typeof michelCodec.packDataBytes>[0],
-    typeJSON as Parameters<typeof michelCodec.packDataBytes>[1],
+    dataJSON as MichelsonData,
+    typeJSON as MichelsonType,
   );
 
   const signature = await sign(packed.bytes, true, true);
