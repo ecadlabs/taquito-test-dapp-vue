@@ -3,6 +3,7 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { RpcClient } from "@taquito/rpc";
 import type { Confirmation } from "@/types/wallet";
+import { toast } from "vue-sonner";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -36,4 +37,24 @@ export const getOperationHash = (confirmation: Confirmation) => {
     opHash = confirmation.toString();
   }
   return opHash;
+};
+
+/**
+ * Copies text to clipboard with toast notifications
+ * @param text - The text to copy to clipboard
+ * @param successMessage - Optional custom success message (default: "Copied to clipboard")
+ * @param errorMessage - Optional custom error message (default: "Failed to copy to clipboard")
+ */
+export const copyToClipboard = async (
+  text: string,
+  successMessage: string = "Copied to clipboard",
+  errorMessage: string = "Failed to copy to clipboard",
+) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast.success(successMessage);
+  } catch (error) {
+    console.error("Failed to copy to clipboard:", error);
+    toast.error(errorMessage);
+  }
 };
