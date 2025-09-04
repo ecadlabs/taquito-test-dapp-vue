@@ -656,6 +656,54 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       },
     },
   },
+  "global-constants": {
+    id: "global-constants",
+    title: "Global Constants",
+    description: `Global Constants allow users to register Michelson expressions in a global table and reference them across multiple contracts. This feature helps reduce contract size and storage costs by enabling code reuse.
+    
+    This is particularly useful for large contracts that exceed size limits or when sharing common code patterns between multiple contracts.`,
+    category: "Advanced Operations",
+    setup: [
+      "Install Taquito: `npm install @taquito/taquito`",
+      "Set up a Tezos wallet with sufficient Tez for registration fees",
+      "Configure Taquito with RPC endpoint and signer",
+      "Understand Michelson expressions and JSON format",
+      "Have sample expressions ready for testing",
+    ],
+    relatedTests: [
+      "counter-contract",
+      "estimate-fees",
+      "batch",
+      "sign-payload",
+    ],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/global-constants",
+      taqutioDocumentation: "https://taquito.io/docs/global_constant/",
+      tezosDocumentation:
+        "https://octez.tezos.com/docs/seoul/global_constants.html",
+    },
+    component: () =>
+      import("@/modules/tests/tests/global-constants/global-constants.vue"),
+    diagrams: {
+      "register-constant": {
+        nodes: [
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "register-constant",
+            label: "Register Global Constant",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+    },
+  },
 };
 
 export const getTestById = (id: string): TestMetadata | undefined => {
