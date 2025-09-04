@@ -25,6 +25,31 @@ export default defineConfig({
         // Exclude the scripts directory from the build as they won't be used on the live site
         return id.includes("/src/scripts/") || id.includes("\\src\\scripts\\");
       },
+      output: {
+        manualChunks: {
+          // Separate Taquito core from signing utilities
+          "taquito-core": ["@taquito/taquito"],
+          // Split signing utilities into focused chunks
+          "taquito-utils": ["@taquito/utils", "@taquito/michel-codec"],
+          "taquito-signers": ["@taquito/signer"],
+          "taquito-wallets": [
+            "@taquito/beacon-wallet",
+            "@taquito/wallet-connect",
+            "@taquito/ledger-signer",
+            "@taquito/remote-signer",
+          ],
+          // Split wallet provider dependencies into focused chunks
+          "beacon-core": ["@airgap/beacon-sdk", "@airgap/beacon-dapp"],
+          "beacon-ui": ["@airgap/beacon-ui"],
+          "beacon-types": ["@airgap/beacon-types"],
+          // Crypto dependencies
+          "crypto-libs": ["@noble/hashes"],
+          // UI components (excluding lucide-vue-next to allow tree-shaking)
+          "ui-components": ["reka-ui", "@vueuse/core"],
+          // Vue ecosystem
+          "vue-ecosystem": ["vue", "vue-router", "pinia", "vue-sonner"],
+        },
+      },
     },
   },
 });

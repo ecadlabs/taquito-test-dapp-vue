@@ -1,20 +1,14 @@
 import { useWalletStore } from "@/stores/walletStore";
 import { useDiagramStore } from "@/stores/diagramStore";
-import { num2PaddedHex, stringToBytes, verifySignature } from "@taquito/utils";
-import { type RequestSignPayloadInput } from "@airgap/beacon-sdk";
-import { SigningType } from "@airgap/beacon-types";
-import { BeaconWallet } from "@taquito/beacon-wallet";
-import { WalletConnect } from "@taquito/wallet-connect";
-import {
-  Parser,
-  packDataBytes,
-  type MichelsonData,
-  type MichelsonType,
-} from "@taquito/michel-codec";
+import { useTaquitoModules } from "@/composables/useTaquitoModules";
 import type { ContractConfig } from "@/types/contract";
 import contracts from "@/contracts/contract-config.json";
 import type { Estimate } from "@taquito/taquito";
-import { PiggyBank } from "lucide-vue-next";
+import { PiggyBankIcon } from "lucide-vue-next";
+import { BeaconWallet } from "@taquito/beacon-wallet";
+import { WalletConnect } from "@taquito/wallet-connect";
+import { LedgerSigner } from "@taquito/ledger-signer";
+import type { MichelsonData, MichelsonType } from "@taquito/michel-codec";
 
 const TEST_ID = "sign-payload";
 let estimate: Estimate;
@@ -26,25 +20,33 @@ const sign = async (
 ) => {
   const diagramStore = useDiagramStore();
   const walletStore = useWalletStore();
+  const { loadUtils, loadBeaconTypes } = useTaquitoModules();
   const Tezos = walletStore.getTezos;
+
   if (!noDiagram) {
     diagramStore.setTestDiagram(TEST_ID, "sign");
   }
 
   try {
+    // Load required modules dynamically
+    const [utils, beaconTypes] = await Promise.all([
+      loadUtils(),
+      loadBeaconTypes(),
+    ]);
+
     diagramStore.setProgress("join-payload", "running", TEST_ID);
     const formattedInput: string = ["Tezos Signed Message:", input].join(" ");
 
     diagramStore.setProgress("convert-to-bytes", "running", TEST_ID);
-    const bytes = alreadyBytes ? input : stringToBytes(formattedInput);
+    const bytes = alreadyBytes ? input : utils.stringToBytes(formattedInput);
     const bytesLength = (bytes.length / 2).toString(16);
     const addPadding = `00000000${bytesLength}`;
     const paddedBytesLength = addPadding.slice(addPadding.length - 8);
     const payloadBytes = "05" + "01" + paddedBytesLength + bytes;
 
     // The payload to send to the wallet
-    const payload: RequestSignPayloadInput = {
-      signingType: SigningType.MICHELINE,
+    const payload = {
+      signingType: beaconTypes.SigningType.MICHELINE,
       payload: payloadBytes,
       sourceAddress: walletStore.getAddress,
     };
@@ -57,14 +59,20 @@ const sign = async (
 
     diagramStore.setProgress("request-wallet-sign", "running", TEST_ID);
     diagramStore.setProgress("wait-for-user", "running", TEST_ID);
-    // Different wallets have different ways of signing payloads
-    let signedPayload;
+
+    // Dynamic wallet type checking and signing
+    let signedPayload: { signature: string };
+
     if (wallet instanceof BeaconWallet) {
       signedPayload = await wallet.client.requestSignPayload(payload);
     } else if (wallet instanceof WalletConnect) {
       const signature = await wallet.sign(payloadBytes);
       signedPayload = { signature };
+    } else if (wallet instanceof LedgerSigner) {
+      const signature = await Tezos.signer.sign(payloadBytes);
+      signedPayload = { signature: signature.prefixSig };
     } else {
+      // Programmatic wallet
       const signature = await Tezos.signer.sign(payloadBytes);
       signedPayload = { signature: signature.prefixSig };
     }
@@ -77,7 +85,11 @@ const sign = async (
       throw new Error("No public key found");
     }
 
-    const verified = await verifySignature(payloadBytes, publicKey, signature);
+    const verified = await utils.verifySignature(
+      payloadBytes,
+      publicKey,
+      signature,
+    );
     if (!verified) {
       throw new Error("Signature verification failed");
     }
@@ -97,22 +109,29 @@ const sign = async (
 const signTzip32 = async (input: string) => {
   const diagramStore = useDiagramStore();
   const walletStore = useWalletStore();
+  const { loadUtils, loadBeaconTypes } = useTaquitoModules();
   const Tezos = walletStore.getTezos;
   diagramStore.setTestDiagram(TEST_ID, "sign-tzip32");
 
   try {
+    // Load required modules dynamically
+    const [utils, beaconTypes] = await Promise.all([
+      loadUtils(),
+      loadBeaconTypes(),
+    ]);
+
     const magicString = "tezos signed offchain message";
     const interface_ = "tzip://32";
     const characterEncoding = "0";
     const message = input;
 
     const magicByteHex = "80";
-    const magicStringHex = stringToBytes(magicString);
-    const interfaceLengthHex = num2PaddedHex(interface_.length, 8);
-    const interfaceHex = stringToBytes(interface_);
-    const encodingHex = num2PaddedHex(Number(characterEncoding), 8);
-    const messageLengthHex = num2PaddedHex(message.length, 16);
-    const messageHex = stringToBytes(message);
+    const magicStringHex = utils.stringToBytes(magicString);
+    const interfaceLengthHex = utils.num2PaddedHex(interface_.length, 8);
+    const interfaceHex = utils.stringToBytes(interface_);
+    const encodingHex = utils.num2PaddedHex(Number(characterEncoding), 8);
+    const messageLengthHex = utils.num2PaddedHex(message.length, 16);
+    const messageHex = utils.stringToBytes(message);
 
     const fullPayloadHex =
       magicByteHex +
@@ -128,7 +147,7 @@ const signTzip32 = async (input: string) => {
     const michelinePayload = "05" + "01" + fullPayloadHex;
 
     const payload = {
-      signingType: SigningType.MICHELINE,
+      signingType: beaconTypes.SigningType.MICHELINE,
       payload: michelinePayload,
     };
 
@@ -140,14 +159,20 @@ const signTzip32 = async (input: string) => {
 
     diagramStore.setProgress("request-wallet-sign", "running", TEST_ID);
     diagramStore.setProgress("wait-for-user", "running", TEST_ID);
-    // Different wallets have different ways of signing payloads
-    let signedPayload;
+
+    // Dynamic wallet type checking and signing
+    let signedPayload: { signature: string };
+
     if (wallet instanceof BeaconWallet) {
       signedPayload = await wallet.client.requestSignPayload(payload);
     } else if (wallet instanceof WalletConnect) {
       const signature = await wallet.sign(payload.payload);
       signedPayload = { signature };
+    } else if (wallet instanceof LedgerSigner) {
+      const signature = await Tezos.signer.sign(payload.payload);
+      signedPayload = { signature: signature.prefixSig };
     } else {
+      // Programmatic wallet
       const signature = await Tezos.signer.sign(payload.payload);
       signedPayload = { signature: signature.prefixSig };
     }
@@ -168,15 +193,25 @@ export const signMichelsonData = async (
   type: string,
 ): Promise<string> => {
   const diagramStore = useDiagramStore();
+  const { loadMichelCodec } = useTaquitoModules();
   diagramStore.setTestDiagram(TEST_ID, "signMichelson");
 
+  // Load michel-codec only when needed for Michelson signing
+  const michelCodec = await loadMichelCodec();
+
   diagramStore.setProgress("parse-micheline-expression", "running", TEST_ID);
-  const p = new Parser();
+  const p = new michelCodec.Parser();
   const dataJSON = p.parseMichelineExpression(data);
   const typeJSON = p.parseMichelineExpression(type);
 
+  if (!dataJSON || !typeJSON) {
+    throw new Error("Failed to parse Micheline expression");
+  }
+
   diagramStore.setProgress("pack-data-bytes", "running", TEST_ID);
-  const packed = packDataBytes(
+  // Type assertion is necessary here because parseMichelineExpression returns Expr
+  // but packDataBytes expects more specific Micheline types. This is safe since we're parsing valid Micheline.
+  const packed = michelCodec.packDataBytes(
     dataJSON as MichelsonData,
     typeJSON as MichelsonType,
   );
@@ -203,10 +238,13 @@ const verifyPayloadViaContract = async (
 ) => {
   const walletStore = useWalletStore();
   const diagramStore = useDiagramStore();
+  const { loadUtils } = useTaquitoModules();
   const Tezos = walletStore.getTezos;
   diagramStore.setTestDiagram(TEST_ID, "verify-payload-via-contract");
 
   try {
+    // Load utils for payload construction
+    const utils = await loadUtils();
     let payloadBytes: string;
 
     if (tzip32) {
@@ -221,12 +259,12 @@ const verifyPayloadViaContract = async (
       // For TZIP-32 verification, we need to construct the same Micheline-wrapped payload
       // that was used for signing: "05" + "01" + fullPayloadHex
       const magicByteHex = "80";
-      const magicStringHex = stringToBytes(magicString);
-      const interfaceLengthHex = num2PaddedHex(interface_.length, 8);
-      const interfaceHex = stringToBytes(interface_);
-      const encodingHex = num2PaddedHex(Number(characterEncoding), 8);
-      const messageLengthHex = num2PaddedHex(message.length, 16);
-      const messageHex = stringToBytes(message);
+      const magicStringHex = utils.stringToBytes(magicString);
+      const interfaceLengthHex = utils.num2PaddedHex(interface_.length, 8);
+      const interfaceHex = utils.stringToBytes(interface_);
+      const encodingHex = utils.num2PaddedHex(Number(characterEncoding), 8);
+      const messageLengthHex = utils.num2PaddedHex(message.length, 16);
+      const messageHex = utils.stringToBytes(message);
 
       const fullPayloadHex =
         magicByteHex +
@@ -244,7 +282,7 @@ const verifyPayloadViaContract = async (
       );
 
       diagramStore.setProgress("convert-to-bytes", "running", TEST_ID);
-      const bytes = stringToBytes(formattedInput);
+      const bytes = utils.stringToBytes(formattedInput);
       const bytesLength = (bytes.length / 2).toString(16);
       const addPadding = `00000000${bytesLength}`;
       const paddedBytesLength = addPadding.slice(addPadding.length - 8);
@@ -267,8 +305,9 @@ const verifyPayloadViaContract = async (
     estimate = await Tezos.estimate.transfer(transferParams);
 
     if (estimate) {
+      // Load icon only when needed
       diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
+        icon: PiggyBankIcon,
         text: "View Fees",
         onClick: () => diagramStore.showFeeEstimationDialog(estimate),
       });
