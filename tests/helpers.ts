@@ -32,8 +32,16 @@ export const goToTest = async ({
 };
 
 export const waitForSuccess = async ({ page }: { page: Page }) => {
-  // Wait for the diagram to complete with a longer timeout for blockchain operations
+  // Wait for the diagram to complete
   await page.waitForSelector('div[data-testid="diagramComplete"]', {
+    timeout: 60000, // Increased timeout for blockchain operations
+    state: "visible",
+  });
+};
+
+export const waitForError = async ({ page }: { page: Page }) => {
+  // Wait for the diagram to enter an error state
+  await page.waitForSelector('div[data-testid="diagramError"]', {
     timeout: 60000, // Increased timeout for blockchain operations
     state: "visible",
   });

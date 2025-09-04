@@ -656,6 +656,49 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       },
     },
   },
+  "failing-contract": {
+    id: "failing-contract",
+    title: "Contract Call Failures",
+    description: `This test demonstrates how Taquito handles various contract call failure scenarios. Understanding error modes is crucial for building robust dApps that can gracefully handle different types of contract interaction failures.
+
+    Different types of errors include parameter type mismatches, invalid entrypoint calls, and malformed parameter structures.`,
+    category: "Smart Contracts",
+    setup: [
+      "Install Taquito: `npm install @taquito/taquito`",
+      "Set up a Tezos wallet with sufficient Tez for gas fees",
+      "Deploy or obtain access to a contract with entry points",
+      "Configure Taquito with RPC endpoint and signer",
+      "Understand the contract's entrypoints and expected parameters",
+    ],
+    relatedTests: ["counter-contract", "failing-noop", "estimate-fees"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/failing-contract",
+      taqutioDocumentation: "https://taquito.io/docs/smartcontracts",
+      tezosDocumentation:
+        "https://octez.tezos.com/docs/seoul/accounts.html#smart-contracts",
+    },
+    component: () =>
+      import("@/modules/tests/tests/failing-contract/failing-contract.vue"),
+    diagrams: {
+      "failing-contract": {
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get Contract",
+          },
+          {
+            id: "execute-operation",
+            label: "Execute Operation",
+          },
+          {
+            id: "wait-confirmation",
+            label: "Wait for Confirmation",
+          },
+        ],
+      },
+    },
+  },
   "global-constants": {
     id: "global-constants",
     title: "Global Constants",
