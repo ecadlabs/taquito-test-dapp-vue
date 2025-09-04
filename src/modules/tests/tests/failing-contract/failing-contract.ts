@@ -25,30 +25,21 @@ const testContractFailure = async (scenario: string): Promise<void> => {
     diagramStore.setProgress("get-contract", "running", TEST_ID);
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    let operation;
-
     diagramStore.setProgress("execute-operation", "running", TEST_ID);
-
     switch (scenario) {
       case "wrong-type":
         // Try to pass a string instead of a number to increment
-        operation = await contract.methodsObject
-          .increment("invalid" as any)
-          .send();
+        await contract.methodsObject.increment("invalid").send();
         break;
 
       case "invalid-entrypoint":
         // Try to call a non-existent entrypoint
-        operation = await (contract as any).methodsObject
-          .nonExistentMethod()
-          .send();
+        await contract.methodsObject.nonExistentMethod().send();
         break;
 
       case "invalid-parameter-structure":
         // Try to pass wrong parameter structure
-        operation = await contract.methodsObject
-          .increment({ invalid: "structure" } as any)
-          .send();
+        await contract.methodsObject.increment({ invalid: "structure" }).send();
         break;
 
       default:
