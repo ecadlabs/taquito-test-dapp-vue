@@ -61,6 +61,14 @@
               data-testid="diagramComplete"
               tabindex="-1"
             />
+            <!-- Locator for automated tests to know when an example has errored -->
+            <div
+              v-if="node.type === 'error' && diagramStatus === 'errored'"
+              class="absolute top-0 left-0 sr-only"
+              aria-hidden="true"
+              data-testid="diagramError"
+              tabindex="-1"
+            />
             <a
               v-if="
                 node.type === 'success' &&
