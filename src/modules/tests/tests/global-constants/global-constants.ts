@@ -24,8 +24,6 @@ const registerGlobalConstant = async (
 
   try {
     diagramStore.setProgress("estimate-fees", "running", TEST_ID);
-
-    // Estimate fees for the register_global_constant operation
     estimate = await Tezos.estimate.registerGlobalConstant({ value });
 
     if (estimate) {
@@ -37,12 +35,9 @@ const registerGlobalConstant = async (
     }
 
     diagramStore.setProgress("register-constant", "running", TEST_ID);
-
-    // Register the global constant
     const operation = await Tezos.contract.registerGlobalConstant({ value });
 
     diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
-
     const confirmation = await operation.confirmation(3);
 
     const opHash = getOperationHash(confirmation);
@@ -51,11 +46,9 @@ const registerGlobalConstant = async (
     }
 
     diagramStore.setProgress("success", "completed", TEST_ID);
-
-    // Return the global constant hash
     return operation.globalConstantHash;
   } catch (error) {
-    console.log(`Error: ${JSON.stringify(error, null, 2)}`);
+    console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error, TEST_ID);
     throw error;
   }

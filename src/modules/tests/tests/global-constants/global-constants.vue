@@ -48,7 +48,7 @@
               <Button
                 variant="ghost"
                 size="icon"
-                :aria-label="`Copy hash ${registrationResult.hash}`"
+                :aria-label="`Copy constant hash`"
                 @click="
                   copyToClipboard(
                     registrationResult.hash,
@@ -67,7 +67,7 @@
               <Button
                 variant="ghost"
                 size="icon"
-                :aria-label="`Copy hash ${registrationResult.hash}`"
+                :aria-label="`Copy operation hash`"
                 @click="
                   copyToClipboard(
                     registrationResult.operationHash,
