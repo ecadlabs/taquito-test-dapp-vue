@@ -8,12 +8,20 @@
           <h1 class="text-2xl font-bold tracking-tight">
             {{ testMetadata.title }}
           </h1>
+          <Badge
+            v-if="testMetadata.contractApi"
+            variant="warning"
+            class="mt-0.5 ml-1 text-xs"
+            >Contract API</Badge
+          >
         </div>
-        <p
-          class="text-base text-muted-foreground w-full xl:w-2/3 2xl:w-1/2 whitespace-pre-line"
-        >
-          {{ testMetadata.description }}
-        </p>
+        <div>
+          <p
+            class="text-base text-muted-foreground w-full xl:w-2/3 2xl:w-1/2 whitespace-pre-line"
+          >
+            {{ testMetadata.description }}
+          </p>
+        </div>
       </div>
 
       <div class="grid gap-4 grid-cols-1 lg:grid-cols-3 w-full">
@@ -184,6 +192,7 @@ import {
   Workflow,
   BookOpenText,
 } from "lucide-vue-next";
+import { Badge } from "@/components/ui/badge";
 
 const route = useRoute();
 const testId = computed(() => route.params.test as string);

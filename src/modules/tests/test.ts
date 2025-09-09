@@ -22,6 +22,7 @@ export interface TestMetadata {
   category: string;
   setup: string[];
   relatedTests: string[];
+  contractApi?: boolean;
   documentation: {
     contract?: string;
     script?: string;
