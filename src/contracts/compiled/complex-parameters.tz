@@ -1,0 +1,104 @@
+{ parameter
+    (or (pair %manage_authorization (string %action) (address %user))
+        (or (map %update_metadata string string)
+            (or (pair %set_nested_record
+                   (pair %metadata (timestamp %created_at) (list %tags string))
+                   (set %permissions string))
+                (pair %add_user_record (string %name) (nat %age) (bool %active))))) ;
+  storage
+    (pair (big_map %user_records address (pair (string %name) (nat %age) (bool %active)))
+          (map %metadata_map string string)
+          (map %complex_data
+             address
+             (pair (pair %metadata (timestamp %created_at) (list %tags string))
+                   (set %permissions string)))
+          (set %authorized_users address)
+          (timestamp %last_updated)) ;
+  code { LAMBDA unit timestamp { DROP ; NOW } ;
+         SWAP ;
+         UNPAIR ;
+         IF_LEFT
+           { PUSH string "add" ;
+             DUP 2 ;
+             CAR ;
+             COMPARE ;
+             EQ ;
+             IF { DUP 2 ;
+                  GET 7 ;
+                  PUSH bool True ;
+                  DIG 2 ;
+                  CDR ;
+                  UPDATE ;
+                  UPDATE 7 ;
+                  UNIT ;
+                  DIG 2 ;
+                  SWAP ;
+                  EXEC ;
+                  UPDATE 8 ;
+                  NIL operation ;
+                  PAIR }
+                { PUSH string "remove" ;
+                  DUP 2 ;
+                  CAR ;
+                  COMPARE ;
+                  EQ ;
+                  IF { DUP 2 ;
+                       GET 7 ;
+                       PUSH bool False ;
+                       DIG 2 ;
+                       CDR ;
+                       UPDATE ;
+                       UPDATE 7 ;
+                       UNIT ;
+                       DIG 2 ;
+                       SWAP ;
+                       EXEC ;
+                       UPDATE 8 ;
+                       NIL operation ;
+                       PAIR }
+                     { DROP 3 ; PUSH string "Invalid action. Use 'add' or 'remove'" ; FAILWITH } } }
+           { IF_LEFT
+               { UPDATE 3 ; UNIT ; DIG 2 ; SWAP ; EXEC ; UPDATE 8 }
+               { IF_LEFT
+                   { SENDER ;
+                     DUP 3 ;
+                     DIG 3 ;
+                     GET 5 ;
+                     DIG 3 ;
+                     SOME ;
+                     DIG 3 ;
+                     UPDATE ;
+                     UPDATE 5 ;
+                     UNIT ;
+                     DIG 2 ;
+                     SWAP ;
+                     EXEC ;
+                     UPDATE 8 }
+                   { SENDER ;
+                     DUP 3 ;
+                     DIG 3 ;
+                     CAR ;
+                     DIG 3 ;
+                     SOME ;
+                     DIG 3 ;
+                     UPDATE ;
+                     UPDATE 1 ;
+                     UNIT ;
+                     DIG 2 ;
+                     SWAP ;
+                     EXEC ;
+                     UPDATE 8 } } ;
+             NIL operation ;
+             PAIR } } ;
+  view "get_user_record"
+       address
+       (option (pair (string %name) (nat %age) (bool %active)))
+       { UNPAIR ; SWAP ; CAR ; SWAP ; GET } ;
+  view "get_nested_record"
+       address
+       (option
+          (pair (pair %metadata (timestamp %created_at) (list %tags string))
+                (set %permissions string)))
+       { UNPAIR ; SWAP ; GET 5 ; SWAP ; GET } ;
+  view "get_all_metadata" unit (map string string) { CDR ; GET 3 } }
+
