@@ -9,7 +9,10 @@ import {
 import { join } from "path";
 import { config } from "dotenv";
 import { importKey } from "@taquito/signer";
-import type { CounterStorage } from "@/types/contract";
+import type {
+  ContractStorage,
+  ComplexParametersStorage,
+} from "@/types/contract";
 
 config();
 
@@ -24,13 +27,13 @@ interface OriginationResult {
   contractAddress: string;
   contractName: string;
   operationHash: string;
-  storage: CounterStorage;
+  storage: ContractStorage;
 }
 
 interface ContractDefinition {
   name: string;
   path: string;
-  storage: CounterStorage;
+  storage: ContractStorage;
 }
 
 export const originateContracts = async (
@@ -171,10 +174,19 @@ export const originateContracts = async (
 };
 
 // Helper function to get default storage for different contracts
-function getDefaultStorage(contractName: string): CounterStorage {
+function getDefaultStorage(contractName: string): ContractStorage {
   switch (contractName.toLowerCase()) {
     case "counter":
       return 0;
+    case "complex-parameters":
+      const complexStorage: ComplexParametersStorage = {
+        user_records: {}, // Empty BigMap
+        metadata_map: {}, // Empty Map
+        complex_data: {}, // Empty Map
+        authorized_users: new Set(), // Empty Set
+        last_updated: new Date().toISOString(), // Current timestamp
+      };
+      return complexStorage;
     default:
       return 0;
   }

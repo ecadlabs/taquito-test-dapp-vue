@@ -747,6 +747,157 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       },
     },
   },
+  "complex-parameters": {
+    id: "complex-parameters",
+    title: "Complex Contract Parameters",
+    description: `This test demonstrates how to handle various complex parameter types when interacting with smart contracts. It covers records, nested structures, maps, and sets.`,
+    category: "Smart Contracts",
+    setup: [
+      "Install Taquito: `npm install @taquito/taquito`",
+      "Set up a Tezos wallet with sufficient Tez for gas fees",
+      "Deploy a contract with complex parameter support",
+      "Configure Taquito with RPC endpoint and signer",
+      "Understand Michelson data types and their JavaScript equivalents",
+    ],
+    relatedTests: [
+      "counter-contract",
+      "estimate-fees",
+      "batch",
+      "sign-payload",
+    ],
+    documentation: {
+      contract:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/complex-parameters.jsligo",
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/complex-parameters",
+      taqutioDocumentation: "https://taquito.io/docs/complex_parameters/",
+      tezosDocumentation:
+        "https://octez.tezos.com/docs/seoul/michelson.html#data-structures",
+    },
+    component: () =>
+      import("@/modules/tests/tests/complex-parameters/complex-parameters.vue"),
+    diagrams: {
+      "add-record": {
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get Contract",
+          },
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "execute-operation",
+            label: "Execute Add Record",
+          },
+          {
+            id: "wait-confirmation",
+            label: "Wait for Confirmation",
+          },
+        ],
+      },
+      "set-nested-record": {
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get Contract",
+          },
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "execute-operation",
+            label: "Execute Set Nested Record",
+          },
+          {
+            id: "wait-confirmation",
+            label: "Wait for Confirmation",
+          },
+        ],
+      },
+      "manage-user-set": {
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get Contract",
+          },
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "execute-operation",
+            label: "Execute Set Operation",
+          },
+          {
+            id: "wait-confirmation",
+            label: "Wait for Confirmation",
+          },
+        ],
+      },
+      "update-metadata": {
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get Contract",
+          },
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "execute-operation",
+            label: "Execute Update Metadata",
+          },
+          {
+            id: "wait-confirmation",
+            label: "Wait for Confirmation",
+          },
+        ],
+      },
+      "get-user-record": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get Contract",
+          },
+          {
+            id: "read-storage",
+            label: "Read User Record",
+          },
+        ],
+      },
+      "get-nested-data": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get Contract",
+          },
+          {
+            id: "read-storage",
+            label: "Read Nested Data",
+          },
+        ],
+      },
+      "get-all-metadata": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get Contract",
+          },
+          {
+            id: "read-storage",
+            label: "Read Metadata Object",
+          },
+        ],
+      },
+    },
+  },
 };
 
 export const getTestById = (id: string): TestMetadata | undefined => {

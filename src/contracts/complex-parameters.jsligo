@@ -1,0 +1,114 @@
+export type user_record = {
+  name: string,
+  age: nat,
+  active: bool
+};
+
+export type nested_record = {
+  metadata: {
+    created_at: timestamp,
+    tags: list<string>
+  },
+  permissions: set<string>
+};
+
+// Contract storage type
+export type storage = {
+  // Big Map: User records by address
+  user_records: big_map<address, user_record>,
+  // Map: Global metadata
+  metadata_map: map<string, string>,
+  // Map: Complex nested data by address
+  complex_data: map<address, nested_record>,
+  // Set: Authorized users (means nothing and is simply for demonstration purposes)
+  authorized_users: set<address>,
+  // Last update tracking
+  last_updated: timestamp
+};
+
+type ret = [list<operation>, storage];
+
+// Helper function to get current timestamp
+const get_current_time = (): timestamp => Tezos.get_now();
+
+// 1. Big map
+@entry
+const add_user_record = (param: user_record, store: storage): ret => {
+  const sender = Tezos.get_sender();
+  const updated_records = Big_map.add(sender, param, store.user_records);
+  const updated_storage = { 
+    ...store, 
+    user_records: updated_records,
+    last_updated: get_current_time()
+  };
+  
+  return [list([]), updated_storage];
+};
+
+// 2. Nested records
+@entry
+const set_nested_record = (param: nested_record, store: storage): ret => {
+  const sender = Tezos.get_sender();
+  const updated_complex = Map.add(sender, param, store.complex_data);
+  
+  const updated_storage = { 
+    ...store, 
+    complex_data: updated_complex,
+    last_updated: get_current_time()
+  };
+  
+  return [list([]), updated_storage];
+};
+
+// 3. Map
+@entry
+const update_metadata = (metadata_updates: map<string, string>, store: storage): ret => {
+  const updated_metadata = metadata_updates;
+  const updated_storage = { 
+    ...store, 
+    metadata_map: updated_metadata,
+    last_updated: get_current_time()
+  };
+  
+  return [list([]), updated_storage];
+};
+
+// 4. Set
+@entry
+const manage_authorization = (params: { action: string, user: address }, store: storage): ret => {
+  let updated_users = store.authorized_users;
+  if (params.action == "add") {
+    updated_users = Set.add(params.user, store.authorized_users);
+  } else if (params.action == "remove") {
+    updated_users = Set.remove(params.user, store.authorized_users);
+  } else {
+    return failwith("Invalid action. Use 'add' or 'remove'");
+  }
+  
+  const updated_storage = { 
+    ...store, 
+    authorized_users: updated_users,
+    last_updated: get_current_time()
+  };
+  
+  return [list([]), updated_storage];
+};
+
+
+// View functions for retrieving data
+
+// Big map
+@view
+const get_user_record = (user: address, store: storage): option<user_record> =>
+  Big_map.find_opt(user, store.user_records);
+
+// Nested records
+@view  
+const get_nested_record = (user: address, store: storage): option<nested_record> =>
+  Map.find_opt(user, store.complex_data);
+
+// Map
+@view  
+const get_all_metadata = (_u: unit, store: storage): map<string, string> =>
+  store.metadata_map;
+
