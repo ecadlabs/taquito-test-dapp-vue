@@ -12,8 +12,23 @@
             v-if="testMetadata.contractApi"
             variant="warning"
             class="mt-0.5 ml-1 text-xs"
-            >Contract API</Badge
           >
+            Contract API
+          </Badge>
+          <TooltipProvider v-if="testMetadata.contractApi">
+            <Tooltip>
+              <TooltipTrigger>
+                <Info class="h-4 w-4 text-muted-foreground mt-0.5" />
+              </TooltipTrigger>
+              <TooltipContent class="w-48">
+                <p>
+                  This test uses the Taquito contract API. It will only work
+                  with the programmatic testing wallet (manually entered private
+                  key).
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <div>
           <p
@@ -191,8 +206,15 @@ import {
   FileText,
   Workflow,
   BookOpenText,
+  Info,
 } from "lucide-vue-next";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const route = useRoute();
 const testId = computed(() => route.params.test as string);
