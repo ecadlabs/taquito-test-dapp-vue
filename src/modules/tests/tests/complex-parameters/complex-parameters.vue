@@ -29,7 +29,7 @@
       <div class="flex flex-col gap-4">
         <div class="space-y-3">
           <div>
-            <Label for="name">Name</Label>
+            <Label class="mb-1" for="name">Name</Label>
             <Input
               id="name"
               v-model="simpleRecord.name"
@@ -38,7 +38,7 @@
             />
           </div>
           <div>
-            <Label for="age">Age</Label>
+            <Label class="mb-1" for="age">Age</Label>
             <Input
               id="age"
               v-model.number="simpleRecord.age"
@@ -55,7 +55,7 @@
               :disabled="!walletConnected"
               class="rounded"
             />
-            <Label for="active">Active</Label>
+            <Label class="mb-1" for="active">Active</Label>
           </div>
         </div>
         <div class="space-y-3">
@@ -85,7 +85,7 @@
       <div class="flex flex-col gap-4">
         <div class="space-y-3">
           <div>
-            <Label for="metadata-created">Created At</Label>
+            <Label class="mb-1" for="metadata-created">Created At</Label>
             <Input
               id="metadata-created"
               v-model="nestedRecord.metadata.created_at"
@@ -94,7 +94,7 @@
             />
           </div>
           <div>
-            <Label for="tags">Tags (comma-separated)</Label>
+            <Label class="mb-1" for="tags">Tags (comma-separated)</Label>
             <Input
               id="tags"
               v-model="tagsInput"
@@ -103,7 +103,9 @@
             />
           </div>
           <div>
-            <Label for="permissions">Permissions (comma-separated)</Label>
+            <Label class="mb-1" for="permissions"
+              >Permissions (comma-separated)</Label
+            >
             <Input
               id="permissions"
               v-model="permissionsInput"
@@ -138,7 +140,7 @@
       <div class="flex flex-col gap-4">
         <div class="space-y-3">
           <div>
-            <Label for="auth-user">User Address</Label>
+            <Label class="mb-1" for="auth-user">User Address</Label>
             <Input
               id="auth-user"
               v-model="authUserAddress"
@@ -181,7 +183,9 @@
       <div class="flex flex-col gap-4">
         <div class="space-y-3">
           <div>
-            <Label for="metadata-updates">Metadata Update (JSON)</Label>
+            <Label class="mb-1" for="metadata-updates"
+              >Metadata Update (JSON)</Label
+            >
             <Textarea
               id="metadata-updates"
               v-model="metadataUpdatesJson"
@@ -210,7 +214,7 @@
       <div class="flex flex-col gap-4">
         <div class="space-y-3">
           <div>
-            <Label for="view-user">User Address</Label>
+            <Label class="mb-1" for="view-user">User Address</Label>
             <Input
               id="view-user"
               v-model="viewUserAddress"
@@ -258,7 +262,7 @@
 
       <!-- Results Display -->
       <div v-if="retrievedData !== null" class="mt-4">
-        <Label>Retrieved Data:</Label>
+        <Label class="mb-1">Retrieved Data:</Label>
         <pre class="mt-2 p-4 bg-muted rounded-md text-sm overflow-auto">{{
           retrievedData === undefined
             ? "undefined"
