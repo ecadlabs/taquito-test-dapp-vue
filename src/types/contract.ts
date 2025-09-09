@@ -1,3 +1,5 @@
+import { MichelsonMap } from "@taquito/taquito";
+
 export interface ContractConfig {
   address: string;
   originatedAt: string;
@@ -30,8 +32,13 @@ export interface ComplexParametersStorage {
   user_records: Record<string, UserRecord>;
   metadata_map: Record<string, string>;
   complex_data: Record<string, NestedRecord>;
-  authorized_users: Set<string>;
+  authorized_users: string[];
   last_updated: string;
+}
+
+// Metadata contract storage
+export interface MetadataContractStorage {
+  metadata: Map<string, Buffer> | MichelsonMap<string, string>;
 }
 
 export type ContractStorage =
@@ -40,4 +47,5 @@ export type ContractStorage =
   | StakingStorage
   | TransferStorage
   | ComplexParametersStorage
+  | MetadataContractStorage
   | number;

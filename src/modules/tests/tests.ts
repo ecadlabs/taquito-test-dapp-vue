@@ -899,6 +899,58 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       },
     },
   },
+  "tzip16-metadata": {
+    id: "tzip16-metadata",
+    title: "TZIP-16 Contract Metadata",
+    description: `TZIP-16 is a Tezos standard for adding metadata to smart contracts.
+
+    Metadata can be stored on-chain (tezos-storage), off-chain via HTTP(S), or on IPFS. This test allows you to experiment with different contracts and see how their metadata is structured and accessed, along with allowing interaction with view execution for read-only data without creating a transaction.`,
+    category: "Smart Contracts",
+    setup: [
+      "Install Taquito TZIP-16 package: `npm install @taquito/tzip16`",
+      "Set up a Tezos wallet for contract interactions",
+      "Deploy contracts with TZIP-16 metadata or use existing ones",
+      "Configure Taquito with RPC endpoint",
+      "Understand different metadata storage approaches (big_map, URI, JSON)",
+    ],
+    relatedTests: ["counter-contract", "complex-parameters", "sign-payload"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/tzip16-metadata",
+      taqutioDocumentation: "https://taquito.io/docs/metadata-tzip16/",
+      tezosDocumentation: "https://tzip.tezosagora.org/proposal/tzip-16/",
+    },
+    component: () =>
+      import("@/modules/tests/tests/tzip16-metadata/tzip16-metadata.vue"),
+    diagrams: {
+      "get-metadata": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get Contract",
+          },
+          {
+            id: "retrieve-metadata",
+            label: "Retrieve Metadata",
+          },
+        ],
+      },
+      "execute-view": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get Contract",
+          },
+          {
+            id: "execute-metadata-view",
+            label: "Execute Metadata View",
+          },
+        ],
+      },
+    },
+  },
 };
 
 export const getTestById = (id: string): TestMetadata | undefined => {

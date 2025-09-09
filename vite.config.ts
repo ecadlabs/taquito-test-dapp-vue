@@ -30,7 +30,11 @@ export default defineConfig({
           // Separate Taquito core from signing utilities
           "taquito-core": ["@taquito/taquito"],
           // Split signing utilities into focused chunks
-          "taquito-utils": ["@taquito/utils", "@taquito/michel-codec"],
+          "taquito-utils": [
+            "@taquito/utils",
+            "@taquito/michel-codec",
+            "@taquito/tzip16",
+          ],
           "taquito-signers": ["@taquito/signer"],
           "taquito-wallets": [
             "@taquito/beacon-wallet",

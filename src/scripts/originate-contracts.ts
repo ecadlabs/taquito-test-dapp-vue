@@ -1,4 +1,5 @@
-import { TezosToolkit } from "@taquito/taquito";
+import { TezosToolkit, MichelsonMap } from "@taquito/taquito";
+import { stringToBytes } from "@taquito/utils";
 import {
   writeFileSync,
   readFileSync,
@@ -12,6 +13,7 @@ import { importKey } from "@taquito/signer";
 import type {
   ContractStorage,
   ComplexParametersStorage,
+  MetadataContractStorage,
 } from "@/types/contract";
 
 config();
@@ -178,12 +180,38 @@ function getDefaultStorage(contractName: string): ContractStorage {
   switch (contractName.toLowerCase()) {
     case "counter":
       return 0;
+    case "metadata": {
+      const metadataMap = new MichelsonMap<string, string>();
+
+      metadataMap.set("", stringToBytes("tezos-storage:metadata"));
+      metadataMap.set(
+        "metadata",
+        stringToBytes(
+          JSON.stringify({
+            name: "Metadata Example Contract",
+            description: "A contract to demonstrate TZIP-16 metadata",
+            version: "1.0.0",
+            license: { name: "MIT" },
+            authors: ["ECAD Labs"],
+            homepage: "https://taquito.io",
+            interfaces: ["TZIP-16"],
+            views: ["hello_world", "standards"],
+          }),
+        ),
+      );
+
+      const metadataStorage: MetadataContractStorage = {
+        metadata: metadataMap,
+      };
+
+      return metadataStorage;
+    }
     case "complex-parameters": {
       const complexStorage: ComplexParametersStorage = {
         user_records: {}, // Empty BigMap
         metadata_map: {}, // Empty Map
         complex_data: {}, // Empty Map
-        authorized_users: new Set(), // Empty Set
+        authorized_users: [], // Empty Set (initialized as array for Taquito)
         last_updated: new Date().toISOString(), // Current timestamp
       };
       return complexStorage;
