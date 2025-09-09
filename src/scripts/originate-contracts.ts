@@ -183,7 +183,7 @@ function getDefaultStorage(contractName: string): ContractStorage {
         user_records: {}, // Empty BigMap
         metadata_map: {}, // Empty Map
         complex_data: {}, // Empty Map
-        authorized_users: new Set(), // Empty Set
+        authorized_users: [],
         last_updated: new Date().toISOString(), // Current timestamp
       };
       return complexStorage;
