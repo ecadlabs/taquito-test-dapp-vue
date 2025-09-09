@@ -30,7 +30,7 @@ export interface ComplexParametersStorage {
   user_records: Record<string, UserRecord>;
   metadata_map: Record<string, string>;
   complex_data: Record<string, NestedRecord>;
-  authorized_users: Set<string>;
+  authorized_users: string[];
   last_updated: string;
 }
 
