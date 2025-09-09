@@ -5,7 +5,7 @@ export interface ContractConfig {
   contractName?: string;
 }
 
-export type CounterStorage = number; // just a number
+export type CounterStorage = number;
 export type DelegationStorage = string; // address
 export type StakingStorage = number; // amount
 export type TransferStorage = number; // balance
