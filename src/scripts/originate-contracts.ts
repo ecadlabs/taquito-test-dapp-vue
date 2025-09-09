@@ -178,7 +178,7 @@ function getDefaultStorage(contractName: string): ContractStorage {
   switch (contractName.toLowerCase()) {
     case "counter":
       return 0;
-    case "complex-parameters":
+    case "complex-parameters": {
       const complexStorage: ComplexParametersStorage = {
         user_records: {}, // Empty BigMap
         metadata_map: {}, // Empty Map
@@ -187,6 +187,7 @@ function getDefaultStorage(contractName: string): ContractStorage {
         last_updated: new Date().toISOString(), // Current timestamp
       };
       return complexStorage;
+    }
     default:
       return 0;
   }

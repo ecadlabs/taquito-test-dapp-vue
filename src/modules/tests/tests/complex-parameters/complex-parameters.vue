@@ -275,6 +275,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
+import type { UserRecord, NestedRecord } from "@/types/contract";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
 import Button from "@/components/ui/button/Button.vue";
@@ -300,7 +301,6 @@ import {
   getNestedData,
   getAllMetadata,
   type RecordParam,
-  type NestedRecord,
 } from "./complex-parameters";
 import type { ContractConfig } from "@/types/contract";
 import contracts from "@/contracts/contract-config.json";
@@ -359,7 +359,9 @@ const metadataUpdatesJson = ref('{"key1": "value1", "key2": "value2"}');
 
 // Data retrieval form data
 const viewUserAddress = ref("");
-const retrievedData = ref<any>(null);
+const retrievedData = ref<
+  UserRecord | NestedRecord | Record<string, string> | null
+>(null);
 
 // Computed validations
 const isSimpleRecordValid = computed(() => {

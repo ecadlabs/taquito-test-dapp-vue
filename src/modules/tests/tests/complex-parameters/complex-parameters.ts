@@ -1,7 +1,11 @@
 import { useWalletStore } from "@/stores/walletStore";
 import { useDiagramStore } from "@/stores/diagramStore";
 import contracts from "@/contracts/contract-config.json";
-import { type ContractConfig } from "@/types/contract";
+import {
+  type ContractConfig,
+  type UserRecord,
+  type NestedRecord,
+} from "@/types/contract";
 import { PiggyBank } from "lucide-vue-next";
 import type { Estimate } from "@taquito/taquito";
 
@@ -19,15 +23,6 @@ export interface RecordParam {
   name: string;
   age: number;
   active: boolean;
-}
-
-export interface NestedRecord {
-  metadata: {
-    created_at: string;
-    updated_at: string | null;
-    tags: string[];
-  };
-  permissions: string[];
 }
 
 /**
@@ -261,9 +256,11 @@ const updateMetadata = async (
  * Retrieves a user record from the contract storage.
  *
  * @param {string} userAddress - The Tezos address of the user whose record should be fetched.
- * @returns {Promise<any>} Resolves with the user record if found, or null if an error occurs.
+ * @returns {Promise<UserRecord | null>} Resolves with the user record if found, or null if an error occurs.
  */
-const getUserRecord = async (userAddress: string): Promise<any> => {
+const getUserRecord = async (
+  userAddress: string,
+): Promise<UserRecord | null> => {
   const diagramStore = useDiagramStore();
   diagramStore.setTestDiagram(TEST_ID, "get-user-record");
 
@@ -292,9 +289,11 @@ const getUserRecord = async (userAddress: string): Promise<any> => {
  * Retrieves complex (nested) data for a specific user from the contract storage.
  *
  * @param {string} userAddress - The Tezos address for which to retrieve nested data.
- * @returns {Promise<any>} Resolves with the nested record data if found, or null if an error occurs.
+ * @returns {Promise<NestedRecord | null>} Resolves with the nested record data if found, or null if an error occurs.
  */
-const getNestedData = async (userAddress: string): Promise<any> => {
+const getNestedData = async (
+  userAddress: string,
+): Promise<NestedRecord | null> => {
   const diagramStore = useDiagramStore();
   diagramStore.setTestDiagram(TEST_ID, "get-nested-data");
 
