@@ -1,5 +1,5 @@
 import { Buffer } from "buffer";
-import process from "process";
+import * as process from "process";
 
 // Extend global interfaces to include Node.js globals
 declare global {
@@ -14,6 +14,9 @@ declare global {
     process: typeof process;
     global: typeof globalThis;
   }
+
+  var Buffer: BufferConstructor;
+  var process: NodeJS.Process;
 }
 
 // Make Buffer and process available globally

@@ -17,8 +17,8 @@ export default defineConfig({
   },
   define: {
     global: "globalThis",
-    Buffer: "Buffer",
-    process: "process",
+    Buffer: "globalThis.Buffer",
+    process: "globalThis.process",
   },
   optimizeDeps: {
     include: ["buffer", "events", "process"],
