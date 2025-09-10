@@ -20,6 +20,12 @@ export interface MetadataResult {
   metadata: ContractMetadata;
 }
 
+export interface ViewExecutionResult {
+  viewName: string;
+  parameter: unknown;
+  result: unknown;
+}
+
 /**
  * Retrieves TZIP-16 metadata from a contract using the specified contract address.
  *
@@ -63,13 +69,13 @@ const getContractMetadata = async (
  * @param {string} contractAddress - The contract address
  * @param {string} viewName - Name of the view to execute
  * @param {unknown} parameter - Parameter to pass to the view (defaults to unit for no params)
- * @returns {Promise<unknown>} The view result
+ * @returns {Promise<ViewExecutionResult>} The view execution result containing viewName, parameter, and result
  */
 const executeMetadataView = async (
   contractAddress: string,
   viewName: string,
   parameter: unknown = undefined,
-): Promise<unknown> => {
+): Promise<ViewExecutionResult> => {
   const diagramStore = useDiagramStore();
   const walletStore = useWalletStore();
 
@@ -83,15 +89,12 @@ const executeMetadataView = async (
 
     // Get contract instance
     const contract = await Tezos.contract.at(contractAddress);
-    console.log(`Contract loaded for view execution: ${contractAddress}`);
 
     diagramStore.setProgress("execute-view", "running", TEST_ID);
 
     // Execute the view
     // For views that take no parameters, use undefined or unit
     const viewParam = parameter === undefined ? undefined : parameter;
-
-    console.log(`Executing view '${viewName}' with parameter:`, viewParam);
 
     // Get the current wallet address for view execution context
     const walletAddress = walletStore.getAddress;
@@ -106,8 +109,6 @@ const executeMetadataView = async (
     ).executeView({
       viewCaller: walletAddress,
     });
-
-    console.log(`View '${viewName}' execution result:`, viewResult);
 
     diagramStore.setProgress("success", "completed", TEST_ID);
 

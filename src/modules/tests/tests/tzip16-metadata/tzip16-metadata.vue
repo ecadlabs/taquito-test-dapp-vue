@@ -228,6 +228,7 @@ import {
   getContractMetadata,
   executeMetadataView,
   type MetadataResult,
+  type ViewExecutionResult,
 } from "./tzip16-metadata";
 import contracts from "@/contracts/contract-config.json";
 import type { ContractConfig } from "@/types/contract";
@@ -273,7 +274,6 @@ const getMetadata = async () => {
     metadataResult.value = await getContractMetadata(
       contractAddress.value.trim(),
     );
-    console.log(`Metadata result:`, { ...metadataResult.value?.metadata });
   } finally {
     isLoading.value = false;
   }
@@ -285,15 +285,11 @@ const executeView = async (viewName: string, index: number) => {
   isExecutingView.value = true;
 
   try {
-    const result = await executeMetadataView(
+    const result: ViewExecutionResult = await executeMetadataView(
       contractAddress.value.trim(),
       viewName,
     );
-    viewExecutionResult.value[index] = JSON.stringify(
-      (result as any).result,
-      null,
-      2,
-    );
+    viewExecutionResult.value[index] = JSON.stringify(result.result, null, 2);
   } catch (error) {
     console.error(`Failed to execute view ${viewName}:`, error);
   } finally {
