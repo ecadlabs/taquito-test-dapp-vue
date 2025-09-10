@@ -44,6 +44,8 @@ jobs:
       environment: ${{ matrix.environment }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: 22.18.0
@@ -69,7 +71,6 @@ jobs:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           command: pages deploy dist --project-name=${{ matrix.project_name }}
-          # Optional: Enable this if you want to have GitHub Deployments triggered
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
   # Single PR comment with all preview URLs
