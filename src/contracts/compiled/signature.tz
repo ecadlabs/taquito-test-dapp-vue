@@ -5,3 +5,4 @@
          CHECK_SIGNATURE ;
          IF { NIL operation ; PAIR }
             { DROP ; PUSH string "Invalid signature" ; FAILWITH } } }
+

@@ -12,6 +12,7 @@
     "format": "npx prettier . --write",
     "format:check": "npx prettier . --check",
     "originate": "tsx src/scripts/originate-contracts.ts",
+    "compile-contracts": "tsx src/scripts/compile-contracts.ts",
     "fund-wallet": "tsx src/scripts/fund-test-wallet.ts",
     "reveal-key": "tsx src/scripts/reveal-public-key.ts",
     "prepare": "husky",

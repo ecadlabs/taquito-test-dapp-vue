@@ -189,7 +189,8 @@ function getDefaultStorage(contractName: string): ContractStorage {
         stringToBytes(
           JSON.stringify({
             name: "Metadata Example Contract",
-            description: "A contract to demonstrate TZIP-16 metadata",
+            description:
+              "A simple counter contract to demonstrate TZIP-16 metadata",
             version: "1.0.0",
             license: { name: "MIT" },
             authors: ["ECAD Labs"],
@@ -223,7 +224,7 @@ function getDefaultStorage(contractName: string): ContractStorage {
 }
 
 // If running this script directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && process.argv[1].endsWith("originate-contracts.ts")) {
   const key = process.argv[2];
 
   originateContracts(key)

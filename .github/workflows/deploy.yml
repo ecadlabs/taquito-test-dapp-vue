@@ -61,6 +61,14 @@ jobs:
           echo "REOWN_PROJECT_ID: ${{ secrets.REOWN_PROJECT_ID }}"
       
       - run: npm run fund-wallet ${{ vars.ALICE_WALLET_ADDRESS }}
+      
+      # Install LIGO for contract compilation
+      - name: Install LIGO
+        run: |
+          curl -sSL https://gitlab.com/ligolang/ligo/-/raw/dev/scripts/installer.sh | bash
+          echo "$HOME/.ligo/bin" >> $GITHUB_PATH
+      
+      - run: npm run compile-contracts
       - run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
       - run: npm run build
 
