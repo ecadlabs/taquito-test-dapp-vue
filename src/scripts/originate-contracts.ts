@@ -242,7 +242,7 @@ function getDefaultStorage(contractName: string): ContractStorage {
 }
 
 // If running this script directly
-if (process.argv[1] && process.argv[1].endsWith("originate-contracts.ts")) {
+if (process.argv[1] && process.argv[1].includes("originate-contracts")) {
   const key = process.argv[2];
 
   originateContracts(key)

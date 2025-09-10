@@ -62,7 +62,7 @@ export const compileContracts = async (): Promise<void> => {
 };
 
 // If running this script directly
-if (process.argv[1] && process.argv[1].endsWith("compile-contracts.ts")) {
+if (process.argv[1] && process.argv[1].includes("compile-contracts")) {
   compileContracts()
     .then(() => {
       console.log(`\n🎉 Compilation completed successfully!`);
