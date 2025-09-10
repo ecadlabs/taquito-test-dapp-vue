@@ -202,6 +202,7 @@ function getDefaultStorage(contractName: string): ContractStorage {
 
       const metadataStorage: MetadataContractStorage = {
         metadata: metadataMap,
+        counter: 0,
       };
 
       return metadataStorage;

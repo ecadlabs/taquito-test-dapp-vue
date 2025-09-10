@@ -39,6 +39,7 @@ export interface ComplexParametersStorage {
 // Metadata contract storage
 export interface MetadataContractStorage {
   metadata: Map<string, Buffer> | MichelsonMap<string, string>;
+  counter: number;
 }
 
 export type ContractStorage =
