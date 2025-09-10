@@ -1,0 +1,26 @@
+export type storage = {
+  counter: int,
+  metadata: big_map<string, bytes>
+};
+
+type ret = [list<operation>, storage];
+
+@entry
+const increment = (delta: int, store: storage): ret => {
+  const new_counter = store.counter + delta;
+  const new_storage = { ...store, counter: new_counter };
+  return [list([]), new_storage];
+};
+
+@entry
+const decrement = (delta: int, store: storage): ret => {
+  const new_counter = store.counter - delta;
+  const new_storage = { ...store, counter: new_counter };
+  return [list([]), new_storage];
+};
+
+@entry
+const reset = (_u: unit, store: storage): ret => {
+  const new_storage = { ...store, counter: 0 };
+  return [list([]), new_storage];
+};

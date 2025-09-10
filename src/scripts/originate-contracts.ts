@@ -208,6 +208,24 @@ function getDefaultStorage(contractName: string): ContractStorage {
 
       return metadataStorage;
     }
+    case "metadata-https": {
+      const metadataMap = new MichelsonMap<string, string>();
+
+      // metadataMap.set("", stringToBytes("http://localhost:5173/contract-metadata.json"));
+      metadataMap.set(
+        "",
+        stringToBytes(
+          `https://${process.env.VITE_NETWORK_TYPE}.dapp.taquito.io/contract-metadata.json`,
+        ),
+      );
+
+      const metadataStorage: MetadataContractStorage = {
+        metadata: metadataMap,
+        counter: 0,
+      };
+
+      return metadataStorage;
+    }
     case "complex-parameters": {
       const complexStorage: ComplexParametersStorage = {
         user_records: {}, // Empty BigMap
