@@ -25,6 +25,10 @@
 - **Storage Management** - Increase paid storage of a contract
 - **Transaction Limits** - Custom gas/storage limits
 - **Failing Noop** - Forcing an operation failure
+- **Global Constants** - Registering global constants
+- **Intentional Contract Call Failure** - Various types of failures you could run into with calling smart contracts
+- **Complex Parameters** - More complex contract interactions such as records, nested structures, maps, and sets
+- **TZIP-16 Metadata** - Fetching metadata from contract storage or off-chain storage, along with calling contract views
 
 ### 🔐 **Staking & Consensus**
 
