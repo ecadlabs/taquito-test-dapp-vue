@@ -11,13 +11,17 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
       "readable-stream": "vite-compatible-readable-stream",
       stream: "vite-compatible-readable-stream",
+      buffer: "buffer",
+      process: "process/browser",
     },
   },
   define: {
     global: "globalThis",
+    Buffer: "Buffer",
+    process: "process",
   },
   optimizeDeps: {
-    include: ["buffer", "events"],
+    include: ["buffer", "events", "process"],
   },
   build: {
     rollupOptions: {
@@ -27,18 +31,6 @@ export default defineConfig({
       },
       output: {
         manualChunks: {
-          "taquito-core": [
-            "@taquito/taquito",
-            "@taquito/utils",
-            "@taquito/michel-codec",
-          ],
-          "taquito-signers": ["@taquito/signer"],
-          "taquito-wallets": [
-            "@taquito/beacon-wallet",
-            "@taquito/wallet-connect",
-            "@taquito/ledger-signer",
-            "@taquito/remote-signer",
-          ],
           beacon: [
             "@airgap/beacon-sdk",
             "@airgap/beacon-dapp",
