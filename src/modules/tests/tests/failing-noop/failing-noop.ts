@@ -23,14 +23,12 @@ const failNoop = async (): Promise<void> => {
     diagramStore.setProgress("wait-for-user", "running", TEST_ID);
     const signed = await Tezos.wallet.signFailingNoop({
       arbitrary: hex,
-      basedOnBlock: 0,
+      basedOnBlock: "head",
     });
 
     diagramStore.setProgress("get-public-key", "running", TEST_ID);
     const pk = await walletStore.getWalletPublicKey();
     if (!pk) throw new Error("No public key found");
-
-    console.log("Signed data:", signed);
 
     diagramStore.setProgress("verify-signature", "running", TEST_ID);
     await verifySignature(
