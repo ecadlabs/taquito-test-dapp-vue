@@ -65,7 +65,8 @@ jobs:
       # Install LIGO for contract compilation
       - name: Install LIGO
         run: |
-          curl -sSL https://gitlab.com/ligolang/ligo/-/raw/dev/scripts/installer.sh | bash
+          sudo systemctl start docker || true
+          curl -sSL https://gitlab.com/ligolang/ligo/-/raw/dev/scripts/installer.sh | bash -s next
           echo "$HOME/.ligo/bin" >> $GITHUB_PATH
       
       - run: npm run compile-contracts
