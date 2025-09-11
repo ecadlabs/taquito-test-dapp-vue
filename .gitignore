@@ -34,3 +34,4 @@ dist-ssr
 /playwright/.cache/
 
 contract-config.json
+/src/contracts/compiled/

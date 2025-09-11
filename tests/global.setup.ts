@@ -19,6 +19,11 @@ setup("create new private key", async ({}) => {
     },
   );
 
+  if (response.status !== 200) {
+    console.error(`Failed to create private key: ${response.statusText}`);
+    throw new Error(`Failed to create private key: ${response.statusText}`);
+  }
+
   const privateKey = await response.text();
 
   process.env.TEST_WALLET_PRIVATE_KEY = privateKey;

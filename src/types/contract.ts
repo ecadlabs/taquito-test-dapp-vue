@@ -1,3 +1,5 @@
+import { MichelsonMap } from "@taquito/taquito";
+
 export interface ContractConfig {
   address: string;
   originatedAt: string;
@@ -34,10 +36,17 @@ export interface ComplexParametersStorage {
   last_updated: string;
 }
 
+// Metadata contract storage
+export interface MetadataContractStorage {
+  metadata: Map<string, Buffer> | MichelsonMap<string, string>;
+  counter: number;
+}
+
 export type ContractStorage =
   | CounterStorage
   | DelegationStorage
   | StakingStorage
   | TransferStorage
   | ComplexParametersStorage
+  | MetadataContractStorage
   | number;
