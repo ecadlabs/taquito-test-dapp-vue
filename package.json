@@ -24,7 +24,7 @@
     "@airgap/beacon-types": "^4.6.1-beta.2",
     "@ledgerhq/hw-transport-webhid": "^6.30.5",
     "@tailwindcss/vite": "^4.1.11",
-    "@taquito/beacon-wallet": "^23.0.0",
+    "@taquito/beacon-wallet": "^23.0.1",
     "@taquito/ledger-signer": "^23.0.0",
     "@taquito/michel-codec": "^23.0.0",
     "@taquito/remote-signer": "^23.0.0",
