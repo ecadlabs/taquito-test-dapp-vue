@@ -57,8 +57,6 @@ export const compileContracts = async (): Promise<void> => {
       );
     }
   }
-
-  console.log("🎉 All contracts compiled successfully!");
 };
 
 // If running this script directly
