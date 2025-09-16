@@ -1,24 +1,76 @@
 <template>
   <div class="w-full flex flex-col items-center gap-6 px-6">
     <!-- Current delegate section -->
-    <div v-if="currentDelegate" class="w-full max-w-md">
-      <div>
-        <div class="flex items-center gap-3 mb-4">
+    <div v-if="currentDelegate" class="w-full max-w-md space-y-2">
+      <!-- Display current delegate -->
+      <div class="mb-4">
+        <div class="flex items-center gap-3 mb-2">
           <CheckCircle class="w-6 h-6 text-green-500" />
           <h3 class="text-lg font-semibold">Current Delegate</h3>
         </div>
-        <div class="bg-background rounded-md p-3 border">
-          <p class="font-mono text-sm break-all">{{ currentDelegate }}</p>
+        <p
+          class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit text-red-400"
+        >
+          {{ currentDelegate }}
+        </p>
+      </div>
+
+      <!-- Change delegate section -->
+      <div>
+        <div class="flex items-center gap-1.5 mb-4">
+          <Cookie class="w-6 h-6" />
+          <h3 class="text-lg font-semibold">Change Delegate</h3>
         </div>
+        <div class="space-y-4">
+          <div>
+            <Label class="text-sm font-medium mb-2 block"
+              >New Delegate Address</Label
+            >
+            <Input
+              placeholder="Enter new delegate address..."
+              v-model="newDelegateAddress"
+              class="w-full font-mono text-sm"
+            />
+          </div>
+          <Button
+            @click="changeDelegate()"
+            :disabled="
+              changingDelegate ||
+              removingDelegate ||
+              loadingCurrentDelegate ||
+              !walletStore.getAddress ||
+              !newDelegateAddress
+            "
+            class="w-full"
+          >
+            <Loader2
+              v-if="changingDelegate"
+              class="w-4 h-4 mr-2 animate-spin"
+            />
+            <Cookie v-else class="w-4 h-4 mr-2" />
+            <span v-if="!changingDelegate" class="font-semibold"
+              >Change Delegate</span
+            >
+            <span v-else>Changing...</span>
+          </Button>
+        </div>
+      </div>
+
+      <!-- Remove delegation section -->
+      <div>
         <Button
           @click="removeDelegation()"
-          :disabled="sending || !walletStore.getAddress"
+          :disabled="
+            changingDelegate || removingDelegate || !walletStore.getAddress
+          "
           variant="destructive"
-          class="w-full mt-4"
+          class="w-full"
         >
-          <Loader2 v-if="sending" class="w-4 h-4 mr-2 animate-spin" />
+          <Loader2 v-if="removingDelegate" class="w-4 h-4 mr-2 animate-spin" />
           <Unlink v-else class="w-4 h-4 mr-2" />
-          <span v-if="!sending" class="font-semibold">Remove Delegation</span>
+          <span v-if="!removingDelegate" class="font-semibold"
+            >Remove Delegation</span
+          >
           <span v-else>Removing...</span>
         </Button>
       </div>
@@ -83,7 +135,10 @@ const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
 
 const toAddress = ref<string>("tz1cjyja1TU6fiyiFav3mFAdnDsCReJ12hPD");
+const newDelegateAddress = ref<string>("");
 const sending = ref<boolean>(false);
+const changingDelegate = ref<boolean>(false);
+const removingDelegate = ref<boolean>(false);
 const currentDelegate = ref<string | null>();
 const loadingCurrentDelegate = ref<boolean>(true);
 
@@ -120,15 +175,28 @@ const delegateToCurrentAddress = async () => {
   }
 };
 
+const changeDelegate = async () => {
+  try {
+    changingDelegate.value = true;
+    await delegate(newDelegateAddress.value);
+    currentDelegate.value = newDelegateAddress.value;
+    newDelegateAddress.value = "";
+  } catch (error) {
+    console.error(error);
+  } finally {
+    changingDelegate.value = false;
+  }
+};
+
 const removeDelegation = async () => {
   try {
-    sending.value = true;
+    removingDelegate.value = true;
     await undelegate();
     currentDelegate.value = undefined;
   } catch (error) {
     console.error(error);
   } finally {
-    sending.value = false;
+    removingDelegate.value = false;
   }
 };
 
