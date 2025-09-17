@@ -951,6 +951,124 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       },
     },
   },
+  "fa2-token": {
+    id: "fa2-token",
+    title: "FA2 Token (TZIP-12)",
+    description:
+      "Test TZIP-12 (FA2) token standard functionality including token transfers, minting, burning, and balance queries. FA2 is a unified token standard for Tezos that supports fungible, non-fungible, and multi-asset tokens.",
+    category: "Token Standards",
+    setup: [
+      "Install and configure Taquito with TZIP-12 support: `npm install @taquito/taquito @taquito/tzip12`",
+      "Deploy an FA2 compliant token contract",
+      "Set up a Tezos wallet (Temple, Kukai, or other supported wallet)",
+      "Use a faucet to fund your wallet with testnet Tez from https://teztnets.com/",
+    ],
+    relatedTests: ["tzip16-metadata", "transfer", "counter-contract"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/fa2-token",
+      taqutioDocumentation: "https://taquito.io/docs/tzip12/",
+      tezosDocumentation:
+        "https://gitlab.com/tezos/tzip/-/blob/master/proposals/tzip-12/tzip-12.md",
+    },
+    component: () => import("@/modules/tests/tests/fa2-token/fa2-token.vue"),
+    diagrams: {
+      mint: {
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get FA2 Contract",
+          },
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "execute-operation",
+            label: "Execute Mint Operation",
+          },
+          {
+            id: "wait-confirmation",
+            label: "Wait for Confirmation",
+          },
+        ],
+      },
+      burn: {
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get FA2 Contract",
+          },
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "execute-operation",
+            label: "Execute Burn Operation",
+          },
+          {
+            id: "wait-confirmation",
+            label: "Wait for Confirmation",
+          },
+        ],
+      },
+      transfer: {
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get FA2 Contract",
+          },
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "execute-operation",
+            label: "Execute Transfer Operation",
+          },
+          {
+            id: "wait-confirmation",
+            label: "Wait for Confirmation",
+          },
+        ],
+      },
+      "get-balance": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get FA2 Contract",
+          },
+          {
+            id: "read-fa2-storage",
+            label: "Read FA2 Contract Storage",
+          },
+        ],
+      },
+      "get-balance-with-callback": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get FA2 Contract",
+          },
+          {
+            id: "call-balance-of",
+            label: "Call FA2 Balance Function",
+          },
+          {
+            id: "wait-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+          {
+            id: "read-callback-storage",
+            label: "Read Callback Storage",
+          },
+        ],
+      },
+    },
+  },
 };
 
 export const getTestById = (id: string): TestMetadata | undefined => {

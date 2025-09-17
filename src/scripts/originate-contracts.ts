@@ -14,6 +14,8 @@ import type {
   ContractStorage,
   ComplexParametersStorage,
   MetadataContractStorage,
+  FA2TokenStorage,
+  BalanceCallbackStorage,
 } from "@/types/contract";
 
 config();
@@ -95,8 +97,25 @@ export const originateContracts = async (
 
   const results: OriginationResult[] = [];
 
-  // Originate each contract
-  for (const contract of contracts) {
+  const originationOrder = [
+    "fa2-token",
+    "balance-callback",
+    // Any contracts not here will be originated in any order
+  ];
+
+  const orderedContracts = contracts.sort((a, b) => {
+    const aIndex = originationOrder.indexOf(a.name);
+    const bIndex = originationOrder.indexOf(b.name);
+    if (aIndex === -1 && bIndex === -1) return 0;
+    if (aIndex === -1) return 1;
+    if (bIndex === -1) return -1;
+    return aIndex - bIndex;
+  });
+
+  const originatedAddresses = new Map<string, string>();
+
+  // Originate each contract in order
+  for (const contract of orderedContracts) {
     try {
       console.log(`\n📄 Originating ${contract.name} contract...`);
 
@@ -108,6 +127,21 @@ export const originateContracts = async (
         continue;
       }
 
+      // Update storage for contracts that depend on others
+      let contractStorage = contract.storage;
+      if (contract.name === "balance-callback") {
+        const fa2TokenAddress = originatedAddresses.get("fa2-token");
+        if (!fa2TokenAddress) {
+          throw new Error(
+            "FA2 token must be originated before balance-callback contract",
+          );
+        }
+        console.log(
+          `🔗 Adding FA2 token address ${fa2TokenAddress} to balance-callback authorized addresses`,
+        );
+        contractStorage = getDefaultStorage(contract.name, { fa2TokenAddress });
+      }
+
       // Read contract code
       const contractCode = readFileSync(contract.path, "utf8");
       console.log(`📖 Contract code loaded from: ${contract.path}`);
@@ -116,7 +150,7 @@ export const originateContracts = async (
       console.log(`⏳ Initiating origination for ${contract.name}...`);
       const originationOp = await Tezos.contract.originate({
         code: contractCode,
-        storage: contract.storage,
+        storage: contractStorage,
       });
 
       if (!originationOp.contractAddress) {
@@ -132,6 +166,9 @@ export const originateContracts = async (
       console.log(`✅ Origination completed for ${contract.name}`);
       console.log(`📍 Contract address: ${originationOp.contractAddress}`);
 
+      // Store the address for dependency injection
+      originatedAddresses.set(contract.name, originationOp.contractAddress);
+
       // Get operation hash
       const operationHash = originationOp.hash;
       console.log(`🔗 Operation hash: ${operationHash}`);
@@ -140,7 +177,7 @@ export const originateContracts = async (
         contractAddress: originationOp.contractAddress,
         contractName: contract.name,
         operationHash: operationHash,
-        storage: contract.storage,
+        storage: contractStorage,
       });
     } catch (error) {
       console.error(`❌ Error originating ${contract.name} contract:`, error);
@@ -176,7 +213,10 @@ export const originateContracts = async (
 };
 
 // Helper function to get default storage for different contracts
-function getDefaultStorage(contractName: string): ContractStorage {
+function getDefaultStorage(
+  contractName: string,
+  dependencies?: { fa2TokenAddress: string },
+): ContractStorage {
   switch (contractName.toLowerCase()) {
     case "counter":
       return 0;
@@ -235,6 +275,61 @@ function getDefaultStorage(contractName: string): ContractStorage {
         last_updated: new Date().toISOString(), // Current timestamp
       };
       return complexStorage;
+    }
+    case "fa2-token": {
+      const ledger = new MichelsonMap<[string, string], string>();
+      const operators = new MichelsonMap<[string, string, string], boolean>();
+      const tokenMetadata = new MichelsonMap<
+        string,
+        { token_id: string; token_info: MichelsonMap<string, string> }
+      >();
+      const totalSupply = new MichelsonMap<string, string>();
+
+      // Initialize token 0 with metadata
+      const tokenInfo = new MichelsonMap<string, string>();
+      tokenInfo.set("name", stringToBytes("Test FA2 Token"));
+      tokenInfo.set("symbol", stringToBytes("TAQ"));
+      tokenInfo.set("decimals", stringToBytes("2"));
+      tokenInfo.set(
+        "description",
+        stringToBytes("A test FA2 token for Taquito's test dapp"),
+      );
+
+      tokenMetadata.set("0", {
+        token_id: "0",
+        token_info: tokenInfo,
+      });
+
+      totalSupply.set("0", "0");
+
+      const fa2Storage: FA2TokenStorage = {
+        ledger,
+        operators,
+        token_metadata: tokenMetadata,
+        total_supply: totalSupply,
+      };
+
+      return fa2Storage;
+    }
+    case "balance-callback": {
+      const responses = new MichelsonMap<
+        string,
+        {
+          data: Array<{
+            request: { owner: string; token_id: string };
+            balance: string;
+          }>;
+          last_updated: string;
+        }
+      >();
+      const authorizedAddresses = dependencies?.fa2TokenAddress
+        ? [dependencies.fa2TokenAddress]
+        : [];
+      const callbackStorage: BalanceCallbackStorage = {
+        responses,
+        authorized_addresses: authorizedAddresses,
+      };
+      return callbackStorage;
     }
     default:
       return 0;

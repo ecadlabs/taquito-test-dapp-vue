@@ -1,0 +1,550 @@
+<template>
+  <div class="mb-4">
+    <h3 class="text-lg font-semibold mb-0.5">Deployed Contract Addresses</h3>
+    <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+      <p>FA2 Token:</p>
+      <p
+        class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit h-fit text-red-400"
+      >
+        {{ CONTRACT_ADDRESS }}
+      </p>
+      <Button
+        @click="openInExplorer(CONTRACT_ADDRESS)"
+        variant="link"
+        class="text-muted-foreground -ml-2 w-fit"
+      >
+        <p class="text-xs">Open in {{ indexerName }}</p>
+        <ExternalLink class="size-3" />
+      </Button>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+      <p>Balance Callback:</p>
+      <p
+        class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit h-fit text-red-400"
+      >
+        {{ CALLBACK_CONTRACT_ADDRESS }}
+      </p>
+      <Button
+        @click="openInExplorer(CALLBACK_CONTRACT_ADDRESS)"
+        variant="link"
+        class="text-muted-foreground -ml-2 w-fit"
+      >
+        <p class="text-xs">Open in {{ indexerName }}</p>
+        <ExternalLink class="size-3" />
+      </Button>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Token Balance Query Section -->
+    <Card>
+      <CardHeader>
+        <CardTitle class="flex items-center gap-2">
+          <Coins class="h-5 w-5" />
+          Token Balance Query
+        </CardTitle>
+        <CardDescription>
+          Query token balances for specific addresses and token IDs. You can
+          pass multiple addresses and token IDs to query balances for multiple
+          addresses and token IDs, but in this example we only allow inputting
+          one.
+        </CardDescription>
+      </CardHeader>
+      <CardContent class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <Label>Owner Address</Label>
+            <Input
+              v-model="balanceQuery.owner"
+              placeholder="tz1..."
+              :disabled="!walletConnected"
+            />
+          </div>
+          <div class="space-y-2">
+            <Label>Token ID</Label>
+            <Input
+              v-model="balanceQuery.token_id"
+              placeholder="0"
+              type="text"
+              :disabled="!walletConnected"
+            />
+          </div>
+        </div>
+        <div class="flex flex-col gap-2">
+          <Button
+            @click="queryBalanceWithCallback"
+            :disabled="!walletConnected || !isValidBalanceQuery"
+          >
+            <Search class="h-4 w-4 mr-2" />
+            Query Balance (Callback)
+          </Button>
+          <Button
+            @click="queryBalanceDirect"
+            :disabled="!walletConnected || !isValidBalanceQuery"
+          >
+            <Search class="h-4 w-4 mr-2" />
+            Query Balance (Direct)
+          </Button>
+        </div>
+        <div v-if="balanceResults.length > 0" class="space-y-2">
+          <h4 class="font-medium">Balance Results:</h4>
+          <div class="space-y-1">
+            <div
+              v-for="result in balanceResults"
+              :key="`${result.owner}-${result.token_id}`"
+              class="p-3 bg-muted rounded-lg text-sm"
+            >
+              <div class="font-medium">Token ID: {{ result.token_id }}</div>
+              <div class="text-muted-foreground">Owner: {{ result.owner }}</div>
+              <div class="text-lg font-bold">
+                Balance: {{ formatTokenAmount(result.balance) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+
+    <!-- Token Transfer Section -->
+    <Card>
+      <CardHeader>
+        <CardTitle class="flex items-center gap-2">
+          <ArrowRightLeft class="h-5 w-5" />
+          Token Transfer
+        </CardTitle>
+        <CardDescription>
+          Transfer tokens between addresses. You can batch transfers together in
+          a single transaction, but in this example we only allow inputting one.
+        </CardDescription>
+      </CardHeader>
+      <CardContent class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <Label>From Address</Label>
+            <Input
+              v-model="transferForm.from_"
+              placeholder="tz1..."
+              :disabled="!walletConnected"
+            />
+          </div>
+          <div class="space-y-2">
+            <Label>To Address</Label>
+            <Input
+              v-model="transferForm.to_"
+              placeholder="tz1..."
+              :disabled="!walletConnected"
+            />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <Label>Token ID</Label>
+            <Input
+              v-model="transferForm.token_id"
+              placeholder="0"
+              type="text"
+              :disabled="!walletConnected"
+            />
+          </div>
+          <div class="space-y-2">
+            <Label>Amount</Label>
+            <Input
+              v-model="transferForm.amount"
+              placeholder="100"
+              type="text"
+              data-testid="transfer-amount"
+              :disabled="!walletConnected"
+            />
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <Button
+            @click="executeTransfer"
+            :disabled="!walletConnected || !isValidTransferForm"
+          >
+            <Send class="h-4 w-4 mr-2" />
+            Transfer Tokens
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+
+    <!-- Mint Tokens Section -->
+    <Card>
+      <CardHeader>
+        <CardTitle class="flex items-center gap-2">
+          <HandCoins class="h-5 w-5" />
+          Mint Tokens
+        </CardTitle>
+        <CardDescription>
+          Create new tokens and assign them to an address
+        </CardDescription>
+      </CardHeader>
+      <CardContent class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="space-y-2">
+            <Label>To Address</Label>
+            <Input
+              v-model="mintForm.to_"
+              placeholder="tz1..."
+              :disabled="!walletConnected"
+            />
+          </div>
+          <div class="space-y-2">
+            <Label>Token ID</Label>
+            <Input
+              v-model="mintForm.token_id"
+              placeholder="0"
+              type="text"
+              :disabled="!walletConnected"
+            />
+          </div>
+          <div class="space-y-2">
+            <Label>Amount</Label>
+            <Input
+              v-model="mintForm.amount"
+              placeholder="100"
+              type="text"
+              data-testid="mint-amount"
+              :disabled="!walletConnected"
+            />
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <Button
+            @click="executeMint"
+            :disabled="!walletConnected || !isValidMintForm"
+          >
+            <Plus class="h-4 w-4 mr-2" />
+            Mint Tokens
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+
+    <!-- Burn Tokens Section -->
+    <Card>
+      <CardHeader>
+        <CardTitle class="flex items-center gap-2">
+          <Flame class="h-5 w-5" />
+          Burn Tokens
+        </CardTitle>
+        <CardDescription>
+          Destroy tokens from an address (reducing total supply)
+        </CardDescription>
+      </CardHeader>
+      <CardContent class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="space-y-2">
+            <Label>From Address</Label>
+            <Input
+              v-model="burnForm.from_"
+              placeholder="tz1..."
+              :disabled="!walletConnected"
+            />
+          </div>
+          <div class="space-y-2">
+            <Label>Token ID</Label>
+            <Input
+              v-model="burnForm.token_id"
+              placeholder="0"
+              type="text"
+              :disabled="!walletConnected"
+            />
+          </div>
+          <div class="space-y-2">
+            <Label>Amount</Label>
+            <Input
+              v-model="burnForm.amount"
+              placeholder="100"
+              type="text"
+              data-testid="burn-amount"
+              :disabled="!walletConnected"
+            />
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <Button
+            variant="destructive"
+            @click="executeBurn"
+            :disabled="!walletConnected || !isValidBurnForm"
+          >
+            <Minus class="h-4 w-4 mr-2" />
+            Burn Tokens
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, onMounted, ref, watch } from "vue";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
+import {
+  mintTokens,
+  burnTokens,
+  transferTokens,
+  type TokenBalance,
+  type MintParam,
+  type BurnParam,
+  type TransferParam,
+  getTokenBalancesDirect,
+  getTokenBalancesWithCallback,
+} from "./fa2-token";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Coins,
+  ArrowRightLeft,
+  Search,
+  Send,
+  Plus,
+  Minus,
+  Flame,
+  HandCoins,
+  ExternalLink,
+} from "lucide-vue-next";
+import { buildIndexerUrl } from "@/lib/utils";
+import type { ContractConfig } from "@/types/contract";
+import contracts from "@/contracts/contract-config.json";
+import { useSettingsStore } from "@/stores/settingsStore";
+import { storeToRefs } from "pinia";
+
+const diagramStore = useDiagramStore();
+const walletStore = useWalletStore();
+const settingsStore = useSettingsStore();
+const { getAddress } = storeToRefs(walletStore);
+
+const networkType = import.meta.env.VITE_NETWORK_TYPE;
+
+const walletConnected = computed(() => !!getAddress.value);
+
+// Balance query state
+const balanceQuery = ref({
+  owner: "",
+  token_id: "0",
+});
+const balanceResults = ref<TokenBalance[]>([]);
+
+// Transfer form state
+const transferForm = ref({
+  from_: "",
+  to_: "",
+  token_id: "0",
+  amount: "",
+});
+
+// Mint form state
+const mintForm = ref({
+  to_: "",
+  token_id: "0",
+  amount: "",
+});
+
+// Burn form state
+const burnForm = ref({
+  from_: "",
+  token_id: "0",
+  amount: "",
+});
+
+// Helper validation functions
+const isValidAddress = (address: string): boolean => address.trim() !== "";
+const isValidTokenId = (tokenId: string): boolean =>
+  /^\d+$/.test(tokenId.trim());
+const isValidAmount = (amount: string): boolean => {
+  const trimmed = amount.trim();
+  return /^\d+$/.test(trimmed) && parseInt(trimmed) > 0;
+};
+
+// Computed validations
+const isValidBalanceQuery = computed(
+  () =>
+    isValidAddress(balanceQuery.value.owner) &&
+    isValidTokenId(balanceQuery.value.token_id),
+);
+
+const isValidTransferForm = computed(
+  () =>
+    isValidAddress(transferForm.value.from_) &&
+    isValidAddress(transferForm.value.to_) &&
+    isValidTokenId(transferForm.value.token_id) &&
+    isValidAmount(transferForm.value.amount),
+);
+
+const isValidMintForm = computed(
+  () =>
+    isValidAddress(mintForm.value.to_) &&
+    isValidTokenId(mintForm.value.token_id) &&
+    isValidAmount(mintForm.value.amount),
+);
+
+const isValidBurnForm = computed(
+  () =>
+    isValidAddress(burnForm.value.from_) &&
+    isValidTokenId(burnForm.value.token_id) &&
+    isValidAmount(burnForm.value.amount),
+);
+
+// Helper functions
+const formatTokenAmount = (amount: string): string => {
+  const decimals = 2; // Using 2 decimals for the test token
+
+  // Handle empty or invalid amounts
+  if (!amount || amount === "0") {
+    return "0.00";
+  }
+
+  // Convert string to number more safely
+  const amountNum = Number(amount);
+  if (isNaN(amountNum)) {
+    console.error("Invalid amount for formatting:", amount);
+    return "Invalid Amount";
+  }
+
+  const formattedAmount = amountNum / Math.pow(10, decimals);
+  return formattedAmount.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
+// Balance query functions
+const queryBalanceWithCallback = async (): Promise<void> => {
+  if (!isValidBalanceQuery.value) return;
+
+  const results = await getTokenBalancesWithCallback([
+    {
+      owner: balanceQuery.value.owner,
+      token_id: balanceQuery.value.token_id,
+    },
+  ]);
+
+  balanceResults.value = results;
+};
+
+const queryBalanceDirect = async (): Promise<void> => {
+  if (!isValidBalanceQuery.value) return;
+
+  const results = await getTokenBalancesDirect([
+    {
+      owner: balanceQuery.value.owner,
+      token_id: balanceQuery.value.token_id,
+    },
+  ]);
+
+  balanceResults.value = results;
+};
+
+// Transfer functions
+const executeTransfer = async (): Promise<void> => {
+  if (!isValidTransferForm.value) return;
+
+  const transfers: TransferParam[] = [
+    {
+      from_: transferForm.value.from_,
+      txs: [
+        {
+          to_: transferForm.value.to_,
+          token_id: transferForm.value.token_id,
+          amount: transferForm.value.amount,
+        },
+      ],
+    },
+  ];
+
+  await transferTokens(transfers);
+};
+
+// Admin functions
+const executeMint = async (): Promise<void> => {
+  if (!isValidMintForm.value) return;
+
+  const mintParam: MintParam = {
+    to_: mintForm.value.to_,
+    token_id: mintForm.value.token_id,
+    amount: mintForm.value.amount,
+  };
+
+  await mintTokens(mintParam);
+};
+
+const executeBurn = async (): Promise<void> => {
+  if (!isValidBurnForm.value) return;
+
+  const burnParam: BurnParam = {
+    from_: burnForm.value.from_,
+    token_id: burnForm.value.token_id,
+    amount: burnForm.value.amount,
+  };
+
+  await burnTokens(burnParam);
+};
+
+// Initialize component
+onMounted(() => {
+  diagramStore.setTestDiagram("fa2-token");
+
+  // Pre-fill user's address where appropriate
+  const userAddress = getAddress.value;
+  if (userAddress) {
+    balanceQuery.value.owner = userAddress;
+    transferForm.value.from_ = userAddress;
+    transferForm.value.to_ = userAddress;
+    mintForm.value.to_ = userAddress;
+    burnForm.value.from_ = userAddress;
+  }
+});
+
+// Watch for wallet address changes and update form fields
+watch(
+  getAddress,
+  (newAddress: string | undefined) => {
+    if (newAddress) {
+      // Update all address fields when user logs in
+      balanceQuery.value.owner = newAddress;
+      transferForm.value.from_ = newAddress;
+      transferForm.value.to_ = newAddress;
+      mintForm.value.to_ = newAddress;
+      burnForm.value.from_ = newAddress;
+    } else {
+      // Clear address fields when user logs out
+      balanceQuery.value.owner = "";
+      transferForm.value.from_ = "";
+      transferForm.value.to_ = "";
+      mintForm.value.to_ = "";
+      burnForm.value.from_ = "";
+    }
+  },
+  { immediate: false }, // Don't trigger immediately since onMounted handles initial state
+);
+
+const indexerName = computed(() => settingsStore.settings.indexer.name);
+
+const indexerUrl = computed(() =>
+  buildIndexerUrl(settingsStore.settings.indexer, networkType),
+);
+
+const CONTRACT_ADDRESS =
+  (contracts as ContractConfig[]).find(
+    (contract: ContractConfig) => contract.contractName === "fa2-token",
+  )?.address ?? "";
+
+const CALLBACK_CONTRACT_ADDRESS =
+  (contracts as ContractConfig[]).find(
+    (contract: ContractConfig) => contract.contractName === "balance-callback",
+  )?.address ?? "";
+
+const openInExplorer = (address: string) => {
+  window.open(`${indexerUrl.value}/${address}/storage`, "_blank");
+};
+</script>
