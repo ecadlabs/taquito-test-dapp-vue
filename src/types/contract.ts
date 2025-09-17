@@ -44,13 +44,13 @@ export interface MetadataContractStorage {
 
 // FA2 Token contract storage
 export interface FA2TokenStorage {
-  ledger: MichelsonMap<[string, string], string>; // (owner, token_id) -> amount
-  operators: MichelsonMap<[string, string, string], boolean>; // (owner, operator, token_id) -> unit
+  ledger: MichelsonMap<[string, string], string>;
+  operators: MichelsonMap<[string, string, string], boolean>;
   token_metadata: MichelsonMap<
     string,
     { token_id: string; token_info: MichelsonMap<string, string> }
   >;
-  total_supply: MichelsonMap<string, string>; // token_id -> amount
+  total_supply: MichelsonMap<string, string>;
 }
 
 // Balance callback contract storage

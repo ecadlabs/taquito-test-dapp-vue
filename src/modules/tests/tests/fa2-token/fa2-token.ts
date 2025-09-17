@@ -7,6 +7,7 @@ import {
 } from "@/types/contract";
 import { PiggyBank } from "lucide-vue-next";
 import type { Estimate } from "@taquito/taquito";
+import type { FA2TokenStorage } from "@/types/contract";
 
 const CONTRACT_ADDRESS =
   (contracts as ContractConfig[]).find(
@@ -216,7 +217,7 @@ export const getTokenBalancesDirect = async (
     const fa2Contract = await Tezos.contract.at(CONTRACT_ADDRESS);
 
     diagramStore.setProgress("read-fa2-storage", "running", TEST_ID);
-    const storage = (await fa2Contract.storage()) as any;
+    const storage = (await fa2Contract.storage()) as FA2TokenStorage;
 
     const balances: TokenBalance[] = [];
 
