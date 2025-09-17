@@ -64,8 +64,12 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "increase-paid-storage",
     ],
     documentation: {
-      contract:
-        "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/counter.jsligo",
+      contract: [
+        {
+          name: "Counter Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/counter.jsligo",
+        },
+      ],
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/counter",
       taqutioDocumentation: "https://taquito.io/docs/smartcontracts",
@@ -465,6 +469,12 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     ],
     relatedTests: ["counter-contract", "estimate-fees"],
     documentation: {
+      contract: [
+        {
+          name: "Verification Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/signature.jsligo",
+        },
+      ],
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/sign-payload",
       taqutioDocumentation: "https://taquito.io/docs/signing/",
@@ -767,8 +777,12 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       "sign-payload",
     ],
     documentation: {
-      contract:
-        "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/complex-parameters.jsligo",
+      contract: [
+        {
+          name: "Complex Parameters Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/complex-parameters.jsligo",
+        },
+      ],
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/complex-parameters",
       taqutioDocumentation: "https://taquito.io/docs/complex_parameters/",
@@ -917,6 +931,16 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/tzip16-metadata",
+      contract: [
+        {
+          name: "Metadata Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/metadata.jsligo",
+        },
+        {
+          name: "Metadata HTTPS Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/metadata-https.jsligo",
+        },
+      ],
       taqutioDocumentation: "https://taquito.io/docs/metadata-tzip16/",
       tezosDocumentation: "https://tzip.tezosagora.org/proposal/tzip-16/",
     },
@@ -967,6 +991,16 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/fa2-token",
+      contract: [
+        {
+          name: "FA2 Token Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/fa2-token.jsligo",
+        },
+        {
+          name: "Balance Callback Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/balance-callback.jsligo",
+        },
+      ],
       taqutioDocumentation: "https://taquito.io/docs/tzip12/",
       tezosDocumentation:
         "https://gitlab.com/tezos/tzip/-/blob/master/proposals/tzip-12/tzip-12.md",
