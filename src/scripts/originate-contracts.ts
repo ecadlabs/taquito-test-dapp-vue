@@ -215,7 +215,7 @@ export const originateContracts = async (
 // Helper function to get default storage for different contracts
 function getDefaultStorage(
   contractName: string,
-  dependencies?: { fa2TokenAddress: string },
+  dependencies?: Record<string, string>,
 ): ContractStorage {
   switch (contractName.toLowerCase()) {
     case "counter":

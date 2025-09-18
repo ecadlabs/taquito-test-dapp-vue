@@ -140,7 +140,7 @@ export const burnTokens = async (param: BurnParam): Promise<void> => {
     }
     diagramStore.setProgress("success", "completed", TEST_ID);
   } catch (error) {
-    console.log(`Error: ${JSON.stringify(error, null, 2)}`);
+    console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error, TEST_ID);
   }
 };
