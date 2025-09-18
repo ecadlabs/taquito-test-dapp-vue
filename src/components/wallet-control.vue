@@ -142,11 +142,7 @@
         <div class="space-y-2">
           <Label :for="providerSelectId">Wallet Provider</Label>
           <Select v-model="provider">
-            <SelectTrigger
-              class="w-[220px]"
-              :id="providerSelectId"
-              :aria-describedby="providerHelpId"
-            >
+            <SelectTrigger class="w-[220px]" :id="providerSelectId">
               <SelectValue placeholder="Select a wallet provider" />
             </SelectTrigger>
             <SelectContent>

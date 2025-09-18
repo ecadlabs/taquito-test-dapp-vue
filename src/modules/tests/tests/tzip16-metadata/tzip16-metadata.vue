@@ -281,7 +281,7 @@ onMounted(() => {
 });
 
 const getMetadata = async () => {
-  if (!isValidContractAddress.value) return;
+  if (!isValidContractAddress(contractAddress.value.trim())) return;
 
   isLoading.value = true;
 
@@ -295,7 +295,7 @@ const getMetadata = async () => {
 };
 
 const executeView = async (viewName: string, index: number) => {
-  if (!isValidContractAddress.value) return;
+  if (!isValidContractAddress(contractAddress.value.trim())) return;
 
   isExecutingView.value = true;
 
