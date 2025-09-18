@@ -41,19 +41,21 @@
       variant="outline"
       class="ml-2 relative"
       @click="showSettingsDialog = true"
+      aria-label="Settings"
     >
       <div
         v-if="settingsStore.isUsingCustomRpcUrl"
         class="bg-orange-400 size-3 absolute -top-1 -right-1 rounded-full"
       />
-      <p class="sr-only">Settings</p>
-      <Settings class="size-5" />
+      <Settings class="size-5" aria-hidden="true" />
     </Button>
 
     <DropdownMenu>
-      <DropdownMenuTrigger class="block md:hidden hover:cursor-pointer">
-        <Menu class="size-6 ml-3" />
-        <p class="sr-only">Navigation Menu Dropdown</p>
+      <DropdownMenuTrigger
+        class="block md:hidden hover:cursor-pointer"
+        aria-label="Open navigation menu"
+      >
+        <Menu class="size-6 ml-3" aria-hidden="true" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <RouterLink :to="{ name: 'tests', params: { test: firstTestId } }">

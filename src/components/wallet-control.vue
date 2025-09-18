@@ -36,9 +36,13 @@
       <div v-if="!address" class="flex items-center gap-2">
         <div class="size-3 rounded-full bg-red-400" aria-hidden="true" />
         <p class="sr-only">Wallet Disconnected</p>
-        <Button size="icon" variant="outline" @click="showConnectDialog = true">
-          <p class="sr-only">Connect Wallet</p>
-          <Wallet class="size-5" />
+        <Button
+          size="icon"
+          variant="outline"
+          @click="showConnectDialog = true"
+          aria-label="Connect Wallet"
+        >
+          <Wallet class="size-5" aria-hidden="true" />
         </Button>
       </div>
       <div v-else class="flex items-center gap-2">
@@ -48,9 +52,9 @@
           size="icon"
           variant="outline"
           @click="showDisconnectDialog = true"
+          aria-label="Disconnect Wallet"
         >
-          <p class="sr-only">Disconnect Wallet</p>
-          <Unplug class="size-5" />
+          <Unplug class="size-5" aria-hidden="true" />
         </Button>
       </div>
     </div>
@@ -246,13 +250,21 @@
             <p class="break-all">Address: {{ address }}</p>
           </div>
           <div class="flex gap-1 flex-shrink-0">
-            <Button variant="ghost" size="icon" @click="copyAddress()">
-              <Copy class="size-4" />
-              <p class="sr-only">Copy wallet address</p>
+            <Button
+              variant="ghost"
+              size="icon"
+              @click="copyAddress()"
+              aria-label="Copy wallet address"
+            >
+              <Copy class="size-4" aria-hidden="true" />
             </Button>
-            <Button variant="ghost" size="icon" @click="openExplorer()">
-              <ExternalLink class="size-4" />
-              <p class="sr-only">Open wallet in explorer</p>
+            <Button
+              variant="ghost"
+              size="icon"
+              @click="openExplorer()"
+              aria-label="Open wallet in explorer"
+            >
+              <ExternalLink class="size-4" aria-hidden="true" />
             </Button>
           </div>
         </div>

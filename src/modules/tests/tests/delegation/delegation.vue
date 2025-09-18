@@ -5,7 +5,7 @@
       <!-- Display current delegate -->
       <div class="mb-4">
         <div class="flex items-center gap-3 mb-2">
-          <CheckCircle class="w-6 h-6 text-green-500" aria-hidden="true" />
+          <CheckCircle class="w-6 h-6 text-green-500" />
           <h3 class="text-lg font-semibold">Current Delegate</h3>
         </div>
         <p

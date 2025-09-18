@@ -1,17 +1,20 @@
 <template>
   <div class="flex items-center w-full justify-center gap-4">
-    <Button @click="decrementCounter()" :disabled="!walletConnected">
-      <Minus class="size-6" />
-      <p class="sr-only">Decrement</p>
+    <Button
+      @click="decrementCounter()"
+      :disabled="!walletConnected"
+      aria-label="Decrement"
+    >
+      <Minus class="size-6" aria-hidden="true" />
     </Button>
     <div class="flex flex-col items-center gap-2">
       <Button
         variant="ghost"
         @click="getStorageValue()"
         :disabled="!walletConnected"
+        aria-label="Get Storage Value"
       >
-        <RefreshCw class="size-4" />
-        <p class="sr-only">Get Storage Value</p>
+        <RefreshCw class="size-4" aria-hidden="true" />
       </Button>
       <p class="text-5xl font-bold">{{ storageValue ?? "..." }}</p>
       <p class="text-sm text-muted-foreground">Storage Value</p>
@@ -19,14 +22,17 @@
         variant="ghost"
         @click="resetCounter()"
         :disabled="!walletConnected"
+        aria-label="Reset"
       >
-        <Trash class="size-4" />
-        <p class="sr-only">Reset</p>
+        <Trash class="size-4" aria-hidden="true" />
       </Button>
     </div>
-    <Button @click="incrementCounter()" :disabled="!walletConnected">
-      <Plus class="size-6" />
-      <p class="sr-only">Increment</p>
+    <Button
+      @click="incrementCounter()"
+      :disabled="!walletConnected"
+      aria-label="Increment"
+    >
+      <Plus class="size-6" aria-hidden="true" />
     </Button>
   </div>
 </template>

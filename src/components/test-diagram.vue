@@ -57,6 +57,7 @@
             <div
               v-if="node.type === 'success' && diagramStatus === 'completed'"
               class="absolute top-0 left-0 sr-only"
+              aria-hidden="true"
               data-testid="diagramComplete"
               tabindex="-1"
             />
@@ -88,6 +89,7 @@
               v-if="diagramStore.getNodeButton(node.id)"
               @click="diagramStore.getNodeButton(node.id)?.onClick"
               class="hover:opacity-80 transition-opacity cursor-pointer"
+              :aria-label="diagramStore.getNodeButton(node.id)?.text"
             >
               <Badge variant="secondary" class="mb-1">
                 <component :is="diagramStore.getNodeButton(node.id)?.icon" />

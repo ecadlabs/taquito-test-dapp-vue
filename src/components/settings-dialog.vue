@@ -83,14 +83,14 @@
             v-if="settingsStore.isUsingCustomRpcUrl"
             class="flex items-center gap-1 text-xs text-muted-foreground"
           >
-            <TriangleAlert class="size-3 text-orange-500" aria-hidden="true" />
+            <TriangleAlert class="size-3 text-orange-500" />
             <span>Using custom RPC URL</span>
           </div>
           <div
             v-if="!isRpcHealthy"
             class="flex items-center gap-1 text-xs text-red-500"
           >
-            <TriangleAlert class="size-3" aria-hidden="true" />
+            <TriangleAlert class="size-3" />
             <span>Cannot reach RPC URL</span>
           </div>
         </div>

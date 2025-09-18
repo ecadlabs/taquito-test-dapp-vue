@@ -60,9 +60,13 @@
         <p class="text-sm text-wrap break-all" data-testid="signature-output">
           {{ signature }}
         </p>
-        <Button size="icon" variant="ghost" @click="copySignature()">
-          <Copy class="w-4 h-4" />
-          <p class="sr-only">Copy Signature</p>
+        <Button
+          size="icon"
+          variant="ghost"
+          @click="copySignature()"
+          aria-label="Copy Signature"
+        >
+          <Copy class="w-4 h-4" aria-hidden="true" />
         </Button>
       </div>
     </div>
@@ -144,7 +148,7 @@
         role="status"
         aria-live="polite"
       >
-        <Check class="size-4" aria-hidden="true" />
+        <Check class="size-4" />
         <p>Signature verified</p>
       </div>
       <div
@@ -153,7 +157,7 @@
         role="status"
         aria-live="polite"
       >
-        <X class="size-4" aria-hidden="true" />
+        <X class="size-4" />
         <p>Invalid signature</p>
       </div>
     </div>
