@@ -57,6 +57,13 @@
               v-model="balanceQuery.owner"
               placeholder="tz1..."
               :disabled="!walletConnected"
+              autocapitalize="none"
+              autocomplete="off"
+              spellcheck="false"
+              :aria-invalid="
+                balanceQuery.owner.length > 0 &&
+                !isValidAddress(balanceQuery.owner)
+              "
             />
           </div>
           <div class="space-y-2">
@@ -66,6 +73,9 @@
               placeholder="0"
               type="text"
               :disabled="!walletConnected"
+              inputmode="numeric"
+              pattern="\\d*"
+              :aria-invalid="!isValidTokenId(balanceQuery.token_id)"
             />
           </div>
         </div>
@@ -85,7 +95,12 @@
             Query Balance (Direct)
           </Button>
         </div>
-        <div v-if="balanceResults.length > 0" class="space-y-2">
+        <div
+          v-if="balanceResults.length > 0"
+          class="space-y-2"
+          role="status"
+          aria-live="polite"
+        >
           <h4 class="font-medium">Balance Results:</h4>
           <div class="space-y-1">
             <div
@@ -124,6 +139,13 @@
               v-model="transferForm.from_"
               placeholder="tz1..."
               :disabled="!walletConnected"
+              autocapitalize="none"
+              autocomplete="off"
+              spellcheck="false"
+              :aria-invalid="
+                transferForm.from_.length > 0 &&
+                !isValidAddress(transferForm.from_)
+              "
             />
           </div>
           <div class="space-y-2">
@@ -132,6 +154,12 @@
               v-model="transferForm.to_"
               placeholder="tz1..."
               :disabled="!walletConnected"
+              autocapitalize="none"
+              autocomplete="off"
+              spellcheck="false"
+              :aria-invalid="
+                transferForm.to_.length > 0 && !isValidAddress(transferForm.to_)
+              "
             />
           </div>
         </div>
@@ -143,6 +171,9 @@
               placeholder="0"
               type="text"
               :disabled="!walletConnected"
+              inputmode="numeric"
+              pattern="\\d*"
+              :aria-invalid="!isValidTokenId(transferForm.token_id)"
             />
           </div>
           <div class="space-y-2">
@@ -153,6 +184,12 @@
               type="text"
               data-testid="transfer-amount"
               :disabled="!walletConnected"
+              inputmode="numeric"
+              pattern="\\d*"
+              :aria-invalid="
+                transferForm.amount.length > 0 &&
+                !isValidAmount(transferForm.amount)
+              "
             />
           </div>
         </div>
@@ -187,6 +224,12 @@
               v-model="mintForm.to_"
               placeholder="tz1..."
               :disabled="!walletConnected"
+              autocapitalize="none"
+              autocomplete="off"
+              spellcheck="false"
+              :aria-invalid="
+                mintForm.to_.length > 0 && !isValidAddress(mintForm.to_)
+              "
             />
           </div>
           <div class="space-y-2">
@@ -196,6 +239,9 @@
               placeholder="0"
               type="text"
               :disabled="!walletConnected"
+              inputmode="numeric"
+              pattern="\\d*"
+              :aria-invalid="!isValidTokenId(mintForm.token_id)"
             />
           </div>
           <div class="space-y-2">
@@ -206,6 +252,11 @@
               type="text"
               data-testid="mint-amount"
               :disabled="!walletConnected"
+              inputmode="numeric"
+              pattern="\\d*"
+              :aria-invalid="
+                mintForm.amount.length > 0 && !isValidAmount(mintForm.amount)
+              "
             />
           </div>
         </div>
@@ -240,6 +291,12 @@
               v-model="burnForm.from_"
               placeholder="tz1..."
               :disabled="!walletConnected"
+              autocapitalize="none"
+              autocomplete="off"
+              spellcheck="false"
+              :aria-invalid="
+                burnForm.from_.length > 0 && !isValidAddress(burnForm.from_)
+              "
             />
           </div>
           <div class="space-y-2">
@@ -249,6 +306,9 @@
               placeholder="0"
               type="text"
               :disabled="!walletConnected"
+              inputmode="numeric"
+              pattern="\\d*"
+              :aria-invalid="!isValidTokenId(burnForm.token_id)"
             />
           </div>
           <div class="space-y-2">
@@ -259,6 +319,11 @@
               type="text"
               data-testid="burn-amount"
               :disabled="!walletConnected"
+              inputmode="numeric"
+              pattern="\\d*"
+              :aria-invalid="
+                burnForm.amount.length > 0 && !isValidAmount(burnForm.amount)
+              "
             />
           </div>
         </div>
@@ -313,7 +378,7 @@ import {
   HandCoins,
   ExternalLink,
 } from "lucide-vue-next";
-import { buildIndexerUrl } from "@/lib/utils";
+import { buildIndexerUrl, validateTezosAddress } from "@/lib/utils";
 import type { ContractConfig } from "@/types/contract";
 import contracts from "@/contracts/contract-config.json";
 import { useSettingsStore } from "@/stores/settingsStore";
@@ -358,7 +423,8 @@ const burnForm = ref({
 });
 
 // Helper validation functions
-const isValidAddress = (address: string): boolean => address.trim() !== "";
+const isValidAddress = (value: string): boolean =>
+  validateTezosAddress(value.trim());
 const isValidTokenId = (tokenId: string): boolean =>
   /^\d+$/.test(tokenId.trim());
 const isValidAmount = (amount: string): boolean => {

@@ -89,6 +89,7 @@
               v-if="diagramStore.getNodeButton(node.id)"
               @click="diagramStore.getNodeButton(node.id)?.onClick"
               class="hover:opacity-80 transition-opacity cursor-pointer"
+              :aria-label="diagramStore.getNodeButton(node.id)?.text"
             >
               <Badge variant="secondary" class="mb-1">
                 <component :is="diagramStore.getNodeButton(node.id)?.icon" />
@@ -99,7 +100,12 @@
             <p>
               {{ node.label }}
             </p>
-            <p v-if="node.type === 'error'" class="text-red-400 mt-1">
+            <p
+              v-if="node.type === 'error'"
+              class="text-red-400 mt-1"
+              role="status"
+              aria-live="assertive"
+            >
               {{ errorMessage }}
             </p>
 

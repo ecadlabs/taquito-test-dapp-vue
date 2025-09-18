@@ -10,6 +10,8 @@
         </div>
         <p
           class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit text-red-400"
+          role="status"
+          aria-live="polite"
         >
           {{ currentDelegate }}
         </p>
@@ -30,6 +32,13 @@
               placeholder="Enter new delegate address..."
               v-model="newDelegateAddress"
               class="w-full font-mono text-sm"
+              autocapitalize="none"
+              autocomplete="off"
+              spellcheck="false"
+              :aria-invalid="
+                newDelegateAddress.length > 0 &&
+                !isValidAddress(newDelegateAddress)
+              "
             />
           </div>
           <Button
@@ -39,9 +48,10 @@
               removingDelegate ||
               loadingCurrentDelegate ||
               !walletStore.getAddress ||
-              !newDelegateAddress
+              !isValidAddress(newDelegateAddress)
             "
             class="w-full"
+            :aria-busy="changingDelegate"
           >
             <Loader2
               v-if="changingDelegate"
@@ -65,6 +75,7 @@
           "
           variant="destructive"
           class="w-full"
+          :aria-busy="removingDelegate"
         >
           <Loader2 v-if="removingDelegate" class="w-4 h-4 mr-2 animate-spin" />
           <Unlink v-else class="w-4 h-4 mr-2" />
@@ -92,6 +103,10 @@
               placeholder="Enter delegate address..."
               v-model="toAddress"
               class="w-full font-mono text-sm"
+              autocapitalize="none"
+              autocomplete="off"
+              spellcheck="false"
+              :aria-invalid="toAddress.length > 0 && !isValidAddress(toAddress)"
             />
           </div>
           <Button
@@ -100,6 +115,7 @@
               sending || loadingCurrentDelegate || !walletStore.getAddress
             "
             class="w-full"
+            :aria-busy="sending"
           >
             <Loader2
               v-if="
@@ -130,6 +146,7 @@ import {
   undelegate,
 } from "@/modules/tests/tests/delegation/delegation";
 import { useWalletStore } from "@/stores/walletStore";
+import { validateTezosAddress } from "@/lib/utils";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
@@ -141,6 +158,8 @@ const changingDelegate = ref<boolean>(false);
 const removingDelegate = ref<boolean>(false);
 const currentDelegate = ref<string | null>();
 const loadingCurrentDelegate = ref<boolean>(true);
+const isValidAddress = (value: string): boolean =>
+  validateTezosAddress(value.trim());
 
 onMounted(async () => {
   diagramStore.setTestDiagram("delegation");
@@ -165,6 +184,7 @@ const loadCurrentDelegate = async () => {
 
 const delegateToCurrentAddress = async () => {
   try {
+    if (!isValidAddress(toAddress.value)) return;
     sending.value = true;
     await delegate(toAddress.value);
     currentDelegate.value = toAddress.value;
@@ -177,6 +197,7 @@ const delegateToCurrentAddress = async () => {
 
 const changeDelegate = async () => {
   try {
+    if (!isValidAddress(newDelegateAddress.value)) return;
     changingDelegate.value = true;
     await delegate(newDelegateAddress.value);
     currentDelegate.value = newDelegateAddress.value;

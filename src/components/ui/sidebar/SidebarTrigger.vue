@@ -20,8 +20,8 @@ const { toggleSidebar } = useSidebar();
     size="icon"
     :class="cn('size-9', props.class)"
     @click="toggleSidebar"
+    aria-label="Toggle Sidebar"
   >
-    <PanelLeft />
-    <span class="sr-only">Toggle Sidebar</span>
+    <PanelLeft aria-hidden="true" />
   </Button>
 </template>

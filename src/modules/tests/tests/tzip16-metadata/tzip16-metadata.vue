@@ -12,10 +12,16 @@
               placeholder="KT1..."
               class="flex-1"
               data-testid="contract-address-input"
+              autocapitalize="none"
+              autocomplete="off"
+              spellcheck="false"
+              :aria-invalid="!isValidContractAddress"
             />
             <Button
               @click="getMetadata"
-              :disabled="!walletConnected || isLoading || !contractAddress"
+              :disabled="
+                !walletConnected || isLoading || !isValidContractAddress
+              "
               data-testid="get-metadata-button"
             >
               <Loader2 v-if="isLoading" class="w-4 h-4 mr-2 animate-spin" />
@@ -92,6 +98,9 @@
           <div class="w-full">
             <div
               class="text-sm font-mono bg-muted p-3 rounded-lg text-red-400 overflow-auto max-h-96"
+              role="region"
+              aria-live="polite"
+              aria-label="Contract metadata JSON"
             >
               <pre class="whitespace-pre-wrap break-words">{{
                 JSON.stringify(metadataResult, null, 2)
@@ -233,7 +242,11 @@ import {
 import contracts from "@/contracts/contract-config.json";
 import type { ContractConfig } from "@/types/contract";
 import { Tzip16Module } from "@taquito/tzip16";
-import { buildIndexerUrl, copyToClipboard } from "@/lib/utils";
+import {
+  buildIndexerUrl,
+  copyToClipboard,
+  validateTezosAddress,
+} from "@/lib/utils";
 import { useSettingsStore } from "@/stores/settingsStore";
 
 const diagramStore = useDiagramStore();
@@ -247,6 +260,8 @@ const isExecutingView = ref(false);
 const contractAddress = ref("");
 const metadataResult = ref<MetadataResult | undefined>(undefined);
 const viewExecutionResult = ref<string[]>([]);
+const isValidContractAddress = (value: string): boolean =>
+  validateTezosAddress(value.trim());
 
 const networkType = import.meta.env.VITE_NETWORK_TYPE;
 
@@ -266,7 +281,7 @@ onMounted(() => {
 });
 
 const getMetadata = async () => {
-  if (!contractAddress.value.trim()) return;
+  if (!isValidContractAddress(contractAddress.value.trim())) return;
 
   isLoading.value = true;
 
@@ -280,7 +295,7 @@ const getMetadata = async () => {
 };
 
 const executeView = async (viewName: string, index: number) => {
-  if (!contractAddress.value.trim()) return;
+  if (!isValidContractAddress(contractAddress.value.trim())) return;
 
   isExecutingView.value = true;
 

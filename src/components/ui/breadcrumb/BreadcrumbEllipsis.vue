@@ -12,7 +12,6 @@ const props = defineProps<{
   <span
     data-slot="breadcrumb-ellipsis"
     role="presentation"
-    aria-hidden="true"
     :class="cn('flex size-9 items-center justify-center', props.class)"
   >
     <slot>

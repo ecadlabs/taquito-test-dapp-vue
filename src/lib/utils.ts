@@ -58,3 +58,13 @@ export const copyToClipboard = async (
     toast.error(errorMessage);
   }
 };
+
+/**
+ * Validates a Tezos address (tz1, tz2, tz3, tz4, KT1)
+ * @param address - The address string to validate
+ * @returns true if valid, false otherwise
+ */
+export const validateTezosAddress = (address: string): boolean => {
+  const tezosAddressPattern = /^(tz[1-4]|KT1)[0-9A-Za-z]{33}$/;
+  return tezosAddressPattern.test(address);
+};

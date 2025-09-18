@@ -48,9 +48,9 @@
               size="icon"
               @click="getStakedBalance"
               :disabled="loadingBalance || !walletConnected"
+              aria-label="Refresh Staked Balance"
             >
-              <RotateCcw class="size-4 mt-1" />
-              <p class="sr-only">Refresh Staked Balance</p>
+              <RotateCcw class="size-4 mt-1" aria-hidden="true" />
             </Button>
           </div>
         </div>
