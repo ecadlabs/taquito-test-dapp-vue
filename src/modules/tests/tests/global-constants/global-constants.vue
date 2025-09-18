@@ -31,7 +31,7 @@
 
       <!-- Registration result -->
       <div v-if="registrationResult" class="space-y-2">
-        <div class="p-4 bg-muted rounded-md">
+        <div class="p-4 bg-muted rounded-md" role="status" aria-live="polite">
           <div class="space-y-2">
             <div class="flex items-center gap-2">
               <Check class="h-4 w-4 text-green-500" />

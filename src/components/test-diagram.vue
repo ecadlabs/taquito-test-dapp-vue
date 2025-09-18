@@ -57,7 +57,6 @@
             <div
               v-if="node.type === 'success' && diagramStatus === 'completed'"
               class="absolute top-0 left-0 sr-only"
-              aria-hidden="true"
               data-testid="diagramComplete"
               tabindex="-1"
             />
@@ -99,7 +98,12 @@
             <p>
               {{ node.label }}
             </p>
-            <p v-if="node.type === 'error'" class="text-red-400 mt-1">
+            <p
+              v-if="node.type === 'error'"
+              class="text-red-400 mt-1"
+              role="status"
+              aria-live="assertive"
+            >
               {{ errorMessage }}
             </p>
 

@@ -4,15 +4,14 @@
     <CommandList>
       <CommandEmpty>No results found.</CommandEmpty>
       <CommandGroup heading="Tests">
-        <RouterLink
-          :to="{ name: 'tests', params: { test: test.value } }"
+        <CommandItem
           v-for="test in tests"
           :key="test.value"
+          :value="test.value"
+          @select="() => handleSelect(test.value)"
         >
-          <CommandItem :value="test.value" @click="open = false">
-            {{ test.label }}
-          </CommandItem>
-        </RouterLink>
+          {{ test.label }}
+        </CommandItem>
       </CommandGroup>
     </CommandList>
   </CommandDialog>
@@ -22,6 +21,7 @@
 import { useMagicKeys } from "@vueuse/core";
 import { AvailableTests } from "@/modules/tests/tests";
 import { computed, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import {
   CommandDialog,
   CommandEmpty,
@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/command";
 
 const open = ref(false);
+const router = useRouter();
 
 const { Meta_K, Ctrl_K } = useMagicKeys({
   passive: false,
@@ -54,4 +55,9 @@ const tests = computed(() => {
     value: test.id,
   }));
 });
+
+const handleSelect = (id: string) => {
+  open.value = false;
+  router.push({ name: "tests", params: { test: id } });
+};
 </script>

@@ -3,14 +3,14 @@
     <!-- Large Screens -->
     <div class="hidden md:block">
       <div v-if="!address" class="flex items-center gap-2">
-        <div class="size-3 rounded-full bg-red-400" />
+        <div class="size-3 rounded-full bg-red-400" aria-hidden="true" />
         <p class="sr-only">Wallet Disconnected</p>
         <Button variant="outline" @click="showConnectDialog = true">
           Connect Wallet
         </Button>
       </div>
       <div v-else class="flex items-center gap-2">
-        <div class="size-3 rounded-full bg-green-400" />
+        <div class="size-3 rounded-full bg-green-400" aria-hidden="true" />
         <p class="sr-only">Wallet Connected</p>
         <Button
           variant="outline"
@@ -26,6 +26,7 @@
           <AlertTriangle
             v-if="!settingsStore.getIsRevealed"
             class="size-4 text-red-600 flex-shrink-0"
+            aria-hidden="true"
           />
         </Button>
       </div>
@@ -33,7 +34,7 @@
     <!-- Small Screens -->
     <div class="block md:hidden">
       <div v-if="!address" class="flex items-center gap-2">
-        <div class="size-3 rounded-full bg-red-400" />
+        <div class="size-3 rounded-full bg-red-400" aria-hidden="true" />
         <p class="sr-only">Wallet Disconnected</p>
         <Button size="icon" variant="outline" @click="showConnectDialog = true">
           <p class="sr-only">Connect Wallet</p>
@@ -41,7 +42,7 @@
         </Button>
       </div>
       <div v-else class="flex items-center gap-2">
-        <div class="size-3 rounded-full bg-green-400" />
+        <div class="size-3 rounded-full bg-green-400" aria-hidden="true" />
         <p class="sr-only">Wallet Connected</p>
         <Button
           size="icon"
@@ -112,7 +113,7 @@
           </AlertDescription>
         </Alert>
         <Alert v-if="provider === 'ledger' && !hidSupported" class="mb-2">
-          <AlertTriangle class="size-4 !text-red-500" />
+          <AlertTriangle class="size-4 !text-red-500" aria-hidden="true" />
           <AlertTitle>
             <p>Heads up!</p>
           </AlertTitle>
@@ -123,7 +124,7 @@
           </AlertDescription>
         </Alert>
         <Alert v-if="provider === 'programmatic'" class="mb-2">
-          <AlertTriangle class="size-4 !text-red-500" />
+          <AlertTriangle class="size-4 !text-red-500" aria-hidden="true" />
           <AlertTitle>
             <p>Important!</p>
           </AlertTitle>
@@ -134,27 +135,45 @@
             not be used with a real, personally owned wallet key.
           </AlertDescription>
         </Alert>
-        <Select v-model="provider">
-          <SelectTrigger class="w-[150px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="beacon"> Beacon </SelectItem>
-            <SelectItem value="walletconnect"> WalletConnect </SelectItem>
-            <SelectItem value="ledger"> Ledger Device </SelectItem>
-            <SelectItem value="programmatic">
-              Programmatic (Testing)
-            </SelectItem>
-          </SelectContent>
-        </Select>
+        <div class="space-y-2">
+          <Label :for="providerSelectId">Wallet Provider</Label>
+          <Select v-model="provider">
+            <SelectTrigger
+              class="w-[220px]"
+              :id="providerSelectId"
+              :aria-describedby="providerHelpId"
+            >
+              <SelectValue placeholder="Select a wallet provider" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="beacon"> Beacon </SelectItem>
+              <SelectItem value="walletconnect"> WalletConnect </SelectItem>
+              <SelectItem value="ledger"> Ledger Device </SelectItem>
+              <SelectItem value="programmatic">
+                Programmatic (Testing)
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Input
-          v-if="provider === 'programmatic'"
-          v-model="privateKey"
-          type="text"
-          placeholder="Private Key"
-          class="w-1/2 mt-2"
-        />
+        <div v-if="provider === 'programmatic'" class="space-y-2 mt-2">
+          <Label :for="privateKeyInputId">
+            Programmatic wallet private key
+          </Label>
+          <Input
+            :id="privateKeyInputId"
+            v-model="privateKey"
+            type="text"
+            placeholder="edsk..."
+            class="w-full"
+            autocomplete="off"
+            spellcheck="false"
+            :aria-describedby="privateKeyHelpId"
+          />
+          <p :id="privateKeyHelpId" class="text-xs text-muted-foreground">
+            Stored only in-memory for this demo. Provide a throwaway key.
+          </p>
+        </div>
       </div>
 
       <DialogFooter>
@@ -167,6 +186,7 @@
             (provider === 'programmatic' && !privateKey) ||
             (provider === 'ledger' && !hidSupported)
           "
+          :aria-busy="loading"
         >
           <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
           <p>Connect</p>
@@ -195,7 +215,7 @@
         class="bg-yellow-50 border border-yellow-200 rounded-lg p-2.5"
       >
         <div class="flex items-start gap-1.5">
-          <AlertTriangle class="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+          <AlertTriangle class="size-4 text-yellow-600 mt-0.5 flex-shrink-0" />
           <div>
             <p class="text-sm font-medium text-yellow-800">
               Wallet key not revealed
@@ -241,11 +261,21 @@
       </div>
 
       <DialogFooter class="flex flex-col gap-2">
-        <Button variant="secondary" @click="change()" :disabled="loading">
+        <Button
+          variant="secondary"
+          @click="change()"
+          :disabled="loading"
+          :aria-busy="loading"
+        >
           <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
           <p>Change Wallet</p>
         </Button>
-        <Button variant="destructive" @click="disconnect()" :disabled="loading">
+        <Button
+          variant="destructive"
+          @click="disconnect()"
+          :disabled="loading"
+          :aria-busy="loading"
+        >
           <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
           <p>Disconnect</p>
         </Button>
@@ -289,6 +319,7 @@ import { buildIndexerUrl } from "@/lib/utils";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Label } from "@/components/ui/label";
 
 const walletStore = useWalletStore();
 const settingsStore = useSettingsStore();
@@ -312,6 +343,9 @@ const loading = ref<boolean>(false);
 const showConnectDialog = ref<boolean>(false);
 const showDisconnectDialog = ref<boolean>(false);
 const privateKey = ref<string>("");
+const providerSelectId = "wallet-provider-select";
+const privateKeyInputId = "programmatic-private-key";
+const privateKeyHelpId = "programmatic-private-key-help";
 
 watch([showConnectDialog, showDisconnectDialog], ([newValue]) => {
   if (newValue === false) {

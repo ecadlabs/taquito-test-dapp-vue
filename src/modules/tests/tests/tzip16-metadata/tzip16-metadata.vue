@@ -12,10 +12,16 @@
               placeholder="KT1..."
               class="flex-1"
               data-testid="contract-address-input"
+              autocapitalize="none"
+              autocomplete="off"
+              spellcheck="false"
+              :aria-invalid="!isValidContractAddress"
             />
             <Button
               @click="getMetadata"
-              :disabled="!walletConnected || isLoading || !contractAddress"
+              :disabled="
+                !walletConnected || isLoading || !isValidContractAddress
+              "
               data-testid="get-metadata-button"
             >
               <Loader2 v-if="isLoading" class="w-4 h-4 mr-2 animate-spin" />
@@ -92,6 +98,9 @@
           <div class="w-full">
             <div
               class="text-sm font-mono bg-muted p-3 rounded-lg text-red-400 overflow-auto max-h-96"
+              role="region"
+              aria-live="polite"
+              aria-label="Contract metadata JSON"
             >
               <pre class="whitespace-pre-wrap break-words">{{
                 JSON.stringify(metadataResult, null, 2)
@@ -247,6 +256,10 @@ const isExecutingView = ref(false);
 const contractAddress = ref("");
 const metadataResult = ref<MetadataResult | undefined>(undefined);
 const viewExecutionResult = ref<string[]>([]);
+const tezosAddressPattern = /^(tz[1-4]|KT1)[0-9A-Za-z]{33}$/;
+const isValidContractAddress = computed(() =>
+  tezosAddressPattern.test(contractAddress.value.trim()),
+);
 
 const networkType = import.meta.env.VITE_NETWORK_TYPE;
 
@@ -266,7 +279,7 @@ onMounted(() => {
 });
 
 const getMetadata = async () => {
-  if (!contractAddress.value.trim()) return;
+  if (!isValidContractAddress.value) return;
 
   isLoading.value = true;
 
@@ -280,7 +293,7 @@ const getMetadata = async () => {
 };
 
 const executeView = async (viewName: string, index: number) => {
-  if (!contractAddress.value.trim()) return;
+  if (!isValidContractAddress.value) return;
 
   isExecutingView.value = true;
 

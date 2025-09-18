@@ -7,6 +7,9 @@
         v-model="payload"
         class="w-48"
         data-testid="string-payload-input"
+        autocapitalize="none"
+        autocomplete="off"
+        spellcheck="false"
       />
     </div>
     <div class="flex items-center gap-2">
@@ -51,7 +54,7 @@
     <div v-if="signature" class="w-1/3">
       <Separator class="my-4" />
     </div>
-    <div v-if="signature" class="text-center">
+    <div v-if="signature" class="text-center" role="status" aria-live="polite">
       <p class="mb-1 text-sm font-bold">Signature</p>
       <div class="flex items-center gap-2">
         <p class="text-sm text-wrap break-all" data-testid="signature-output">
@@ -73,6 +76,9 @@
         v-model="payloadToSendToContract"
         class="w-48"
         data-testid="contract-payload-input"
+        autocapitalize="none"
+        autocomplete="off"
+        spellcheck="false"
       />
     </div>
     <div>
@@ -82,6 +88,9 @@
         v-model="signatureToSendToContract"
         class="w-48"
         data-testid="contract-signature-input"
+        autocapitalize="none"
+        autocomplete="off"
+        spellcheck="false"
       />
     </div>
     <div>
@@ -91,6 +100,9 @@
         v-model="publicKeyToSendToContract"
         class="w-48"
         data-testid="contract-public-key-input"
+        autocapitalize="none"
+        autocomplete="off"
+        spellcheck="false"
       />
     </div>
     <Button
@@ -104,6 +116,7 @@
       "
       class="w-52"
       data-testid="verify-payload-button"
+      :aria-busy="verifyingOnContract"
     >
       <Loader2 v-if="verifyingOnContract" class="w-4 h-4 mr-2 animate-spin" />
       <p v-else>Verify Signature</p>
@@ -119,6 +132,7 @@
       "
       class="w-72"
       data-testid="verify-payload-tzip32-button"
+      :aria-busy="verifyingOnContract"
     >
       <Loader2 v-if="verifyingOnContract" class="w-4 h-4 mr-2 animate-spin" />
       <p v-else>Verify Signature (Tzip32 Compatible)</p>
@@ -127,12 +141,19 @@
       <div
         v-if="payloadVerifiedOnContract"
         class="flex items-center gap-2 text-green-500"
+        role="status"
+        aria-live="polite"
       >
-        <Check class="size-4" />
+        <Check class="size-4" aria-hidden="true" />
         <p>Signature verified</p>
       </div>
-      <div v-else class="flex items-center gap-2 text-red-500">
-        <X class="size-4" />
+      <div
+        v-else
+        class="flex items-center gap-2 text-red-500"
+        role="status"
+        aria-live="polite"
+      >
+        <X class="size-4" aria-hidden="true" />
         <p>Invalid signature</p>
       </div>
     </div>
