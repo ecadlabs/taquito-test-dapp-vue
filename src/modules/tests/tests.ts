@@ -64,8 +64,12 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "increase-paid-storage",
     ],
     documentation: {
-      contract:
-        "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/counter.jsligo",
+      contract: [
+        {
+          name: "Counter Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/counter.jsligo",
+        },
+      ],
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/counter",
       taqutioDocumentation: "https://taquito.io/docs/smartcontracts",
@@ -465,6 +469,12 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     ],
     relatedTests: ["counter-contract", "estimate-fees"],
     documentation: {
+      contract: [
+        {
+          name: "Verification Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/signature.jsligo",
+        },
+      ],
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/sign-payload",
       taqutioDocumentation: "https://taquito.io/docs/signing/",
@@ -767,8 +777,12 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       "sign-payload",
     ],
     documentation: {
-      contract:
-        "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/complex-parameters.jsligo",
+      contract: [
+        {
+          name: "Complex Parameters Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/complex-parameters.jsligo",
+        },
+      ],
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/complex-parameters",
       taqutioDocumentation: "https://taquito.io/docs/complex_parameters/",
@@ -917,6 +931,16 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/tzip16-metadata",
+      contract: [
+        {
+          name: "Metadata Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/metadata.jsligo",
+        },
+        {
+          name: "Metadata HTTPS Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/metadata-https.jsligo",
+        },
+      ],
       taqutioDocumentation: "https://taquito.io/docs/metadata-tzip16/",
       tezosDocumentation: "https://tzip.tezosagora.org/proposal/tzip-16/",
     },
@@ -946,6 +970,134 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
           {
             id: "execute-metadata-view",
             label: "Execute Metadata View",
+          },
+        ],
+      },
+    },
+  },
+  "fa2-token": {
+    id: "fa2-token",
+    title: "FA2 Token (TZIP-12)",
+    description:
+      "Test TZIP-12 (FA2) token standard functionality including token transfers, minting, burning, and balance queries. FA2 is a unified token standard for Tezos that supports fungible, non-fungible, and multi-asset tokens.",
+    category: "Token Standards",
+    setup: [
+      "Install and configure Taquito with TZIP-12 support: `npm install @taquito/taquito @taquito/tzip12`",
+      "Deploy an FA2 compliant token contract",
+      "Set up a Tezos wallet (Temple, Kukai, or other supported wallet)",
+      "Use a faucet to fund your wallet with testnet Tez from https://teztnets.com/",
+    ],
+    relatedTests: ["tzip16-metadata", "transfer", "counter-contract"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/fa2-token",
+      contract: [
+        {
+          name: "FA2 Token Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/fa2-token.jsligo",
+        },
+        {
+          name: "Balance Callback Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/balance-callback.jsligo",
+        },
+      ],
+      taqutioDocumentation: "https://taquito.io/docs/tzip12/",
+      tezosDocumentation:
+        "https://gitlab.com/tezos/tzip/-/blob/master/proposals/tzip-12/tzip-12.md",
+    },
+    component: () => import("@/modules/tests/tests/fa2-token/fa2-token.vue"),
+    diagrams: {
+      mint: {
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get FA2 Contract",
+          },
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "execute-operation",
+            label: "Execute Mint Operation",
+          },
+          {
+            id: "wait-confirmation",
+            label: "Wait for Confirmation",
+          },
+        ],
+      },
+      burn: {
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get FA2 Contract",
+          },
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "execute-operation",
+            label: "Execute Burn Operation",
+          },
+          {
+            id: "wait-confirmation",
+            label: "Wait for Confirmation",
+          },
+        ],
+      },
+      transfer: {
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get FA2 Contract",
+          },
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "execute-operation",
+            label: "Execute Transfer Operation",
+          },
+          {
+            id: "wait-confirmation",
+            label: "Wait for Confirmation",
+          },
+        ],
+      },
+      "get-balance": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get FA2 Contract",
+          },
+          {
+            id: "read-fa2-storage",
+            label: "Read FA2 Contract Storage",
+          },
+        ],
+      },
+      "get-balance-with-callback": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get FA2 Contract",
+          },
+          {
+            id: "call-balance-of",
+            label: "Call FA2 Balance Function",
+          },
+          {
+            id: "wait-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+          {
+            id: "read-callback-storage",
+            label: "Read Callback Storage",
           },
         ],
       },

@@ -99,19 +99,22 @@
           </CardHeader>
           <CardContent>
             <div class="space-y-3">
-              <div
-                v-if="testMetadata.documentation.contract"
-                class="flex items-center gap-2"
-              >
-                <FileCode class="h-4 w-4 text-muted-foreground" />
-                <a
-                  :href="testMetadata.documentation.contract"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-sm text-primary hover:underline"
+              <div v-if="testMetadata.documentation.contract" class="space-y-3">
+                <div
+                  v-for="contract in testMetadata.documentation.contract"
+                  :key="contract.name"
+                  class="flex items-center gap-2"
                 >
-                  Contract Source
-                </a>
+                  <FileCode class="h-4 w-4 text-muted-foreground" />
+                  <a
+                    :href="contract.url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-sm text-primary hover:underline"
+                  >
+                    {{ contract.name }}
+                  </a>
+                </div>
               </div>
               <div
                 v-if="testMetadata.documentation.script"

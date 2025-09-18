@@ -1,0 +1,227 @@
+// Type definitions
+export type token_id = nat;
+export type owner = address;
+export type operator = address;
+export type amount = nat;
+
+// Token metadata type
+export type token_metadata_value = {
+  token_id: token_id,
+  token_info: map<string, bytes>
+};
+
+// Transfer type
+export type transfer_destination = {
+  to_: address,
+  token_id: token_id,
+  amount: amount
+};
+
+export type transfer_param = {
+  from_: address,
+  txs: list<transfer_destination>
+};
+
+// Balance request types
+export type balance_request = {
+  owner: address,
+  token_id: token_id
+};
+
+export type balance_response = {
+  request: balance_request,
+  balance: amount
+};
+
+// Operator types (for TZIP-12 compliance, but not used in implementation)
+export type operator_param = {
+  owner: address,
+  operator: address,
+  token_id: token_id
+};
+
+export type update_operator_param = 
+  | ["Add_operator", operator_param]
+  | ["Remove_operator", operator_param];
+
+
+// Storage type
+export type storage = {
+  ledger: big_map<[address, token_id], amount>,
+  token_metadata: big_map<token_id, token_metadata_value>,
+  total_supply: big_map<token_id, amount>
+};
+
+type ret = [list<operation>, storage];
+
+// Helper functions
+const get_balance = (owner: address, token_id: token_id, ledger: big_map<[address, token_id], amount>): amount => {
+  return match(Big_map.find_opt([owner, token_id], ledger)) {
+    when(Some(balance)): balance;
+    when(None()): 0n;
+  };
+};
+
+const update_balance = (owner: address, token_id: token_id, new_balance: amount, ledger: big_map<[address, token_id], amount>): big_map<[address, token_id], amount> => {
+  if (new_balance == 0n) {
+    return Big_map.remove([owner, token_id], ledger);
+  } else {
+    return Big_map.update([owner, token_id], Some(new_balance), ledger);
+  }
+};
+
+const assert_token_exists = (token_id: token_id, token_metadata: big_map<token_id, token_metadata_value>): unit => {
+  if (!Big_map.mem(token_id, token_metadata)) {
+    failwith("FA2_TOKEN_UNDEFINED");
+  };
+};
+
+// Helper function to process a single destination
+const process_destination = (from_: address, destination: transfer_destination, ledger: big_map<[address, token_id], amount>, token_metadata: big_map<token_id, token_metadata_value>): big_map<[address, token_id], amount> => {
+  assert_token_exists(destination.token_id, token_metadata);
+  const from_balance = get_balance(from_, destination.token_id, ledger);
+  const to_balance = get_balance(destination.to_, destination.token_id, ledger);
+  
+  // Check sufficient balance
+  if (from_balance < destination.amount) {
+    failwith("FA2_INSUFFICIENT_BALANCE");
+  };
+  
+  // Update balances
+  const new_from_balance = abs(from_balance - destination.amount);
+  const new_to_balance = to_balance + destination.amount;
+  
+  let updated_ledger = update_balance(from_, destination.token_id, new_from_balance, ledger);
+  updated_ledger = update_balance(destination.to_, destination.token_id, new_to_balance, updated_ledger);
+  
+  return updated_ledger;
+};
+
+// Helper function to process all destinations for a transfer recursively
+const process_destinations_recursive = (from_: address, remaining_destinations: list<transfer_destination>, acc_ledger: big_map<[address, token_id], amount>, token_metadata: big_map<token_id, token_metadata_value>): big_map<[address, token_id], amount> => {
+  return match(remaining_destinations) {
+    when([]): acc_ledger;
+    when([dest_head, ...dest_tail]): 
+      do {
+        const updated_ledger = process_destination(from_, dest_head, acc_ledger, token_metadata);
+        return process_destinations_recursive(from_, dest_tail, updated_ledger, token_metadata);
+      };
+  };
+};
+
+// Helper function to process all transfers recursively
+const process_transfers_recursive = (remaining_transfers: list<transfer_param>, acc_ledger: big_map<[address, token_id], amount>, token_metadata: big_map<token_id, token_metadata_value>): big_map<[address, token_id], amount> => {
+  return match(remaining_transfers) {
+    when([]): acc_ledger;
+    when([transfer_head, ...transfer_tail]): 
+      do {
+        const ledger_after_destinations = process_destinations_recursive(transfer_head.from_, transfer_head.txs, acc_ledger, token_metadata);
+        return process_transfers_recursive(transfer_tail, ledger_after_destinations, token_metadata);
+      };
+  };
+};
+
+// Transfer entrypoint - processes all transfers and all destinations
+@entry
+const transfer = (transfers: list<transfer_param>, store: storage): ret => {
+  if (List.length(transfers) == 0n) {
+    failwith("Empty transfer list");
+  };
+  
+  // Process all transfers and all their destinations
+  const final_ledger = process_transfers_recursive(transfers, store.ledger, store.token_metadata);
+  const new_store = {...store, ledger: final_ledger};
+  return [list([]), new_store];
+};
+
+// Helper function to process a single balance request
+const process_single_balance_request = (request: balance_request, ledger: big_map<[address, token_id], amount>, token_metadata: big_map<token_id, token_metadata_value>): balance_response => {
+  assert_token_exists(request.token_id, token_metadata);
+  const balance = get_balance(request.owner, request.token_id, ledger);
+  return {request: request, balance: balance};
+};
+
+// Balance_of entrypoint
+@entry
+const balance_of = (param: {requests: list<balance_request>, callback: contract<list<balance_response>>}, store: storage): ret => {
+  if (List.length(param.requests) == 0n) {
+    failwith("Empty balance request list");
+  };
+  
+  // Process all balance requests using List.map
+  const responses = List.map((request: balance_request): balance_response => 
+    process_single_balance_request(request, store.ledger, store.token_metadata), param.requests);
+  
+  const operation = Tezos.transaction(responses, 0mutez, param.callback);
+  return [list([operation]), store];
+};
+
+// Update_operators entrypoint - no-op implementation for testing
+@entry
+const update_operators = (_updates: list<update_operator_param>, store: storage): ret => {
+  // Mock implementation - do nothing, just return unchanged storage
+  // This satisfies TZIP-12 compliance without implementing actual operator logic
+  // DO NOT DO THIS IN A REAL APP. THIS IS FOR TESTING PURPOSES ONLY. ANYONE CAN MINT/BURN TOKENS TO ANY ADDRESS.
+  return [list([]), store];
+};
+
+// Mint entrypoint
+@entry
+const mint = (param: {to_: address, token_id: token_id, amount: amount}, store: storage): ret => {
+  // In a real app, you would check if the caller is authorized to mint tokens. This is for testing purposes only.
+  assert_token_exists(param.token_id, store.token_metadata);
+  // Get current balance and total supply
+  const current_balance = get_balance(param.to_, param.token_id, store.ledger);
+  const current_total_supply = match(Big_map.find_opt(param.token_id, store.total_supply)) {
+    when(Some(supply)): supply;
+    when(None()): 0n;
+  };
+  
+  // Update balance and total supply
+  const new_balance = current_balance + param.amount;
+  const new_total_supply = current_total_supply + param.amount;
+  
+  const new_ledger = update_balance(param.to_, param.token_id, new_balance, store.ledger);
+  const new_total_supply_map = Big_map.update(param.token_id, Some(new_total_supply), store.total_supply);
+  
+  const new_store = {
+    ...store,
+    ledger: new_ledger,
+    total_supply: new_total_supply_map,
+  };
+  
+  return [list([]), new_store];
+};
+
+// Burn entrypoint
+@entry
+const burn = (param: {from_: address, token_id: token_id, amount: amount}, store: storage): ret => {
+  // In a real app, you would check if the caller is authorized to burn tokens. This is for testing purposes only.
+  assert_token_exists(param.token_id, store.token_metadata);
+  // Get current balance and total supply
+  const current_balance = get_balance(param.from_, param.token_id, store.ledger);
+  const current_total_supply = match(Big_map.find_opt(param.token_id, store.total_supply)) {
+    when(Some(supply)): supply;
+    when(None()): 0n;
+  };
+  
+  // Check sufficient balance
+  if (current_balance < param.amount) {
+    failwith("FA2_INSUFFICIENT_BALANCE");
+  };
+  
+  // Update balance and total supply
+  const new_balance = abs(current_balance - param.amount);
+  const new_total_supply = abs(current_total_supply - param.amount);
+  
+  const new_ledger = update_balance(param.from_, param.token_id, new_balance, store.ledger);
+  const new_total_supply_map = Big_map.update(param.token_id, Some(new_total_supply), store.total_supply);
+  
+  const new_store = {
+    ...store,
+    ledger: new_ledger,
+    total_supply: new_total_supply_map
+  };
+  
+  return [list([]), new_store];
+};

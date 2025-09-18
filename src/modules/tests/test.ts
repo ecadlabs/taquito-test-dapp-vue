@@ -24,7 +24,7 @@ export interface TestMetadata {
   relatedTests: string[];
   contractApi?: boolean;
   documentation: {
-    contract?: string;
+    contract?: { name: string; url: string }[];
     script?: string;
     taqutioDocumentation?: string;
     tezosDocumentation?: string;

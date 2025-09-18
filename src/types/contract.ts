@@ -42,6 +42,32 @@ export interface MetadataContractStorage {
   counter: number;
 }
 
+// FA2 Token contract storage
+export interface FA2TokenStorage {
+  ledger: MichelsonMap<[string, string], string>;
+  operators: MichelsonMap<[string, string, string], boolean>;
+  token_metadata: MichelsonMap<
+    string,
+    { token_id: string; token_info: MichelsonMap<string, string> }
+  >;
+  total_supply: MichelsonMap<string, string>;
+}
+
+// Balance callback contract storage
+export interface BalanceCallbackStorage {
+  responses: MichelsonMap<
+    string,
+    {
+      data: Array<{
+        request: { owner: string; token_id: string };
+        balance: string;
+      }>;
+      last_updated: string;
+    }
+  >;
+  authorized_addresses: string[];
+}
+
 export type ContractStorage =
   | CounterStorage
   | DelegationStorage
@@ -49,4 +75,6 @@ export type ContractStorage =
   | TransferStorage
   | ComplexParametersStorage
   | MetadataContractStorage
+  | FA2TokenStorage
+  | BalanceCallbackStorage
   | number;
