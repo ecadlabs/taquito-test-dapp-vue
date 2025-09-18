@@ -378,7 +378,7 @@ import {
   HandCoins,
   ExternalLink,
 } from "lucide-vue-next";
-import { buildIndexerUrl } from "@/lib/utils";
+import { buildIndexerUrl, validateTezosAddress } from "@/lib/utils";
 import type { ContractConfig } from "@/types/contract";
 import contracts from "@/contracts/contract-config.json";
 import { useSettingsStore } from "@/stores/settingsStore";
@@ -423,9 +423,8 @@ const burnForm = ref({
 });
 
 // Helper validation functions
-const tezosAddressPattern = /^(tz[1-4]|KT1)[0-9A-Za-z]{33}$/;
-const isValidAddress = (address: string): boolean =>
-  tezosAddressPattern.test(address.trim());
+const isValidAddress = (value: string): boolean =>
+  validateTezosAddress(value.trim());
 const isValidTokenId = (tokenId: string): boolean =>
   /^\d+$/.test(tokenId.trim());
 const isValidAmount = (amount: string): boolean => {

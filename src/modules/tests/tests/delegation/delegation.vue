@@ -146,6 +146,7 @@ import {
   undelegate,
 } from "@/modules/tests/tests/delegation/delegation";
 import { useWalletStore } from "@/stores/walletStore";
+import { validateTezosAddress } from "@/lib/utils";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
@@ -157,9 +158,8 @@ const changingDelegate = ref<boolean>(false);
 const removingDelegate = ref<boolean>(false);
 const currentDelegate = ref<string | null>();
 const loadingCurrentDelegate = ref<boolean>(true);
-const tezosAddressPattern = /^(tz[1-4]|KT1)[0-9A-Za-z]{33}$/;
 const isValidAddress = (value: string): boolean =>
-  tezosAddressPattern.test(value.trim());
+  validateTezosAddress(value.trim());
 
 onMounted(async () => {
   diagramStore.setTestDiagram("delegation");

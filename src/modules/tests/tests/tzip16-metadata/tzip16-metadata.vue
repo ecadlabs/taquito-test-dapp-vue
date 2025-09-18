@@ -242,7 +242,11 @@ import {
 import contracts from "@/contracts/contract-config.json";
 import type { ContractConfig } from "@/types/contract";
 import { Tzip16Module } from "@taquito/tzip16";
-import { buildIndexerUrl, copyToClipboard } from "@/lib/utils";
+import {
+  buildIndexerUrl,
+  copyToClipboard,
+  validateTezosAddress,
+} from "@/lib/utils";
 import { useSettingsStore } from "@/stores/settingsStore";
 
 const diagramStore = useDiagramStore();
@@ -256,10 +260,8 @@ const isExecutingView = ref(false);
 const contractAddress = ref("");
 const metadataResult = ref<MetadataResult | undefined>(undefined);
 const viewExecutionResult = ref<string[]>([]);
-const tezosAddressPattern = /^(tz[1-4]|KT1)[0-9A-Za-z]{33}$/;
-const isValidContractAddress = computed(() =>
-  tezosAddressPattern.test(contractAddress.value.trim()),
-);
+const isValidContractAddress = (value: string): boolean =>
+  validateTezosAddress(value.trim());
 
 const networkType = import.meta.env.VITE_NETWORK_TYPE;
 
