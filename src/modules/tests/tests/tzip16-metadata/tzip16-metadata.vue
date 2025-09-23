@@ -33,54 +33,24 @@
       </div>
       <div>
         <h3 class="mb-1 font-medium">Metadata in Storage Contract</h3>
-        <p
-          class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit text-red-400"
-        >
-          {{ METADATA_CONTRACT_ADDRESS }}
-        </p>
-        <div class="flex gap-1 items-center">
-          <Button
-            @click="openInExplorer(METADATA_CONTRACT_ADDRESS)"
-            variant="link"
-            class="text-muted-foreground -ml-2"
+        <div>
+          <p
+            class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit text-red-400"
           >
-            <p class="text-xs">Open in {{ indexerName }}</p>
-            <ExternalLink class="size-3" />
-          </Button>
-          <Button
-            @click="copyToClipboard(METADATA_CONTRACT_ADDRESS)"
-            variant="link"
-            class="text-muted-foreground -ml-2"
-          >
-            <Copy class="size-3" />
-            <p class="sr-only">Copy Address to Clipboard</p>
-          </Button>
+            {{ METADATA_CONTRACT_ADDRESS }}
+          </p>
+          <OpenInExplorer :address="METADATA_CONTRACT_ADDRESS" />
         </div>
       </div>
       <div>
         <h3 class="mb-1 font-medium">Metadata via HTTPS Contract</h3>
-        <p
-          class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit text-red-400"
-        >
-          {{ METADATA_HTTPS_CONTRACT_ADDRESS }}
-        </p>
-        <div class="flex gap-1 items-center">
-          <Button
-            @click="openInExplorer(METADATA_HTTPS_CONTRACT_ADDRESS)"
-            variant="link"
-            class="text-muted-foreground -ml-2"
+        <div>
+          <p
+            class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit text-red-400"
           >
-            <p class="text-xs">Open in {{ indexerName }}</p>
-            <ExternalLink class="size-3" />
-          </Button>
-          <Button
-            @click="copyToClipboard(METADATA_HTTPS_CONTRACT_ADDRESS)"
-            variant="link"
-            class="text-muted-foreground -ml-2"
-          >
-            <Copy class="size-3" />
-            <p class="sr-only">Copy Address to Clipboard</p>
-          </Button>
+            {{ METADATA_HTTPS_CONTRACT_ADDRESS }}
+          </p>
+          <OpenInExplorer :address="METADATA_HTTPS_CONTRACT_ADDRESS" />
         </div>
       </div>
     </div>
@@ -224,15 +194,7 @@ import Input from "@/components/ui/input/Input.vue";
 import Label from "@/components/ui/label/Label.vue";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Database,
-  Loader2,
-  Info,
-  Eye,
-  Play,
-  ExternalLink,
-  Copy,
-} from "lucide-vue-next";
+import { Database, Loader2, Info, Eye, Play } from "lucide-vue-next";
 import {
   getContractMetadata,
   executeMetadataView,
@@ -242,19 +204,13 @@ import {
 import contracts from "@/contracts/contract-config.json";
 import type { ContractConfig } from "@/types/contract";
 import { Tzip16Module } from "@taquito/tzip16";
-import {
-  buildIndexerUrl,
-  copyToClipboard,
-  validateTezosAddress,
-} from "@/lib/utils";
-import { useSettingsStore } from "@/stores/settingsStore";
+import { validateTezosAddress } from "@/lib/utils";
+import OpenInExplorer from "@/modules/tests/components/open-in-explorer.vue";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
-const settingsStore = useSettingsStore();
 
 const walletConnected = computed(() => !!walletStore.getAddress);
-const indexerName = computed(() => settingsStore.settings.indexer.name);
 const isLoading = ref(false);
 const isExecutingView = ref(false);
 const contractAddress = ref("");
@@ -262,8 +218,6 @@ const metadataResult = ref<MetadataResult | undefined>(undefined);
 const viewExecutionResult = ref<string[]>([]);
 const isValidContractAddress = (value: string): boolean =>
   validateTezosAddress(value.trim());
-
-const networkType = import.meta.env.VITE_NETWORK_TYPE;
 
 onMounted(() => {
   diagramStore.setTestDiagram("tzip16-metadata");
@@ -316,10 +270,6 @@ const getViewName = (view: string): string => {
   return view.replace(/"/g, "");
 };
 
-const indexerUrl = computed(() =>
-  buildIndexerUrl(settingsStore.settings.indexer, networkType),
-);
-
 const METADATA_CONTRACT_ADDRESS =
   (contracts as ContractConfig[]).find(
     (contract: ContractConfig) => contract.contractName === "metadata",
@@ -329,8 +279,4 @@ const METADATA_HTTPS_CONTRACT_ADDRESS =
   (contracts as ContractConfig[]).find(
     (contract: ContractConfig) => contract.contractName === "metadata-https",
   )?.address ?? "";
-
-const openInExplorer = (address: string) => {
-  window.open(`${indexerUrl.value}/${address}/storage`, "_blank");
-};
 </script>
