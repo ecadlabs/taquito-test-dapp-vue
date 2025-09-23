@@ -194,7 +194,7 @@ import Input from "@/components/ui/input/Input.vue";
 import Label from "@/components/ui/label/Label.vue";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Database, Loader2, Info, Eye, Play, Copy } from "lucide-vue-next";
+import { Database, Loader2, Info, Eye, Play } from "lucide-vue-next";
 import {
   getContractMetadata,
   executeMetadataView,
@@ -204,7 +204,7 @@ import {
 import contracts from "@/contracts/contract-config.json";
 import type { ContractConfig } from "@/types/contract";
 import { Tzip16Module } from "@taquito/tzip16";
-import { copyToClipboard, validateTezosAddress } from "@/lib/utils";
+import { validateTezosAddress } from "@/lib/utils";
 import OpenInExplorer from "@/modules/tests/components/open-in-explorer.vue";
 
 const diagramStore = useDiagramStore();
