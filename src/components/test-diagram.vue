@@ -75,7 +75,7 @@
                 diagramStatus === 'completed' &&
                 !diagram?.noIndexer
               "
-              :href="`${indexerUrl}/${operationHash}/operations`"
+              :href="operationsUrl"
               target="_blank"
               class="cursor-pointer transition-opacity hover:opacity-80"
             >
@@ -162,8 +162,13 @@ const getStepTiming = (stepId: string) => {
 
 const networkType = import.meta.env.VITE_NETWORK_TYPE;
 
-const indexerUrl = computed(() =>
-  buildIndexerUrl(settingsStore.settings.indexer, networkType),
+const operationsUrl = computed(() =>
+  buildIndexerUrl(
+    settingsStore.settings.indexer,
+    networkType,
+    operationHash.value?.toString(),
+    "operations",
+  ),
 );
 const selectedIndexerName = computed(() => settingsStore.settings.indexer.name);
 

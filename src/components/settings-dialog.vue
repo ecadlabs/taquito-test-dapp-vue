@@ -136,6 +136,7 @@ import {
   useSettingsStore,
   type IndexerOption,
 } from "@/stores/settingsStore";
+import type { NetworkType } from "@airgap/beacon-types";
 import { useDebounce } from "@vueuse/core";
 import { LoaderCircle, TriangleAlert, Undo2 } from "lucide-vue-next";
 import { computed, ref, watch } from "vue";
@@ -144,7 +145,11 @@ const emit = defineEmits(["close"]);
 
 const settingsStore = useSettingsStore();
 
-const indexers: IndexerOption[] = availableIndexers;
+const indexers: IndexerOption[] = availableIndexers.filter((indexer) =>
+  indexer.availableNetworks.includes(
+    import.meta.env.VITE_NETWORK_TYPE as NetworkType,
+  ),
+);
 
 const gitSha = import.meta.env.VITE_GITHUB_SHA;
 const version = import.meta.env.VITE_VERSION;

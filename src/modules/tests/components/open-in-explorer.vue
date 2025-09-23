@@ -36,10 +36,15 @@ const networkType = import.meta.env.VITE_NETWORK_TYPE;
 const indexerName = computed(() => settingsStore.settings.indexer.name);
 
 const indexerUrl = computed(() =>
-  buildIndexerUrl(settingsStore.settings.indexer, networkType),
+  buildIndexerUrl(
+    settingsStore.settings.indexer,
+    networkType,
+    props.address,
+    "contract",
+  ),
 );
 
 const openInExplorer = () => {
-  window.open(`${indexerUrl.value}/${props.address}/storage`, "_blank");
+  window.open(indexerUrl.value, "_blank");
 };
 </script>
