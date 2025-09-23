@@ -5,9 +5,9 @@
     </DialogHeader>
 
     <div class="space-y-4">
-      <div class="flex gap-2 flex-col">
+      <div class="flex flex-col gap-2">
         <Label :for="indexerSelectId" class="font-medium">Indexer</Label>
-        <div class="space-y-2 w-full sm:w-auto">
+        <div class="w-full space-y-2 sm:w-auto">
           <Select v-model="settingsStore.settings.indexer">
             <SelectTrigger
               class="w-full sm:w-[220px]"
@@ -28,14 +28,14 @@
               </SelectGroup>
             </SelectContent>
           </Select>
-          <p :id="indexerHelpId" class="text-xs text-muted-foreground">
+          <p :id="indexerHelpId" class="text-muted-foreground text-xs">
             Determines which explorer the contract inspection links open.
           </p>
         </div>
       </div>
       <div class="flex flex-col gap-2">
         <div class="flex items-center justify-between gap-2">
-          <Label :for="rpcInputId" class="font-medium flex items-center gap-2">
+          <Label :for="rpcInputId" class="flex items-center gap-2 font-medium">
             RPC URL
           </Label>
           <Badge
@@ -52,7 +52,7 @@
         <div class="flex items-center">
           <LoaderCircle
             v-if="runningHealthCheck"
-            class="size-4 text-muted-foreground animate-spin mr-2"
+            class="text-muted-foreground mr-2 size-4 animate-spin"
           />
           <Input
             :id="rpcInputId"
@@ -70,18 +70,18 @@
             class="ml-1"
             :aria-label="'Reset RPC URL to default'"
           >
-            <Undo2 class="size-4 text-muted-foreground" />
+            <Undo2 class="text-muted-foreground size-4" />
           </Button>
         </div>
         <div
           :id="rpcStatusId"
-          class="flex flex-col items-start sm:items-end gap-1"
+          class="flex flex-col items-start gap-1 sm:items-end"
           role="status"
           aria-live="polite"
         >
           <div
             v-if="settingsStore.isUsingCustomRpcUrl"
-            class="flex items-center gap-1 text-xs text-muted-foreground"
+            class="text-muted-foreground flex items-center gap-1 text-xs"
           >
             <TriangleAlert class="size-3 text-orange-500" />
             <span>Using custom RPC URL</span>
@@ -98,7 +98,7 @@
     </div>
 
     <DialogFooter class="flex items-center">
-      <div class="text-xs text-muted-foreground">
+      <div class="text-muted-foreground text-xs">
         <p>Version {{ version }}</p>
         <Separator orientation="vertical" class="h-4" />
         <p>Network: {{ network }}</p>
@@ -112,18 +112,16 @@
 </template>
 
 <script setup lang="ts">
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import {
-  availableIndexers,
-  useSettingsStore,
-  type IndexerOption,
-} from "@/stores/settingsStore";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -133,12 +131,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
-import { LoaderCircle, TriangleAlert, Undo2 } from "lucide-vue-next";
+import {
+  availableIndexers,
+  useSettingsStore,
+  type IndexerOption,
+} from "@/stores/settingsStore";
 import { useDebounce } from "@vueuse/core";
-import { watch, computed, ref } from "vue";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
+import { LoaderCircle, TriangleAlert, Undo2 } from "lucide-vue-next";
+import { computed, ref, watch } from "vue";
 
 const emit = defineEmits(["close"]);
 

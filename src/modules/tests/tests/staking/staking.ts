@@ -1,9 +1,9 @@
-import { useWalletStore } from "@/stores/walletStore";
 import { useDiagramStore } from "@/stores/diagramStore";
-import { PiggyBank } from "lucide-vue-next";
-import type { Estimate } from "@taquito/taquito";
-import { RpcClient } from "@taquito/rpc";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useWalletStore } from "@/stores/walletStore";
+import { RpcClient } from "@taquito/rpc";
+import type { Estimate } from "@taquito/taquito";
+import { PiggyBank } from "lucide-vue-next";
 
 const TEST_ID = "staking";
 let estimate: Estimate;
@@ -173,9 +173,9 @@ const getDelegateAcceptsStaking = async (address: string): Promise<boolean> => {
 };
 
 export {
+  finalizeUnstake,
+  getDelegateAcceptsStaking,
+  getStakingInfo,
   stake,
   unstake,
-  finalizeUnstake,
-  getStakingInfo,
-  getDelegateAcceptsStaking,
 };

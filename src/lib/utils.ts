@@ -1,8 +1,8 @@
 import { useSettingsStore, type IndexerOption } from "@/stores/settingsStore";
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-import { RpcClient } from "@taquito/rpc";
 import type { Confirmation } from "@/types/wallet";
+import { RpcClient } from "@taquito/rpc";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 import { toast } from "vue-sonner";
 
 export function cn(...inputs: ClassValue[]) {
@@ -41,9 +41,12 @@ export const getOperationHash = (confirmation: Confirmation) => {
 
 /**
  * Copies text to clipboard with toast notifications
+ *
  * @param text - The text to copy to clipboard
- * @param successMessage - Optional custom success message (default: "Copied to clipboard")
- * @param errorMessage - Optional custom error message (default: "Failed to copy to clipboard")
+ * @param successMessage - Optional custom success message (default: "Copied to
+ *   clipboard")
+ * @param errorMessage - Optional custom error message (default: "Failed to copy
+ *   to clipboard")
  */
 export const copyToClipboard = async (
   text: string,
@@ -61,8 +64,9 @@ export const copyToClipboard = async (
 
 /**
  * Validates a Tezos address (tz1, tz2, tz3, tz4, KT1)
+ *
  * @param address - The address string to validate
- * @returns true if valid, false otherwise
+ * @returns True if valid, false otherwise
  */
 export const validateTezosAddress = (address: string): boolean => {
   const tezosAddressPattern = /^(tz[1-4]|KT1)[0-9A-Za-z]{33}$/;

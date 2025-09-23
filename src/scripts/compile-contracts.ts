@@ -1,6 +1,6 @@
-import { existsSync, readdirSync, mkdirSync } from "fs";
-import { join } from "path";
 import { execSync } from "child_process";
+import { existsSync, mkdirSync, readdirSync } from "fs";
+import { join } from "path";
 
 export const compileContracts = async (): Promise<void> => {
   console.log("🔧 Starting JSLIGO contract compilation...");

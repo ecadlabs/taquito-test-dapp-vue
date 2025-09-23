@@ -1,7 +1,7 @@
 <template>
   <Toaster />
   <div id="app">
-    <header class="sticky top-0 bg-background z-20">
+    <header class="bg-background sticky top-0 z-20">
       <HeaderComponent />
     </header>
     <main>
@@ -17,13 +17,13 @@
 </template>
 
 <script setup lang="ts">
-import "vue-sonner/style.css";
-import HeaderComponent from "@/components/header-component.vue";
-import { Toaster } from "@/components/ui/sonner";
-import TestDialog from "@/components/test-dialog.vue";
-import { onMounted } from "vue";
-import { useWalletStore } from "@/stores/walletStore";
 import CommandMenu from "@/components/command-menu.vue";
+import HeaderComponent from "@/components/header-component.vue";
+import TestDialog from "@/components/test-dialog.vue";
+import { Toaster } from "@/components/ui/sonner";
+import { useWalletStore } from "@/stores/walletStore";
+import { onMounted } from "vue";
+import "vue-sonner/style.css";
 
 const walletStore = useWalletStore();
 

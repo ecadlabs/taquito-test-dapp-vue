@@ -1,15 +1,15 @@
 <template>
-  <div class="w-full flex flex-col items-center gap-6 px-6">
+  <div class="flex w-full flex-col items-center gap-6 px-6">
     <!-- Current delegate section -->
     <div v-if="currentDelegate" class="w-full max-w-md space-y-2">
       <!-- Display current delegate -->
       <div class="mb-4">
-        <div class="flex items-center gap-3 mb-2">
-          <CheckCircle class="w-6 h-6 text-green-500" />
+        <div class="mb-2 flex items-center gap-3">
+          <CheckCircle class="h-6 w-6 text-green-500" />
           <h3 class="text-lg font-semibold">Current Delegate</h3>
         </div>
         <p
-          class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit text-red-400"
+          class="bg-muted w-fit rounded-md px-2 py-1 font-mono text-xs text-red-400"
           role="status"
           aria-live="polite"
         >
@@ -19,13 +19,13 @@
 
       <!-- Change delegate section -->
       <div>
-        <div class="flex items-center gap-1.5 mb-4">
-          <Cookie class="w-6 h-6" />
+        <div class="mb-4 flex items-center gap-1.5">
+          <Cookie class="h-6 w-6" />
           <h3 class="text-lg font-semibold">Change Delegate</h3>
         </div>
         <div class="space-y-4">
           <div>
-            <Label class="text-sm font-medium mb-2 block"
+            <Label class="mb-2 block text-sm font-medium"
               >New Delegate Address</Label
             >
             <Input
@@ -55,9 +55,9 @@
           >
             <Loader2
               v-if="changingDelegate"
-              class="w-4 h-4 mr-2 animate-spin"
+              class="mr-2 h-4 w-4 animate-spin"
             />
-            <Cookie v-else class="w-4 h-4 mr-2" />
+            <Cookie v-else class="mr-2 h-4 w-4" />
             <span v-if="!changingDelegate" class="font-semibold"
               >Change Delegate</span
             >
@@ -77,8 +77,8 @@
           class="w-full"
           :aria-busy="removingDelegate"
         >
-          <Loader2 v-if="removingDelegate" class="w-4 h-4 mr-2 animate-spin" />
-          <Unlink v-else class="w-4 h-4 mr-2" />
+          <Loader2 v-if="removingDelegate" class="mr-2 h-4 w-4 animate-spin" />
+          <Unlink v-else class="mr-2 h-4 w-4" />
           <span v-if="!removingDelegate" class="font-semibold"
             >Remove Delegation</span
           >
@@ -90,13 +90,13 @@
     <!-- Delegate to new address section -->
     <div v-else class="w-full max-w-md">
       <div>
-        <div class="flex items-center gap-1.5 mb-4">
-          <Cookie class="w-6 h-6" />
+        <div class="mb-4 flex items-center gap-1.5">
+          <Cookie class="h-6 w-6" />
           <h3 class="text-lg font-semibold">Delegate to Baker</h3>
         </div>
         <div class="space-y-4">
           <div>
-            <Label class="text-sm font-medium mb-2 block"
+            <Label class="mb-2 block text-sm font-medium"
               >Delegate Address</Label
             >
             <Input
@@ -121,9 +121,9 @@
               v-if="
                 sending || (loadingCurrentDelegate && walletStore.getAddress)
               "
-              class="w-4 h-4 mr-2 animate-spin"
+              class="mr-2 h-4 w-4 animate-spin"
             />
-            <Cookie v-else class="w-4 h-4" />
+            <Cookie v-else class="h-4 w-4" />
             <span v-if="!sending" class="font-semibold">Delegate</span>
             <span v-else>Delegating...</span>
           </Button>
@@ -134,19 +134,19 @@
 </template>
 
 <script setup lang="ts">
-import { useDiagramStore } from "@/stores/diagramStore";
-import { ref, onMounted, watch } from "vue";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, CheckCircle, Unlink, Cookie } from "lucide-vue-next";
+import { validateTezosAddress } from "@/lib/utils";
 import {
   delegate,
   getDelegate,
   undelegate,
 } from "@/modules/tests/tests/delegation/delegation";
+import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
-import { validateTezosAddress } from "@/lib/utils";
+import { CheckCircle, Cookie, Loader2, Unlink } from "lucide-vue-next";
+import { onMounted, ref, watch } from "vue";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();

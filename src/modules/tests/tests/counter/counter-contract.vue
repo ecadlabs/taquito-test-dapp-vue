@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center w-full justify-center gap-4">
+  <div class="flex w-full items-center justify-center gap-4">
     <Button
       @click="decrementCounter()"
       :disabled="!walletConnected"
@@ -17,7 +17,7 @@
         <RefreshCw class="size-4" aria-hidden="true" />
       </Button>
       <p class="text-5xl font-bold">{{ storageValue ?? "..." }}</p>
-      <p class="text-sm text-muted-foreground">Storage Value</p>
+      <p class="text-muted-foreground text-sm">Storage Value</p>
       <Button
         variant="ghost"
         @click="resetCounter()"
@@ -38,17 +38,17 @@
 </template>
 
 <script setup lang="ts">
-import { useDiagramStore } from "@/stores/diagramStore";
 import Button from "@/components/ui/button/Button.vue";
 import {
-  increment,
   decrement,
-  reset,
   getContractStorage,
+  increment,
+  reset,
 } from "@/modules/tests/tests/counter/counter-contract";
-import { computed, onMounted, ref } from "vue";
-import { Minus, Plus, RefreshCw, Trash } from "lucide-vue-next";
+import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
+import { Minus, Plus, RefreshCw, Trash } from "lucide-vue-next";
+import { computed, onMounted, ref } from "vue";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();

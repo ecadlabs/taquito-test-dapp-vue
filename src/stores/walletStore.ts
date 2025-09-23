@@ -1,16 +1,19 @@
+import { useSettingsStore } from "@/stores/settingsStore";
+import type { ProgrammaticWallet, WalletProvider } from "@/types/wallet";
+import { BeaconEvent } from "@airgap/beacon-dapp";
+import { NetworkType } from "@airgap/beacon-types";
+import TransportWebHID from "@ledgerhq/hw-transport-webhid";
+import { BeaconWallet } from "@taquito/beacon-wallet";
+import { LedgerSigner } from "@taquito/ledger-signer";
+import { importKey, InMemorySigner } from "@taquito/signer";
+import { TezosToolkit } from "@taquito/taquito";
+import {
+  PermissionScopeMethods,
+  WalletConnect,
+  NetworkType as WalletConnectNetworkType,
+} from "@taquito/wallet-connect";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
-import { BeaconWallet } from "@taquito/beacon-wallet";
-import { TezosToolkit } from "@taquito/taquito";
-import { importKey, InMemorySigner } from "@taquito/signer";
-import type { WalletProvider, ProgrammaticWallet } from "@/types/wallet";
-import { PermissionScopeMethods, WalletConnect } from "@taquito/wallet-connect";
-import { NetworkType } from "@airgap/beacon-types";
-import { NetworkType as WalletConnectNetworkType } from "@taquito/wallet-connect";
-import { BeaconEvent } from "@airgap/beacon-dapp";
-import { useSettingsStore } from "@/stores/settingsStore";
-import TransportWebHID from "@ledgerhq/hw-transport-webhid";
-import { LedgerSigner } from "@taquito/ledger-signer";
 
 export const useWalletStore = defineStore("wallet", () => {
   const settingsStore = useSettingsStore();
@@ -28,9 +31,7 @@ export const useWalletStore = defineStore("wallet", () => {
   const getWallet = computed(() => wallet.value);
   const getAddress = computed(() => address.value);
 
-  /**
-   * Gets the address from the current wallet
-   */
+  /** Gets the address from the current wallet */
   const getWalletAddress = async (): Promise<string | undefined> => {
     if (!wallet.value) return undefined;
 
@@ -52,9 +53,7 @@ export const useWalletStore = defineStore("wallet", () => {
     }
   };
 
-  /**
-   * Gets the public key from the current wallet
-   */
+  /** Gets the public key from the current wallet */
   const getWalletPublicKey = async (): Promise<string | undefined> => {
     if (!wallet.value) return undefined;
 
@@ -72,9 +71,7 @@ export const useWalletStore = defineStore("wallet", () => {
   const getBalance = computed(() => balance.value);
   const getWalletName = computed(() => walletName.value);
 
-  /**
-   * Resets all wallet state variables to undefined and clears the local storage
-   */
+  /** Resets all wallet state variables to undefined and clears the local storage */
   const resetWalletState = (): void => {
     wallet.value = undefined;
     address.value = undefined;
@@ -88,9 +85,7 @@ export const useWalletStore = defineStore("wallet", () => {
     Tezos.setProvider({ signer: undefined, wallet: undefined });
   };
 
-  /**
-   * Initializes a Beacon wallet
-   */
+  /** Initializes a Beacon wallet */
   const initializeBeaconWallet = async (): Promise<void> => {
     const networkType =
       import.meta.env.VITE_NETWORK_TYPE === "seoulnet"
@@ -142,9 +137,7 @@ export const useWalletStore = defineStore("wallet", () => {
     localStorage.setItem("wallet-provider", "beacon");
   };
 
-  /**
-   * Initializes a WalletConnect wallet
-   */
+  /** Initializes a WalletConnect wallet */
   const initializeWalletConnect = async (): Promise<void> => {
     const walletConnect = await WalletConnect.init({
       projectId: import.meta.env.VITE_REOWN_PROJECT_ID,
@@ -184,9 +177,7 @@ export const useWalletStore = defineStore("wallet", () => {
     localStorage.setItem("wallet-provider", "walletconnect");
   };
 
-  /**
-   * Initializes a programmatic wallet using a private key
-   */
+  /** Initializes a programmatic wallet using a private key */
   const initializeProgrammaticWallet = async (
     privateKey: string,
   ): Promise<void> => {
@@ -234,9 +225,7 @@ export const useWalletStore = defineStore("wallet", () => {
     }
   };
 
-  /**
-   * Initializes a Ledger hardware wallet
-   */
+  /** Initializes a Ledger hardware wallet */
   const initializeLedgerWallet = async (): Promise<void> => {
     const transport = await TransportWebHID.create();
     const ledgerSigner = new LedgerSigner(transport);
@@ -248,16 +237,18 @@ export const useWalletStore = defineStore("wallet", () => {
   };
 
   /**
-   * Initializes a wallet using the network configuration from environment variables.
-   * Requests wallet permissions and sets the wallet as the provider for the Tezos instance.
+   * Initializes a wallet using the network configuration from environment
+   * variables. Requests wallet permissions and sets the wallet as the provider
+   * for the Tezos instance.
    *
    * @async
    * @param {WalletProvider} provider The provider used to connect the wallet
-   *
-   * @returns {Promise<void>} Resolves when the wallet is initialized and permissions are granted.
-   *
-   * @throws {ReferenceError} If a wallet is already initialized in this session.
-   * @throws {Error} If wallet initialization or permission request fails (e.g., user cancels the wallet popup).
+   * @returns {Promise<void>} Resolves when the wallet is initialized and
+   *   permissions are granted.
+   * @throws {ReferenceError} If a wallet is already initialized in this
+   *   session.
+   * @throws {Error} If wallet initialization or permission request fails (e.g.,
+   *   user cancels the wallet popup).
    */
   const initializeWallet = async (
     provider: WalletProvider,
@@ -336,8 +327,9 @@ export const useWalletStore = defineStore("wallet", () => {
   /**
    * Disconnects the currently connected wallet.
    *
-   * This function disconnects the wallet, clears the active account from the wallet client,
-   * and resets the wallet, address, and balance state to `undefined`.
+   * This function disconnects the wallet, clears the active account from the
+   * wallet client, and resets the wallet, address, and balance state to
+   * `undefined`.
    *
    * @throws {ReferenceError} If no wallet is currently connected.
    * @throws {Error} If an error occurs during disconnection.
@@ -371,10 +363,13 @@ export const useWalletStore = defineStore("wallet", () => {
   };
 
   /**
-   * Asynchronously fetches the balance for the current wallet address from the Tezos network and updates the `balance` state value.
+   * Asynchronously fetches the balance for the current wallet address from the
+   * Tezos network and updates the `balance` state value.
    *
-   * @throws {ReferenceError} If there is no saved address to fetch the balance for.
-   * @throws {Error} If an error occurs while fetching the balance from the Tezos network.
+   * @throws {ReferenceError} If there is no saved address to fetch the balance
+   *   for.
+   * @throws {Error} If an error occurs while fetching the balance from the
+   *   Tezos network.
    */
   const fetchBalance = async () => {
     if (!address.value) {
@@ -394,14 +389,20 @@ export const useWalletStore = defineStore("wallet", () => {
    * Performs an operation on the WalletConnect session stored in IndexedDB.
    *
    * This function opens the 'WALLET_CONNECT_V2_INDEXED_DB' IndexedDB database,
-   * accesses the 'keyvaluestorage' object store, and searches for a key that starts with
-   * 'wc@2:client:0.3:session'. If such a key is found, it executes the provided operation
-   * callback on the object store and session key. The result of the operation is returned.
-   * If the database, store, or key does not exist, or if any error occurs, it resolves to `undefined`.
+   * accesses the 'keyvaluestorage' object store, and searches for a key that
+   * starts with 'wc@2:client:0.3:session'. If such a key is found, it executes
+   * the provided operation callback on the object store and session key. The
+   * result of the operation is returned. If the database, store, or key does
+   * not exist, or if any error occurs, it resolves to `undefined`.
    *
-   * @param {'readonly' | 'readwrite'} mode - The transaction mode for the object store.
-   * @param {(store: IDBObjectStore, sessionKey: string) => IDBRequest} operation - A callback that performs an IndexedDB operation using the object store and session key.
-   * @returns {Promise<string | undefined>} The result of the operation if successful, otherwise `undefined`.
+   * @param {"readonly" | "readwrite"} mode - The transaction mode for the
+   *   object store.
+   * @param {(store: IDBObjectStore, sessionKey: string) => IDBRequest} operation
+   *   - A callback that performs an IndexedDB operation using the object store and
+   *       session key.
+   *
+   * @returns {Promise<string | undefined>} The result of the operation if
+   *   successful, otherwise `undefined`.
    */
   const walletConnectIndexedDBOperation = async (
     mode: "readonly" | "readwrite",
@@ -436,7 +437,8 @@ export const useWalletStore = defineStore("wallet", () => {
   /**
    * Retrieves the WalletConnect session from IndexedDB if it exists.
    *
-   * @returns {Promise<string | undefined>} The WalletConnect session data if found, otherwise `undefined`.
+   * @returns {Promise<string | undefined>} The WalletConnect session data if
+   *   found, otherwise `undefined`.
    */
   const getWalletConnectSessionFromIndexedDB = async (): Promise<
     string | undefined
@@ -449,7 +451,8 @@ export const useWalletStore = defineStore("wallet", () => {
   /**
    * Deletes the WalletConnect session from IndexedDB if it exists.
    *
-   * @returns {Promise<string | undefined>} The result of the delete operation if successful, otherwise `undefined`.
+   * @returns {Promise<string | undefined>} The result of the delete operation
+   *   if successful, otherwise `undefined`.
    */
   const deleteWalletConnectSessionFromIndexedDB = async (): Promise<
     string | undefined

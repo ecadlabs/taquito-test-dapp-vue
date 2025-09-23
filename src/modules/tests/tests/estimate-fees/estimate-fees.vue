@@ -1,23 +1,23 @@
 <template>
-  <div class="w-full flex justify-center">
+  <div class="flex w-full justify-center">
     <Button
       @click="estimate()"
       :disabled="sending || !walletStore.getAddress"
       class="w-32"
     >
-      <Loader2 v-if="sending" class="w-4 h-4 mr-2 animate-spin" />
+      <Loader2 v-if="sending" class="mr-2 h-4 w-4 animate-spin" />
       <p v-else>Estimate Fees</p>
     </Button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useDiagramStore } from "@/stores/diagramStore";
-import { ref, onMounted } from "vue";
 import Button from "@/components/ui/button/Button.vue";
-import { Loader2 } from "lucide-vue-next";
 import { estimateFees } from "@/modules/tests/tests/estimate-fees/estimate-fees";
+import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
+import { Loader2 } from "lucide-vue-next";
+import { onMounted, ref } from "vue";
 
 const sending = ref<boolean>(false);
 const diagramStore = useDiagramStore();

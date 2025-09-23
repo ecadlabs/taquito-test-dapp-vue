@@ -12,7 +12,7 @@
         />
       </div>
 
-      <div class="flex-col sm:flex-row flex gap-2">
+      <div class="flex flex-col gap-2 sm:flex-row">
         <Button
           @click="registerConstant"
           :disabled="
@@ -31,16 +31,16 @@
 
       <!-- Registration result -->
       <div v-if="registrationResult" class="space-y-2">
-        <div class="p-4 bg-muted rounded-md" role="status" aria-live="polite">
+        <div class="bg-muted rounded-md p-4" role="status" aria-live="polite">
           <div class="space-y-2">
             <div class="flex items-center gap-2">
               <Check class="h-4 w-4 text-green-500" />
               <span class="font-medium">Constant Registered Successfully!</span>
             </div>
-            <div class="text-sm flex items-center">
+            <div class="flex items-center text-sm">
               <span class="font-medium">Hash:</span>
               <code
-                class="ml-2 p-1 bg-background rounded text-xs max-w-full inline-block overflow-hidden text-ellipsis whitespace-nowrap"
+                class="bg-background ml-2 inline-block max-w-full overflow-hidden rounded p-1 text-xs text-ellipsis whitespace-nowrap"
                 :title="registrationResult.hash"
               >
                 {{ registrationResult.hash }}
@@ -59,9 +59,9 @@
                 <CopyIcon class="size-3" />
               </Button>
             </div>
-            <div class="text-sm flex items-center">
+            <div class="flex items-center text-sm">
               <span class="font-medium">Operation Hash:</span>
-              <code class="ml-2 p-1 bg-background rounded text-xs">{{
+              <code class="bg-background ml-2 rounded p-1 text-xs">{{
                 registrationResult.operationHash
               }}</code>
               <Button
@@ -86,17 +86,17 @@
 </template>
 
 <script setup lang="ts">
+import Button from "@/components/ui/button/Button.vue";
+import Label from "@/components/ui/label/Label.vue";
+import Textarea from "@/components/ui/textarea/Textarea.vue";
+import { copyToClipboard } from "@/lib/utils";
+import {
+  generateSampleExpression,
+  registerGlobalConstant,
+} from "@/modules/tests/tests/global-constants/global-constants";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
-import Button from "@/components/ui/button/Button.vue";
-import Textarea from "@/components/ui/textarea/Textarea.vue";
-import Label from "@/components/ui/label/Label.vue";
-import { copyToClipboard } from "@/lib/utils";
-import { Hash, Loader2, Check, Shuffle, CopyIcon } from "lucide-vue-next";
-import {
-  registerGlobalConstant,
-  generateSampleExpression,
-} from "@/modules/tests/tests/global-constants/global-constants";
+import { Check, CopyIcon, Hash, Loader2, Shuffle } from "lucide-vue-next";
 import { computed, onMounted, ref } from "vue";
 
 const diagramStore = useDiagramStore();

@@ -1,14 +1,14 @@
-import { useWalletStore } from "@/stores/walletStore";
-import { useDiagramStore } from "@/stores/diagramStore";
 import { useTaquitoModules } from "@/composables/useTaquitoModules";
-import type { ContractConfig } from "@/types/contract";
 import contracts from "@/contracts/contract-config.json";
-import type { Estimate } from "@taquito/taquito";
-import { PiggyBankIcon } from "lucide-vue-next";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
+import type { ContractConfig } from "@/types/contract";
 import { BeaconWallet } from "@taquito/beacon-wallet";
-import { WalletConnect } from "@taquito/wallet-connect";
 import { LedgerSigner } from "@taquito/ledger-signer";
 import type { MichelsonData, MichelsonType } from "@taquito/michel-codec";
+import type { Estimate } from "@taquito/taquito";
+import { WalletConnect } from "@taquito/wallet-connect";
+import { PiggyBankIcon } from "lucide-vue-next";
 
 const TEST_ID = "sign-payload";
 let estimate: Estimate;

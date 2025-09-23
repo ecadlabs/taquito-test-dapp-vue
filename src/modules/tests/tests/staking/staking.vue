@@ -1,5 +1,5 @@
 <template>
-  <div class="w-fit mx-auto flex flex-col items-center gap-6 px-6">
+  <div class="mx-auto flex w-fit flex-col items-center gap-6 px-6">
     <Card class="w-full lg:w-1/2 lg:min-w-[500px]">
       <CardContent>
         <Alert
@@ -29,10 +29,10 @@
         </Alert>
 
         <div
-          class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-[#F4F4F6] py-3 pl-5 pr-3 rounded-md"
+          class="flex flex-col gap-2 rounded-md bg-[#F4F4F6] py-3 pr-3 pl-5 sm:flex-row sm:items-center sm:justify-between"
         >
           <div class="flex items-center gap-2">
-            <Wallet class="size-4 text-muted-foreground mt-0.5" />
+            <Wallet class="text-muted-foreground mt-0.5 size-4" />
             <p class="text-muted-foreground text-sm">Staked Balance</p>
           </div>
           <div class="flex items-center gap-2 text-xl font-bold">
@@ -50,7 +50,7 @@
               :disabled="loadingBalance || !walletConnected"
               aria-label="Refresh Staked Balance"
             >
-              <RotateCcw class="size-4 mt-1" aria-hidden="true" />
+              <RotateCcw class="mt-1 size-4" aria-hidden="true" />
             </Button>
           </div>
         </div>
@@ -63,7 +63,7 @@
           :max="balance"
           :step="0.00001"
         />
-        <div class="flex flex-col gap-2 mt-4">
+        <div class="mt-4 flex flex-col gap-2">
           <Button
             class="w-full"
             :disabled="
@@ -76,7 +76,7 @@
             @click="stakeTokens"
             data-testid="stake-button"
           >
-            <Beef class="size-4 mt-0.5" />
+            <Beef class="mt-0.5 size-4" />
             <span v-if="stakingLoading">Staking...</span>
             <span v-else>Stake</span>
           </Button>
@@ -92,7 +92,7 @@
             @click="unstakeTokens"
             data-testid="unstake-button"
           >
-            <LockKeyholeOpen class="size-4 mt-0.5" />
+            <LockKeyholeOpen class="mt-0.5 size-4" />
             <span v-if="unstakingLoading">Unstaking...</span>
             <span v-else>Unstake</span>
           </Button>
@@ -109,7 +109,7 @@
           @click="finalizeUnstakeTokens"
           data-testid="finalize-button"
         >
-          <LockKeyholeOpen class="size-4 mt-0.5" />
+          <LockKeyholeOpen class="mt-0.5 size-4" />
           <span v-if="finalizingLoading">Finalizing...</span>
           <span v-else>Finalize Unstake</span>
         </Button>
@@ -119,9 +119,13 @@
 </template>
 
 <script setup lang="ts">
-import { useDiagramStore } from "@/stores/diagramStore";
-import { ref, onMounted, computed } from "vue";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { getDelegate } from "@/modules/tests/tests/delegation/delegation";
 import {
   finalizeUnstake,
   getDelegateAcceptsStaking,
@@ -129,10 +133,8 @@ import {
   stake,
   unstake,
 } from "@/modules/tests/tests/staking/staking";
-import { Input } from "@/components/ui/input";
+import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
-import { getDelegate } from "@/modules/tests/tests/delegation/delegation";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Beef,
   LockKeyholeOpen,
@@ -140,9 +142,7 @@ import {
   TriangleAlert,
   Wallet,
 } from "lucide-vue-next";
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { computed, onMounted, ref } from "vue";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();

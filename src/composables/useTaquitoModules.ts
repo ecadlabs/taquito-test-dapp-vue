@@ -1,5 +1,6 @@
 /**
- * Composable for loading Taquito modules dynamically to reduce initial bundle size
+ * Composable for loading Taquito modules dynamically to reduce initial bundle
+ * size
  */
 export const useTaquitoModules = () => {
   const loadUtils = async () => {

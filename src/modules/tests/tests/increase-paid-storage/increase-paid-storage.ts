@@ -1,5 +1,5 @@
-import { useWalletStore } from "@/stores/walletStore";
 import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
 const TEST_ID = "increase-paid-storage";
 
 const increaseStorage = async (contract: string, bytes: number) => {

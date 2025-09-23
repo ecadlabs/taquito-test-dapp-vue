@@ -1,10 +1,10 @@
 <template>
-  <div class="ml-4 mr-4 mb-4 md:mr-8">
+  <div class="mr-4 mb-4 ml-4 md:mr-8">
     <div v-if="testMetadata" class="space-y-8">
       <!-- Header Section -->
       <div class="space-y-1">
         <div class="flex items-center gap-1">
-          <BookOpenText class="size-6 mt-0.5 shrink-0" />
+          <BookOpenText class="mt-0.5 size-6 shrink-0" />
           <h1 class="text-2xl font-bold tracking-tight">
             {{ testMetadata.title }}
           </h1>
@@ -15,7 +15,7 @@
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <Info class="h-4 w-4 text-muted-foreground mt-0.5" />
+                  <Info class="text-muted-foreground mt-0.5 h-4 w-4" />
                 </TooltipTrigger>
                 <TooltipContent class="w-48">
                   <p>
@@ -29,13 +29,13 @@
           </template>
         </div>
         <p
-          class="text-base text-muted-foreground w-full xl:w-2/3 2xl:w-1/2 whitespace-pre-line"
+          class="text-muted-foreground w-full text-base whitespace-pre-line xl:w-2/3 2xl:w-1/2"
         >
           {{ testMetadata.description }}
         </p>
       </div>
 
-      <div class="grid gap-4 grid-cols-1 lg:grid-cols-3 w-full">
+      <div class="grid w-full grid-cols-1 gap-4 lg:grid-cols-3">
         <!-- Setup -->
         <Card>
           <CardHeader>
@@ -52,7 +52,7 @@
                 class="flex items-start gap-2"
               >
                 <span
-                  class="flex size-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-medium flex-shrink-0 mt-0.5"
+                  class="bg-primary text-primary-foreground mt-0.5 flex size-4 flex-shrink-0 items-center justify-center rounded-full text-xs font-medium"
                 >
                   {{ index + 1 }}
                 </span>
@@ -75,15 +75,15 @@
                 v-for="relatedTestId in testMetadata.relatedTests"
                 :key="relatedTestId"
                 :to="`/tests/${relatedTestId}`"
-                class="flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors"
+                class="hover:bg-muted flex items-center gap-2 rounded-md p-2 transition-colors"
               >
-                <ArrowRight class="h-4 w-4 text-muted-foreground" />
+                <ArrowRight class="text-muted-foreground h-4 w-4" />
                 <span class="text-sm font-medium">{{
                   getTestTitle(relatedTestId)
                 }}</span>
               </router-link>
             </div>
-            <p v-else class="text-sm text-muted-foreground">
+            <p v-else class="text-muted-foreground text-sm">
               No related tests available
             </p>
           </CardContent>
@@ -105,12 +105,12 @@
                   :key="contract.name"
                   class="flex items-center gap-2"
                 >
-                  <FileCode class="h-4 w-4 text-muted-foreground" />
+                  <FileCode class="text-muted-foreground h-4 w-4" />
                   <a
                     :href="contract.url"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="text-sm text-primary hover:underline"
+                    class="text-primary text-sm hover:underline"
                   >
                     {{ contract.name }}
                   </a>
@@ -120,12 +120,12 @@
                 v-if="testMetadata.documentation.script"
                 class="flex items-center gap-2"
               >
-                <FileText class="h-4 w-4 text-muted-foreground" />
+                <FileText class="text-muted-foreground h-4 w-4" />
                 <a
                   :href="testMetadata.documentation.script"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-sm text-primary hover:underline"
+                  class="text-primary text-sm hover:underline"
                 >
                   Script Source
                 </a>
@@ -134,12 +134,12 @@
                 v-if="testMetadata.documentation.taqutioDocumentation"
                 class="flex items-center gap-2"
               >
-                <BookOpenText class="h-4 w-4 text-muted-foreground" />
+                <BookOpenText class="text-muted-foreground h-4 w-4" />
                 <a
                   :href="testMetadata.documentation.taqutioDocumentation"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-sm text-primary hover:underline"
+                  class="text-primary text-sm hover:underline"
                 >
                   Taquito Documentation
                 </a>
@@ -148,12 +148,12 @@
                 v-if="testMetadata.documentation.tezosDocumentation"
                 class="flex items-center gap-2"
               >
-                <BookOpenText class="h-4 w-4 text-muted-foreground" />
+                <BookOpenText class="text-muted-foreground h-4 w-4" />
                 <a
                   :href="testMetadata.documentation.tezosDocumentation"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="text-sm text-primary hover:underline"
+                  class="text-primary text-sm hover:underline"
                 >
                   Tezos Documentation
                 </a>
@@ -169,7 +169,7 @@
       </div>
 
       <!-- Bottom Section: Operational Flow -->
-      <div class="border-t pt-8 space-y-6">
+      <div class="space-y-6 border-t pt-8">
         <!-- Operational Flow -->
         <Card>
           <CardHeader>
@@ -188,32 +188,31 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import { useRoute } from "vue-router";
-import { getTestById } from "@/modules/tests/tests";
-import type { TestMetadata } from "@/modules/tests/test";
 import TestDiagram from "@/components/test-diagram.vue";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useDiagramStore } from "@/stores/diagramStore";
-import { onUnmounted } from "vue";
-import {
-  Settings,
-  Link,
-  ArrowRight,
-  Code,
-  FileCode,
-  FileText,
-  Workflow,
-  BookOpenText,
-  Info,
-} from "lucide-vue-next";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import type { TestMetadata } from "@/modules/tests/test";
+import { getTestById } from "@/modules/tests/tests";
+import { useDiagramStore } from "@/stores/diagramStore";
+import {
+  ArrowRight,
+  BookOpenText,
+  Code,
+  FileCode,
+  FileText,
+  Info,
+  Link,
+  Settings,
+  Workflow,
+} from "lucide-vue-next";
+import { computed, onUnmounted } from "vue";
+import { useRoute } from "vue-router";
 
 const route = useRoute();
 const testId = computed(() => route.params.test as string);

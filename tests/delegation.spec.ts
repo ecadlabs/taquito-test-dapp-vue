@@ -1,6 +1,6 @@
 import { test } from "@playwright/test";
-import { getSharedPage, setupSharedContext } from "./shared-context.ts";
 import { delegate, goToTest, waitForSuccess } from "./helpers.ts";
+import { getSharedPage, setupSharedContext } from "./shared-context.ts";
 
 test.describe("Delegation", () => {
   test.beforeAll(async () => {

@@ -1,13 +1,13 @@
-import { useWalletStore } from "@/stores/walletStore";
-import { useDiagramStore } from "@/stores/diagramStore";
 import contracts from "@/contracts/contract-config.json";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
 import {
   type ContractConfig,
-  type UserRecord,
   type NestedRecord,
+  type UserRecord,
 } from "@/types/contract";
-import { PiggyBank } from "lucide-vue-next";
 import type { Estimate } from "@taquito/taquito";
+import { PiggyBank } from "lucide-vue-next";
 
 const CONTRACT_ADDRESS =
   (contracts as ContractConfig[]).find(
@@ -28,7 +28,8 @@ export interface RecordParam {
 /**
  * Adds a user record to the contract with simple parameters.
  *
- * @param {RecordParam} record - The user record to add, containing name, age, and active status.
+ * @param {RecordParam} record - The user record to add, containing name, age,
+ *   and active status.
  * @returns {Promise<void>} Resolves when the operation is complete.
  */
 const addUserRecord = async (record: RecordParam): Promise<void> => {
@@ -77,8 +78,10 @@ const addUserRecord = async (record: RecordParam): Promise<void> => {
 /**
  * Sets a complex nested record in the contract storage.
  *
- * @param {NestedRecord} nestedRecord - The nested record object containing metadata and permissions arrays.
- * @returns {Promise<void>} Resolves when the operation is confirmed or logs an error if it fails.
+ * @param {NestedRecord} nestedRecord - The nested record object containing
+ *   metadata and permissions arrays.
+ * @returns {Promise<void>} Resolves when the operation is confirmed or logs an
+ *   error if it fails.
  */
 const setNestedRecord = async (nestedRecord: NestedRecord): Promise<void> => {
   const diagramStore = useDiagramStore();
@@ -146,8 +149,10 @@ const setNestedRecord = async (nestedRecord: NestedRecord): Promise<void> => {
 /**
  * Adds or removes a user address from the authorized users set in the contract.
  *
- * @param action - The action to perform: "add" to include the user, "remove" to remove the user.
- * @param userAddress - The Tezos address of the user to add or remove from the set.
+ * @param action - The action to perform: "add" to include the user, "remove" to
+ *   remove the user.
+ * @param userAddress - The Tezos address of the user to add or remove from the
+ *   set.
  * @returns A Promise that resolves when the operation is complete.
  */
 const manageUserSet = async (
@@ -204,7 +209,8 @@ const manageUserSet = async (
 /**
  * Updates the contract's metadata map with the provided key-value pairs.
  *
- * @param updates - An object containing metadata key-value pairs to update in the contract.
+ * @param updates - An object containing metadata key-value pairs to update in
+ *   the contract.
  * @returns A Promise that resolves when the operation is complete.
  */
 const updateMetadata = async (
@@ -255,8 +261,10 @@ const updateMetadata = async (
 /**
  * Retrieves a user record from the contract storage.
  *
- * @param {string} userAddress - The Tezos address of the user whose record should be fetched.
- * @returns {Promise<UserRecord | null>} Resolves with the user record if found, or null if an error occurs.
+ * @param {string} userAddress - The Tezos address of the user whose record
+ *   should be fetched.
+ * @returns {Promise<UserRecord | null>} Resolves with the user record if found,
+ *   or null if an error occurs.
  */
 const getUserRecord = async (
   userAddress: string,
@@ -286,10 +294,13 @@ const getUserRecord = async (
 };
 
 /**
- * Retrieves complex (nested) data for a specific user from the contract storage.
+ * Retrieves complex (nested) data for a specific user from the contract
+ * storage.
  *
- * @param {string} userAddress - The Tezos address for which to retrieve nested data.
- * @returns {Promise<NestedRecord | null>} Resolves with the nested record data if found, or null if an error occurs.
+ * @param {string} userAddress - The Tezos address for which to retrieve nested
+ *   data.
+ * @returns {Promise<NestedRecord | null>} Resolves with the nested record data
+ *   if found, or null if an error occurs.
  */
 const getNestedData = async (
   userAddress: string,
@@ -321,7 +332,8 @@ const getNestedData = async (
 /**
  * Retrieves all metadata from the contract storage.
  *
- * @returns {Promise<Record<string, string> | null>} Resolves with the metadata object if found, or null if an error occurs.
+ * @returns {Promise<Record<string, string> | null>} Resolves with the metadata
+ *   object if found, or null if an error occurs.
  */
 const getAllMetadata = async (): Promise<Record<string, string> | null> => {
   const diagramStore = useDiagramStore();
@@ -369,10 +381,10 @@ const getAllMetadata = async (): Promise<Record<string, string> | null> => {
 
 export {
   addUserRecord,
-  setNestedRecord,
-  manageUserSet,
-  updateMetadata,
-  getUserRecord,
-  getNestedData,
   getAllMetadata,
+  getNestedData,
+  getUserRecord,
+  manageUserSet,
+  setNestedRecord,
+  updateMetadata,
 };

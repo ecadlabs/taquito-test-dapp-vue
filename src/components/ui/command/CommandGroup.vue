@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { ListboxGroupProps } from "reka-ui";
-import type { HTMLAttributes } from "vue";
-import { reactiveOmit } from "@vueuse/core";
-import { ListboxGroup, ListboxGroupLabel, useId } from "reka-ui";
-import { computed, onMounted, onUnmounted } from "vue";
 import { cn } from "@/lib/utils";
+import { reactiveOmit } from "@vueuse/core";
+import type { ListboxGroupProps } from "reka-ui";
+import { ListboxGroup, ListboxGroupLabel, useId } from "reka-ui";
+import type { HTMLAttributes } from "vue";
+import { computed, onMounted, onUnmounted } from "vue";
 import { provideCommandGroupContext, useCommand } from ".";
 
 const props = defineProps<
@@ -42,7 +42,7 @@ onUnmounted(() => {
   >
     <ListboxGroupLabel
       v-if="heading"
-      class="px-2 py-1.5 text-xs font-medium text-muted-foreground"
+      class="text-muted-foreground px-2 py-1.5 text-xs font-medium"
     >
       {{ heading }}
     </ListboxGroupLabel>

@@ -22,9 +22,9 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button";
 import { buildIndexerUrl, copyToClipboard } from "@/lib/utils";
-import { ExternalLink, Copy } from "lucide-vue-next";
-import { computed } from "vue";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { Copy, ExternalLink } from "lucide-vue-next";
+import { computed } from "vue";
 
 const props = defineProps<{
   address: string;

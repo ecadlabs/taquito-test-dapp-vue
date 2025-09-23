@@ -1,6 +1,6 @@
 import getTez from "@tacoinfra/get-tez";
-import { config } from "dotenv";
 import { TezosToolkit } from "@taquito/taquito";
+import { config } from "dotenv";
 
 config();
 

@@ -1,9 +1,9 @@
-import { useWalletStore } from "@/stores/walletStore";
-import { useDiagramStore } from "@/stores/diagramStore";
 import contracts from "@/contracts/contract-config.json";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
 import { type ContractConfig } from "@/types/contract";
-import { PiggyBank } from "lucide-vue-next";
 import type { Estimate } from "@taquito/taquito";
+import { PiggyBank } from "lucide-vue-next";
 
 const CONTRACT_ADDRESS =
   (contracts as ContractConfig[]).find(
@@ -17,9 +17,10 @@ let estimate: Estimate;
  * Increments the contract storage value by the specified amount.
  *
  * @async
- * @param {number} amount - The amount to increment the storage by (must be between 1 and 100 inclusive).
- * @throws {Error} If the amount is not within the valid range.
+ * @param {number} amount - The amount to increment the storage by (must be
+ *   between 1 and 100 inclusive).
  * @returns {Promise<void>}
+ * @throws {Error} If the amount is not within the valid range.
  */
 const increment = async (amount: number): Promise<number | undefined> => {
   const diagramStore = useDiagramStore();
@@ -75,9 +76,10 @@ const increment = async (amount: number): Promise<number | undefined> => {
  * Decrements the contract storage value by the specified amount.
  *
  * @async
- * @param {number} amount - The amount to decrement the storage by (must be between 1 and 100 inclusive).
- * @throws {Error} If the amount is not within the valid range.
+ * @param {number} amount - The amount to decrement the storage by (must be
+ *   between 1 and 100 inclusive).
  * @returns {Promise<void>}
+ * @throws {Error} If the amount is not within the valid range.
  */
 const decrement = async (amount: number): Promise<number | undefined> => {
   const diagramStore = useDiagramStore();
@@ -236,4 +238,4 @@ const getContractMethods = async (): Promise<void> => {
   return;
 };
 
-export { increment, decrement, reset, getContractStorage, getContractMethods };
+export { decrement, getContractMethods, getContractStorage, increment, reset };

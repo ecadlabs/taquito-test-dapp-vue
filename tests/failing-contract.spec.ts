@@ -1,6 +1,6 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { goToTest, waitForError } from "./helpers.ts";
 import { getSharedPage, setupSharedContext } from "./shared-context.ts";
-import { goToTest, waitForSuccess, waitForError } from "./helpers.ts";
 
 test.describe("Contract Call Failures", () => {
   test.beforeAll(async () => {

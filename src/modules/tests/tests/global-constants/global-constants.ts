@@ -1,8 +1,8 @@
-import { useWalletStore } from "@/stores/walletStore";
-import { useDiagramStore } from "@/stores/diagramStore";
 import { getOperationHash } from "@/lib/utils";
-import { PiggyBank } from "lucide-vue-next";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
 import type { Estimate } from "@taquito/taquito";
+import { PiggyBank } from "lucide-vue-next";
 
 const TEST_ID = "global-constants";
 
@@ -55,7 +55,8 @@ const registerGlobalConstant = async (
 };
 
 /**
- * Generates a sample Michelson expression with some randomness to avoid duplicates
+ * Generates a sample Michelson expression with some randomness to avoid
+ * duplicates
  *
  * @returns {object} A sample Michelson expression
  */
@@ -76,4 +77,4 @@ const generateSampleExpression = (): object => {
   };
 };
 
-export { registerGlobalConstant, generateSampleExpression };
+export { generateSampleExpression, registerGlobalConstant };

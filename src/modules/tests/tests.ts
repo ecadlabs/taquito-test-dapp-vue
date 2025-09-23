@@ -1,4 +1,4 @@
-import type { TestMetadata, TestDiagram } from "@/modules/tests/test";
+import type { TestDiagram, TestMetadata } from "@/modules/tests/test";
 
 export const AvailableTests: Record<string, TestMetadata> = {
   transfer: {
@@ -1123,6 +1123,7 @@ export const getAllCategories = (): string[] => {
 
 /**
  * Get a diagram for a test, supporting both single and multiple diagrams
+ *
  * @param testId - The test ID
  * @param diagramKey - Optional diagram key for multi-diagram tests
  * @returns The diagram or undefined if not found

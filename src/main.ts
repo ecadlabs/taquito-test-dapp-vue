@@ -1,3 +1,4 @@
+// organize-imports-ignore
 import "./polyfills";
 import { createApp } from "vue";
 import "@/style.css";

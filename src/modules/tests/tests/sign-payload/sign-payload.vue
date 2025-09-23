@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full flex flex-col items-center gap-2">
+  <div class="flex w-full flex-col items-center gap-2">
     <div>
       <Label class="mb-1">String Payload</Label>
       <Input
@@ -19,7 +19,7 @@
         class="w-32"
         data-testid="sign-payload-button"
       >
-        <Loader2 v-if="signing" class="w-4 h-4 mr-2 animate-spin" />
+        <Loader2 v-if="signing" class="mr-2 h-4 w-4 animate-spin" />
         <p v-else>Sign</p>
       </Button>
       <Button
@@ -28,7 +28,7 @@
         class="w-48"
         data-testid="sign-tzip32-payload-button"
       >
-        <Loader2 v-if="signingTzip32" class="w-4 h-4 mr-2 animate-spin" />
+        <Loader2 v-if="signingTzip32" class="mr-2 h-4 w-4 animate-spin" />
         <p v-else>Sign (Tzip32 Compatible)</p>
       </Button>
     </div>
@@ -36,7 +36,7 @@
     <div class="w-1/2">
       <Separator class="my-4" />
     </div>
-    <div class="w-full md:w-1/3 flex flex-col items-center gap-2">
+    <div class="flex w-full flex-col items-center gap-2 md:w-1/3">
       <Label class="mb-1">Michelson Data</Label>
       <Textarea placeholder="Data..." v-model="michelsonData" disabled />
       <Label class="mb-1">Michelson Type</Label>
@@ -48,7 +48,7 @@
       class="w-48"
       data-testid="sign-michelson-data-button"
     >
-      <Loader2 v-if="signingMichelson" class="w-4 h-4 mr-2 animate-spin" />
+      <Loader2 v-if="signingMichelson" class="mr-2 h-4 w-4 animate-spin" />
       <p v-else>Sign Michelson Data</p>
     </Button>
     <div v-if="signature" class="w-1/3">
@@ -66,7 +66,7 @@
           @click="copySignature()"
           aria-label="Copy Signature"
         >
-          <Copy class="w-4 h-4" aria-hidden="true" />
+          <Copy class="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
     </div>
@@ -122,7 +122,7 @@
       data-testid="verify-payload-button"
       :aria-busy="verifyingOnContract"
     >
-      <Loader2 v-if="verifyingOnContract" class="w-4 h-4 mr-2 animate-spin" />
+      <Loader2 v-if="verifyingOnContract" class="mr-2 h-4 w-4 animate-spin" />
       <p v-else>Verify Signature</p>
     </Button>
     <Button
@@ -138,7 +138,7 @@
       data-testid="verify-payload-tzip32-button"
       :aria-busy="verifyingOnContract"
     >
-      <Loader2 v-if="verifyingOnContract" class="w-4 h-4 mr-2 animate-spin" />
+      <Loader2 v-if="verifyingOnContract" class="mr-2 h-4 w-4 animate-spin" />
       <p v-else>Verify Signature (Tzip32 Compatible)</p>
     </Button>
     <div v-if="payloadVerifiedOnContract !== undefined">
@@ -165,21 +165,20 @@
 </template>
 
 <script setup lang="ts">
-import { useDiagramStore } from "@/stores/diagramStore";
-import { ref, onMounted, computed } from "vue";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Check, Loader2, X } from "lucide-vue-next";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
+import { Check, Copy, Loader2, X } from "lucide-vue-next";
+import { computed, onMounted, ref } from "vue";
+import { toast } from "vue-sonner";
 // Dynamic imports for signing functions to reduce initial bundle size
 const loadSigningFunctions = async () => {
   return await import("@/modules/tests/tests/sign-payload/sign-payload");
 };
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
-import { Copy } from "lucide-vue-next";
-import { toast } from "vue-sonner";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();

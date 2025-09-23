@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full flex flex-col items-center gap-4">
+  <div class="flex w-full flex-col items-center gap-4">
     <div>
       <Label class="mb-1">Contract Address</Label>
       <Input
@@ -24,17 +24,15 @@
       :disabled="processing || !walletStore.getAddress"
       class="w-32"
     >
-      <Loader2 v-if="processing" class="w-4 h-4 mr-2 animate-spin" />
+      <Loader2 v-if="processing" class="mr-2 h-4 w-4 animate-spin" />
       <p v-else>Increase Storage</p>
     </Button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useDiagramStore } from "@/stores/diagramStore";
-import { ref, onMounted } from "vue";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   NumberField,
@@ -43,11 +41,13 @@ import {
   NumberFieldIncrement,
   NumberFieldInput,
 } from "@/components/ui/number-field";
-import { Loader2 } from "lucide-vue-next";
+import contracts from "@/contracts/contract-config.json";
 import { increaseStorage } from "@/modules/tests/tests/increase-paid-storage/increase-paid-storage";
+import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
 import type { ContractConfig } from "@/types/contract";
-import contracts from "@/contracts/contract-config.json";
+import { Loader2 } from "lucide-vue-next";
+import { onMounted, ref } from "vue";
 
 const contractAddress = ref<string>();
 const bytes = ref<number>(1);

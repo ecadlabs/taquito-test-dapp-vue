@@ -1,6 +1,6 @@
-import { useWalletStore } from "@/stores/walletStore";
-import { useDiagramStore } from "@/stores/diagramStore";
 import contracts from "@/contracts/contract-config.json";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
 import { type ContractConfig } from "@/types/contract";
 
 const CONTRACT_ADDRESS =
@@ -16,7 +16,8 @@ const TEST_ID = "transaction-limit";
  * @param {number} storageLimit - The storage limit to set for the transaction.
  * @param {number} gasLimit - The gas limit to set for the transaction.
  * @param {number} fee - The fee (in mutez) to set for the transaction.
- * @returns {Promise<void>} Resolves when the transaction is confirmed or fails with an error.
+ * @returns {Promise<void>} Resolves when the transaction is confirmed or fails
+ *   with an error.
  */
 const interact = async (
   storageLimit: number,

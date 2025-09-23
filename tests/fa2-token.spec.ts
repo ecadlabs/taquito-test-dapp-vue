@@ -1,6 +1,6 @@
-import { test, expect } from "@playwright/test";
-import { getSharedPage, setupSharedContext } from "./shared-context.ts";
+import { expect, test } from "@playwright/test";
 import { goToTest, waitForSuccess } from "./helpers.ts";
+import { getSharedPage, setupSharedContext } from "./shared-context.ts";
 
 test.describe.serial("FA2 Token (TZIP-12)", () => {
   test.beforeAll(async () => {

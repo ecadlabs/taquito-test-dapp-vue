@@ -1,11 +1,11 @@
 import { test } from "@playwright/test";
-import { getSharedPage, setupSharedContext } from "./shared-context.ts";
 import {
-  goToTest,
-  waitForSuccess,
-  waitForBalanceLoaded,
   delegate,
+  goToTest,
+  waitForBalanceLoaded,
+  waitForSuccess,
 } from "./helpers.ts";
+import { getSharedPage, setupSharedContext } from "./shared-context.ts";
 
 test.describe("Staking", () => {
   test.beforeAll(async () => {

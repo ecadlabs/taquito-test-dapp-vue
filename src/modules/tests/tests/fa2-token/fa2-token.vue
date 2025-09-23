@@ -1,26 +1,26 @@
 <template>
   <div class="mb-4">
-    <h3 class="text-lg font-semibold mb-0.5">Deployed Contract Addresses</h3>
-    <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+    <h3 class="mb-0.5 text-lg font-semibold">Deployed Contract Addresses</h3>
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
       <p>FA2 Token:</p>
       <p
-        class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit h-fit text-red-400"
+        class="bg-muted h-fit w-fit rounded-md px-2 py-1 font-mono text-xs text-red-400"
       >
         {{ CONTRACT_ADDRESS }}
       </p>
       <OpenInExplorer :address="CONTRACT_ADDRESS" />
     </div>
-    <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
       <p>Balance Callback:</p>
       <p
-        class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit h-fit text-red-400"
+        class="bg-muted h-fit w-fit rounded-md px-2 py-1 font-mono text-xs text-red-400"
       >
         {{ CALLBACK_CONTRACT_ADDRESS }}
       </p>
       <OpenInExplorer :address="CALLBACK_CONTRACT_ADDRESS" />
     </div>
   </div>
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
     <!-- Token Balance Query Section -->
     <Card>
       <CardHeader>
@@ -36,7 +36,7 @@
         </CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div class="space-y-2">
             <Label>Owner Address</Label>
             <Input
@@ -70,14 +70,14 @@
             @click="queryBalanceWithCallback"
             :disabled="!walletConnected || !isValidBalanceQuery"
           >
-            <Search class="h-4 w-4 mr-2" />
+            <Search class="mr-2 h-4 w-4" />
             Query Balance (Callback)
           </Button>
           <Button
             @click="queryBalanceDirect"
             :disabled="!walletConnected || !isValidBalanceQuery"
           >
-            <Search class="h-4 w-4 mr-2" />
+            <Search class="mr-2 h-4 w-4" />
             Query Balance (Direct)
           </Button>
         </div>
@@ -92,7 +92,7 @@
             <div
               v-for="result in balanceResults"
               :key="`${result.owner}-${result.token_id}`"
-              class="p-3 bg-muted rounded-lg text-sm"
+              class="bg-muted rounded-lg p-3 text-sm"
             >
               <div class="font-medium">Token ID: {{ result.token_id }}</div>
               <div class="text-muted-foreground">Owner: {{ result.owner }}</div>
@@ -118,7 +118,7 @@
         </CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div class="space-y-2">
             <Label>From Address</Label>
             <Input
@@ -149,7 +149,7 @@
             />
           </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div class="space-y-2">
             <Label>Token ID</Label>
             <Input
@@ -184,7 +184,7 @@
             @click="executeTransfer"
             :disabled="!walletConnected || !isValidTransferForm"
           >
-            <Send class="h-4 w-4 mr-2" />
+            <Send class="mr-2 h-4 w-4" />
             Transfer Tokens
           </Button>
         </div>
@@ -203,7 +203,7 @@
         </CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div class="space-y-2">
             <Label>To Address</Label>
             <Input
@@ -251,7 +251,7 @@
             @click="executeMint"
             :disabled="!walletConnected || !isValidMintForm"
           >
-            <Plus class="h-4 w-4 mr-2" />
+            <Plus class="mr-2 h-4 w-4" />
             Mint Tokens
           </Button>
         </div>
@@ -270,7 +270,7 @@
         </CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div class="space-y-2">
             <Label>From Address</Label>
             <Input
@@ -319,7 +319,7 @@
             @click="executeBurn"
             :disabled="!walletConnected || !isValidBurnForm"
           >
-            <Minus class="h-4 w-4 mr-2" />
+            <Minus class="mr-2 h-4 w-4" />
             Burn Tokens
           </Button>
         </div>
@@ -329,20 +329,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
-import { useDiagramStore } from "@/stores/diagramStore";
-import { useWalletStore } from "@/stores/walletStore";
-import {
-  mintTokens,
-  burnTokens,
-  transferTokens,
-  type TokenBalance,
-  type MintParam,
-  type BurnParam,
-  type TransferParam,
-  getTokenBalancesDirect,
-  getTokenBalancesWithCallback,
-} from "./fa2-token";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -350,24 +337,37 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import contracts from "@/contracts/contract-config.json";
+import { validateTezosAddress } from "@/lib/utils";
+import OpenInExplorer from "@/modules/tests/components/open-in-explorer.vue";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
+import type { ContractConfig } from "@/types/contract";
 import {
-  Coins,
   ArrowRightLeft,
-  Search,
-  Send,
-  Plus,
-  Minus,
+  Coins,
   Flame,
   HandCoins,
+  Minus,
+  Plus,
+  Search,
+  Send,
 } from "lucide-vue-next";
-import { validateTezosAddress } from "@/lib/utils";
-import type { ContractConfig } from "@/types/contract";
-import contracts from "@/contracts/contract-config.json";
-import OpenInExplorer from "@/modules/tests/components/open-in-explorer.vue";
 import { storeToRefs } from "pinia";
+import { computed, onMounted, ref, watch } from "vue";
+import {
+  burnTokens,
+  getTokenBalancesDirect,
+  getTokenBalancesWithCallback,
+  mintTokens,
+  transferTokens,
+  type BurnParam,
+  type MintParam,
+  type TokenBalance,
+  type TransferParam,
+} from "./fa2-token";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();

@@ -1,12 +1,12 @@
 <template>
-  <div class="flex w-full h-[calc(100vh-4.5rem)]">
+  <div class="flex h-[calc(100vh-4.5rem)] w-full">
     <div
-      class="w-full sticky [top:4.5rem] self-start z-10 h-[calc(100vh-4.5rem)] max-h-[calc(100vh-4.5rem)] overflow-hidden"
+      class="sticky [top:4.5rem] z-10 h-[calc(100vh-4.5rem)] max-h-[calc(100vh-4.5rem)] w-full self-start overflow-hidden"
     >
-      <SidebarProvider class="!min-h-fit h-full">
+      <SidebarProvider class="h-full !min-h-fit">
         <SidebarComponent />
         <SidebarInset>
-          <header class="flex my-4 shrink-0 items-center gap-2 px-4">
+          <header class="my-4 flex shrink-0 items-center gap-2 px-4">
             <SidebarTrigger class="-ml-1 flex md:hidden" />
             <Separator
               v-if="currentTestComponent"
@@ -32,11 +32,11 @@
                 v-if="currentTestComponent"
               />
             </TestWrapper>
-            <div v-else class="w-full h-full">
-              <div class="mx-auto w-fit mt-16 md:mt-32 text-center">
-                <HeartCrack class="size-8 mx-auto" />
-                <h1 class="font-bold text-2xl md:text-3xl">No Test Found</h1>
-                <p class="text-sm md:text-base mx-8">
+            <div v-else class="h-full w-full">
+              <div class="mx-auto mt-16 w-fit text-center md:mt-32">
+                <HeartCrack class="mx-auto size-8" />
+                <h1 class="text-2xl font-bold md:text-3xl">No Test Found</h1>
+                <p class="mx-8 text-sm md:text-base">
                   Hmm, it looks like we don't have this test set up yet.
                 </p>
               </div>
@@ -49,13 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import TestWrapper from "@/modules/tests/components/test-wrapper.vue";
 import SidebarComponent from "@/components/sidebar-component.vue";
-import {
-  SidebarProvider,
-  SidebarInset,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -63,18 +57,24 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import TestWrapper from "@/modules/tests/components/test-wrapper.vue";
 import { getTestById } from "@/modules/tests/tests";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { HeartCrack } from "lucide-vue-next";
 import {
   computed,
-  ref,
-  watch,
+  defineAsyncComponent,
   onBeforeUnmount,
   onMounted,
-  defineAsyncComponent,
+  ref,
+  watch,
 } from "vue";
 import { useRoute } from "vue-router";
-import { HeartCrack } from "lucide-vue-next";
-import { useDiagramStore } from "@/stores/diagramStore";
 
 const route = useRoute();
 const scrollContainer = ref<HTMLElement>();

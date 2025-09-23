@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center w-full justify-center gap-4">
+  <div class="flex w-full flex-col items-center justify-center gap-4">
     <div>
       <Label class="mb-1">Storage Limit</Label>
       <Input
@@ -39,14 +39,14 @@
 </template>
 
 <script setup lang="ts">
-import { useDiagramStore } from "@/stores/diagramStore";
 import Button from "@/components/ui/button/Button.vue";
-import { computed, onMounted, ref } from "vue";
-import { useWalletStore } from "@/stores/walletStore";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { interact } from "@/modules/tests/tests/transaction-limit/transaction-limit";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
 import { Loader2 } from "lucide-vue-next";
+import { computed, onMounted, ref } from "vue";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();

@@ -1,5 +1,5 @@
-import { useWalletStore } from "@/stores/walletStore";
 import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
 import { tzip16 } from "@taquito/tzip16";
 
 const TEST_ID = "tzip16-metadata";
@@ -27,9 +27,11 @@ export interface ViewExecutionResult {
 }
 
 /**
- * Retrieves TZIP-16 metadata from a contract using the specified contract address.
+ * Retrieves TZIP-16 metadata from a contract using the specified contract
+ * address.
  *
- * @param {string} contractAddress - The address of the contract to retrieve metadata from
+ * @param {string} contractAddress - The address of the contract to retrieve
+ *   metadata from
  * @returns {Promise<MetadataResult>} The metadata result containing metadata
  */
 const getContractMetadata = async (
@@ -68,8 +70,10 @@ const getContractMetadata = async (
  *
  * @param {string} contractAddress - The contract address
  * @param {string} viewName - Name of the view to execute
- * @param {unknown} parameter - Parameter to pass to the view (defaults to unit for no params)
- * @returns {Promise<ViewExecutionResult>} The view execution result containing viewName, parameter, and result
+ * @param {unknown} parameter - Parameter to pass to the view (defaults to unit
+ *   for no params)
+ * @returns {Promise<ViewExecutionResult>} The view execution result containing
+ *   viewName, parameter, and result
  */
 const executeMetadataView = async (
   contractAddress: string,
@@ -126,4 +130,4 @@ const executeMetadataView = async (
   }
 };
 
-export { getContractMetadata, executeMetadataView };
+export { executeMetadataView, getContractMetadata };

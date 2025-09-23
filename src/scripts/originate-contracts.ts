@@ -1,22 +1,22 @@
-import { TezosToolkit, MichelsonMap } from "@taquito/taquito";
+import type {
+  BalanceCallbackStorage,
+  ComplexParametersStorage,
+  ContractStorage,
+  FA2TokenStorage,
+  MetadataContractStorage,
+} from "@/types/contract";
+import { importKey } from "@taquito/signer";
+import { MichelsonMap, TezosToolkit } from "@taquito/taquito";
 import { stringToBytes } from "@taquito/utils";
+import { config } from "dotenv";
 import {
-  writeFileSync,
-  readFileSync,
   existsSync,
-  readdirSync,
   mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
 } from "fs";
 import { join } from "path";
-import { config } from "dotenv";
-import { importKey } from "@taquito/signer";
-import type {
-  ContractStorage,
-  ComplexParametersStorage,
-  MetadataContractStorage,
-  FA2TokenStorage,
-  BalanceCallbackStorage,
-} from "@/types/contract";
 
 config();
 

@@ -1,8 +1,8 @@
-import { useWalletStore } from "@/stores/walletStore";
-import { useDiagramStore } from "@/stores/diagramStore";
-import { getOperationHash } from "@/lib/utils";
-import type { ContractConfig } from "@/types/contract";
 import contracts from "@/contracts/contract-config.json";
+import { getOperationHash } from "@/lib/utils";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
+import type { ContractConfig } from "@/types/contract";
 
 const TEST_ID = "batch";
 
