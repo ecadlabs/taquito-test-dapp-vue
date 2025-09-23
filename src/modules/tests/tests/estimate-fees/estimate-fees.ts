@@ -1,7 +1,7 @@
-import { useWalletStore } from "@/stores/walletStore";
 import { useDiagramStore } from "@/stores/diagramStore";
-import { PiggyBank } from "lucide-vue-next";
+import { useWalletStore } from "@/stores/walletStore";
 import type { Estimate } from "@taquito/taquito";
+import { PiggyBank } from "lucide-vue-next";
 
 const TEST_ID = "estimate-fees";
 const address = "tz1VRj54TQDtUGgv6gF4AbGbXMphyDpVkCpf";

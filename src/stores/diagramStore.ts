@@ -1,9 +1,9 @@
-import { defineStore } from "pinia";
-import { ref, type Component } from "vue";
 import type { TestDiagram } from "@/modules/tests/test";
 import { getTestDiagram } from "@/modules/tests/tests";
-import type { Estimate } from "@taquito/taquito";
 import { useWalletStore } from "@/stores/walletStore";
+import type { Estimate } from "@taquito/taquito";
+import { defineStore } from "pinia";
+import { ref, type Component } from "vue";
 
 export interface DialogContent {
   title: string;
@@ -53,6 +53,7 @@ export const useDiagramStore = defineStore("diagram", () => {
 
   /**
    * Helper function to set the diagram for a specific test and operation
+   *
    * @param testId - The test ID
    * @param diagramKey - Optional diagram key for multi-diagram tests
    */
@@ -128,6 +129,7 @@ export const useDiagramStore = defineStore("diagram", () => {
 
   /**
    * Get timing information for a specific step
+   *
    * @param stepId - The step ID to get timing for
    * @returns StepTiming object or undefined if not found
    */
@@ -137,6 +139,7 @@ export const useDiagramStore = defineStore("diagram", () => {
 
   /**
    * Get all step timings for the current diagram
+   *
    * @returns Map of step ID to timing information
    */
   const getAllStepTimings = (): Map<string, StepTiming> => {
@@ -145,6 +148,7 @@ export const useDiagramStore = defineStore("diagram", () => {
 
   /**
    * Set a button for a specific node
+   *
    * @param nodeId - The node ID to add the button to
    * @param button - The button configuration
    */
@@ -157,6 +161,7 @@ export const useDiagramStore = defineStore("diagram", () => {
 
   /**
    * Remove a button from a specific node
+   *
    * @param nodeId - The node ID to remove the button from
    */
   const removeNodeButton = (nodeId: string) => {
@@ -165,6 +170,7 @@ export const useDiagramStore = defineStore("diagram", () => {
 
   /**
    * Get a button for a specific node
+   *
    * @param nodeId - The node ID to get the button for
    */
   const getNodeButton = (nodeId: string) => {
@@ -173,6 +179,7 @@ export const useDiagramStore = defineStore("diagram", () => {
 
   /**
    * Show a dialog with custom content
+   *
    * @param content - The dialog content configuration
    */
   const openDialog = (content: DialogContent) => {
@@ -180,9 +187,7 @@ export const useDiagramStore = defineStore("diagram", () => {
     showDialog.value = true;
   };
 
-  /**
-   * Hide the dialog
-   */
+  /** Hide the dialog */
   const closeDialog = () => {
     showDialog.value = false;
     dialogContent.value = null;

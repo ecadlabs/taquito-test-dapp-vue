@@ -1,6 +1,6 @@
-import { useWalletStore } from "@/stores/walletStore";
-import { useDiagramStore } from "@/stores/diagramStore";
 import contracts from "@/contracts/contract-config.json";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
 import { type ContractConfig } from "@/types/contract";
 
 const CONTRACT_ADDRESS =
@@ -14,7 +14,8 @@ const TEST_ID = "failing-contract";
  *
  * @async
  * @param {string} scenario - The type of failure scenario to test
- * @returns {Promise<void>} Resolves when the operation fails or errors are handled.
+ * @returns {Promise<void>} Resolves when the operation fails or errors are
+ *   handled.
  */
 const testContractFailure = async (scenario: string): Promise<void> => {
   const diagramStore = useDiagramStore();

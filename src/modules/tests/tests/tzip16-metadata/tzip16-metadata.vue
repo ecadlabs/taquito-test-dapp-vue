@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center w-full gap-6">
+  <div class="flex w-full flex-col items-center gap-6">
     <!-- Contract Address Input Section -->
     <div class="w-full max-w-2xl space-y-4">
       <div class="grid grid-cols-1 gap-4">
@@ -24,8 +24,8 @@
               "
               data-testid="get-metadata-button"
             >
-              <Loader2 v-if="isLoading" class="w-4 h-4 mr-2 animate-spin" />
-              <Database v-else class="w-4 h-4 mr-2" />
+              <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
+              <Database v-else class="mr-2 h-4 w-4" />
               Get Metadata
             </Button>
           </div>
@@ -35,7 +35,7 @@
         <h3 class="mb-1 font-medium">Metadata in Storage Contract</h3>
         <div>
           <p
-            class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit text-red-400"
+            class="bg-muted w-fit rounded-md px-2 py-1 font-mono text-xs text-red-400"
           >
             {{ METADATA_CONTRACT_ADDRESS }}
           </p>
@@ -46,7 +46,7 @@
         <h3 class="mb-1 font-medium">Metadata via HTTPS Contract</h3>
         <div>
           <p
-            class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit text-red-400"
+            class="bg-muted w-fit rounded-md px-2 py-1 font-mono text-xs text-red-400"
           >
             {{ METADATA_HTTPS_CONTRACT_ADDRESS }}
           </p>
@@ -67,46 +67,46 @@
         <CardContent class="space-y-4">
           <div class="w-full">
             <div
-              class="text-sm font-mono bg-muted p-3 rounded-lg text-red-400 overflow-auto max-h-96"
+              class="bg-muted max-h-96 overflow-auto rounded-lg p-3 font-mono text-sm text-red-400"
               role="region"
               aria-live="polite"
               aria-label="Contract metadata JSON"
             >
-              <pre class="whitespace-pre-wrap break-words">{{
+              <pre class="break-words whitespace-pre-wrap">{{
                 JSON.stringify(metadataResult, null, 2)
               }}</pre>
             </div>
           </div>
           <div
             v-if="metadataResult.metadata"
-            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+            class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3"
           >
             <div v-if="metadataResult.metadata.name" class="space-y-1">
-              <Label class="text-sm font-medium text-muted-foreground"
+              <Label class="text-muted-foreground text-sm font-medium"
                 >Name</Label
               >
               <p class="text-sm">{{ metadataResult.metadata.name }}</p>
             </div>
             <div v-if="metadataResult.metadata.description" class="space-y-1">
-              <Label class="text-sm font-medium text-muted-foreground"
+              <Label class="text-muted-foreground text-sm font-medium"
                 >Description</Label
               >
               <p class="text-sm">{{ metadataResult.metadata.description }}</p>
             </div>
             <div v-if="metadataResult.metadata.version" class="space-y-1">
-              <Label class="text-sm font-medium text-muted-foreground"
+              <Label class="text-muted-foreground text-sm font-medium"
                 >Version</Label
               >
               <p class="text-sm">{{ metadataResult.metadata.version }}</p>
             </div>
             <div v-if="metadataResult.metadata.license" class="space-y-1">
-              <Label class="text-sm font-medium text-muted-foreground"
+              <Label class="text-muted-foreground text-sm font-medium"
                 >License</Label
               >
               <p class="text-sm">{{ metadataResult.metadata.license }}</p>
             </div>
             <div v-if="metadataResult.metadata.authors" class="space-y-1">
-              <Label class="text-sm font-medium text-muted-foreground"
+              <Label class="text-muted-foreground text-sm font-medium"
                 >Authors</Label
               >
               <div class="flex flex-wrap gap-1">
@@ -120,7 +120,7 @@
               </div>
             </div>
             <div v-if="metadataResult.metadata.interfaces" class="space-y-1">
-              <Label class="text-sm font-medium text-muted-foreground"
+              <Label class="text-muted-foreground text-sm font-medium"
                 >Interfaces</Label
               >
               <div class="flex flex-wrap gap-1">
@@ -156,7 +156,7 @@
             <div
               v-for="(view, index) in metadataResult.metadata.views"
               :key="index"
-              class="p-3 border rounded-lg"
+              class="rounded-lg border p-3"
             >
               <div class="flex items-center gap-2">
                 <Badge variant="outline">{{
@@ -168,13 +168,13 @@
                   @click="executeView(getViewName(view as string), index)"
                   :disabled="isExecutingView"
                 >
-                  <Play class="w-3 h-3 mr-1" />
+                  <Play class="mr-1 h-3 w-3" />
                   Execute
                 </Button>
               </div>
               <pre
                 v-if="viewExecutionResult[index]"
-                class="mt-2 text-xs bg-muted p-2 rounded w-full break-words whitespace-pre-wrap"
+                class="bg-muted mt-2 w-full rounded p-2 text-xs break-words whitespace-pre-wrap"
                 >{{ viewExecutionResult[index] }}</pre
               >
             </div>
@@ -186,26 +186,26 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
-import { useDiagramStore } from "@/stores/diagramStore";
-import { useWalletStore } from "@/stores/walletStore";
+import { Badge } from "@/components/ui/badge";
 import Button from "@/components/ui/button/Button.vue";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Input from "@/components/ui/input/Input.vue";
 import Label from "@/components/ui/label/Label.vue";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Database, Loader2, Info, Eye, Play } from "lucide-vue-next";
+import contracts from "@/contracts/contract-config.json";
+import { validateTezosAddress } from "@/lib/utils";
+import OpenInExplorer from "@/modules/tests/components/open-in-explorer.vue";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
+import type { ContractConfig } from "@/types/contract";
+import { Tzip16Module } from "@taquito/tzip16";
+import { Database, Eye, Info, Loader2, Play } from "lucide-vue-next";
+import { computed, onMounted, ref } from "vue";
 import {
-  getContractMetadata,
   executeMetadataView,
+  getContractMetadata,
   type MetadataResult,
   type ViewExecutionResult,
 } from "./tzip16-metadata";
-import contracts from "@/contracts/contract-config.json";
-import type { ContractConfig } from "@/types/contract";
-import { Tzip16Module } from "@taquito/tzip16";
-import { validateTezosAddress } from "@/lib/utils";
-import OpenInExplorer from "@/modules/tests/components/open-in-explorer.vue";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();

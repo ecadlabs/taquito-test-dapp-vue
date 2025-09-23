@@ -25,7 +25,7 @@
           </p>
           <AlertTriangle
             v-if="!settingsStore.getIsRevealed"
-            class="size-4 text-red-600 flex-shrink-0"
+            class="size-4 flex-shrink-0 text-red-600"
             aria-hidden="true"
           />
         </Button>
@@ -67,7 +67,7 @@
         <DialogTitle>Connect Wallet</DialogTitle>
         <DialogDescription>
           <div>
-            <div class="flex space-x-1 items-center flex-wrap">
+            <div class="flex flex-wrap items-center space-x-1">
               <span>Taquito Playground supports both</span>
               <a
                 href="https://www.walletbeacon.io/"
@@ -104,7 +104,7 @@
           </AlertTitle>
           <AlertDescription class="inline-block"
             >Use of an HID (your Ledger device) within this browser requires the
-            <code class="px-1 py-0.5 rounded bg-muted text-xs font-mono"
+            <code class="bg-muted rounded px-1 py-0.5 font-mono text-xs"
               >enable-experimental-web-platform-features</code
             >
             experimental flag to be enabled. Learn more
@@ -156,7 +156,7 @@
           </Select>
         </div>
 
-        <div v-if="provider === 'programmatic'" class="space-y-2 mt-2">
+        <div v-if="provider === 'programmatic'" class="mt-2 space-y-2">
           <Label :for="privateKeyInputId">
             Programmatic wallet private key
           </Label>
@@ -170,7 +170,7 @@
             spellcheck="false"
             :aria-describedby="privateKeyHelpId"
           />
-          <p :id="privateKeyHelpId" class="text-xs text-muted-foreground">
+          <p :id="privateKeyHelpId" class="text-muted-foreground text-xs">
             Stored only in-memory for this demo. Provide a throwaway key.
           </p>
         </div>
@@ -188,7 +188,7 @@
           "
           :aria-busy="loading"
         >
-          <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
+          <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
           <p>Connect</p>
         </Button>
       </DialogFooter>
@@ -212,15 +212,15 @@
       <!-- Warning for unrevealed wallet -->
       <div
         v-if="!settingsStore.getIsRevealed"
-        class="bg-yellow-50 border border-yellow-200 rounded-lg p-2.5"
+        class="rounded-lg border border-yellow-200 bg-yellow-50 p-2.5"
       >
         <div class="flex items-start gap-1.5">
-          <AlertTriangle class="size-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+          <AlertTriangle class="mt-0.5 size-4 flex-shrink-0 text-yellow-600" />
           <div>
             <p class="text-sm font-medium text-yellow-800">
               Wallet key not revealed
             </p>
-            <div class="text-xs text-yellow-700 mt-1">
+            <div class="mt-1 text-xs text-yellow-700">
               <p>
                 Your wallets public key has not been revealed on the blockchain.
                 Most operations will fail. Reveal your key by sending a
@@ -245,7 +245,7 @@
           <div class="min-w-0">
             <p class="break-all">Address: {{ address }}</p>
           </div>
-          <div class="flex gap-1 flex-shrink-0">
+          <div class="flex flex-shrink-0 gap-1">
             <Button
               variant="ghost"
               size="icon"
@@ -275,7 +275,7 @@
           :disabled="loading"
           :aria-busy="loading"
         >
-          <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
+          <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
           <p>Change Wallet</p>
         </Button>
         <Button
@@ -284,7 +284,7 @@
           :disabled="loading"
           :aria-busy="loading"
         >
-          <Loader2 v-if="loading" class="w-4 h-4 mr-2 animate-spin" />
+          <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
           <p>Disconnect</p>
         </Button>
       </DialogFooter>
@@ -294,17 +294,18 @@
 
 <script setup lang="ts">
 import { useWalletStore } from "@/stores/walletStore";
-import { computed, ref, watch } from "vue";
 import type { WalletProvider } from "@/types/wallet";
 import {
-  Loader2,
-  Wallet,
-  Unplug,
+  AlertTriangle,
   Copy,
   ExternalLink,
-  AlertTriangle,
+  Loader2,
+  Unplug,
+  Wallet,
 } from "lucide-vue-next";
+import { computed, ref, watch } from "vue";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -314,6 +315,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -322,12 +325,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "vue-sonner";
 import { buildIndexerUrl } from "@/lib/utils";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { Input } from "@/components/ui/input";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { Label } from "@/components/ui/label";
+import { toast } from "vue-sonner";
 
 const walletStore = useWalletStore();
 const settingsStore = useSettingsStore();

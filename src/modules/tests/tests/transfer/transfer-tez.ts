@@ -1,8 +1,8 @@
-import { useWalletStore } from "@/stores/walletStore";
-import { useDiagramStore } from "@/stores/diagramStore";
-import { PiggyBank } from "lucide-vue-next";
-import type { Estimate, TransactionWalletOperation } from "@taquito/taquito";
 import { getOperationHash } from "@/lib/utils";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
+import type { Estimate, TransactionWalletOperation } from "@taquito/taquito";
+import { PiggyBank } from "lucide-vue-next";
 
 const TEST_ID = "transfer";
 

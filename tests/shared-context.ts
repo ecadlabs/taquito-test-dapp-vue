@@ -1,4 +1,4 @@
-import { chromium, Browser, BrowserContext, Page } from "@playwright/test";
+import { Browser, BrowserContext, chromium, Page } from "@playwright/test";
 import { connectToWallet } from "./helpers";
 
 let sharedBrowser: Browser;

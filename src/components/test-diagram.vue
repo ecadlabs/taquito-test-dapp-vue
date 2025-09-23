@@ -1,14 +1,14 @@
 <template>
-  <div class="overflow-auto w-full relative" ref="diagram-container">
-    <div class="min-w-full h-[180px] relative">
+  <div class="relative w-full overflow-auto" ref="diagram-container">
+    <div class="relative h-[180px] min-w-full">
       <!-- Connections layer -->
       <div
-        class="absolute top-0 left-0 w-full h-full pointer-events-none z-[1]"
+        class="pointer-events-none absolute top-0 left-0 z-[1] h-full w-full"
       >
         <div
           v-for="connection in connections"
           :key="connection.id"
-          class="absolute pointer-events-none transition-all duration-300"
+          class="pointer-events-none absolute transition-all duration-300"
           :class="[
             getConnectionClass(connection),
             isConnectionErrored(connection) ? 'error-path' : '',
@@ -17,7 +17,7 @@
           <!-- The random z-index and bg-white is to prevent the connections from visually overlapping. This should be re-done. -->
           <div
             v-if="connection.horizontal"
-            class="connection-line bg-white horizontal absolute rounded transition-all duration-300"
+            class="connection-line horizontal absolute rounded bg-white transition-all duration-300"
             :class="[
               isConnectionActive(connection) ? 'animated' : '',
               inProgressConnectionErroredClasses(connection),
@@ -34,7 +34,7 @@
       </div>
 
       <!-- Nodes layer -->
-      <div class="absolute top-0 left-0 w-full z-[2]">
+      <div class="absolute top-0 left-0 z-[2] w-full">
         <div
           v-for="node in positionedNodes"
           :key="node.id"
@@ -46,17 +46,17 @@
         >
           <!-- Circle node -->
           <div
-            class="node-circle w-5 h-5 rounded-full bg-white border-2 border-gray-300 transition-all duration-300"
+            class="node-circle h-5 w-5 rounded-full border-2 border-gray-300 bg-white transition-all duration-300"
           ></div>
           <!-- Text label -->
           <div
-            class="text-xs absolute font-medium text-gray-700 text-center leading-[1.2]"
+            class="absolute text-center text-xs leading-[1.2] font-medium text-gray-700"
             :class="node.type === 'error' ? 'top-6' : 'bottom-6'"
           >
             <!-- Locator for automated tests to know when an example is completed -->
             <div
               v-if="node.type === 'success' && diagramStatus === 'completed'"
-              class="absolute top-0 left-0 sr-only"
+              class="sr-only absolute top-0 left-0"
               aria-hidden="true"
               data-testid="diagramComplete"
               tabindex="-1"
@@ -64,7 +64,7 @@
             <!-- Locator for automated tests to know when an example has errored -->
             <div
               v-if="node.type === 'error' && diagramStatus === 'errored'"
-              class="absolute top-0 left-0 sr-only"
+              class="sr-only absolute top-0 left-0"
               aria-hidden="true"
               data-testid="diagramError"
               tabindex="-1"
@@ -77,7 +77,7 @@
               "
               :href="`${indexerUrl}/${operationHash}/operations`"
               target="_blank"
-              class="hover:opacity-80 transition-opacity cursor-pointer"
+              class="cursor-pointer transition-opacity hover:opacity-80"
             >
               <Badge variant="secondary" class="mb-1">
                 <Hash />
@@ -88,7 +88,7 @@
             <button
               v-if="diagramStore.getNodeButton(node.id)"
               @click="diagramStore.getNodeButton(node.id)?.onClick"
-              class="hover:opacity-80 transition-opacity cursor-pointer"
+              class="cursor-pointer transition-opacity hover:opacity-80"
               :aria-label="diagramStore.getNodeButton(node.id)?.text"
             >
               <Badge variant="secondary" class="mb-1">
@@ -102,7 +102,7 @@
             </p>
             <p
               v-if="node.type === 'error'"
-              class="text-red-400 mt-1"
+              class="mt-1 text-red-400"
               role="status"
               aria-live="assertive"
             >
@@ -114,7 +114,7 @@
               <Badge
                 v-if="getStepTiming(node.id)?.duration !== undefined"
                 variant="outline"
-                class="text-xs font-mono"
+                class="font-mono text-xs"
               >
                 {{ Math.round(getStepTiming(node.id)?.duration ?? 0) }}ms
               </Badge>
@@ -127,13 +127,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from "vue";
-import { useDiagramStore } from "@/stores/diagramStore";
-import type { DiagramNode } from "@/modules/tests/test";
-import { Hash } from "lucide-vue-next";
 import { Badge } from "@/components/ui/badge";
 import { buildIndexerUrl } from "@/lib/utils";
+import type { DiagramNode } from "@/modules/tests/test";
+import { useDiagramStore } from "@/stores/diagramStore";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { Hash } from "lucide-vue-next";
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from "vue";
 
 // Extended node type for internal use
 type TypedNode = DiagramNode & {

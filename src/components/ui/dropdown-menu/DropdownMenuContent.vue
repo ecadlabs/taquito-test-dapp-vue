@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from "vue";
+import { cn } from "@/lib/utils";
 import { reactiveOmit } from "@vueuse/core";
 import {
   DropdownMenuContent,
@@ -8,7 +8,7 @@ import {
   DropdownMenuPortal,
   useForwardPropsEmits,
 } from "reka-ui";
-import { cn } from "@/lib/utils";
+import type { HTMLAttributes } from "vue";
 
 const props = withDefaults(
   defineProps<DropdownMenuContentProps & { class?: HTMLAttributes["class"] }>(),

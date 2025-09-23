@@ -1,5 +1,5 @@
-import { TezosToolkit } from "@taquito/taquito";
 import { InMemorySigner } from "@taquito/signer";
+import { TezosToolkit } from "@taquito/taquito";
 import { config } from "dotenv";
 
 config();
@@ -7,18 +7,22 @@ config();
 const rpc = process.env.VITE_RPC_URL;
 
 /**
- * Reveals the public key associated with a given private key on the Tezos blockchain.
-
- * This script connects to the Tezos node specified by the `VITE_RPC_URL` environment variable,
- * sets up an in-memory signer using the provided private key, and runs a reveal operation.
- * 
- * Usage:
- *   `npm run reveal-key <private_key>`
- * 
+ * Reveals the public key associated with a given private key on the Tezos
+ * blockchain.
+ *
+ * This script connects to the Tezos node specified by the `VITE_RPC_URL`
+ * environment variable, sets up an in-memory signer using the provided private
+ * key, and runs a reveal operation.
+ *
+ * Usage: `npm run reveal-key <private_key>`
+ *
  * Notes:
- *   - The reveal operation is required for accounts whose public key has not yet been revealed on-chain.
- *   - If the public key is already revealed, this function will fail.
- *   - This script is designed to be run from the command line in a local development environment.
+ *
+ * - The reveal operation is required for accounts whose public key has not yet
+ *   been revealed on-chain.
+ * - If the public key is already revealed, this function will fail.
+ * - This script is designed to be run from the command line in a local
+ *   development environment.
  */
 const reveal = async (key: string) => {
   if (!rpc) {

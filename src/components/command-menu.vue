@@ -18,10 +18,6 @@
 </template>
 
 <script setup lang="ts">
-import { useMagicKeys } from "@vueuse/core";
-import { AvailableTests } from "@/modules/tests/tests";
-import { computed, ref, watch } from "vue";
-import { useRouter } from "vue-router";
 import {
   CommandDialog,
   CommandEmpty,
@@ -30,6 +26,10 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { AvailableTests } from "@/modules/tests/tests";
+import { useMagicKeys } from "@vueuse/core";
+import { computed, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 
 const open = ref(false);
 const router = useRouter();

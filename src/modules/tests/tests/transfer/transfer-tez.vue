@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full flex flex-col items-center gap-4">
+  <div class="flex w-full flex-col items-center gap-4">
     <div>
       <Label class="mb-1">Wallet Address</Label>
       <Input placeholder="Wallet address..." v-model="toAddress" class="w-48" />
@@ -20,18 +20,15 @@
       :disabled="sending || !walletStore.getAddress"
       class="w-32"
     >
-      <Loader2 v-if="sending" class="w-4 h-4 mr-2 animate-spin" />
+      <Loader2 v-if="sending" class="mr-2 h-4 w-4 animate-spin" />
       <p v-else>Send Transfer</p>
     </Button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useDiagramStore } from "@/stores/diagramStore";
-import { ref, onMounted, watch } from "vue";
-import { send } from "@/modules/tests/tests/transfer/transfer-tez";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   NumberField,
@@ -40,8 +37,11 @@ import {
   NumberFieldIncrement,
   NumberFieldInput,
 } from "@/components/ui/number-field";
-import { Loader2 } from "lucide-vue-next";
+import { send } from "@/modules/tests/tests/transfer/transfer-tez";
+import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
+import { Loader2 } from "lucide-vue-next";
+import { onMounted, ref, watch } from "vue";
 
 const walletStore = useWalletStore();
 

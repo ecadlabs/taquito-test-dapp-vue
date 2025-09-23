@@ -1,5 +1,5 @@
-import { useWalletStore } from "@/stores/walletStore";
 import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
 import { verifySignature } from "@taquito/utils";
 
 const TEST_ID = "failing-noop";
@@ -8,7 +8,8 @@ const TEST_ID = "failing-noop";
  * Signs a failing noop operation and verifies the signature.
  *
  * @async
- * @returns {Promise<void>} Resolves when the operation is processed or fails with an error.
+ * @returns {Promise<void>} Resolves when the operation is processed or fails
+ *   with an error.
  */
 const failNoop = async (): Promise<void> => {
   const diagramStore = useDiagramStore();

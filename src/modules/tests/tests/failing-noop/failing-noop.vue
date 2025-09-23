@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center w-full justify-center gap-4">
+  <div class="flex w-full flex-col items-center justify-center gap-4">
     <Button @click="fail" :disabled="!walletConnected || sending">
       <Loader2 v-if="sending" class="animate-spin" />
       <p v-else>Fail Noop</p>
@@ -8,12 +8,12 @@
 </template>
 
 <script setup lang="ts">
-import { useDiagramStore } from "@/stores/diagramStore";
-import { computed, onMounted, ref } from "vue";
-import { useWalletStore } from "@/stores/walletStore";
-import { failNoop } from "@/modules/tests/tests/failing-noop/failing-noop";
-import { Loader2 } from "lucide-vue-next";
 import Button from "@/components/ui/button/Button.vue";
+import { failNoop } from "@/modules/tests/tests/failing-noop/failing-noop";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
+import { Loader2 } from "lucide-vue-next";
+import { computed, onMounted, ref } from "vue";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();

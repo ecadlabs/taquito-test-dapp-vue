@@ -1,9 +1,9 @@
-import { useWalletStore } from "@/stores/walletStore";
 import { useDiagramStore } from "@/stores/diagramStore";
-import { PiggyBank } from "lucide-vue-next";
-import type { Estimate } from "@taquito/taquito";
-import { RpcClient } from "@taquito/rpc";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useWalletStore } from "@/stores/walletStore";
+import { RpcClient } from "@taquito/rpc";
+import type { Estimate } from "@taquito/taquito";
+import { PiggyBank } from "lucide-vue-next";
 
 const TEST_ID = "delegation";
 let estimate: Estimate;
@@ -103,4 +103,4 @@ const getDelegate = async (address: string): Promise<string | null> => {
   return delegate;
 };
 
-export { delegate, undelegate, getDelegate };
+export { delegate, getDelegate, undelegate };

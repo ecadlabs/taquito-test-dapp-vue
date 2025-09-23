@@ -1,9 +1,9 @@
 <template>
-  <div class="flex flex-col items-center w-full justify-center gap-6">
+  <div class="flex w-full flex-col items-center justify-center gap-6">
     <div class="flex flex-col items-center gap-4 p-4">
       <h4 class="text-md font-medium">Failure Scenarios</h4>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
+      <div class="grid w-full max-w-2xl grid-cols-1 gap-3 md:grid-cols-2">
         <Button
           @click="() => testFailure('wrong-type')"
           :disabled="!walletConnected || isLoading"
@@ -11,7 +11,7 @@
         >
           <Loader2
             v-if="isLoading && currentTest === 'wrong-type'"
-            class="animate-spin mr-2 h-4 w-4"
+            class="mr-2 h-4 w-4 animate-spin"
           />
           <XCircle v-else class="mr-2 h-4 w-4" />
           Wrong Type
@@ -24,7 +24,7 @@
         >
           <Loader2
             v-if="isLoading && currentTest === 'invalid-entrypoint'"
-            class="animate-spin mr-2 h-4 w-4"
+            class="mr-2 h-4 w-4 animate-spin"
           />
           <XCircle v-else class="mr-2 h-4 w-4" />
           Invalid Entrypoint
@@ -37,7 +37,7 @@
         >
           <Loader2
             v-if="isLoading && currentTest === 'invalid-parameter-structure'"
-            class="animate-spin mr-2 h-4 w-4"
+            class="mr-2 h-4 w-4 animate-spin"
           />
           <XCircle v-else class="mr-2 h-4 w-4" />
           Invalid Structure
@@ -48,19 +48,19 @@
     <!-- Error Visualization Section -->
     <div
       v-if="errorMessage"
-      class="w-full max-w-2xl p-4 border border-red-200 rounded-lg bg-red-50"
+      class="w-full max-w-2xl rounded-lg border border-red-200 bg-red-50 p-4"
     >
-      <h4 class="text-md font-medium text-red-800 mb-2 flex items-center">
+      <h4 class="text-md mb-2 flex items-center font-medium text-red-800">
         <AlertTriangle class="mr-2 h-4 w-4" />
         Error Details
       </h4>
-      <div class="bg-red-100 p-3 rounded border text-sm">
+      <div class="rounded border bg-red-100 p-3 text-sm">
         <pre
-          class="whitespace-pre-wrap text-red-700 font-mono text-xs overflow-auto"
+          class="overflow-auto font-mono text-xs whitespace-pre-wrap text-red-700"
           >{{ formattedError }}</pre
         >
       </div>
-      <p class="text-xs text-red-600 mt-2">
+      <p class="mt-2 text-xs text-red-600">
         This error was expected and demonstrates how Taquito handles contract
         call failures.
       </p>
@@ -69,12 +69,12 @@
 </template>
 
 <script setup lang="ts">
-import { useDiagramStore } from "@/stores/diagramStore";
-import { computed, onMounted, ref, watch } from "vue";
-import { useWalletStore } from "@/stores/walletStore";
-import { testContractFailure } from "@/modules/tests/tests/failing-contract/failing-contract";
-import { Loader2, XCircle, AlertTriangle } from "lucide-vue-next";
 import Button from "@/components/ui/button/Button.vue";
+import { testContractFailure } from "@/modules/tests/tests/failing-contract/failing-contract";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
+import { AlertTriangle, Loader2, XCircle } from "lucide-vue-next";
+import { computed, onMounted, ref, watch } from "vue";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();

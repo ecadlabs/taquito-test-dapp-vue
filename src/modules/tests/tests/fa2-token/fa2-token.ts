@@ -1,13 +1,13 @@
-import { useWalletStore } from "@/stores/walletStore";
-import { useDiagramStore } from "@/stores/diagramStore";
 import contracts from "@/contracts/contract-config.json";
-import {
-  type ContractConfig,
-  type BalanceCallbackStorage,
-} from "@/types/contract";
-import { PiggyBank } from "lucide-vue-next";
-import type { Estimate } from "@taquito/taquito";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
 import type { FA2TokenStorage } from "@/types/contract";
+import {
+  type BalanceCallbackStorage,
+  type ContractConfig,
+} from "@/types/contract";
+import type { Estimate } from "@taquito/taquito";
+import { PiggyBank } from "lucide-vue-next";
 
 const CONTRACT_ADDRESS =
   (contracts as ContractConfig[]).find(
@@ -55,6 +55,7 @@ export interface BurnParam {
 
 /**
  * Mints tokens to a specified address
+ *
  * @param param - Mint parameters
  * @returns Promise<void>
  */
@@ -101,6 +102,7 @@ export const mintTokens = async (param: MintParam): Promise<void> => {
 
 /**
  * Burns tokens from a specified address
+ *
  * @param param - Burn parameters
  * @returns Promise<void>
  */
@@ -147,6 +149,7 @@ export const burnTokens = async (param: BurnParam): Promise<void> => {
 
 /**
  * Transfers tokens between addresses
+ *
  * @param transfers - Array of transfer parameters (all will be processed)
  * @returns Promise<void>
  */
@@ -198,8 +201,10 @@ export const transferTokens = async (
 };
 
 /**
- * Gets token balances for specified addresses and token IDs by reading contract storage directly
- * This is a non-standard approach but is quick and doesn't use the callback contract, so less complexity, time, and fees
+ * Gets token balances for specified addresses and token IDs by reading contract
+ * storage directly This is a non-standard approach but is quick and doesn't use
+ * the callback contract, so less complexity, time, and fees
+ *
  * @param requests - Array of balance requests
  * @returns Promise<TokenBalance[]>
  */
@@ -250,8 +255,9 @@ export const getTokenBalancesDirect = async (
 };
 
 /**
- * Gets token balances using TZIP-12 compliant balance_of callback pattern
- * This follows the FA2 standard but requires a callback contract.
+ * Gets token balances using TZIP-12 compliant balance_of callback pattern This
+ * follows the FA2 standard but requires a callback contract.
+ *
  * @param requests - Array of balance requests
  * @returns Promise<TokenBalance[]>
  */

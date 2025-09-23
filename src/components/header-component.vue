@@ -1,9 +1,9 @@
 <template>
-  <div class="flex md:justify-between p-4 items-center">
-    <div class="flex items-center flex-col sm:flex-row">
+  <div class="flex items-center p-4 md:justify-between">
+    <div class="flex flex-col items-center sm:flex-row">
       <RouterLink
         :to="{ name: 'home' }"
-        class="font-medium leading-none flex gap-1.5 items-center p-2"
+        class="flex items-center gap-1.5 p-2 leading-none font-medium"
       >
         <img src="@/assets/logo.svg" alt="Taquito Logo" class="size-5" />
         <p>Taquito Playground</p>
@@ -15,7 +15,7 @@
     </div>
 
     <div class="mr-auto" />
-    <NavigationMenu class="hidden md:block mr-4">
+    <NavigationMenu class="mr-4 hidden md:block">
       <NavigationMenuList>
         <NavigationMenuItem>
           <RouterLink :to="{ name: 'tests', params: { test: firstTestId } }">
@@ -39,23 +39,23 @@
     <Button
       size="icon"
       variant="outline"
-      class="ml-2 relative"
+      class="relative ml-2"
       @click="showSettingsDialog = true"
       aria-label="Settings"
     >
       <div
         v-if="settingsStore.isUsingCustomRpcUrl"
-        class="bg-orange-400 size-3 absolute -top-1 -right-1 rounded-full"
+        class="absolute -top-1 -right-1 size-3 rounded-full bg-orange-400"
       />
       <Settings class="size-5" aria-hidden="true" />
     </Button>
 
     <DropdownMenu>
       <DropdownMenuTrigger
-        class="block md:hidden hover:cursor-pointer"
+        class="block hover:cursor-pointer md:hidden"
         aria-label="Open navigation menu"
       >
-        <Menu class="size-6 ml-3" aria-hidden="true" />
+        <Menu class="ml-3 size-6" aria-hidden="true" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <RouterLink :to="{ name: 'tests', params: { test: firstTestId } }">
@@ -78,11 +78,11 @@
 </template>
 
 <script setup lang="ts">
-import WalletControl from "@/components/wallet-control.vue";
 import SettingsDialog from "@/components/settings-dialog.vue";
+import WalletControl from "@/components/wallet-control.vue";
 
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -97,12 +97,12 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { isRevealed } from "@/lib/utils";
 import { AvailableTests } from "@/modules/tests/tests";
-import { computed, ref, watch } from "vue";
-import { Menu, Settings } from "lucide-vue-next";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
-import { isRevealed } from "@/lib/utils";
+import { Menu, Settings } from "lucide-vue-next";
+import { computed, ref, watch } from "vue";
 
 const settingsStore = useSettingsStore();
 const walletStore = useWalletStore();

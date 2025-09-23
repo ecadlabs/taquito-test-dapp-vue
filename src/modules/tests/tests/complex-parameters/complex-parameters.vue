@@ -1,9 +1,9 @@
 <template>
-  <div class="w-full lg:w-1/2 mx-auto space-y-8">
+  <div class="mx-auto w-full space-y-8 lg:w-1/2">
     <div>
-      <h3 class="text-lg font-semibold mb-0.5">Deployed Contract Address</h3>
+      <h3 class="mb-0.5 text-lg font-semibold">Deployed Contract Address</h3>
       <p
-        class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit text-red-400"
+        class="bg-muted w-fit rounded-md px-2 py-1 font-mono text-xs text-red-400"
       >
         {{ CONTRACT_ADDRESS }}
       </p>
@@ -57,7 +57,7 @@
             :disabled="!walletConnected || !isSimpleRecordValid"
             class="w-full"
           >
-            <UserPlus class="w-4 h-4 mr-2" />
+            <UserPlus class="mr-2 h-4 w-4" />
             Add Simple Record
           </Button>
         </div>
@@ -113,7 +113,7 @@
             :disabled="!walletConnected || !isNestedRecordValid"
             class="w-full"
           >
-            <Database class="w-4 h-4 mr-2" />
+            <Database class="mr-2 h-4 w-4" />
             Set Nested Objects
           </Button>
         </div>
@@ -148,7 +148,7 @@
             :disabled="!walletConnected || !authUserAddress"
             class="flex-1"
           >
-            <UserCheck class="w-4 h-4 mr-2" />
+            <UserCheck class="mr-2 h-4 w-4" />
             Add User
           </Button>
           <Button
@@ -157,7 +157,7 @@
             variant="destructive"
             class="flex-1"
           >
-            <UserX class="w-4 h-4 mr-2" />
+            <UserX class="mr-2 h-4 w-4" />
             Remove User
           </Button>
         </div>
@@ -194,7 +194,7 @@
             :disabled="!walletConnected || !isMetadataUpdatesValid"
             class="w-full"
           >
-            <Settings class="w-4 h-4 mr-2" />
+            <Settings class="mr-2 h-4 w-4" />
             Update Metadata
           </Button>
         </div>
@@ -222,7 +222,7 @@
             :disabled="!walletConnected || !viewUserAddress"
             class="flex-1"
           >
-            <Eye class="w-4 h-4 mr-2" />
+            <Eye class="mr-2 h-4 w-4" />
             Get Simple Record
           </Button>
           <Button
@@ -230,7 +230,7 @@
             :disabled="!walletConnected || !viewUserAddress"
             class="flex-1"
           >
-            <FileText class="w-4 h-4 mr-2" />
+            <FileText class="mr-2 h-4 w-4" />
             Get Nested Objects
           </Button>
         </div>
@@ -246,7 +246,7 @@
               :disabled="!walletConnected"
               class="flex-1"
             >
-              <Database class="w-4 h-4 mr-2" />
+              <Database class="mr-2 h-4 w-4" />
               Get All Metadata
             </Button>
           </div>
@@ -256,7 +256,7 @@
       <!-- Results Display -->
       <div v-if="retrievedData !== null" class="mt-4">
         <Label class="mb-1">Retrieved Data:</Label>
-        <pre class="mt-2 p-4 bg-muted rounded-md text-sm overflow-auto">{{
+        <pre class="bg-muted mt-2 overflow-auto rounded-md p-4 text-sm">{{
           retrievedData === undefined
             ? "undefined"
             : JSON.stringify(retrievedData, null, 2)
@@ -267,36 +267,39 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
-import type { UserRecord, NestedRecord } from "@/types/contract";
-import { useDiagramStore } from "@/stores/diagramStore";
-import { useWalletStore } from "@/stores/walletStore";
 import Button from "@/components/ui/button/Button.vue";
 import Input from "@/components/ui/input/Input.vue";
 import Label from "@/components/ui/label/Label.vue";
 import Textarea from "@/components/ui/textarea/Textarea.vue";
-import {
-  UserPlus,
-  Database,
-  UserCheck,
-  UserX,
-  Settings,
-  Eye,
-  FileText,
-} from "lucide-vue-next";
-import {
-  addUserRecord,
-  setNestedRecord,
-  manageUserSet,
-  updateMetadata,
-  getUserRecord,
-  getNestedData,
-  getAllMetadata,
-  type RecordParam,
-} from "./complex-parameters";
-import type { ContractConfig } from "@/types/contract";
 import contracts from "@/contracts/contract-config.json";
 import OpenInExplorer from "@/modules/tests/components/open-in-explorer.vue";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
+import type {
+  ContractConfig,
+  NestedRecord,
+  UserRecord,
+} from "@/types/contract";
+import {
+  Database,
+  Eye,
+  FileText,
+  Settings,
+  UserCheck,
+  UserPlus,
+  UserX,
+} from "lucide-vue-next";
+import { computed, onMounted, ref, watch } from "vue";
+import {
+  addUserRecord,
+  getAllMetadata,
+  getNestedData,
+  getUserRecord,
+  manageUserSet,
+  setNestedRecord,
+  updateMetadata,
+  type RecordParam,
+} from "./complex-parameters";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();

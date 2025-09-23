@@ -1,7 +1,7 @@
 <template>
   <Sidebar>
     <SidebarHeader class="block md:hidden">
-      <div class="font-medium leading-none flex gap-1.5 items-center p-2 mt-2">
+      <div class="mt-2 flex items-center gap-1.5 p-2 leading-none font-medium">
         <img src="@/assets/logo.svg" alt="Taquito Logo" class="size-5" />
         <p>Taquito Playground</p>
       </div>
@@ -47,9 +47,9 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { useRoute } from "vue-router";
 import { getAllCategories, getTestsByCategory } from "@/modules/tests/tests";
 import { computed } from "vue";
+import { useRoute } from "vue-router";
 
 const route = useRoute();
 
