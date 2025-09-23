@@ -33,40 +33,24 @@
       </div>
       <div>
         <h3 class="mb-1 font-medium">Metadata in Storage Contract</h3>
-        <p
-          class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit text-red-400"
-        >
-          {{ METADATA_CONTRACT_ADDRESS }}
-        </p>
-        <div class="flex gap-1 items-center">
-          <OpenInExplorer :address="METADATA_CONTRACT_ADDRESS" />
-          <Button
-            @click="copyToClipboard(METADATA_CONTRACT_ADDRESS)"
-            variant="link"
-            class="text-muted-foreground -ml-2"
+        <div>
+          <p
+            class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit text-red-400"
           >
-            <Copy class="size-3" />
-            <p class="sr-only">Copy Address to Clipboard</p>
-          </Button>
+            {{ METADATA_CONTRACT_ADDRESS }}
+          </p>
+          <OpenInExplorer :address="METADATA_CONTRACT_ADDRESS" />
         </div>
       </div>
       <div>
         <h3 class="mb-1 font-medium">Metadata via HTTPS Contract</h3>
-        <p
-          class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit text-red-400"
-        >
-          {{ METADATA_HTTPS_CONTRACT_ADDRESS }}
-        </p>
-        <div class="flex gap-1 items-center">
-          <OpenInExplorer :address="METADATA_HTTPS_CONTRACT_ADDRESS" />
-          <Button
-            @click="copyToClipboard(METADATA_HTTPS_CONTRACT_ADDRESS)"
-            variant="link"
-            class="text-muted-foreground -ml-2"
+        <div>
+          <p
+            class="text-xs font-mono bg-muted rounded-md py-1 px-2 w-fit text-red-400"
           >
-            <Copy class="size-3" />
-            <p class="sr-only">Copy Address to Clipboard</p>
-          </Button>
+            {{ METADATA_HTTPS_CONTRACT_ADDRESS }}
+          </p>
+          <OpenInExplorer :address="METADATA_HTTPS_CONTRACT_ADDRESS" />
         </div>
       </div>
     </div>
