@@ -7,7 +7,6 @@
 | Network       | URL                                |
 | ------------- | ---------------------------------- |
 | **Seoulnet**  | https://seoulnet.dapp.taquito.io/  |
-| **Rionet**    | https://rionet.dapp.taquito.io/    |
 | **Shadownet** | https://shadownet.dapp.taquito.io/ |
 | **Ghostnet**  | https://ghostnet.dapp.taquito.io/  |
 
