@@ -7,14 +7,7 @@
       >
         {{ CONTRACT_ADDRESS }}
       </p>
-      <Button
-        @click="openInExplorer()"
-        variant="link"
-        class="text-muted-foreground -ml-2"
-      >
-        <p class="text-xs">Open in {{ indexerName }}</p>
-        <ExternalLink class="size-3" />
-      </Button>
+      <OpenInExplorer :address="CONTRACT_ADDRESS" />
     </div>
 
     <!-- Simple Record Parameters -->
@@ -290,7 +283,6 @@ import {
   Settings,
   Eye,
   FileText,
-  ExternalLink,
 } from "lucide-vue-next";
 import {
   addUserRecord,
@@ -304,22 +296,12 @@ import {
 } from "./complex-parameters";
 import type { ContractConfig } from "@/types/contract";
 import contracts from "@/contracts/contract-config.json";
-import { buildIndexerUrl } from "@/lib/utils";
-import { useSettingsStore } from "@/stores/settingsStore";
+import OpenInExplorer from "@/modules/tests/components/open-in-explorer.vue";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
-const settingsStore = useSettingsStore();
-
-const networkType = import.meta.env.VITE_NETWORK_TYPE;
 
 const walletConnected = computed(() => !!walletStore.getAddress);
-
-const indexerName = computed(() => settingsStore.settings.indexer.name);
-
-const indexerUrl = computed(() =>
-  buildIndexerUrl(settingsStore.settings.indexer, networkType),
-);
 
 watch(walletConnected, () => {
   if (walletConnected.value && walletStore.getAddress) {
@@ -452,8 +434,4 @@ const CONTRACT_ADDRESS =
     (contract: ContractConfig) =>
       contract.contractName === "complex-parameters",
   )?.address ?? "";
-
-const openInExplorer = () => {
-  window.open(`${indexerUrl.value}/${CONTRACT_ADDRESS}/storage`, "_blank");
-};
 </script>

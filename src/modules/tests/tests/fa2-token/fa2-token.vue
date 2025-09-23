@@ -8,14 +8,7 @@
       >
         {{ CONTRACT_ADDRESS }}
       </p>
-      <Button
-        @click="openInExplorer(CONTRACT_ADDRESS)"
-        variant="link"
-        class="text-muted-foreground -ml-2 w-fit"
-      >
-        <p class="text-xs">Open in {{ indexerName }}</p>
-        <ExternalLink class="size-3" />
-      </Button>
+      <OpenInExplorer :address="CONTRACT_ADDRESS" />
     </div>
     <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
       <p>Balance Callback:</p>
@@ -24,14 +17,7 @@
       >
         {{ CALLBACK_CONTRACT_ADDRESS }}
       </p>
-      <Button
-        @click="openInExplorer(CALLBACK_CONTRACT_ADDRESS)"
-        variant="link"
-        class="text-muted-foreground -ml-2 w-fit"
-      >
-        <p class="text-xs">Open in {{ indexerName }}</p>
-        <ExternalLink class="size-3" />
-      </Button>
+      <OpenInExplorer :address="CALLBACK_CONTRACT_ADDRESS" />
     </div>
   </div>
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -376,20 +362,16 @@ import {
   Minus,
   Flame,
   HandCoins,
-  ExternalLink,
 } from "lucide-vue-next";
-import { buildIndexerUrl, validateTezosAddress } from "@/lib/utils";
+import { validateTezosAddress } from "@/lib/utils";
 import type { ContractConfig } from "@/types/contract";
 import contracts from "@/contracts/contract-config.json";
-import { useSettingsStore } from "@/stores/settingsStore";
+import OpenInExplorer from "@/modules/tests/components/open-in-explorer.vue";
 import { storeToRefs } from "pinia";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
-const settingsStore = useSettingsStore();
 const { getAddress } = storeToRefs(walletStore);
-
-const networkType = import.meta.env.VITE_NETWORK_TYPE;
 
 const walletConnected = computed(() => !!getAddress.value);
 
@@ -594,12 +576,6 @@ watch(
   { immediate: false }, // Don't trigger immediately since onMounted handles initial state
 );
 
-const indexerName = computed(() => settingsStore.settings.indexer.name);
-
-const indexerUrl = computed(() =>
-  buildIndexerUrl(settingsStore.settings.indexer, networkType),
-);
-
 const CONTRACT_ADDRESS =
   (contracts as ContractConfig[]).find(
     (contract: ContractConfig) => contract.contractName === "fa2-token",
@@ -609,8 +585,4 @@ const CALLBACK_CONTRACT_ADDRESS =
   (contracts as ContractConfig[]).find(
     (contract: ContractConfig) => contract.contractName === "balance-callback",
   )?.address ?? "";
-
-const openInExplorer = (address: string) => {
-  window.open(`${indexerUrl.value}/${address}/storage`, "_blank");
-};
 </script>
