@@ -367,12 +367,15 @@ const copyAddress = () => {
 };
 
 const networkType = import.meta.env.VITE_NETWORK_TYPE;
-const indexerUrl = computed(() =>
-  buildIndexerUrl(settingsStore.settings.indexer, networkType),
-);
 
 const openExplorer = () => {
-  window.open(`${indexerUrl.value}/${address.value}/operations`, "_blank");
+  const operationsUrl = buildIndexerUrl(
+    settingsStore.settings.indexer,
+    networkType,
+    address.value,
+    "operations",
+  );
+  window.open(operationsUrl, "_blank");
 };
 
 const connect = async () => {

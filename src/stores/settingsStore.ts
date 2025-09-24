@@ -1,3 +1,4 @@
+import { NetworkType } from "@airgap/beacon-types";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
 
@@ -5,6 +6,7 @@ export type IndexerOption = {
   name: string;
   value: string;
   url: string;
+  availableNetworks: NetworkType[];
 };
 
 export const availableIndexers: IndexerOption[] = [
@@ -12,12 +14,18 @@ export const availableIndexers: IndexerOption[] = [
     name: "TzKT",
     value: "tzkt",
     url: "https://[networkType].tzkt.io",
+    availableNetworks: [
+      NetworkType.GHOSTNET,
+      NetworkType.SHADOWNET,
+      NetworkType.SEOULNET,
+    ],
   },
-  // {
-  // 	name: 'Tzstats',
-  // 	value: 'tzstats',
-  // 	url: 'https://[networkType].tzstats.com',
-  // },
+  {
+    name: "Tzstats",
+    value: "tzstats",
+    url: "https://[networkType]tzstats.com",
+    availableNetworks: [NetworkType.GHOSTNET],
+  },
 ];
 
 export type Settings = {
@@ -26,7 +34,12 @@ export type Settings = {
 };
 
 const defaultSettings: Settings = {
-  indexer: availableIndexers[0],
+  indexer:
+    availableIndexers.find((indexer) =>
+      indexer.availableNetworks.includes(
+        import.meta.env.VITE_NETWORK_TYPE as NetworkType,
+      ),
+    ) || availableIndexers[0],
   rpcUrl: import.meta.env.VITE_RPC_URL,
 };
 
