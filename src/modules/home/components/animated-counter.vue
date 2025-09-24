@@ -13,15 +13,18 @@ interface Props {
 const props = defineProps<Props>();
 
 const count = ref(0);
-const duration = 1500; // 1.5 seconds
+const ANIMATION_DURATION_MS = 1500;
+const ANIMATION_DELAY_MS = 300;
 
 onMounted(() => {
   const startTime = Date.now();
   const animate = () => {
     const currentTime = Date.now();
-    const progress = Math.min((currentTime - startTime) / duration, 1);
+    const progress = Math.min(
+      (currentTime - startTime) / ANIMATION_DURATION_MS,
+      1,
+    );
 
-    // Easing function for smooth animation
     const easeOutQuart = 1 - Math.pow(1 - progress, 4);
     count.value = Math.floor(props.target * easeOutQuart);
 
@@ -32,7 +35,7 @@ onMounted(() => {
     }
   };
 
-  setTimeout(() => requestAnimationFrame(animate), 300);
+  setTimeout(() => requestAnimationFrame(animate), ANIMATION_DELAY_MS);
 });
 
 const displayValue = computed(() => `${count.value}${props.suffix ?? ""}`);

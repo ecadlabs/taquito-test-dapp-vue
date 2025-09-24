@@ -465,7 +465,7 @@ import {
   ShieldCheckIcon,
   TrendingUpIcon,
 } from "lucide-vue-next";
-import { computed, onMounted } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 
 const testCount = computed(() => Object.keys(AvailableTests).length);
 
@@ -532,6 +532,7 @@ const scrollToFeatures = () => {
   document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
 };
 
+const observer = ref<IntersectionObserver | null>(null);
 // Intersection Observer for scroll animations
 onMounted(() => {
   const observerOptions = {
@@ -539,7 +540,7 @@ onMounted(() => {
     rootMargin: "0px 0px -50px 0px",
   };
 
-  const observer = new IntersectionObserver((entries) => {
+  observer.value = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
         const delay = parseInt(entry.target.getAttribute("data-delay") || "0");
@@ -550,10 +551,13 @@ onMounted(() => {
     });
   }, observerOptions);
 
-  // Observe all elements with animate-on-scroll class
   document.querySelectorAll(".animate-on-scroll").forEach((el) => {
-    observer.observe(el);
+    observer.value?.observe(el);
   });
+});
+
+onUnmounted(() => {
+  observer.value?.disconnect();
 });
 </script>
 
