@@ -1,0 +1,9 @@
+{
+  "name": "Metadata via HTTPS Example Contract",
+  "description": "A simple counter contract to demonstrate TZIP-16 metadata obtained via HTTPS",
+  "version": "1.0.0",
+  "license": { "name": "MIT" },
+  "authors": ["ECAD Labs"],
+  "homepage": "https://taquito.io",
+  "interfaces": ["TZIP-16"]
+}

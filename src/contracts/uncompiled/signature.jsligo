@@ -1,0 +1,21 @@
+export type storage = unit;
+type ret = [list<operation>, storage];
+
+@entry
+const verifySignature = (params: {
+  public_key: key,
+  signature: signature,
+  payload_bytes: bytes
+}, store: storage): ret => {
+  const check_signature =
+    (pk: key, signed: signature, msg: bytes) =>
+    Crypto.check(pk, signed, msg);
+  
+    const is_valid = check_signature(params.public_key, params.signature, params.payload_bytes);
+
+  if (is_valid) {
+    return [list([]), store];
+  } else {
+    failwith("Invalid signature");
+  };
+};

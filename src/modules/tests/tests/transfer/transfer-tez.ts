@@ -1,100 +1,50 @@
-import { useWalletStore } from "@/stores/walletStore";
+import { getOperationHash } from "@/lib/utils";
 import { useDiagramStore } from "@/stores/diagramStore";
-import { PiggyBank } from 'lucide-vue-next';
-import type { Estimate } from "@taquito/taquito";
+import { useWalletStore } from "@/stores/walletStore";
+import type { Estimate, TransactionWalletOperation } from "@taquito/taquito";
+import { PiggyBank } from "lucide-vue-next";
 
-const TEST_ID = 'transfer';
+const TEST_ID = "transfer";
 
-let estimate: Estimate | undefined = undefined;
+let estimate: Estimate;
 const send = async (to: string, amount: number) => {
-	const diagramStore = useDiagramStore();
-	const walletStore = useWalletStore();
+  const diagramStore = useDiagramStore();
+  const walletStore = useWalletStore();
 
-	const Tezos = walletStore.getTezos;
+  const Tezos = walletStore.getTezos;
 
-	try {
-		// Validate input parameters
-		if (!to || amount <= 0) {
-			throw new Error('Invalid recipient address or amount');
-		}
+  try {
+    // Validate input parameters
+    if (!to || amount <= 0) {
+      throw new Error("Invalid recipient address or amount");
+    }
 
-		diagramStore.setProgress('estimate-fees', 'running', TEST_ID);
-		estimate = await Tezos.estimate.transfer({ to, amount: amount });
+    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
+    estimate = await Tezos.estimate.transfer({ to, amount: amount });
 
-		// Set the button for the estimate-fees node
-		diagramStore.setNodeButton('estimate-fees', {
-			icon: PiggyBank,
-			text: 'View Fees',
-			onClick: showFees
-		});
+    if (estimate) {
+      diagramStore.setNodeButton("estimate-fees", {
+        icon: PiggyBank,
+        text: "View Fees",
+        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
+      });
+    }
 
-		console.log(
-			`burnFeeMutez : ${estimate.burnFeeMutez},
-			gasLimit : ${estimate.gasLimit},
-			minimalFeeMutez : ${estimate.minimalFeeMutez},
-			storageLimit : ${estimate.storageLimit},
-			suggestedFeeMutez : ${estimate.suggestedFeeMutez},
-			totalCost : ${estimate.totalCost},
-			usingBaseFeeMutez : ${estimate.usingBaseFeeMutez}`
-		);
+    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    const transfer: TransactionWalletOperation = await Tezos.wallet
+      .transfer({ to, amount })
+      .send();
 
-		diagramStore.setProgress('wait-for-user', 'running', TEST_ID);
-		const transfer = await Tezos.wallet.transfer({ to, amount }).send();
+    diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
+    const confirmation = await transfer.confirmation();
 
-		diagramStore.setProgress('wait-for-chain-confirmation', 'running', TEST_ID);
-		const confirmation = await transfer.confirmation();
+    const opHash = getOperationHash(confirmation);
+    diagramStore.setOperationHash(opHash, TEST_ID);
+    diagramStore.setProgress("success", "completed", TEST_ID);
+  } catch (error) {
+    console.error(`Failed to send transfer to '${to}': ${error}`);
+    diagramStore.setErrorMessage(error, TEST_ID);
+  }
+};
 
-		if (confirmation?.block.hash) diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
-
-		diagramStore.setProgress('success', 'completed', TEST_ID);
-		await walletStore.fetchBalance();
-	} catch (error) {
-		console.error(`Failed to send transfer to '${to}': ${error}`);
-		diagramStore.setErrorMessage(error, TEST_ID);
-	}
-}
-
-const showFees = () => {
-	const diagramStore = useDiagramStore();
-	const dialogContent = {
-		title: 'Transaction Fees',
-		description: 'Transaction fee breakdown',
-		content: `
-				<div class="space-y-2">
-					<div class="flex justify-between">
-						<span class="font-medium">Burn Fee:</span>
-						<span>${estimate?.burnFeeMutez} mutez</span>
-					</div>
-					<div class="flex justify-between">
-						<span class="font-medium">Gas Limit:</span>
-						<span>${estimate?.gasLimit}</span>
-					</div>
-					<div class="flex justify-between">
-						<span class="font-medium">Minimal Fee:</span>
-						<span>${estimate?.minimalFeeMutez} mutez</span>
-					</div>
-					<div class="flex justify-between">
-						<span class="font-medium">Storage Limit:</span>
-						<span>${estimate?.storageLimit}</span>
-					</div>
-					<div class="flex justify-between">
-						<span class="font-medium">Suggested Fee:</span>
-						<span>${estimate?.suggestedFeeMutez} mutez</span>
-					</div>
-					<div class="flex justify-between">
-						<span class="font-medium">Total Cost:</span>
-						<span>${estimate?.totalCost} mutez</span>
-					</div>
-					<div class="flex justify-between">
-						<span class="font-medium">Using Base Fee:</span>
-						<span>${estimate?.usingBaseFeeMutez} mutez</span>
-					</div>
-				</div>
-			`
-	};
-
-	// Trigger the dialog with custom content
-	diagramStore.openDialog(dialogContent);
-}
-
-export { send, showFees }
+export { send };

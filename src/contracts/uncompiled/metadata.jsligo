@@ -1,0 +1,36 @@
+export type storage = {
+  counter: int,
+  metadata: big_map<string, bytes>
+};
+
+type ret = [list<operation>, storage];
+
+@entry
+const increment = (delta: int, store: storage): ret => {
+  const new_counter = store.counter + delta;
+  const new_storage = { ...store, counter: new_counter };
+  return [list([]), new_storage];
+};
+
+@entry
+const decrement = (delta: int, store: storage): ret => {
+  const new_counter = store.counter - delta;
+  const new_storage = { ...store, counter: new_counter };
+  return [list([]), new_storage];
+};
+
+@entry
+const reset = (_u: unit, store: storage): ret => {
+  const new_storage = { ...store, counter: 0 };
+  return [list([]), new_storage];
+};
+
+@view
+const hello_world = (_param: unit, _store: storage): string => {
+  return "Hello, World!";
+};
+
+@view
+const standards = (_param: unit, _store: storage): string => {
+  return "Situation: there are 14 competing standards. '14?! Ridiculous! We need to develop one universal standard that covers everyone's use cases.' 'Yeah!'. Situation: there are 15 competing standards. https://xkcd.com/927/";
+};

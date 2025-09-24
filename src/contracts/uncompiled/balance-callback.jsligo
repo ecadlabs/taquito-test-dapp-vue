@@ -1,0 +1,50 @@
+export type balance_request = {
+  owner: address,
+  token_id: nat
+};
+
+export type balance_response = {
+  request: balance_request,
+  balance: nat
+};
+
+export type storage = {
+  responses: big_map<address, {data: list<balance_response>, last_updated: timestamp}>,
+  authorized_addresses: list<address>
+};
+
+type ret = [list<operation>, storage];
+
+// Helper function to check if caller is authorized (ie, only the FA2 contract we made can call this)
+const assert_authorized_caller = (authorized_addresses: list<address>): unit => {
+  const caller = Tezos.get_sender();
+  const is_authorized = List.fold_left(
+    ([acc, addr]: [bool, address]): bool => acc || (addr == caller),
+    false,
+    authorized_addresses
+  );
+  if (!is_authorized) {
+    failwith("UNAUTHORIZED_CALLER");
+  };
+};
+
+// Entrypoint to receive balance responses from FA2 contracts
+@entry
+const receive_balances = (responses: list<balance_response>, store: storage): ret => {
+  // Check if the caller is authorized
+  assert_authorized_caller(store.authorized_addresses);
+  
+  // Store responses by sender address to avoid conflicts between different queries
+  const sender = Tezos.get_sender();
+  const updated_responses = Big_map.update(
+    sender,
+    Some({data: responses, last_updated: Tezos.get_now()}),
+    store.responses
+  );
+  
+  const updated_storage = {
+    responses: updated_responses,
+    authorized_addresses: store.authorized_addresses
+  };
+  return [list([]), updated_storage];
+};

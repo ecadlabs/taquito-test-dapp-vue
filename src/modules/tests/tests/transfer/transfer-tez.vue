@@ -1,65 +1,78 @@
 <template>
-	<div class="w-full flex flex-col items-center gap-4">
-		<div>
-			<Label class="mb-1">Wallet Address</Label>
-			<Input placeholder="Wallet address..." v-model="toAddress" class="w-48" />
-		</div>
+  <div class="flex w-full flex-col items-center gap-4">
+    <div>
+      <Label class="mb-1">Wallet Address</Label>
+      <Input placeholder="Wallet address..." v-model="toAddress" class="w-48" />
+    </div>
 
-		<div>
-			<NumberField :min="1" :max="100" v-model="amount">
-				<Label>Amount</Label>
-				<NumberFieldContent class="w-48">
-					<NumberFieldDecrement />
-					<NumberFieldInput />
-					<NumberFieldIncrement />
-				</NumberFieldContent>
-			</NumberField>
-		</div>
-		<Button @click="sendTransfer()" :disabled="sending" class="w-32">
-			<Loader2 v-if="sending" class="w-4 h-4 mr-2 animate-spin" />
-			<p v-else>Send Transfer</p>
-		</Button>
-	</div>
+    <div>
+      <NumberField :min="1" :max="100" v-model="amount">
+        <Label>Amount</Label>
+        <NumberFieldContent class="w-48">
+          <NumberFieldDecrement />
+          <NumberFieldInput />
+          <NumberFieldIncrement />
+        </NumberFieldContent>
+      </NumberField>
+    </div>
+    <Button
+      @click="sendTransfer()"
+      :disabled="sending || !walletStore.getAddress"
+      class="w-32"
+    >
+      <Loader2 v-if="sending" class="mr-2 h-4 w-4 animate-spin" />
+      <p v-else>Send Transfer</p>
+    </Button>
+  </div>
 </template>
 
-<script setup lang='ts'>
-import { useDiagramStore } from '@/stores/diagramStore';
-import { ref, onMounted } from 'vue';
-import { send } from '@/modules/tests/tests/transfer/transfer-tez';
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label'
+<script setup lang="ts">
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-	NumberField,
-	NumberFieldContent,
-	NumberFieldDecrement,
-	NumberFieldIncrement,
-	NumberFieldInput,
-} from '@/components/ui/number-field'
-import { Loader2 } from 'lucide-vue-next';
+  NumberField,
+  NumberFieldContent,
+  NumberFieldDecrement,
+  NumberFieldIncrement,
+  NumberFieldInput,
+} from "@/components/ui/number-field";
+import { send } from "@/modules/tests/tests/transfer/transfer-tez";
+import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
+import { Loader2 } from "lucide-vue-next";
+import { onMounted, ref, watch } from "vue";
 
-// Ghostnet
-// const toAddress = ref<string>('tz1h3rQ8wBxFd8L9B3d7Jhaawu6Z568XU3xY')
-// Seoulnet
-const toAddress = ref<string>('tz1VRj54TQDtUGgv6gF4AbGbXMphyDpVkCpf')
+const walletStore = useWalletStore();
+
+const toAddress = ref<string>(walletStore.getAddress ?? "");
 const amount = ref<number>(1);
 const sending = ref<boolean>(false);
 const diagramStore = useDiagramStore();
 
 onMounted(() => {
-	diagramStore.setTestDiagram('transfer');
+  diagramStore.setTestDiagram("transfer");
 });
 
-const sendTransfer = async () => {
-	if (!toAddress.value) return;
+watch(
+  () => walletStore.getAddress,
+  (newAddress: string | undefined) => {
+    if (typeof newAddress === "string" && newAddress.length > 0) {
+      toAddress.value = newAddress;
+    }
+  },
+);
 
-	try {
-		sending.value = true;
-		await send(toAddress.value, amount.value);
-	} catch (error) {
-		console.error(error);
-	} finally {
-		sending.value = false;
-	}
-}
+const sendTransfer = async () => {
+  if (!toAddress.value) return;
+
+  try {
+    sending.value = true;
+    await send(toAddress.value, amount.value);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    sending.value = false;
+  }
+};
 </script>

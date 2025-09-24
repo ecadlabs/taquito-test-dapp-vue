@@ -1,182 +1,288 @@
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
-import type { TestDiagram } from '@/modules/tests/test';
-import { getTestDiagram } from '@/modules/tests/tests';
+import type { TestDiagram } from "@/modules/tests/test";
+import { getTestDiagram } from "@/modules/tests/tests";
+import { useWalletStore } from "@/stores/walletStore";
+import type { Estimate } from "@taquito/taquito";
+import { defineStore } from "pinia";
+import { ref, type Component } from "vue";
 
 export interface DialogContent {
-	title: string;
-	description?: string;
-	content: string | (() => any); // Can be a string or a function that returns JSX/Vue component
+  title: string;
+  description?: string;
+  content: string; // HTML string
 }
 
-export const useDiagramStore = defineStore('diagram', () => {
-	const currentDiagram = ref<TestDiagram | null>(null);
-	const currentStep = ref<string | null>(null);
-	const diagramStatus = ref<'idle' | 'running' | 'completed' | 'errored'>('idle');
-	const errorMessage = ref();
-	const successful = ref<boolean>(false);
-	const operationHash = ref<string | number>();
-	const currentTestId = ref<string | null>(null);
-	const currentDiagramKey = ref<string | null>(null);
+export interface StepTiming {
+  startTime: DOMHighResTimeStamp;
+  endTime?: DOMHighResTimeStamp;
+  duration?: number;
+}
 
-	// Button state management
-	const nodeButtons = ref<Map<string, { icon: any; text: string; onClick: () => void }>>(new Map());
+export const useDiagramStore = defineStore("diagram", () => {
+  const currentDiagram = ref<TestDiagram | null>(null);
+  const currentStep = ref<string | null>(null);
+  const diagramStatus = ref<"idle" | "running" | "completed" | "errored">(
+    "idle",
+  );
+  const errorMessage = ref();
+  const operationHash = ref<string | number>();
+  const currentTestId = ref<string | null>(null);
+  const currentDiagramKey = ref<string | null>(null);
 
-	// Dialog state management
-	const showDialog = ref<boolean>(false);
-	const dialogContent = ref<DialogContent | null>(null);
+  // Timing tracking for each step
+  const stepTimings = ref<Map<string, StepTiming>>(new Map());
 
-	const setDiagram = (diagram: TestDiagram, testId: string, diagramKey?: string) => {
-		resetDiagram();
-		currentDiagram.value = diagram;
-		currentTestId.value = testId;
-		currentDiagramKey.value = diagramKey || null;
-	};
+  // Button state management
+  const nodeButtons = ref<
+    Map<string, { icon: Component; text: string; onClick: () => void }>
+  >(new Map());
 
-	/**
-	 * Helper function to set the diagram for a specific test and operation
-	 * @param testId - The test ID
-	 * @param diagramKey - Optional diagram key for multi-diagram tests
-	 */
-	const setTestDiagram = (testId: string, diagramKey?: string) => {
-		const diagram = getTestDiagram(testId, diagramKey);
-		if (diagram) {
-			diagram.nodes.forEach(node => {
-				removeNodeButton(node.id);
-			});
-			setDiagram(diagram, testId, diagramKey);
-		}
-	};
+  // Dialog state management
+  const showDialog = ref<boolean>(false);
+  const dialogContent = ref<DialogContent | null>(null);
 
-	const setProgress = (stepId: string, status: 'running' | 'completed', testId?: string) => {
-		if (testId && currentTestId.value !== testId) {
-			return;
-		}
+  const setDiagram = (
+    diagram: TestDiagram,
+    testId: string,
+    diagramKey?: string,
+  ) => {
+    resetDiagram();
+    currentDiagram.value = diagram;
+    currentTestId.value = testId;
+    currentDiagramKey.value = diagramKey || null;
+  };
 
-		// Reset diagram if there was an error - this allows users to retry
-		// and should only run when the user interacts with something, since
-		// if the diagram has errored, no more progress can be made.
-		if (errorMessage.value) {
-			errorMessage.value = undefined;
-			currentStep.value = stepId;
-			diagramStatus.value = status;
-		}
+  /**
+   * Helper function to set the diagram for a specific test and operation
+   *
+   * @param testId - The test ID
+   * @param diagramKey - Optional diagram key for multi-diagram tests
+   */
+  const setTestDiagram = (testId: string, diagramKey?: string) => {
+    const diagram = getTestDiagram(testId, diagramKey);
+    if (diagram) {
+      diagram.nodes.forEach((node) => {
+        removeNodeButton(node.id);
+      });
+      setDiagram(diagram, testId, diagramKey);
+    }
+  };
 
-		if (currentDiagram.value && currentTestId.value) {
-			currentStep.value = stepId;
-			diagramStatus.value = status;
-		}
-	};
+  const setProgress = async (
+    stepId: string,
+    status: "running" | "completed",
+    testId?: string,
+  ) => {
+    if (testId && currentTestId.value !== testId) return;
 
-	const setSuccessful = (testId?: string) => {
-		if (testId && currentTestId.value !== testId) {
-			return;
-		}
-		successful.value = true;
-	}
+    // Reset diagram if there was an error - this allows users to retry
+    // and should only run when the user interacts with something, since
+    // if the diagram has errored, no more progress can be made.
+    if (errorMessage.value) {
+      errorMessage.value = undefined;
+      currentStep.value = stepId;
+      diagramStatus.value = status;
+    }
 
-	const setErrorMessage = (error: unknown, testId?: string) => {
-		if (testId && currentTestId.value !== testId) {
-			return;
-		}
-		errorMessage.value = error;
-		diagramStatus.value = 'errored';
-	}
+    if (currentDiagram.value && currentTestId.value) {
+      if (currentStep.value && currentStep.value !== stepId) {
+        const prevTiming = stepTimings.value.get(currentStep.value);
+        if (prevTiming?.startTime && !prevTiming.endTime) {
+          prevTiming.endTime = performance.now();
+          prevTiming.duration = prevTiming.endTime - prevTiming.startTime;
+        }
+      }
+      stepTimings.value.set(stepId, { startTime: performance.now() });
 
-	const setOperationHash = (hash: string | number, testId?: string) => {
-		if (testId && currentTestId.value !== testId) {
-			return;
-		}
-		operationHash.value = hash;
-	}
+      currentStep.value = stepId;
+      diagramStatus.value = status;
 
-	/**
-	 * Set a button for a specific node
-	 * @param nodeId - The node ID to add the button to
-	 * @param button - The button configuration
-	 */
-	const setNodeButton = (nodeId: string, button: { icon: any; text: string; onClick: () => void }) => {
-		nodeButtons.value.set(nodeId, button);
-	};
+      if (status === "completed") {
+        await useWalletStore().fetchBalance();
+      }
+    }
+  };
 
-	/**
-	 * Remove a button from a specific node
-	 * @param nodeId - The node ID to remove the button from
-	 */
-	const removeNodeButton = (nodeId: string) => {
-		nodeButtons.value.delete(nodeId);
-	};
+  const setErrorMessage = (error: unknown, testId?: string) => {
+    if (testId && currentTestId.value !== testId) {
+      return;
+    }
 
-	/**
-	 * Get a button for a specific node
-	 * @param nodeId - The node ID to get the button for
-	 */
-	const getNodeButton = (nodeId: string) => {
-		return nodeButtons.value.get(nodeId);
-	};
+    // Track timing for the current step when it errors
+    if (currentStep.value) {
+      const timing = stepTimings.value.get(currentStep.value);
+      if (timing) {
+        timing.endTime = performance.now();
+        timing.duration = timing.endTime - timing.startTime;
+      }
+    }
 
-	/**
-	 * Show a dialog with custom content
-	 * @param content - The dialog content configuration
-	 */
-	const openDialog = (content: DialogContent) => {
-		dialogContent.value = content;
-		showDialog.value = true;
-	};
+    errorMessage.value = error;
+    diagramStatus.value = "errored";
+  };
 
-	/**
-	 * Hide the dialog
-	 */
-	const closeDialog = () => {
-		showDialog.value = false;
-		dialogContent.value = null;
-	};
+  const setOperationHash = (hash: string | number, testId?: string) => {
+    if (testId && currentTestId.value !== testId) {
+      return;
+    }
+    operationHash.value = hash;
+  };
 
-	const resetDiagram = () => {
-		if (currentDiagram.value) {
-			currentDiagram.value = null;
-			currentStep.value = null;
-			diagramStatus.value = 'idle';
-			errorMessage.value = undefined;
-			successful.value = false;
-			operationHash.value = undefined;
-			currentTestId.value = null;
-			currentDiagramKey.value = null;
-			nodeButtons.value.clear();
-			showDialog.value = false;
-			dialogContent.value = null;
-		}
-	};
+  /**
+   * Get timing information for a specific step
+   *
+   * @param stepId - The step ID to get timing for
+   * @returns StepTiming object or undefined if not found
+   */
+  const getStepTiming = (stepId: string): StepTiming | undefined => {
+    return stepTimings.value.get(stepId);
+  };
 
-	const cancelCurrentTest = () => {
-		if (currentTestId.value) {
-			resetDiagram();
-		}
-	};
+  /**
+   * Get all step timings for the current diagram
+   *
+   * @returns Map of step ID to timing information
+   */
+  const getAllStepTimings = (): Map<string, StepTiming> => {
+    return stepTimings.value;
+  };
 
-	return {
-		currentDiagram,
-		currentStep,
-		diagramStatus,
-		errorMessage,
-		operationHash,
-		currentTestId,
-		currentDiagramKey,
-		nodeButtons,
-		showDialog,
-		dialogContent,
-		setDiagram,
-		setTestDiagram,
-		setProgress,
-		resetDiagram,
-		setSuccessful,
-		setErrorMessage,
-		setOperationHash,
-		setNodeButton,
-		removeNodeButton,
-		getNodeButton,
-		openDialog,
-		closeDialog,
-		cancelCurrentTest,
-	};
-}); 
+  /**
+   * Set a button for a specific node
+   *
+   * @param nodeId - The node ID to add the button to
+   * @param button - The button configuration
+   */
+  const setNodeButton = (
+    nodeId: string,
+    button: { icon: Component; text: string; onClick: () => void },
+  ) => {
+    nodeButtons.value.set(nodeId, button);
+  };
+
+  /**
+   * Remove a button from a specific node
+   *
+   * @param nodeId - The node ID to remove the button from
+   */
+  const removeNodeButton = (nodeId: string) => {
+    nodeButtons.value.delete(nodeId);
+  };
+
+  /**
+   * Get a button for a specific node
+   *
+   * @param nodeId - The node ID to get the button for
+   */
+  const getNodeButton = (nodeId: string) => {
+    return nodeButtons.value.get(nodeId);
+  };
+
+  /**
+   * Show a dialog with custom content
+   *
+   * @param content - The dialog content configuration
+   */
+  const openDialog = (content: DialogContent) => {
+    dialogContent.value = content;
+    showDialog.value = true;
+  };
+
+  /** Hide the dialog */
+  const closeDialog = () => {
+    showDialog.value = false;
+    dialogContent.value = null;
+  };
+
+  const resetDiagram = () => {
+    if (currentDiagram.value) {
+      currentDiagram.value = null;
+      currentStep.value = null;
+      diagramStatus.value = "idle";
+      errorMessage.value = undefined;
+      operationHash.value = undefined;
+      currentTestId.value = null;
+      currentDiagramKey.value = null;
+      stepTimings.value.clear();
+      nodeButtons.value.clear();
+      showDialog.value = false;
+      dialogContent.value = null;
+    }
+  };
+
+  const cancelCurrentTest = () => {
+    if (currentTestId.value) {
+      resetDiagram();
+    }
+  };
+
+  const showFeeEstimationDialog = (estimate: Estimate) => {
+    const dialogContent = {
+      title: "Transaction Fee Estimate",
+      description:
+        "Transaction fee estimate breakdown for the current operation.",
+      content: `
+					<div class="space-y-2">
+						<div class="flex justify-between">
+							<span class="font-medium">Burn Fee:</span>
+							<span>${estimate.burnFeeMutez} mutez</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Gas Limit:</span>
+							<span>${estimate.gasLimit}</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Minimal Fee:</span>
+							<span>${estimate.minimalFeeMutez} mutez</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Storage Limit:</span>
+							<span>${estimate.storageLimit}</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Suggested Fee:</span>
+							<span>${estimate.suggestedFeeMutez} mutez</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Total Cost:</span>
+							<span>${estimate.totalCost} mutez</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-medium">Using Base Fee:</span>
+							<span>${estimate.usingBaseFeeMutez} mutez</span>
+						</div>
+					</div>
+				`,
+    };
+
+    openDialog(dialogContent);
+  };
+
+  return {
+    currentDiagram,
+    currentStep,
+    diagramStatus,
+    errorMessage,
+    operationHash,
+    currentTestId,
+    currentDiagramKey,
+    stepTimings,
+    nodeButtons,
+    showDialog,
+    dialogContent,
+    setDiagram,
+    setTestDiagram,
+    setProgress,
+    resetDiagram,
+    setErrorMessage,
+    setOperationHash,
+    getStepTiming,
+    getAllStepTimings,
+    setNodeButton,
+    removeNodeButton,
+    getNodeButton,
+    openDialog,
+    closeDialog,
+    cancelCurrentTest,
+    showFeeEstimationDialog,
+  };
+});

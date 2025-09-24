@@ -25,4 +25,13 @@ dist-ssr
 
 .env
 .ligo
-src/contracts/contract-config.json
+.cursor
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+contract-config.json
+/src/contracts/compiled/
