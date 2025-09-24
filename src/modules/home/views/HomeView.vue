@@ -445,6 +445,7 @@
 
 <script setup lang="ts">
 import { Button } from "@/components/ui/button";
+import AnimatedCounter from "@/modules/home/components/animated-counter.vue";
 import {
   AvailableTests,
   getTestById,
@@ -464,48 +465,7 @@ import {
   ShieldCheckIcon,
   TrendingUpIcon,
 } from "lucide-vue-next";
-import { computed, defineComponent, onMounted, ref } from "vue";
-
-// Animated Counter Component
-const AnimatedCounter = defineComponent({
-  props: {
-    target: {
-      type: Number,
-      required: true,
-    },
-    suffix: {
-      type: String,
-      default: "",
-    },
-  },
-  setup(props) {
-    const count = ref(0);
-    const duration = 1500; // 1.5 seconds
-
-    onMounted(() => {
-      const startTime = Date.now();
-      const animate = () => {
-        const currentTime = Date.now();
-        const progress = Math.min((currentTime - startTime) / duration, 1);
-
-        // Easing function for smooth animation
-        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-        count.value = Math.floor(props.target * easeOutQuart);
-
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          count.value = props.target;
-        }
-      };
-
-      // Start animation after a small delay
-      setTimeout(() => requestAnimationFrame(animate), 300);
-    });
-
-    return () => `${count.value}${props.suffix}`;
-  },
-});
+import { computed, onMounted } from "vue";
 
 const testCount = computed(() => Object.keys(AvailableTests).length);
 
