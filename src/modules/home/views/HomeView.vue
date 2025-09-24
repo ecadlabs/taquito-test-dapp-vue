@@ -543,7 +543,10 @@ onMounted(() => {
   observer.value = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        const delay = parseInt(entry.target.getAttribute("data-delay") || "0");
+        const delay = parseInt(
+          entry.target.getAttribute("data-delay") || "0",
+          10,
+        );
         setTimeout(() => {
           entry.target.classList.add("animate-in");
         }, delay);

@@ -17,15 +17,15 @@ const ANIMATION_DURATION_MS = 1500;
 const ANIMATION_DELAY_MS = 300;
 
 onMounted(() => {
-  const startTime = Date.now();
+  const startTime = performance.now();
   const animate = () => {
-    const currentTime = Date.now();
+    const currentTime = performance.now();
     const progress = Math.min(
       (currentTime - startTime) / ANIMATION_DURATION_MS,
       1,
     );
 
-    const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+    const easeOutQuart = 1 - Math.pow(1 - progress, 2.15);
     count.value = Math.floor(props.target * easeOutQuart);
 
     if (progress < 1) {
