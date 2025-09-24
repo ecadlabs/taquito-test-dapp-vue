@@ -33,6 +33,7 @@ export const buildIndexerUrl = (
     }
     return identifier ? `${baseUrl}/${identifier}` : baseUrl;
   }
+  throw new Error(`Unsupported indexer value: ${indexer.value}`);
 };
 
 export const isRevealed = async (address: string): Promise<boolean> => {
