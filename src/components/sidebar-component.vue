@@ -21,6 +21,7 @@
               >
                 <RouterLink
                   :to="{ name: 'tests', params: { test: childItem.test } }"
+                  @click="handleNavigationClick"
                 >
                   {{ childItem.title }}
                 </RouterLink>
@@ -46,15 +47,23 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { getAllCategories, getTestsByCategory } from "@/modules/tests/tests";
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
+const { isMobile, setOpenMobile } = useSidebar();
 
 const isItemActive = (testParam: string) => {
   return route.name === "tests" && route.params.test === testParam;
+};
+
+const handleNavigationClick = () => {
+  if (isMobile.value) {
+    setOpenMobile(false);
+  }
 };
 
 const data = computed(() => {
