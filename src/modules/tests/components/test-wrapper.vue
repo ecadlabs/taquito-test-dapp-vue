@@ -8,26 +8,33 @@
           <h1 class="text-2xl font-bold tracking-tight">
             {{ testMetadata.title }}
           </h1>
-          <template v-if="testMetadata.contractApi">
-            <Badge variant="warning" class="mt-0.5 ml-1 text-xs">
-              Contract API
-            </Badge>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info class="text-muted-foreground mt-0.5 h-4 w-4" />
-                </TooltipTrigger>
-                <TooltipContent class="w-48">
-                  <p>
-                    This test uses the Taquito contract API. It will only work
-                    with the programmatic testing wallet (manually entered
-                    private key).
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </template>
+          <Badge
+            v-if="testMetadata.contractApi"
+            variant="warning"
+            class="mt-0.5 ml-1 text-xs"
+          >
+            Contract API
+          </Badge>
         </div>
+        <Alert
+          v-if="
+            testMetadata.contractApi &&
+            walletStore.getWalletName !== 'programmatic'
+          "
+          class="my-4 w-full lg:w-1/2"
+        >
+          <AlertTitle
+            class="text-warning flex items-center gap-1 font-semibold"
+          >
+            <TriangleAlert class="text-warning size-4" />
+            <p>Heads up!</p>
+          </AlertTitle>
+          <AlertDescription>
+            This test uses the Taquito contract API. It will not work with a
+            normal wallet connected. It will only work if you've manually
+            entered a private key as your connection method.
+          </AlertDescription>
+        </Alert>
         <p
           class="text-muted-foreground w-full text-base whitespace-pre-line xl:w-2/3 2xl:w-1/2"
         >
@@ -189,30 +196,28 @@
 
 <script setup lang="ts">
 import TestDiagram from "@/components/test-diagram.vue";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import type { TestMetadata } from "@/modules/tests/test";
 import { getTestById } from "@/modules/tests/tests";
 import { useDiagramStore } from "@/stores/diagramStore";
+import { useWalletStore } from "@/stores/walletStore";
 import {
   ArrowRight,
   BookOpenText,
   Code,
   FileCode,
   FileText,
-  Info,
   Link,
   Settings,
+  TriangleAlert,
   Workflow,
 } from "lucide-vue-next";
 import { computed, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
+
+const walletStore = useWalletStore();
 
 const route = useRoute();
 const testId = computed(() => route.params.test as string);
