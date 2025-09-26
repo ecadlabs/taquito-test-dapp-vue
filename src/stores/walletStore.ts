@@ -82,7 +82,10 @@ export const useWalletStore = defineStore("wallet", () => {
     localStorage.removeItem("wallet-provider");
 
     // Reset Tezos provider to clear any configured signers/wallets
-    Tezos.setProvider({ signer: undefined, wallet: undefined });
+    // and recreate a fresh instance to fully clear any imported keys.
+    // This is necessary because importKey() persists keys in the toolkit instance.
+    const freshTezos = new TezosToolkit(settingsStore.settings.rpcUrl);
+    Object.assign(Tezos, freshTezos);
   };
 
   /** Initializes a Beacon wallet */
