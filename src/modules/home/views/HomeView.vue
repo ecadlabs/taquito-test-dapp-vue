@@ -679,7 +679,7 @@ onUnmounted(() => {
 }
 
 /* Responsive adjustments */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .floating-orb {
     filter: blur(20px);
   }
