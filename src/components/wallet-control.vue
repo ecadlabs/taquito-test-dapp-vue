@@ -67,7 +67,7 @@
         <DialogTitle>Connect Wallet</DialogTitle>
         <DialogDescription>
           <div>
-            <div class="flex flex-wrap items-center space-x-1">
+            <div class="flex flex-wrap items-center space-x-1 text-left">
               <span>Taquito Playground supports both</span>
               <a
                 href="https://www.walletbeacon.io/"
@@ -85,7 +85,7 @@
               <p>Select your preference and hit connect to get started.</p>
             </div>
 
-            <p class="mt-2 italic">
+            <p class="mt-2 text-left italic">
               Just a note: when building your own dApp, you shouldn't use both
               Beacon and WalletConnect. Instead, you should pick one that works
               best for your use-case. We use both here for testing and
