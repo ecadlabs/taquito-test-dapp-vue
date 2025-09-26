@@ -206,7 +206,7 @@ export const useWalletStore = defineStore("wallet", () => {
           getActiveAccount: async () => ({
             address: importedAddress,
           }),
-          getPeers: async () => [{ name: "Programmatic Wallet" }],
+          getPeers: async () => [{ name: "Raw Private Key Access" }],
           disconnect: async () => Promise.resolve(),
           clearActiveAccount: async () => Promise.resolve(),
         },
@@ -215,7 +215,7 @@ export const useWalletStore = defineStore("wallet", () => {
       };
       wallet.value = mockWallet;
       address.value = await mockWallet.getPKH();
-      walletName.value = "Programmatic Wallet";
+      walletName.value = "Raw Private Key Access";
       Tezos.setProvider({ signer });
     } catch (error) {
       console.error("Failed to initialize programmatic wallet:", error);

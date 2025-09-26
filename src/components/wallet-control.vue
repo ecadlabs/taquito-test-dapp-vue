@@ -133,7 +133,7 @@
             <p>Important!</p>
           </AlertTitle>
           <AlertDescription>
-            The programmatic wallet is designed for testing purposes only, such
+            Raw private key access is designed for testing purposes only, such
             as automated test scripts. It has less security measures and will
             NOT ask for confirmation before carrying out operations. This should
             not be used with a real, personally owned wallet key.
@@ -150,16 +150,14 @@
               <SelectItem value="walletconnect"> WalletConnect </SelectItem>
               <SelectItem value="ledger"> Ledger Device </SelectItem>
               <SelectItem value="programmatic">
-                Programmatic (Testing)
+                Raw Private Key Access
               </SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div v-if="provider === 'programmatic'" class="mt-2 space-y-2">
-          <Label :for="privateKeyInputId">
-            Programmatic wallet private key
-          </Label>
+          <Label :for="privateKeyInputId"> Private Key </Label>
           <Input
             :id="privateKeyInputId"
             v-model="privateKey"
