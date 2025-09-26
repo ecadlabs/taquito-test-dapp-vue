@@ -1,9 +1,9 @@
 <template>
-  <div class="flex h-[calc(100dvh-4.5rem)] w-full">
+  <div class="flex min-h-screen w-full">
     <div
-      class="sticky [top:4.5rem] z-10 h-[calc(100dvh-4.5rem)] max-h-[calc(100dvh-4.5rem)] w-full self-start overflow-hidden"
+      class="sticky [top:4.5rem] z-10 min-h-[calc(100vh-4.5rem)] w-full self-start"
     >
-      <SidebarProvider class="h-full !min-h-fit">
+      <SidebarProvider class="min-h-full">
         <SidebarComponent />
         <SidebarInset>
           <header class="my-4 flex shrink-0 items-center gap-2 px-4">
@@ -25,10 +25,7 @@
               </BreadcrumbList>
             </Breadcrumb>
           </header>
-          <div
-            ref="scrollContainer"
-            class="flex-1 overflow-auto overscroll-contain"
-          >
+          <div class="flex-1">
             <TestWrapper v-if="currentTestComponent">
               <component
                 :is="currentTestComponent"
@@ -74,22 +71,19 @@ import {
   defineAsyncComponent,
   onBeforeUnmount,
   onMounted,
-  ref,
   watch,
 } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
-const scrollContainer = ref<HTMLElement>();
 const diagramStore = useDiagramStore();
 
 // Watch for route changes to reset diagram when navigating between tests or away from tests
 watch(
   () => route.params.test,
   (newTest, oldTest) => {
-    if (scrollContainer.value) {
-      scrollContainer.value.scrollTop = 0;
-    }
+    // Scroll to top of page when test changes
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
     // Cancel current test and reset diagram when test changes or when navigating away from tests
     if (newTest !== oldTest) {
