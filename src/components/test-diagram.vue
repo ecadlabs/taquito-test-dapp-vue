@@ -1,6 +1,6 @@
 <template>
   <div class="relative w-full overflow-auto" ref="diagram-container">
-    <div class="relative h-[180px] min-w-full">
+    <div class="relative min-w-full" :style="{ height: `${diagramHeight}px` }">
       <!-- Connections layer -->
       <div
         class="pointer-events-none absolute top-0 left-0 z-[1] h-full w-full"
@@ -102,7 +102,8 @@
             </p>
             <p
               v-if="node.type === 'error'"
-              class="mt-1 text-red-400"
+              ref="errorTextRef"
+              class="mx-auto mt-1 w-[300px] text-red-400"
               role="status"
               aria-live="assertive"
             >
@@ -133,7 +134,15 @@ import type { DiagramNode } from "@/modules/tests/test";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { Hash } from "lucide-vue-next";
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  useTemplateRef,
+  watch,
+} from "vue";
 
 // Extended node type for internal use
 type TypedNode = DiagramNode & {
@@ -144,6 +153,8 @@ const diagramStore = useDiagramStore();
 const settingsStore = useSettingsStore();
 
 const diagramContainer = useTemplateRef("diagram-container");
+const errorTextRef = useTemplateRef("errorTextRef");
+const errorTextHeight = ref(0);
 
 const verticalSpacing = 50;
 const horizontalMargin = 80;
@@ -257,6 +268,17 @@ const positionedNodes = computed((): TypedNode[] => {
   return [startNode, ...positionedMainNodes, errorNode, successNode];
 });
 
+const diagramHeight = computed(() => {
+  const baseHeight = 180;
+
+  // If there's an error message, add the measured error text height
+  if (errorMessage.value && errorTextHeight.value > 0) {
+    return baseHeight + errorTextHeight.value;
+  }
+
+  return baseHeight;
+});
+
 // Allows for quickly looking up keys without having to run expensive find operations on positionedNodes
 const nodeMap = computed(() => {
   const map = new Map<string, TypedNode>();
@@ -309,6 +331,25 @@ onMounted(() => {
     observer.disconnect();
   });
 });
+
+// Watch for error message changes and measure the error text height
+watch(
+  [errorMessage, errorTextRef],
+  async () => {
+    if (errorMessage.value && errorTextRef.value) {
+      await nextTick(); // Wait for DOM to update
+      const errorTextElement = Array.isArray(errorTextRef.value)
+        ? errorTextRef.value[0]
+        : errorTextRef.value;
+      if (errorTextElement) {
+        errorTextHeight.value = errorTextElement.offsetHeight;
+      }
+    } else {
+      errorTextHeight.value = 0;
+    }
+  },
+  { immediate: true },
+);
 
 const connections = computed(() => {
   if (!positionedNodes.value.length) return [];
