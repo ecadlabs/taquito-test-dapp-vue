@@ -1,7 +1,7 @@
 <template>
-  <div class="flex h-[calc(100vh-4.5rem)] w-full">
+  <div class="flex h-[calc(100dvh-4.5rem)] w-full">
     <div
-      class="sticky [top:4.5rem] z-10 h-[calc(100vh-4.5rem)] max-h-[calc(100vh-4.5rem)] w-full self-start overflow-hidden"
+      class="sticky [top:4.5rem] z-10 h-[calc(100dvh-4.5rem)] max-h-[calc(100dvh-4.5rem)] w-full self-start overflow-hidden"
     >
       <SidebarProvider class="h-full !min-h-fit">
         <SidebarComponent />
@@ -25,7 +25,10 @@
               </BreadcrumbList>
             </Breadcrumb>
           </header>
-          <div ref="scrollContainer" class="flex-1 overflow-auto">
+          <div
+            ref="scrollContainer"
+            class="flex-1 overflow-auto overscroll-contain"
+          >
             <TestWrapper v-if="currentTestComponent">
               <component
                 :is="currentTestComponent"
