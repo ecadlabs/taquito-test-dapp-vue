@@ -273,7 +273,7 @@ const statusType = ref<"success" | "error" | "info">("info");
 const txHash = ref<string>("");
 const isCooldown = ref<boolean>(false);
 const cooldownTimeLeft = ref<number>(0);
-const cooldownTimer = ref<NodeJS.Timeout | null>(null);
+const cooldownTimer = ref<number | null>(null);
 
 // Computed properties
 const isValidAmount = computed(() => {
