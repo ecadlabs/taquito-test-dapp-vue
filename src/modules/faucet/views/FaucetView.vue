@@ -310,7 +310,7 @@ const startCooldown = () => {
   isCooldown.value = true;
   cooldownTimeLeft.value = FAUCET_COOLDOWN_TIME_SECONDS;
 
-  cooldownTimer.value = setInterval(() => {
+  cooldownTimer.value = window.setInterval(() => {
     cooldownTimeLeft.value--;
     if (cooldownTimeLeft.value <= 0) {
       if (cooldownTimer.value) {
