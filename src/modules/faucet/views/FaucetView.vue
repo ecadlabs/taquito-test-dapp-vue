@@ -262,6 +262,8 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 
 const walletStore = useWalletStore();
 
+const ONE_XTZ_IN_MUTEZ = 1000000;
+
 // Reactive state
 const requestAmount = ref<number>(1);
 const isLoading = ref<boolean>(false);
@@ -279,7 +281,7 @@ const isValidAmount = computed(() => {
 const hasExceededLimit = computed(() => {
   if (!walletStore.getBalance) return false;
   // Convert from mutez to XTZ and check if > 50
-  const balanceInXtz = walletStore.getBalance.toNumber() / 1000000;
+  const balanceInXtz = walletStore.getBalance.toNumber() / ONE_XTZ_IN_MUTEZ;
   return balanceInXtz > 50;
 });
 
@@ -292,7 +294,7 @@ const formatAddress = (address: string | undefined): string => {
 const formatBalance = (balance: BigNumber | undefined): string => {
   if (!balance) return "0";
   // Convert from mutez to XTZ
-  const xtz = balance.toNumber() / 1000000;
+  const xtz = balance.toNumber() / ONE_XTZ_IN_MUTEZ;
   return xtz.toFixed(2);
 };
 
