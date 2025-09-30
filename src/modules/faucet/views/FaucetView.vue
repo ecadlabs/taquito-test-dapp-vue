@@ -263,6 +263,7 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 const walletStore = useWalletStore();
 
 const ONE_XTZ_IN_MUTEZ = 1000000;
+const FAUCET_COOLDOWN_TIME_SECONDS = 10;
 
 // Reactive state
 const requestAmount = ref<number>(1);
@@ -272,6 +273,7 @@ const statusType = ref<"success" | "error" | "info">("info");
 const txHash = ref<string>("");
 const isCooldown = ref<boolean>(false);
 const cooldownTimeLeft = ref<number>(0);
+const cooldownTimer = ref<NodeJS.Timeout | null>(null);
 
 // Computed properties
 const isValidAmount = computed(() => {
@@ -300,13 +302,21 @@ const formatBalance = (balance: BigNumber | undefined): string => {
 
 // Cooldown function
 const startCooldown = () => {
-  isCooldown.value = true;
-  cooldownTimeLeft.value = 10;
+  // Clear any existing timer
+  if (cooldownTimer.value) {
+    clearInterval(cooldownTimer.value);
+  }
 
-  const timer = setInterval(() => {
+  isCooldown.value = true;
+  cooldownTimeLeft.value = FAUCET_COOLDOWN_TIME_SECONDS;
+
+  cooldownTimer.value = setInterval(() => {
     cooldownTimeLeft.value--;
     if (cooldownTimeLeft.value <= 0) {
-      clearInterval(timer);
+      if (cooldownTimer.value) {
+        clearInterval(cooldownTimer.value);
+        cooldownTimer.value = null;
+      }
       isCooldown.value = false;
       cooldownTimeLeft.value = 0;
     }
@@ -401,6 +411,10 @@ onMounted(() => {
 
 onUnmounted(() => {
   observer.value?.disconnect();
+  if (cooldownTimer.value) {
+    clearInterval(cooldownTimer.value);
+    cooldownTimer.value = null;
+  }
 });
 </script>
 
