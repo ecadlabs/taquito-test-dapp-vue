@@ -321,9 +321,15 @@ const requestTez = async () => {
   txHash.value = "";
 
   try {
+    const faucetUrl = import.meta.env.VITE_FAUCET_URL;
+
+    if (!faucetUrl) {
+      throw new Error("Faucet URL is not set");
+    }
+
     // Since challenges and captcha are disabled, we can directly call verify
     // TODO: Change once we enable captcha and challenges
-    const response = await fetch(`${import.meta.env.VITE_FAUCET_URL}/verify`, {
+    const response = await fetch(`${faucetUrl}/verify`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
