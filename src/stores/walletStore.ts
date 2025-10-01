@@ -3,6 +3,7 @@ import type { ProgrammaticWallet, WalletProvider } from "@/types/wallet";
 import { BeaconEvent } from "@airgap/beacon-dapp";
 import { NetworkType } from "@airgap/beacon-types";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
+import * as Sentry from "@sentry/vue";
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { LedgerSigner } from "@taquito/ledger-signer";
 import { importKey, InMemorySigner } from "@taquito/signer";
@@ -49,6 +50,7 @@ export const useWalletStore = defineStore("wallet", () => {
       }
     } catch (error) {
       console.error("Error getting address:", error);
+      Sentry.captureException(error);
       return undefined;
     }
   };
@@ -65,6 +67,7 @@ export const useWalletStore = defineStore("wallet", () => {
       }
     } catch (error) {
       console.error("Error getting public key:", error);
+      Sentry.captureException(error);
       return undefined;
     }
   };
@@ -225,6 +228,7 @@ export const useWalletStore = defineStore("wallet", () => {
       throw new Error(
         `Programmatic wallet initialization failed: ${error instanceof Error ? error.message : String(error)}`,
       );
+      Sentry.captureException(error);
     }
   };
 
@@ -323,6 +327,7 @@ export const useWalletStore = defineStore("wallet", () => {
         error,
       );
       resetWalletState();
+      Sentry.captureException(error);
       throw error;
     }
   };
@@ -384,6 +389,7 @@ export const useWalletStore = defineStore("wallet", () => {
       balance.value = await Tezos.tz.getBalance(address.value);
     } catch (error) {
       console.error("Error fetching balance:", error);
+      Sentry.captureException(error);
       throw error;
     }
   };

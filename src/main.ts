@@ -14,6 +14,7 @@ Sentry.init({
   app,
   dsn: import.meta.env.VITE_SENTRY_DSN,
   sendDefaultPii: false,
+  defaultIntegrations: false,
 });
 
 app.use(router);
