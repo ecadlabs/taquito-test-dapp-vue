@@ -67,7 +67,7 @@
         <DialogTitle>Connect Wallet</DialogTitle>
         <DialogDescription>
           <div>
-            <div class="flex flex-wrap items-center space-x-1">
+            <div class="flex flex-wrap items-center space-x-1 text-left">
               <span>Taquito Playground supports both</span>
               <a
                 href="https://www.walletbeacon.io/"
@@ -85,7 +85,7 @@
               <p>Select your preference and hit connect to get started.</p>
             </div>
 
-            <p class="mt-2 italic">
+            <p class="mt-2 text-left italic">
               Just a note: when building your own dApp, you shouldn't use both
               Beacon and WalletConnect. Instead, you should pick one that works
               best for your use-case. We use both here for testing and
@@ -133,7 +133,7 @@
             <p>Important!</p>
           </AlertTitle>
           <AlertDescription>
-            The programmatic wallet is designed for testing purposes only, such
+            Raw private key access is designed for testing purposes only, such
             as automated test scripts. It has less security measures and will
             NOT ask for confirmation before carrying out operations. This should
             not be used with a real, personally owned wallet key.
@@ -150,16 +150,14 @@
               <SelectItem value="walletconnect"> WalletConnect </SelectItem>
               <SelectItem value="ledger"> Ledger Device </SelectItem>
               <SelectItem value="programmatic">
-                Programmatic (Testing)
+                Raw Private Key Access
               </SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div v-if="provider === 'programmatic'" class="mt-2 space-y-2">
-          <Label :for="privateKeyInputId">
-            Programmatic wallet private key
-          </Label>
+          <Label :for="privateKeyInputId"> Private Key </Label>
           <Input
             :id="privateKeyInputId"
             v-model="privateKey"
@@ -367,12 +365,15 @@ const copyAddress = () => {
 };
 
 const networkType = import.meta.env.VITE_NETWORK_TYPE;
-const indexerUrl = computed(() =>
-  buildIndexerUrl(settingsStore.settings.indexer, networkType),
-);
 
 const openExplorer = () => {
-  window.open(`${indexerUrl.value}/${address.value}/operations`, "_blank");
+  const operationsUrl = buildIndexerUrl(
+    settingsStore.settings.indexer,
+    networkType,
+    address.value,
+    "operations",
+  );
+  window.open(operationsUrl, "_blank");
 };
 
 const connect = async () => {

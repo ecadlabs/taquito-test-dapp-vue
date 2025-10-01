@@ -12,8 +12,28 @@ export function cn(...inputs: ClassValue[]) {
 export const buildIndexerUrl = (
   indexer: IndexerOption,
   networkType: string,
+  identifier?: string,
+  routeType: "contract" | "operations" = "contract",
 ) => {
-  return indexer.url.replace("[networkType]", networkType);
+  if (indexer.value === "tzkt") {
+    const baseUrl = indexer.url.replace("[networkType]", networkType);
+    if (routeType === "operations") {
+      return identifier ? `${baseUrl}/${identifier}/operations` : baseUrl;
+    }
+    return identifier ? `${baseUrl}/${identifier}/storage` : baseUrl;
+  } else if (indexer.value === "tzstats") {
+    let prefix = "";
+    if (networkType === "ghostnet") {
+      prefix = "ghost.";
+    }
+
+    const baseUrl = indexer.url.replace("[networkType]", prefix);
+    if (routeType === "operations") {
+      return identifier ? `${baseUrl}/${identifier}/operations` : baseUrl;
+    }
+    return identifier ? `${baseUrl}/${identifier}` : baseUrl;
+  }
+  throw new Error(`Unsupported indexer value: ${indexer.value}`);
 };
 
 export const isRevealed = async (address: string): Promise<boolean> => {

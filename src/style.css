@@ -197,5 +197,7 @@
     @apply bg-background text-foreground;
     /* Prevent elastic scroll from affecting layout */
     overscroll-behavior: none;
+    /* Improve mobile scrolling */
+    -webkit-overflow-scrolling: touch;
   }
 }

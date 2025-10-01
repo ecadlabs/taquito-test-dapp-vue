@@ -82,7 +82,10 @@ export const useWalletStore = defineStore("wallet", () => {
     localStorage.removeItem("wallet-provider");
 
     // Reset Tezos provider to clear any configured signers/wallets
-    Tezos.setProvider({ signer: undefined, wallet: undefined });
+    // and recreate a fresh instance to fully clear any imported keys.
+    // This is necessary because importKey() persists keys in the toolkit instance.
+    const freshTezos = new TezosToolkit(settingsStore.settings.rpcUrl);
+    Object.assign(Tezos, freshTezos);
   };
 
   /** Initializes a Beacon wallet */
@@ -206,7 +209,7 @@ export const useWalletStore = defineStore("wallet", () => {
           getActiveAccount: async () => ({
             address: importedAddress,
           }),
-          getPeers: async () => [{ name: "Programmatic Wallet" }],
+          getPeers: async () => [{ name: "Raw Private Key Access" }],
           disconnect: async () => Promise.resolve(),
           clearActiveAccount: async () => Promise.resolve(),
         },
@@ -215,7 +218,7 @@ export const useWalletStore = defineStore("wallet", () => {
       };
       wallet.value = mockWallet;
       address.value = await mockWallet.getPKH();
-      walletName.value = "Programmatic Wallet";
+      walletName.value = "Raw Private Key Access";
       Tezos.setProvider({ signer });
     } catch (error) {
       console.error("Failed to initialize programmatic wallet:", error);

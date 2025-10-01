@@ -3,7 +3,7 @@ import { getTestDiagram } from "@/modules/tests/tests";
 import { useWalletStore } from "@/stores/walletStore";
 import type { Estimate } from "@taquito/taquito";
 import { defineStore } from "pinia";
-import { ref, type Component } from "vue";
+import { ref, watch, type Component } from "vue";
 
 export interface DialogContent {
   title: string;
@@ -214,6 +214,20 @@ export const useDiagramStore = defineStore("diagram", () => {
       resetDiagram();
     }
   };
+
+  watch(
+    () => useWalletStore().getWallet,
+    (newWallet, oldWallet) => {
+      if (
+        oldWallet &&
+        !newWallet &&
+        currentTestId.value &&
+        diagramStatus.value === "running"
+      ) {
+        window.location.reload();
+      }
+    },
+  );
 
   const showFeeEstimationDialog = (estimate: Estimate) => {
     const dialogContent = {
