@@ -23,6 +23,7 @@
     "@airgap/beacon-sdk": "^4.6.0",
     "@airgap/beacon-types": "^4.6.1-beta.2",
     "@ledgerhq/hw-transport-webhid": "^6.30.5",
+    "@sentry/vue": "^10.17.0",
     "@tailwindcss/vite": "^4.1.11",
     "@taquito/beacon-wallet": "^23.0.1",
     "@taquito/ledger-signer": "^23.0.0",
