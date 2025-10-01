@@ -225,10 +225,10 @@ export const useWalletStore = defineStore("wallet", () => {
       Tezos.setProvider({ signer });
     } catch (error) {
       console.error("Failed to initialize programmatic wallet:", error);
+      Sentry.captureException(error);
       throw new Error(
         `Programmatic wallet initialization failed: ${error instanceof Error ? error.message : String(error)}`,
       );
-      Sentry.captureException(error);
     }
   };
 
