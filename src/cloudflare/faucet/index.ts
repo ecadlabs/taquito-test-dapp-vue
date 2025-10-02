@@ -148,15 +148,16 @@ async function handleFund(request: Request, env: Env): Promise<Response> {
     const maxTez = env.MAX_TEZ ? parseInt(env.MAX_TEZ) : 10;
 
     if (
+      typeof amount !== "number" ||
+      !isFinite(amount) ||
       amount < minTez ||
       amount > maxTez ||
-      !Number.isInteger(amount) ||
       amount <= 0
     ) {
       return addCorsHeaders(
         new Response(
           JSON.stringify({
-            error: `Amount must be an integer between ${minTez} and ${maxTez} tez`,
+            error: `Amount must be an number between ${minTez} and ${maxTez} tez`,
           }),
           { status: 400, headers: { "Content-Type": "application/json" } },
         ),
@@ -184,7 +185,7 @@ async function handleFund(request: Request, env: Env): Promise<Response> {
         return addCorsHeaders(
           new Response(
             JSON.stringify({
-              error: `Recipient balance exceeds maximum allowed (${maxBalance} tez`,
+              error: `Recipient balance exceeds maximum allowed (${maxBalance} tez)`,
             }),
             { status: 400, headers: { "Content-Type": "application/json" } },
           ),

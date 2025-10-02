@@ -15,9 +15,6 @@ export default defineConfig({
       process: "process/browser",
     },
   },
-  server: {
-    allowedHosts: ["61cecd2770fb.ngrok-free.app"],
-  },
   define: {
     global: "globalThis",
     Buffer: "globalThis.Buffer",
