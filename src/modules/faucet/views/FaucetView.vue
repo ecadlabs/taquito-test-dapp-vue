@@ -402,7 +402,7 @@ const requestTez = async () => {
       throw new Error("Please complete the captcha verification");
     }
 
-    const response = await fetch(`${import.meta.env.VITE_FAUCET_URL}/fund`, {
+    const response = await fetch(`${faucetUrl}/fund`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

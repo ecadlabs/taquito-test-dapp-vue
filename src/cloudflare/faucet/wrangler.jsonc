@@ -24,7 +24,7 @@
 
   "vars": {
     // Secret keys are stored in the Cloudflare Secrets Manager (npx wrangler secret put)
-    "ALLOWED_ORIGINS": "ghostnet.dapp.taquito.io,seoulnet.dapp.taquito.io,shadownet.dapp.taquito.io",
+    "ALLOWED_ORIGINS": "ghostnet.dapp.taquito.io,seoulnet.dapp.taquito.io,shadownet.dapp.taquito.io,taquito-dapp.pages.dev",
     "RPC_URL": "https://ghostnet.tezos.ecadinfra.com",
     "ALLOWED_RPC_URLS": "https://ghostnet.tezos.ecadinfra.com,https://shadownet.tezos.ecadinfra.com,https://seoulnet.tezos.ecadinfra.com",
     "MIN_TEZ": "1",
