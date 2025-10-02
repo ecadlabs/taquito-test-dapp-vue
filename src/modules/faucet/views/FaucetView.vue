@@ -123,30 +123,53 @@
               </div>
             </div>
 
+            <!-- Cloudflare Turnstile -->
+            <VueTurnstile
+              ref="turnstileRef"
+              v-model="captchaToken"
+              :site-key="turnstileSiteKey"
+              @error="onTurnstileError"
+              @success="onTurnstileSuccess"
+              @expired="onTurnstileExpired"
+              theme="light"
+            />
+
             <!-- Request Button -->
-            <Button
-              @click="requestTez"
-              :disabled="
-                isLoading || !isValidAmount || hasExceededLimit || isCooldown
-              "
-              size="lg"
-              class="w-full bg-[#D3832B] transition-all duration-200 hover:scale-105 hover:bg-[#B8722A] hover:shadow-lg hover:shadow-[#D3832B]/25 disabled:opacity-50 disabled:hover:scale-100"
-            >
-              <div v-if="isLoading" class="flex items-center gap-2">
-                <div
-                  class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
-                ></div>
-                <span>Requesting Tez...</span>
-              </div>
-              <div v-else-if="isCooldown" class="flex items-center gap-2">
-                <Hourglass class="spin-ease-animation h-4 w-4" />
-                <span>Cooldown: {{ cooldownTimeLeft }}s</span>
-              </div>
-              <div v-else class="flex items-center gap-2">
-                <Droplets class="h-4 w-4" />
-                <span>Request {{ requestAmount }} XTZ</span>
-              </div>
-            </Button>
+            <div>
+              <Button
+                @click="requestTez"
+                :disabled="
+                  isLoading ||
+                  !isValidAmount ||
+                  hasExceededLimit ||
+                  isCooldown ||
+                  !captchaToken
+                "
+                size="lg"
+                class="w-full bg-[#D3832B] transition-all duration-200 hover:scale-105 hover:bg-[#B8722A] hover:shadow-lg hover:shadow-[#D3832B]/25 disabled:opacity-50 disabled:hover:scale-100"
+              >
+                <div v-if="isLoading" class="flex items-center gap-2">
+                  <div
+                    class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+                  ></div>
+                  <span>Requesting Tez...</span>
+                </div>
+                <div v-else-if="isCooldown" class="flex items-center gap-2">
+                  <Hourglass class="spin-ease-animation h-4 w-4" />
+                  <span>Cooldown: {{ cooldownTimeLeft }}s</span>
+                </div>
+                <div v-else class="flex items-center gap-2">
+                  <Droplets class="h-4 w-4" />
+                  <span>Request {{ requestAmount }} XTZ</span>
+                </div>
+              </Button>
+              <p
+                v-if="!captchaToken"
+                class="text-muted-foreground mt-0.5 animate-pulse text-right text-xs"
+              >
+                Captcha running...
+              </p>
+            </div>
 
             <!-- Status Messages -->
             <div v-if="statusMessage" class="space-y-2">
@@ -259,6 +282,7 @@ import {
   XCircle,
 } from "lucide-vue-next";
 import { computed, onMounted, onUnmounted, ref } from "vue";
+import VueTurnstile from "vue-turnstile";
 
 const walletStore = useWalletStore();
 
@@ -274,6 +298,33 @@ const txHash = ref<string>("");
 const isCooldown = ref<boolean>(false);
 const cooldownTimeLeft = ref<number>(0);
 const cooldownTimer = ref<number | null>(null);
+
+const captchaToken = ref("");
+const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+const turnstileRef = ref<InstanceType<typeof VueTurnstile> | null>(null);
+
+// VueTurnstile event handlers
+const onTurnstileSuccess = (token: string) => {
+  captchaToken.value = token;
+};
+
+const onTurnstileError = () => {
+  console.error("Turnstile verification failed");
+  captchaToken.value = "";
+  statusMessage.value = "Captcha verification failed. Please try again.";
+  statusType.value = "error";
+};
+
+const onTurnstileExpired = () => {
+  captchaToken.value = "";
+};
+
+// Refresh Turnstile token silently
+const refreshCaptcha = () => {
+  if (turnstileRef.value) {
+    turnstileRef.value.reset(); // Reset the widget to get a new token
+  }
+};
 
 // Computed properties
 const isValidAmount = computed(() => {
@@ -312,6 +363,14 @@ const startCooldown = () => {
 
   cooldownTimer.value = window.setInterval(() => {
     cooldownTimeLeft.value--;
+
+    // Refresh captcha when half the cooldown is over
+    if (
+      cooldownTimeLeft.value === Math.floor(FAUCET_COOLDOWN_TIME_SECONDS / 2)
+    ) {
+      refreshCaptcha();
+    }
+
     if (cooldownTimeLeft.value <= 0) {
       if (cooldownTimer.value) {
         clearInterval(cooldownTimer.value);
@@ -339,9 +398,11 @@ const requestTez = async () => {
       throw new Error("Faucet URL is not set");
     }
 
-    // Since challenges and captcha are disabled, we can directly call verify
-    // TODO: Change once we enable captcha and challenges
-    const response = await fetch(`${faucetUrl}/verify`, {
+    if (!captchaToken.value) {
+      throw new Error("Please complete the captcha verification");
+    }
+
+    const response = await fetch(`${import.meta.env.VITE_FAUCET_URL}/fund`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -349,10 +410,14 @@ const requestTez = async () => {
       body: JSON.stringify({
         address: walletStore.getAddress,
         amount: requestAmount.value,
+        captchaToken: captchaToken.value,
+        ...(import.meta.env.VITE_RPC_URL && {
+          rpc: import.meta.env.VITE_RPC_URL,
+        }),
       }),
     });
 
-    const data = await response.json();
+    const data = (await response.json()) as { txHash?: string; error?: string };
 
     if (!response.ok) {
       throw new Error(data.error || "Failed to request Tez");

@@ -1,0 +1,36 @@
+{
+  "name": "taquito-playground-faucet",
+  "main": "./index.ts",
+  "compatibility_date": "2025-07-18",
+  "account_id": "",
+
+  // Durable Object bindings and migrations
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "RATE_LIMITER",
+        "class_name": "RateLimiter",
+      },
+    ],
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["RateLimiter"],
+    },
+  ],
+
+  "node_compat": true,
+
+  "vars": {
+    // Secret keys are stored in the Cloudflare Secrets Manager (npx wrangler secret put)
+    "ALLOWED_ORIGINS": "ghostnet.dapp.taquito.io,seoulnet.dapp.taquito.io,shadownet.dapp.taquito.io",
+    "RPC_URL": "https://ghostnet.tezos.ecadinfra.com",
+    "ALLOWED_RPC_URLS": "https://ghostnet.tezos.ecadinfra.com,https://shadownet.tezos.ecadinfra.com,https://seoulnet.tezos.ecadinfra.com",
+    "MIN_TEZ": "1",
+    "MAX_TEZ": "10",
+    "RATE_LIMIT_ENABLED": "true",
+    "RATE_LIMIT_WINDOW": "3600",
+    "RATE_LIMIT_MAX_REQUESTS": "20",
+  },
+}
