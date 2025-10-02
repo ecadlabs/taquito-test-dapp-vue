@@ -14,7 +14,7 @@ export class RateLimiter extends DurableObject {
   private rateLimitData: Map<string, number[]> = new Map();
   private state: DurableObjectState;
 
-  constructor(state: DurableObjectState, env: any) {
+  constructor(state: DurableObjectState, env: Record<string, unknown>) {
     super(state, env);
     this.state = state;
   }
