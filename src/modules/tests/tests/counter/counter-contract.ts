@@ -64,7 +64,7 @@ const increment = async (amount: number): Promise<number | undefined> => {
 
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
     return await getContractStorage(true);
   } catch (error) {
     console.log(`Error: ${JSON.stringify(error, null, 2)}`);
@@ -118,7 +118,7 @@ const decrement = async (amount: number): Promise<number | undefined> => {
     const confirmation = await operation.confirmation(3);
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
     return await getContractStorage(true);
   } catch (error) {
     console.log(`Error: ${JSON.stringify(error, null, 2)}`);
@@ -164,7 +164,7 @@ const reset = async (): Promise<void> => {
     const confirmation = await operation.confirmation(3);
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
   } catch (error) {
     console.log(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error, TEST_ID);
@@ -196,7 +196,7 @@ const getContractStorage = async (
     console.log(`Current storage value: ${storage}`);
     if (!noDiagram)
       diagramStore.setProgress("read-storage", "running", TEST_ID);
-    if (!noDiagram) diagramStore.setProgress("success", "completed", TEST_ID);
+    if (!noDiagram) diagramStore.setCompleted(TEST_ID);
     return storage as number;
   } catch (error) {
     console.log(`Error: ${error}`);
@@ -225,7 +225,7 @@ const getContractMethods = async (): Promise<void> => {
       .then((c) => {
         const methods = c.parameterSchema.ExtractSignatures();
         console.log(JSON.stringify(methods, null, 2));
-        diagramStore.setProgress("success", "completed", TEST_ID);
+        diagramStore.setCompleted(TEST_ID);
       })
       .catch((error) => {
         console.log(`Error: ${error}`);

@@ -48,7 +48,7 @@ const interact = async (
 
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
   } catch (error) {
     console.log(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error, TEST_ID);

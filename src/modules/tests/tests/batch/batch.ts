@@ -41,7 +41,7 @@ const sendBatch = async (): Promise<void> => {
     const confirmation = await batchOp.confirmation();
     const opHash = getOperationHash(confirmation);
     diagramStore.setOperationHash(opHash, TEST_ID);
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
   } catch (error) {
     console.log(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error, TEST_ID);

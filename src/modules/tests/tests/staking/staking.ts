@@ -44,7 +44,7 @@ const stake = async (amount: number) => {
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
   } catch (error) {
     console.error(`Failed to stake '${amount}': ${error}`);
     diagramStore.setErrorMessage(error, TEST_ID);
@@ -88,7 +88,7 @@ const unstake = async (amount: number) => {
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
   } catch (error) {
     console.error(`Failed to unstake '${amount}': ${error}`);
     diagramStore.setErrorMessage(error, TEST_ID);
@@ -124,7 +124,7 @@ const finalizeUnstake = async () => {
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
   } catch (error) {
     console.error(`Failed to finalize unstake: ${error}`);
     diagramStore.setErrorMessage(error, TEST_ID);

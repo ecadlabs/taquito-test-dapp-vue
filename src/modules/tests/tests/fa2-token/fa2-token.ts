@@ -93,7 +93,7 @@ export const mintTokens = async (param: MintParam): Promise<void> => {
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
     }
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error, TEST_ID);
@@ -140,7 +140,7 @@ export const burnTokens = async (param: BurnParam): Promise<void> => {
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
     }
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error, TEST_ID);
@@ -193,7 +193,7 @@ export const transferTokens = async (
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
     }
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error, TEST_ID);
@@ -245,7 +245,7 @@ export const getTokenBalancesDirect = async (
       });
     }
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
     return balances;
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
@@ -312,7 +312,7 @@ export const getTokenBalancesWithCallback = async (
       balance: response.balance,
     }));
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
     return balances;
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);

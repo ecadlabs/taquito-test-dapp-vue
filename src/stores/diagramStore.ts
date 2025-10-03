@@ -102,6 +102,33 @@ export const useDiagramStore = defineStore("diagram", () => {
     }
   };
 
+  /**
+   * Helper function to mark the current test as completed
+   *
+   * @param testId - The test ID to mark as completed
+   */
+  const setCompleted = async (testId?: string) => {
+    if (testId && currentTestId.value !== testId) return;
+
+    // Mark the current step as completed (timing-wise) if it exists
+    if (currentStep.value && currentStep.value !== "success") {
+      const timing = stepTimings.value.get(currentStep.value);
+      if (timing?.startTime && !timing.endTime) {
+        timing.endTime = performance.now();
+        timing.duration = timing.endTime - timing.startTime;
+      }
+    }
+
+    // Set current step to "success" to highlight the success node in the diagram
+    stepTimings.value.set("success", { startTime: performance.now() });
+    currentStep.value = "success";
+
+    // Set diagram status to completed
+    diagramStatus.value = "completed";
+
+    await useWalletStore().fetchBalance();
+  };
+
   const setErrorMessage = (error: unknown, testId?: string) => {
     if (testId && currentTestId.value !== testId) {
       return;
@@ -286,6 +313,7 @@ export const useDiagramStore = defineStore("diagram", () => {
     setDiagram,
     setTestDiagram,
     setProgress,
+    setCompleted,
     resetDiagram,
     setErrorMessage,
     setOperationHash,

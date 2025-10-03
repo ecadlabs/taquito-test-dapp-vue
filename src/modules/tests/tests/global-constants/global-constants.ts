@@ -45,7 +45,7 @@ const registerGlobalConstant = async (
       diagramStore.setOperationHash(opHash, TEST_ID);
     }
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
     return operation.globalConstantHash;
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);

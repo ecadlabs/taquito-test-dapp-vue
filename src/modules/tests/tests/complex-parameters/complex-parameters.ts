@@ -68,7 +68,7 @@ const addUserRecord = async (record: RecordParam): Promise<void> => {
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation.block.hash, TEST_ID);
     }
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error, TEST_ID);
@@ -139,7 +139,7 @@ const setNestedRecord = async (nestedRecord: NestedRecord): Promise<void> => {
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation.block.hash, TEST_ID);
     }
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error, TEST_ID);
@@ -199,7 +199,7 @@ const manageUserSet = async (
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation.block.hash, TEST_ID);
     }
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error, TEST_ID);
@@ -251,7 +251,7 @@ const updateMetadata = async (
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation.block.hash, TEST_ID);
     }
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error, TEST_ID);
@@ -284,7 +284,7 @@ const getUserRecord = async (
       .get_user_record(userAddress)
       .executeView({ viewCaller: userAddress });
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
     return result;
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
@@ -320,7 +320,7 @@ const getNestedData = async (
       .get_nested_record(userAddress)
       .executeView({ viewCaller: userAddress });
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
     return result;
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
@@ -370,7 +370,7 @@ const getAllMetadata = async (): Promise<Record<string, string> | null> => {
       throw new Error("Result is not a map");
     }
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
     return cleanMetadata;
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);

@@ -40,7 +40,7 @@ const send = async (to: string, amount: number) => {
 
     const opHash = getOperationHash(confirmation);
     diagramStore.setOperationHash(opHash, TEST_ID);
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
   } catch (error) {
     console.error(`Failed to send transfer to '${to}': ${error}`);
     diagramStore.setErrorMessage(error, TEST_ID);

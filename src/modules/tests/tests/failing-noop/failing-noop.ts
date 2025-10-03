@@ -39,7 +39,7 @@ const failNoop = async (): Promise<void> => {
       new Uint8Array([3]),
     );
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
   } catch (error) {
     console.log(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error, TEST_ID);

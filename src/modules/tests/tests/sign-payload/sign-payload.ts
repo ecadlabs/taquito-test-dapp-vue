@@ -95,7 +95,7 @@ const sign = async (
     }
 
     if (!noDiagram) {
-      diagramStore.setProgress("success", "completed", TEST_ID);
+      diagramStore.setCompleted(TEST_ID);
     }
 
     return signature;
@@ -178,7 +178,7 @@ const signTzip32 = async (input: string) => {
     }
 
     const { signature } = signedPayload;
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
 
     return signature;
   } catch (error) {
@@ -221,7 +221,7 @@ export const signMichelsonData = async (
     throw new Error("Failed to sign Michelson data");
   }
 
-  diagramStore.setProgress("success", "completed", TEST_ID);
+  diagramStore.setCompleted(TEST_ID);
   return signature;
 };
 
@@ -320,7 +320,7 @@ const verifyPayloadViaContract = async (
     const confirmation = await operation.confirmation(1);
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
     return true;
   } catch (error) {
     console.error(`Failed to verify payload via contract: ${error}`);

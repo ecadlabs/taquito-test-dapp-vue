@@ -52,7 +52,7 @@ const getContractMetadata = async (
     diagramStore.setProgress("retrieve-metadata", "running", TEST_ID);
     const metadata = (await contract.tzip16().getMetadata()).metadata;
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
 
     return {
       metadata: metadata as ContractMetadata,
@@ -114,7 +114,7 @@ const executeMetadataView = async (
       viewCaller: walletAddress,
     });
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
 
     return {
       viewName,

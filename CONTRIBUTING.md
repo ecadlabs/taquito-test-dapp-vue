@@ -156,7 +156,7 @@ export const mainTestFunction = async (param: string): Promise<void> => {
     diagramStore.setProgress("wait-for-confirmation", "running", TEST_ID);
     await operation.confirmation(3);
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
   } catch (error) {
     // If something goes wrong, log the error but also ensure you display it to the user in the diagram
     console.error("Error:", error);

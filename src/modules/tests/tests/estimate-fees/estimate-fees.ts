@@ -25,7 +25,7 @@ const estimateFees = async () => {
       });
     }
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted(TEST_ID);
   } catch (error) {
     console.error(
       `Failed to estiimate fees for transfer to '${address}': ${error}`,
