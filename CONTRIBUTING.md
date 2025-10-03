@@ -126,9 +126,6 @@ const CONTRACT_ADDRESS =
     (contract: ContractConfig) => contract.contractName === "your-contract",
   )?.address ?? "";
 
-// The TEST_ID constant is to help keep the code clean, as we use it often in diagram helpers.
-const TEST_ID = "your-test-name";
-
 /**
  * Main test function description
  *
@@ -142,26 +139,26 @@ export const mainTestFunction = async (param: string): Promise<void> => {
 
   // Tell the diagram store which diagram we're using
   // IMPORTANT: You should set a default diagram in the vue component onMounted hook later
-  diagramStore.setTestDiagram(TEST_ID, "my-diagram");
+  diagramStore.setTestDiagram("my-test-name", "my-diagram");
 
   // Always surround your test logic in a try/catch
   try {
     // Update diagram progress as you go using the ID of the step.
     // Do this before running each actual logic step (so time tracking is accurate)
-    diagramStore.setProgress("get-contract", "running", TEST_ID);
+    diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("execute-contract", "running", TEST_ID);
+    diagramStore.setProgress("execute-contract");
     const operation = await contract.methodsObject.yourMethod(param).send();
 
-    diagramStore.setProgress("wait-for-confirmation", "running", TEST_ID);
+    diagramStore.setProgress("wait-for-confirmation");
     await operation.confirmation(3);
 
-    diagramStore.setCompleted(TEST_ID);
+    diagramStore.setCompleted();
   } catch (error) {
     // If something goes wrong, log the error but also ensure you display it to the user in the diagram
     console.error("Error:", error);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
   }
 };
 ```
@@ -201,7 +198,7 @@ const walletStore = useWalletStore();
 const walletConnected = computed(() => !!walletStore.getAddress);
 
 onMounted(() => {
-  diagramStore.setTestDiagram("my-default-diagram");
+  diagramStore.setTestDiagram("my-test-name", "my-default-diagram");
 });
 </script>
 ```
