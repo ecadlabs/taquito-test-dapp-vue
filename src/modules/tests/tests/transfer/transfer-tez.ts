@@ -17,7 +17,7 @@ const send = async (to: string, amount: number) => {
       throw new Error("Invalid recipient address or amount");
     }
 
-    diagramStore.setProgress("estimate-fees", "running");
+    diagramStore.setProgress("estimate-fees");
     estimate = await Tezos.estimate.transfer({ to, amount: amount });
 
     if (estimate) {
@@ -28,12 +28,12 @@ const send = async (to: string, amount: number) => {
       });
     }
 
-    diagramStore.setProgress("wait-for-user", "running");
+    diagramStore.setProgress("wait-for-user");
     const transfer: TransactionWalletOperation = await Tezos.wallet
       .transfer({ to, amount })
       .send();
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running");
+    diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await transfer.confirmation();
 
     const opHash = getOperationHash(confirmation);

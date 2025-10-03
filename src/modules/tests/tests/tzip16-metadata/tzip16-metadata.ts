@@ -45,11 +45,11 @@ const getContractMetadata = async (
   try {
     const Tezos = walletStore.getTezos;
 
-    diagramStore.setProgress("get-contract", "running");
+    diagramStore.setProgress("get-contract");
 
     const contract = await Tezos.wallet.at(contractAddress, tzip16);
 
-    diagramStore.setProgress("retrieve-metadata", "running");
+    diagramStore.setProgress("retrieve-metadata");
     const metadata = (await contract.tzip16().getMetadata()).metadata;
 
     diagramStore.setCompleted();
@@ -86,7 +86,7 @@ const executeMetadataView = async (
   diagramStore.setTestDiagram(TEST_ID, "execute-view");
 
   try {
-    diagramStore.setProgress("setup-contract", "running");
+    diagramStore.setProgress("setup-contract");
 
     // Get Tezos instance
     const Tezos = walletStore.getTezos;
@@ -94,7 +94,7 @@ const executeMetadataView = async (
     // Get contract instance
     const contract = await Tezos.contract.at(contractAddress);
 
-    diagramStore.setProgress("execute-view", "running");
+    diagramStore.setProgress("execute-view");
 
     // Execute the view
     // For views that take no parameters, use undefined or unit

@@ -34,10 +34,10 @@ const sign = async (
       loadBeaconTypes(),
     ]);
 
-    diagramStore.setProgress("join-payload", "running");
+    diagramStore.setProgress("join-payload");
     const formattedInput: string = ["Tezos Signed Message:", input].join(" ");
 
-    diagramStore.setProgress("convert-to-bytes", "running");
+    diagramStore.setProgress("convert-to-bytes");
     const bytes = alreadyBytes ? input : utils.stringToBytes(formattedInput);
     const bytesLength = (bytes.length / 2).toString(16);
     const addPadding = `00000000${bytesLength}`;
@@ -57,8 +57,8 @@ const sign = async (
       throw new Error("No wallet found");
     }
 
-    diagramStore.setProgress("request-wallet-sign", "running");
-    diagramStore.setProgress("wait-for-user", "running");
+    diagramStore.setProgress("request-wallet-sign");
+    diagramStore.setProgress("wait-for-user");
 
     // Dynamic wallet type checking and signing
     let signedPayload: { signature: string };
@@ -79,7 +79,7 @@ const sign = async (
 
     const { signature } = signedPayload;
 
-    diagramStore.setProgress("verify-signature", "running");
+    diagramStore.setProgress("verify-signature");
     const publicKey = await walletStore.getWalletPublicKey();
     if (!publicKey) {
       throw new Error("No public key found");
@@ -157,8 +157,8 @@ const signTzip32 = async (input: string) => {
       throw new Error("No wallet found");
     }
 
-    diagramStore.setProgress("request-wallet-sign", "running");
-    diagramStore.setProgress("wait-for-user", "running");
+    diagramStore.setProgress("request-wallet-sign");
+    diagramStore.setProgress("wait-for-user");
 
     // Dynamic wallet type checking and signing
     let signedPayload: { signature: string };
@@ -199,7 +199,7 @@ export const signMichelsonData = async (
   // Load michel-codec only when needed for Michelson signing
   const michelCodec = await loadMichelCodec();
 
-  diagramStore.setProgress("parse-micheline-expression", "running");
+  diagramStore.setProgress("parse-micheline-expression");
   const p = new michelCodec.Parser();
   const dataJSON = p.parseMichelineExpression(data);
   const typeJSON = p.parseMichelineExpression(type);
@@ -208,7 +208,7 @@ export const signMichelsonData = async (
     throw new Error("Failed to parse Micheline expression");
   }
 
-  diagramStore.setProgress("pack-data-bytes", "running");
+  diagramStore.setProgress("pack-data-bytes");
   // Type assertion is necessary here because parseMichelineExpression returns Expr
   // but packDataBytes expects more specific Micheline types. This is safe since we're parsing valid Micheline.
   const packed = michelCodec.packDataBytes(
@@ -253,8 +253,8 @@ const verifyPayloadViaContract = async (
       const characterEncoding = "0";
       const message = payload;
 
-      diagramStore.setProgress("join-payload", "running");
-      diagramStore.setProgress("convert-to-bytes", "running");
+      diagramStore.setProgress("join-payload");
+      diagramStore.setProgress("convert-to-bytes");
 
       // For TZIP-32 verification, we need to construct the same Micheline-wrapped payload
       // that was used for signing: "05" + "01" + fullPayloadHex
@@ -276,12 +276,12 @@ const verifyPayloadViaContract = async (
         messageHex;
       payloadBytes = "05" + "01" + fullPayloadHex;
     } else {
-      diagramStore.setProgress("join-payload", "running");
+      diagramStore.setProgress("join-payload");
       const formattedInput: string = ["Tezos Signed Message:", payload].join(
         " ",
       );
 
-      diagramStore.setProgress("convert-to-bytes", "running");
+      diagramStore.setProgress("convert-to-bytes");
       const bytes = utils.stringToBytes(formattedInput);
       const bytesLength = (bytes.length / 2).toString(16);
       const addPadding = `00000000${bytesLength}`;
@@ -289,10 +289,10 @@ const verifyPayloadViaContract = async (
       payloadBytes = "05" + "01" + paddedBytesLength + bytes;
     }
 
-    diagramStore.setProgress("get-contract", "running");
+    diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(SIGNATURE_CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("estimate-fees", "running");
+    diagramStore.setProgress("estimate-fees");
     const parameter = {
       public_key: publicKey,
       signature: signature,
@@ -313,10 +313,10 @@ const verifyPayloadViaContract = async (
       });
     }
 
-    diagramStore.setProgress("wait-for-user", "running");
+    diagramStore.setProgress("wait-for-user");
     const operation = await contract.methodsObject.default(parameter).send();
 
-    diagramStore.setProgress("wait-confirmation", "running");
+    diagramStore.setProgress("wait-confirmation");
     const confirmation = await operation.confirmation(1);
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash);

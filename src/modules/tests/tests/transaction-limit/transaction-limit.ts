@@ -29,12 +29,12 @@ const interact = async (
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("get-contract", "running");
+    diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("set-transaction-limit", "running");
-    diagramStore.setProgress("execute-operation", "running");
-    diagramStore.setProgress("wait-for-user", "running");
+    diagramStore.setProgress("set-transaction-limit");
+    diagramStore.setProgress("execute-operation");
+    diagramStore.setProgress("wait-for-user");
 
     const operation = await contract.methodsObject.increment(1).send({
       storageLimit,
@@ -42,7 +42,7 @@ const interact = async (
       fee,
     });
 
-    diagramStore.setProgress("wait-chain-confirmation", "running");
+    diagramStore.setProgress("wait-chain-confirmation");
     const confirmation = await operation.confirmation(3);
 
     if (confirmation?.block.hash)

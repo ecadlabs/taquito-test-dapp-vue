@@ -40,10 +40,10 @@ const addUserRecord = async (record: RecordParam): Promise<void> => {
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("get-contract", "running");
+    diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("estimate-fees", "running");
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .add_user_record(record)
       .toTransferParams();
@@ -57,12 +57,12 @@ const addUserRecord = async (record: RecordParam): Promise<void> => {
       });
     }
 
-    diagramStore.setProgress("execute-operation", "running");
+    diagramStore.setProgress("execute-operation");
     const operation = await contract.methodsObject
       .add_user_record(record)
       .send();
 
-    diagramStore.setProgress("wait-confirmation", "running");
+    diagramStore.setProgress("wait-confirmation");
     const confirmation = await operation.confirmation(3);
 
     if (confirmation?.block.hash) {
@@ -91,7 +91,7 @@ const setNestedRecord = async (nestedRecord: NestedRecord): Promise<void> => {
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("get-contract", "running");
+    diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
     const cleanString = (str: string) => str.replace(/[^\x20-\x7E]/g, ""); // Keep only printable ASCII
 
@@ -114,7 +114,7 @@ const setNestedRecord = async (nestedRecord: NestedRecord): Promise<void> => {
           : ["read"],
     };
 
-    diagramStore.setProgress("estimate-fees", "running");
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .set_nested_record(complexData)
       .toTransferParams();
@@ -128,12 +128,12 @@ const setNestedRecord = async (nestedRecord: NestedRecord): Promise<void> => {
       });
     }
 
-    diagramStore.setProgress("execute-operation", "running");
+    diagramStore.setProgress("execute-operation");
     const operation = await contract.methodsObject
       .set_nested_record(complexData)
       .send();
 
-    diagramStore.setProgress("wait-confirmation", "running");
+    diagramStore.setProgress("wait-confirmation");
     const confirmation = await operation.confirmation(3);
 
     if (confirmation?.block.hash) {
@@ -166,7 +166,7 @@ const manageUserSet = async (
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("get-contract", "running");
+    diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
     const params = {
@@ -174,7 +174,7 @@ const manageUserSet = async (
       user: userAddress,
     };
 
-    diagramStore.setProgress("estimate-fees", "running");
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .manage_authorization(params)
       .toTransferParams();
@@ -188,12 +188,12 @@ const manageUserSet = async (
       });
     }
 
-    diagramStore.setProgress("execute-operation", "running");
+    diagramStore.setProgress("execute-operation");
     const operation = await contract.methodsObject
       .manage_authorization(params)
       .send();
 
-    diagramStore.setProgress("wait-confirmation", "running");
+    diagramStore.setProgress("wait-confirmation");
     const confirmation = await operation.confirmation(3);
 
     if (confirmation?.block.hash) {
@@ -223,10 +223,10 @@ const updateMetadata = async (
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("get-contract", "running");
+    diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("estimate-fees", "running");
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .update_metadata(updates)
       .toTransferParams();
@@ -240,12 +240,12 @@ const updateMetadata = async (
       });
     }
 
-    diagramStore.setProgress("execute-operation", "running");
+    diagramStore.setProgress("execute-operation");
     const operation = await contract.methodsObject
       .update_metadata(updates)
       .send();
 
-    diagramStore.setProgress("wait-confirmation", "running");
+    diagramStore.setProgress("wait-confirmation");
     const confirmation = await operation.confirmation(3);
 
     if (confirmation?.block.hash) {
@@ -276,10 +276,10 @@ const getUserRecord = async (
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("get-contract", "running");
+    diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("read-storage", "running");
+    diagramStore.setProgress("read-storage");
     const result = await contract.contractViews
       .get_user_record(userAddress)
       .executeView({ viewCaller: userAddress });
@@ -312,10 +312,10 @@ const getNestedData = async (
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("get-contract", "running");
+    diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("read-storage", "running");
+    diagramStore.setProgress("read-storage");
     const result = await contract.contractViews
       .get_nested_record(userAddress)
       .executeView({ viewCaller: userAddress });
@@ -343,14 +343,14 @@ const getAllMetadata = async (): Promise<Record<string, string> | null> => {
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("get-contract", "running");
+    diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
     const address = walletStore.getAddress;
     if (!address) {
       throw new Error("No wallet address found");
     }
 
-    diagramStore.setProgress("read-storage", "running");
+    diagramStore.setProgress("read-storage");
 
     // The result type is expected to have a valueMap property of type Map<string, string>
     type MetadataViewResult = { valueMap: Map<string, string> };

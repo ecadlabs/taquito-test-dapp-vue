@@ -18,18 +18,18 @@ const failNoop = async (): Promise<void> => {
   const hex = "48656C6C6F20576F726C64";
 
   try {
-    diagramStore.setProgress("signing-operation", "running");
-    diagramStore.setProgress("wait-for-user", "running");
+    diagramStore.setProgress("signing-operation");
+    diagramStore.setProgress("wait-for-user");
     const signed = await Tezos.wallet.signFailingNoop({
       arbitrary: hex,
       basedOnBlock: "head",
     });
 
-    diagramStore.setProgress("get-public-key", "running");
+    diagramStore.setProgress("get-public-key");
     const pk = await walletStore.getWalletPublicKey();
     if (!pk) throw new Error("No public key found");
 
-    diagramStore.setProgress("verify-signature", "running");
+    diagramStore.setProgress("verify-signature");
     await verifySignature(
       signed.bytes,
       pk,

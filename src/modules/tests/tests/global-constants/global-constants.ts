@@ -21,7 +21,7 @@ const registerGlobalConstant = async (
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("estimate-fees", "running");
+    diagramStore.setProgress("estimate-fees");
     estimate = await Tezos.estimate.registerGlobalConstant({ value });
 
     if (estimate) {
@@ -32,10 +32,10 @@ const registerGlobalConstant = async (
       });
     }
 
-    diagramStore.setProgress("register-constant", "running");
+    diagramStore.setProgress("register-constant");
     const operation = await Tezos.contract.registerGlobalConstant({ value });
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running");
+    diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await operation.confirmation(3);
 
     const opHash = getOperationHash(confirmation);

@@ -22,10 +22,10 @@ const testContractFailure = async (scenario: string): Promise<void> => {
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("get-contract", "running");
+    diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("execute-operation", "running");
+    diagramStore.setProgress("execute-operation");
     switch (scenario) {
       case "wrong-type":
         // Try to pass a string instead of a number to increment

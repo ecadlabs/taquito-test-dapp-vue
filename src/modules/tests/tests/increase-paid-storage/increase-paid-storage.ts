@@ -15,16 +15,16 @@ const increaseStorage = async (contract: string, bytes: number) => {
     }
 
     diagramStore.setTestDiagram(TEST_ID, "increase");
-    diagramStore.setProgress("estimate-fees", "running");
+    diagramStore.setProgress("estimate-fees");
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    diagramStore.setProgress("wait-for-user", "running");
+    diagramStore.setProgress("wait-for-user");
     const operation = await Tezos.wallet
       .increasePaidStorage({ amount: bytes, destination: contract })
       .send();
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running");
+    diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await operation.confirmation(3);
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash);

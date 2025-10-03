@@ -15,7 +15,7 @@ const stake = async (amount: number) => {
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("estimate-fees", "running");
+    diagramStore.setProgress("estimate-fees");
     estimate = await Tezos.estimate.stake({
       amount,
       mutez: false,
@@ -29,8 +29,8 @@ const stake = async (amount: number) => {
       });
     }
 
-    diagramStore.setProgress("stake", "running");
-    diagramStore.setProgress("wait-for-user", "running");
+    diagramStore.setProgress("stake");
+    diagramStore.setProgress("wait-for-user");
     const op = await Tezos.wallet
       .stake({
         amount,
@@ -38,7 +38,7 @@ const stake = async (amount: number) => {
       })
       .send();
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running");
+    diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await op.confirmation();
 
     if (confirmation?.block.hash)
@@ -59,7 +59,7 @@ const unstake = async (amount: number) => {
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("estimate-fees", "running");
+    diagramStore.setProgress("estimate-fees");
     estimate = await Tezos.estimate.unstake({
       amount,
       mutez: false,
@@ -73,8 +73,8 @@ const unstake = async (amount: number) => {
       });
     }
 
-    diagramStore.setProgress("unstake", "running");
-    diagramStore.setProgress("wait-for-user", "running");
+    diagramStore.setProgress("unstake");
+    diagramStore.setProgress("wait-for-user");
     const op = await Tezos.wallet
       .unstake({
         amount,
@@ -82,7 +82,7 @@ const unstake = async (amount: number) => {
       })
       .send();
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running");
+    diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await op.confirmation();
 
     if (confirmation?.block.hash)
@@ -103,7 +103,7 @@ const finalizeUnstake = async () => {
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("estimate-fees", "running");
+    diagramStore.setProgress("estimate-fees");
     estimate = await Tezos.estimate.finalizeUnstake({});
 
     if (estimate) {
@@ -114,11 +114,11 @@ const finalizeUnstake = async () => {
       });
     }
 
-    diagramStore.setProgress("finalize-unstake", "running");
-    diagramStore.setProgress("wait-for-user", "running");
+    diagramStore.setProgress("finalize-unstake");
+    diagramStore.setProgress("wait-for-user");
     const op = await Tezos.wallet.finalizeUnstake({}).send();
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running");
+    diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await op.confirmation();
 
     if (confirmation?.block.hash)

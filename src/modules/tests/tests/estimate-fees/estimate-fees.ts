@@ -13,7 +13,7 @@ const estimateFees = async () => {
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("estimate-fees", "running");
+    diagramStore.setProgress("estimate-fees");
     estimate = await Tezos.estimate.transfer({ to: address, amount: 1 });
 
     if (estimate) {

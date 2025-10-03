@@ -67,10 +67,7 @@ export const useDiagramStore = defineStore("diagram", () => {
     }
   };
 
-  const setProgress = async (
-    stepId: string,
-    status: "running" | "completed",
-  ) => {
+  const setProgress = async (stepId: string) => {
     if (!currentTestId.value) return;
 
     // Reset diagram if there was an error - this allows users to retry
@@ -79,7 +76,7 @@ export const useDiagramStore = defineStore("diagram", () => {
     if (errorMessage.value) {
       errorMessage.value = undefined;
       currentStep.value = stepId;
-      diagramStatus.value = status;
+      diagramStatus.value = "running";
     }
 
     if (currentDiagram.value && currentTestId.value) {
@@ -93,11 +90,7 @@ export const useDiagramStore = defineStore("diagram", () => {
       stepTimings.value.set(stepId, { startTime: performance.now() });
 
       currentStep.value = stepId;
-      diagramStatus.value = status;
-
-      if (status === "completed") {
-        await useWalletStore().fetchBalance();
-      }
+      diagramStatus.value = "running";
     }
   };
 

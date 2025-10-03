@@ -21,21 +21,21 @@ const sendBatch = async (): Promise<void> => {
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("create-batch", "running");
+    diagramStore.setProgress("create-batch");
     const batch = Tezos.wallet.batch();
 
     if (!walletStore.getAddress) throw new Error("No wallet address found");
 
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("add-operations", "running");
+    diagramStore.setProgress("add-operations");
     batch.withTransfer({ to: walletStore.getAddress, amount: 1 });
     batch.withContractCall(contract.methodsObject.increment(1));
 
-    diagramStore.setProgress("wait-for-user", "running");
+    diagramStore.setProgress("wait-for-user");
     const batchOp = await batch.send();
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running");
+    diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await batchOp.confirmation();
     const opHash = getOperationHash(confirmation);
     diagramStore.setOperationHash(opHash);
