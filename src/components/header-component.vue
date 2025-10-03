@@ -25,6 +25,13 @@
           </RouterLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
+          <RouterLink :to="{ name: 'faucet' }">
+            <NavigationMenuLink :class="navigationMenuTriggerStyle()">
+              Faucet
+            </NavigationMenuLink>
+          </RouterLink>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
           <NavigationMenuLink
             href="https://taquito.io/docs/quick_start"
             :class="navigationMenuTriggerStyle()"
@@ -61,6 +68,11 @@
         <RouterLink :to="{ name: 'tests', params: { test: firstTestId } }">
           <DropdownMenuItem class="hover:cursor-pointer"
             >Examples</DropdownMenuItem
+          >
+        </RouterLink>
+        <RouterLink :to="{ name: 'faucet' }">
+          <DropdownMenuItem class="hover:cursor-pointer"
+            >Faucet</DropdownMenuItem
           >
         </RouterLink>
         <DropdownMenuItem

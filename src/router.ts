@@ -1,3 +1,4 @@
+import FaucetView from "@/modules/faucet/views/FaucetView.vue";
 import HomeView from "@/modules/home/views/HomeView.vue";
 import TestsView from "@/modules/tests/views/TestsView.vue";
 import { createRouter, createWebHistory } from "vue-router";
@@ -12,6 +13,11 @@ const routes = [
     path: "/tests/:test?",
     name: "tests",
     component: TestsView,
+  },
+  {
+    path: "/faucet",
+    name: "faucet",
+    component: FaucetView,
   },
 ];
 

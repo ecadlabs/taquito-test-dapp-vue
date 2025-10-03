@@ -151,6 +151,11 @@ const getStakingInfo = async (address: string) => {
   }
 };
 
+type StakingLimit = {
+  limit_of_staking_over_baking_millionth: number;
+  edge_of_baking_over_staking_billionth: number;
+};
+
 const getDelegateAcceptsStaking = async (address: string): Promise<boolean> => {
   const settingsStore = useSettingsStore();
   try {
@@ -163,7 +168,8 @@ const getDelegateAcceptsStaking = async (address: string): Promise<boolean> => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const stakingData = await response.json();
+    const stakingData = (await response.json()) as StakingLimit;
+
     const { limit_of_staking_over_baking_millionth } = stakingData;
     return limit_of_staking_over_baking_millionth > 0;
   } catch (error) {

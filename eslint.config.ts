@@ -29,4 +29,7 @@ export default tseslint.config(
       },
     },
   },
+  {
+    ignores: ["src/cloudflare/faucet/.wrangler"],
+  },
 );
