@@ -3,7 +3,6 @@ import { useWalletStore } from "@/stores/walletStore";
 import type { Estimate } from "@taquito/taquito";
 import { PiggyBank } from "lucide-vue-next";
 
-const TEST_ID = "estimate-fees";
 const address = "tz1VRj54TQDtUGgv6gF4AbGbXMphyDpVkCpf";
 
 let estimate: Estimate;
@@ -14,7 +13,7 @@ const estimateFees = async () => {
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
+    diagramStore.setProgress("estimate-fees");
     estimate = await Tezos.estimate.transfer({ to: address, amount: 1 });
 
     if (estimate) {
@@ -25,12 +24,12 @@ const estimateFees = async () => {
       });
     }
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted();
   } catch (error) {
     console.error(
       `Failed to estiimate fees for transfer to '${address}': ${error}`,
     );
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     throw error;
   }
 };

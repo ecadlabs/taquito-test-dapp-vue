@@ -66,11 +66,11 @@ export const mintTokens = async (param: MintParam): Promise<void> => {
 
   try {
     diagramStore.setTestDiagram(TEST_ID, "mint");
-    diagramStore.setProgress("get-contract", "running", TEST_ID);
+    diagramStore.setProgress("get-contract");
 
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .mint(param)
       .toTransferParams();
@@ -84,19 +84,19 @@ export const mintTokens = async (param: MintParam): Promise<void> => {
       });
     }
 
-    diagramStore.setProgress("execute-operation", "running", TEST_ID);
+    diagramStore.setProgress("execute-operation");
     const operation = await contract.methodsObject.mint(param).send();
 
-    diagramStore.setProgress("wait-confirmation", "running", TEST_ID);
+    diagramStore.setProgress("wait-confirmation");
     const confirmation = await operation.confirmation(3);
 
     if (confirmation?.block.hash) {
-      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
+      diagramStore.setOperationHash(confirmation?.block.hash);
     }
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted();
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
   }
 };
 
@@ -113,11 +113,11 @@ export const burnTokens = async (param: BurnParam): Promise<void> => {
 
   try {
     diagramStore.setTestDiagram(TEST_ID, "burn");
-    diagramStore.setProgress("get-contract", "running", TEST_ID);
+    diagramStore.setProgress("get-contract");
 
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .burn(param)
       .toTransferParams();
@@ -131,19 +131,19 @@ export const burnTokens = async (param: BurnParam): Promise<void> => {
       });
     }
 
-    diagramStore.setProgress("execute-operation", "running", TEST_ID);
+    diagramStore.setProgress("execute-operation");
     const operation = await contract.methodsObject.burn(param).send();
 
-    diagramStore.setProgress("wait-confirmation", "running", TEST_ID);
+    diagramStore.setProgress("wait-confirmation");
     const confirmation = await operation.confirmation(3);
 
     if (confirmation?.block.hash) {
-      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
+      diagramStore.setOperationHash(confirmation?.block.hash);
     }
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted();
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
   }
 };
 
@@ -162,7 +162,7 @@ export const transferTokens = async (
 
   try {
     diagramStore.setTestDiagram(TEST_ID, "transfer");
-    diagramStore.setProgress("get-contract", "running", TEST_ID);
+    diagramStore.setProgress("get-contract");
 
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
@@ -170,7 +170,7 @@ export const transferTokens = async (
       throw new Error("No transfer parameters provided");
     }
 
-    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .transfer(transfers)
       .toTransferParams();
@@ -184,19 +184,19 @@ export const transferTokens = async (
       });
     }
 
-    diagramStore.setProgress("execute-operation", "running", TEST_ID);
+    diagramStore.setProgress("execute-operation");
     const operation = await contract.methodsObject.transfer(transfers).send();
 
-    diagramStore.setProgress("wait-confirmation", "running", TEST_ID);
+    diagramStore.setProgress("wait-confirmation");
     const confirmation = await operation.confirmation(3);
 
     if (confirmation?.block.hash) {
-      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
+      diagramStore.setOperationHash(confirmation?.block.hash);
     }
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted();
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
   }
 };
 
@@ -217,11 +217,11 @@ export const getTokenBalancesDirect = async (
 
   try {
     diagramStore.setTestDiagram(TEST_ID, "get-balance");
-    diagramStore.setProgress("get-contract", "running", TEST_ID);
+    diagramStore.setProgress("get-contract");
 
     const fa2Contract = await Tezos.contract.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("read-fa2-storage", "running", TEST_ID);
+    diagramStore.setProgress("read-fa2-storage");
     const storage = (await fa2Contract.storage()) as FA2TokenStorage;
 
     const balances: TokenBalance[] = [];
@@ -245,11 +245,11 @@ export const getTokenBalancesDirect = async (
       });
     }
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted();
     return balances;
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     return [];
   }
 };
@@ -270,12 +270,12 @@ export const getTokenBalancesWithCallback = async (
 
   try {
     diagramStore.setTestDiagram(TEST_ID, "get-balance-with-callback");
-    diagramStore.setProgress("get-contracts", "running", TEST_ID);
+    diagramStore.setProgress("get-contracts");
 
     const fa2Contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
     const callbackContract = await Tezos.wallet.at(CALLBACK_CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("call-balance-of", "running", TEST_ID);
+    diagramStore.setProgress("call-balance-of");
 
     const balanceOfParams = {
       requests: requests,
@@ -286,14 +286,14 @@ export const getTokenBalancesWithCallback = async (
       .balance_of(balanceOfParams)
       .send();
 
-    diagramStore.setProgress("wait-confirmation", "running", TEST_ID);
+    diagramStore.setProgress("wait-confirmation");
     const confirmation = await operation.confirmation(1);
 
     if (confirmation?.block.hash) {
-      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
+      diagramStore.setOperationHash(confirmation?.block.hash);
     }
 
-    diagramStore.setProgress("read-callback-storage", "running", TEST_ID);
+    diagramStore.setProgress("read-callback-storage");
     const callbackStorage =
       (await callbackContract.storage()) as BalanceCallbackStorage;
 
@@ -312,11 +312,11 @@ export const getTokenBalancesWithCallback = async (
       balance: response.balance,
     }));
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted();
     return balances;
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     return [];
   }
 };

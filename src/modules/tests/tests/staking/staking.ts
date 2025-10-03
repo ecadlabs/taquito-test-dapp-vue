@@ -15,7 +15,7 @@ const stake = async (amount: number) => {
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
+    diagramStore.setProgress("estimate-fees");
     estimate = await Tezos.estimate.stake({
       amount,
       mutez: false,
@@ -29,8 +29,8 @@ const stake = async (amount: number) => {
       });
     }
 
-    diagramStore.setProgress("stake", "running", TEST_ID);
-    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    diagramStore.setProgress("stake");
+    diagramStore.setProgress("wait-for-user");
     const op = await Tezos.wallet
       .stake({
         amount,
@@ -38,16 +38,16 @@ const stake = async (amount: number) => {
       })
       .send();
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
+    diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await op.confirmation();
 
     if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
+      diagramStore.setOperationHash(confirmation?.block.hash);
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted();
   } catch (error) {
     console.error(`Failed to stake '${amount}': ${error}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     throw error;
   }
 };
@@ -59,7 +59,7 @@ const unstake = async (amount: number) => {
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
+    diagramStore.setProgress("estimate-fees");
     estimate = await Tezos.estimate.unstake({
       amount,
       mutez: false,
@@ -73,8 +73,8 @@ const unstake = async (amount: number) => {
       });
     }
 
-    diagramStore.setProgress("unstake", "running", TEST_ID);
-    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    diagramStore.setProgress("unstake");
+    diagramStore.setProgress("wait-for-user");
     const op = await Tezos.wallet
       .unstake({
         amount,
@@ -82,16 +82,16 @@ const unstake = async (amount: number) => {
       })
       .send();
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
+    diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await op.confirmation();
 
     if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
+      diagramStore.setOperationHash(confirmation?.block.hash);
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted();
   } catch (error) {
     console.error(`Failed to unstake '${amount}': ${error}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     throw error;
   }
 };
@@ -103,7 +103,7 @@ const finalizeUnstake = async () => {
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
+    diagramStore.setProgress("estimate-fees");
     estimate = await Tezos.estimate.finalizeUnstake({});
 
     if (estimate) {
@@ -114,20 +114,20 @@ const finalizeUnstake = async () => {
       });
     }
 
-    diagramStore.setProgress("finalize-unstake", "running", TEST_ID);
-    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    diagramStore.setProgress("finalize-unstake");
+    diagramStore.setProgress("wait-for-user");
     const op = await Tezos.wallet.finalizeUnstake({}).send();
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
+    diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await op.confirmation();
 
     if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
+      diagramStore.setOperationHash(confirmation?.block.hash);
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted();
   } catch (error) {
     console.error(`Failed to finalize unstake: ${error}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     throw error;
   }
 };
