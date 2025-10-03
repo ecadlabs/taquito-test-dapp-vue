@@ -70,9 +70,8 @@ export const useDiagramStore = defineStore("diagram", () => {
   const setProgress = async (
     stepId: string,
     status: "running" | "completed",
-    testId?: string,
   ) => {
-    if (testId && currentTestId.value !== testId) return;
+    if (!currentTestId.value) return;
 
     // Reset diagram if there was an error - this allows users to retry
     // and should only run when the user interacts with something, since
@@ -102,13 +101,9 @@ export const useDiagramStore = defineStore("diagram", () => {
     }
   };
 
-  /**
-   * Helper function to mark the current test as completed
-   *
-   * @param testId - The test ID to mark as completed
-   */
-  const setCompleted = async (testId?: string) => {
-    if (testId && currentTestId.value !== testId) return;
+  /** Helper function to mark the current test as completed */
+  const setCompleted = async () => {
+    if (!currentTestId.value) return;
 
     // Mark the current step as completed (timing-wise) if it exists
     if (currentStep.value && currentStep.value !== "success") {
@@ -129,8 +124,8 @@ export const useDiagramStore = defineStore("diagram", () => {
     await useWalletStore().fetchBalance();
   };
 
-  const setErrorMessage = (error: unknown, testId?: string) => {
-    if (testId && currentTestId.value !== testId) {
+  const setErrorMessage = (error: unknown) => {
+    if (!currentTestId.value) {
       return;
     }
 
@@ -147,8 +142,8 @@ export const useDiagramStore = defineStore("diagram", () => {
     diagramStatus.value = "errored";
   };
 
-  const setOperationHash = (hash: string | number, testId?: string) => {
-    if (testId && currentTestId.value !== testId) {
+  const setOperationHash = (hash: string | number) => {
+    if (!currentTestId.value) {
       return;
     }
     operationHash.value = hash;

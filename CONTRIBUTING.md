@@ -141,6 +141,7 @@ export const mainTestFunction = async (param: string): Promise<void> => {
   const Tezos = walletStore.getTezos;
 
   // Tell the diagram store which diagram we're using
+  // IMPORTANT: You should set a default diagram in the vue component onMounted hook later
   diagramStore.setTestDiagram(TEST_ID, "my-diagram");
 
   // Always surround your test logic in a try/catch
@@ -198,6 +199,10 @@ import { ref, computed } from "vue";
 
 const walletStore = useWalletStore();
 const walletConnected = computed(() => !!walletStore.getAddress);
+
+onMounted(() => {
+  diagramStore.setTestDiagram("my-default-diagram");
+});
 </script>
 ```
 

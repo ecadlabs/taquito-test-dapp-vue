@@ -45,14 +45,14 @@ const getContractMetadata = async (
   try {
     const Tezos = walletStore.getTezos;
 
-    diagramStore.setProgress("get-contract", "running", TEST_ID);
+    diagramStore.setProgress("get-contract", "running");
 
     const contract = await Tezos.wallet.at(contractAddress, tzip16);
 
-    diagramStore.setProgress("retrieve-metadata", "running", TEST_ID);
+    diagramStore.setProgress("retrieve-metadata", "running");
     const metadata = (await contract.tzip16().getMetadata()).metadata;
 
-    diagramStore.setCompleted(TEST_ID);
+    diagramStore.setCompleted();
 
     return {
       metadata: metadata as ContractMetadata,
@@ -61,7 +61,7 @@ const getContractMetadata = async (
     console.error(
       `Error retrieving metadata: ${JSON.stringify(error, null, 2)}`,
     );
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
   }
 };
 
@@ -86,7 +86,7 @@ const executeMetadataView = async (
   diagramStore.setTestDiagram(TEST_ID, "execute-view");
 
   try {
-    diagramStore.setProgress("setup-contract", "running", TEST_ID);
+    diagramStore.setProgress("setup-contract", "running");
 
     // Get Tezos instance
     const Tezos = walletStore.getTezos;
@@ -94,7 +94,7 @@ const executeMetadataView = async (
     // Get contract instance
     const contract = await Tezos.contract.at(contractAddress);
 
-    diagramStore.setProgress("execute-view", "running", TEST_ID);
+    diagramStore.setProgress("execute-view", "running");
 
     // Execute the view
     // For views that take no parameters, use undefined or unit
@@ -114,7 +114,7 @@ const executeMetadataView = async (
       viewCaller: walletAddress,
     });
 
-    diagramStore.setCompleted(TEST_ID);
+    diagramStore.setCompleted();
 
     return {
       viewName,
@@ -125,7 +125,7 @@ const executeMetadataView = async (
     console.error(
       `Error executing view '${viewName}': ${JSON.stringify(error, null, 2)}`,
     );
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     throw error;
   }
 };

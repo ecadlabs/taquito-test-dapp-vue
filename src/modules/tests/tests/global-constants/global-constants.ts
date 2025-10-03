@@ -4,8 +4,6 @@ import { useWalletStore } from "@/stores/walletStore";
 import type { Estimate } from "@taquito/taquito";
 import { PiggyBank } from "lucide-vue-next";
 
-const TEST_ID = "global-constants";
-
 let estimate: Estimate;
 
 /**
@@ -23,7 +21,7 @@ const registerGlobalConstant = async (
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
+    diagramStore.setProgress("estimate-fees", "running");
     estimate = await Tezos.estimate.registerGlobalConstant({ value });
 
     if (estimate) {
@@ -34,22 +32,22 @@ const registerGlobalConstant = async (
       });
     }
 
-    diagramStore.setProgress("register-constant", "running", TEST_ID);
+    diagramStore.setProgress("register-constant", "running");
     const operation = await Tezos.contract.registerGlobalConstant({ value });
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
+    diagramStore.setProgress("wait-for-chain-confirmation", "running");
     const confirmation = await operation.confirmation(3);
 
     const opHash = getOperationHash(confirmation);
     if (opHash) {
-      diagramStore.setOperationHash(opHash, TEST_ID);
+      diagramStore.setOperationHash(opHash);
     }
 
-    diagramStore.setCompleted(TEST_ID);
+    diagramStore.setCompleted();
     return operation.globalConstantHash;
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     throw error;
   }
 };

@@ -34,10 +34,10 @@ const sign = async (
       loadBeaconTypes(),
     ]);
 
-    diagramStore.setProgress("join-payload", "running", TEST_ID);
+    diagramStore.setProgress("join-payload", "running");
     const formattedInput: string = ["Tezos Signed Message:", input].join(" ");
 
-    diagramStore.setProgress("convert-to-bytes", "running", TEST_ID);
+    diagramStore.setProgress("convert-to-bytes", "running");
     const bytes = alreadyBytes ? input : utils.stringToBytes(formattedInput);
     const bytesLength = (bytes.length / 2).toString(16);
     const addPadding = `00000000${bytesLength}`;
@@ -57,8 +57,8 @@ const sign = async (
       throw new Error("No wallet found");
     }
 
-    diagramStore.setProgress("request-wallet-sign", "running", TEST_ID);
-    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    diagramStore.setProgress("request-wallet-sign", "running");
+    diagramStore.setProgress("wait-for-user", "running");
 
     // Dynamic wallet type checking and signing
     let signedPayload: { signature: string };
@@ -79,7 +79,7 @@ const sign = async (
 
     const { signature } = signedPayload;
 
-    diagramStore.setProgress("verify-signature", "running", TEST_ID);
+    diagramStore.setProgress("verify-signature", "running");
     const publicKey = await walletStore.getWalletPublicKey();
     if (!publicKey) {
       throw new Error("No public key found");
@@ -95,13 +95,13 @@ const sign = async (
     }
 
     if (!noDiagram) {
-      diagramStore.setCompleted(TEST_ID);
+      diagramStore.setCompleted();
     }
 
     return signature;
   } catch (error) {
     console.error(`Failed to sign payload: ${error}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     return null;
   }
 };
@@ -157,8 +157,8 @@ const signTzip32 = async (input: string) => {
       throw new Error("No wallet found");
     }
 
-    diagramStore.setProgress("request-wallet-sign", "running", TEST_ID);
-    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    diagramStore.setProgress("request-wallet-sign", "running");
+    diagramStore.setProgress("wait-for-user", "running");
 
     // Dynamic wallet type checking and signing
     let signedPayload: { signature: string };
@@ -178,12 +178,12 @@ const signTzip32 = async (input: string) => {
     }
 
     const { signature } = signedPayload;
-    diagramStore.setCompleted(TEST_ID);
+    diagramStore.setCompleted();
 
     return signature;
   } catch (error) {
     console.error(`Failed to sign payload: ${error}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     return null;
   }
 };
@@ -199,7 +199,7 @@ export const signMichelsonData = async (
   // Load michel-codec only when needed for Michelson signing
   const michelCodec = await loadMichelCodec();
 
-  diagramStore.setProgress("parse-micheline-expression", "running", TEST_ID);
+  diagramStore.setProgress("parse-micheline-expression", "running");
   const p = new michelCodec.Parser();
   const dataJSON = p.parseMichelineExpression(data);
   const typeJSON = p.parseMichelineExpression(type);
@@ -208,7 +208,7 @@ export const signMichelsonData = async (
     throw new Error("Failed to parse Micheline expression");
   }
 
-  diagramStore.setProgress("pack-data-bytes", "running", TEST_ID);
+  diagramStore.setProgress("pack-data-bytes", "running");
   // Type assertion is necessary here because parseMichelineExpression returns Expr
   // but packDataBytes expects more specific Micheline types. This is safe since we're parsing valid Micheline.
   const packed = michelCodec.packDataBytes(
@@ -221,7 +221,7 @@ export const signMichelsonData = async (
     throw new Error("Failed to sign Michelson data");
   }
 
-  diagramStore.setCompleted(TEST_ID);
+  diagramStore.setCompleted();
   return signature;
 };
 
@@ -253,8 +253,8 @@ const verifyPayloadViaContract = async (
       const characterEncoding = "0";
       const message = payload;
 
-      diagramStore.setProgress("join-payload", "running", TEST_ID);
-      diagramStore.setProgress("convert-to-bytes", "running", TEST_ID);
+      diagramStore.setProgress("join-payload", "running");
+      diagramStore.setProgress("convert-to-bytes", "running");
 
       // For TZIP-32 verification, we need to construct the same Micheline-wrapped payload
       // that was used for signing: "05" + "01" + fullPayloadHex
@@ -276,12 +276,12 @@ const verifyPayloadViaContract = async (
         messageHex;
       payloadBytes = "05" + "01" + fullPayloadHex;
     } else {
-      diagramStore.setProgress("join-payload", "running", TEST_ID);
+      diagramStore.setProgress("join-payload", "running");
       const formattedInput: string = ["Tezos Signed Message:", payload].join(
         " ",
       );
 
-      diagramStore.setProgress("convert-to-bytes", "running", TEST_ID);
+      diagramStore.setProgress("convert-to-bytes", "running");
       const bytes = utils.stringToBytes(formattedInput);
       const bytesLength = (bytes.length / 2).toString(16);
       const addPadding = `00000000${bytesLength}`;
@@ -289,10 +289,10 @@ const verifyPayloadViaContract = async (
       payloadBytes = "05" + "01" + paddedBytesLength + bytes;
     }
 
-    diagramStore.setProgress("get-contract", "running", TEST_ID);
+    diagramStore.setProgress("get-contract", "running");
     const contract = await Tezos.wallet.at(SIGNATURE_CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
+    diagramStore.setProgress("estimate-fees", "running");
     const parameter = {
       public_key: publicKey,
       signature: signature,
@@ -313,18 +313,18 @@ const verifyPayloadViaContract = async (
       });
     }
 
-    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    diagramStore.setProgress("wait-for-user", "running");
     const operation = await contract.methodsObject.default(parameter).send();
 
-    diagramStore.setProgress("wait-confirmation", "running", TEST_ID);
+    diagramStore.setProgress("wait-confirmation", "running");
     const confirmation = await operation.confirmation(1);
     if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
-    diagramStore.setCompleted(TEST_ID);
+      diagramStore.setOperationHash(confirmation?.block.hash);
+    diagramStore.setCompleted();
     return true;
   } catch (error) {
     console.error(`Failed to verify payload via contract: ${error}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     return false;
   }
 };

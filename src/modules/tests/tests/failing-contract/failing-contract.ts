@@ -7,7 +7,6 @@ const CONTRACT_ADDRESS =
   (contracts as ContractConfig[]).find(
     (contract: ContractConfig) => contract.contractName === "counter",
   )?.address ?? "";
-const TEST_ID = "failing-contract";
 
 /**
  * Attempts to call a contract with invalid parameters to test error handling.
@@ -23,10 +22,10 @@ const testContractFailure = async (scenario: string): Promise<void> => {
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("get-contract", "running", TEST_ID);
+    diagramStore.setProgress("get-contract", "running");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("execute-operation", "running", TEST_ID);
+    diagramStore.setProgress("execute-operation", "running");
     switch (scenario) {
       case "wrong-type":
         // Try to pass a string instead of a number to increment
@@ -55,7 +54,7 @@ const testContractFailure = async (scenario: string): Promise<void> => {
       `Expected contract call failure for scenario '${scenario}':`,
       JSON.stringify(error, null, 2),
     );
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
   }
 };
 

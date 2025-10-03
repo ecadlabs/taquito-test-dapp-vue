@@ -7,7 +7,6 @@ const CONTRACT_ADDRESS =
   (contracts as ContractConfig[]).find(
     (contract: ContractConfig) => contract.contractName === "counter",
   )?.address ?? "";
-const TEST_ID = "transaction-limit";
 
 /**
  * Interacts with the contract using custom transaction limits.
@@ -30,12 +29,12 @@ const interact = async (
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("get-contract", "running", TEST_ID);
+    diagramStore.setProgress("get-contract", "running");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("set-transaction-limit", "running", TEST_ID);
-    diagramStore.setProgress("execute-operation", "running", TEST_ID);
-    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    diagramStore.setProgress("set-transaction-limit", "running");
+    diagramStore.setProgress("execute-operation", "running");
+    diagramStore.setProgress("wait-for-user", "running");
 
     const operation = await contract.methodsObject.increment(1).send({
       storageLimit,
@@ -43,15 +42,15 @@ const interact = async (
       fee,
     });
 
-    diagramStore.setProgress("wait-chain-confirmation", "running", TEST_ID);
+    diagramStore.setProgress("wait-chain-confirmation", "running");
     const confirmation = await operation.confirmation(3);
 
     if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
-    diagramStore.setCompleted(TEST_ID);
+      diagramStore.setOperationHash(confirmation?.block.hash);
+    diagramStore.setCompleted();
   } catch (error) {
     console.log(`Error: ${JSON.stringify(error, null, 2)}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
   }
 };
 

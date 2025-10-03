@@ -2,8 +2,6 @@ import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
 import { verifySignature } from "@taquito/utils";
 
-const TEST_ID = "failing-noop";
-
 /**
  * Signs a failing noop operation and verifies the signature.
  *
@@ -20,18 +18,18 @@ const failNoop = async (): Promise<void> => {
   const hex = "48656C6C6F20576F726C64";
 
   try {
-    diagramStore.setProgress("signing-operation", "running", TEST_ID);
-    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    diagramStore.setProgress("signing-operation", "running");
+    diagramStore.setProgress("wait-for-user", "running");
     const signed = await Tezos.wallet.signFailingNoop({
       arbitrary: hex,
       basedOnBlock: "head",
     });
 
-    diagramStore.setProgress("get-public-key", "running", TEST_ID);
+    diagramStore.setProgress("get-public-key", "running");
     const pk = await walletStore.getWalletPublicKey();
     if (!pk) throw new Error("No public key found");
 
-    diagramStore.setProgress("verify-signature", "running", TEST_ID);
+    diagramStore.setProgress("verify-signature", "running");
     await verifySignature(
       signed.bytes,
       pk,
@@ -39,10 +37,10 @@ const failNoop = async (): Promise<void> => {
       new Uint8Array([3]),
     );
 
-    diagramStore.setCompleted(TEST_ID);
+    diagramStore.setCompleted();
   } catch (error) {
     console.log(`Error: ${JSON.stringify(error, null, 2)}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
   }
 };
 
