@@ -31,10 +31,6 @@ export default {
       if (request.method === "OPTIONS") {
         const origin = request.headers.get("Origin");
 
-        if (!isOriginAllowed(origin, env)) {
-          return new Response("Forbidden", { status: 403 });
-        }
-
         return new Response(null, {
           status: 204,
           headers: {
@@ -74,10 +70,6 @@ async function handleFund(request: Request, env: Env): Promise<Response> {
         "Access-Control-Allow-Origin": origin || "*",
       },
     });
-  }
-
-  if (!isOriginAllowed(origin, env)) {
-    return addCorsHeaders(new Response("Forbidden", { status: 403 }), origin);
   }
 
   // Rate limiting check
@@ -358,13 +350,4 @@ async function validateAndSelectRpcUrl(
     console.error(`RPC URL connectivity test failed for ${rpcUrl}:`, error);
     return null;
   }
-}
-
-function isOriginAllowed(origin: string | null, env: Env): boolean {
-  if (!origin) return false;
-
-  const allowedOrigins = env.ALLOWED_ORIGINS.split(",").map((o: string) =>
-    o.trim(),
-  );
-  return allowedOrigins.includes("*") || allowedOrigins.includes(origin);
 }
