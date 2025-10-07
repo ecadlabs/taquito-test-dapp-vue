@@ -20,7 +20,7 @@ const delegate = async (address: string) => {
     if (!walletStore.getAddress)
       throw new Error("No address found to delegate from");
 
-    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
+    diagramStore.setProgress("estimate-fees");
     estimate = await Tezos.estimate.setDelegate({
       source: walletStore.getAddress,
       delegate: address,
@@ -34,22 +34,22 @@ const delegate = async (address: string) => {
       });
     }
 
-    diagramStore.setProgress("set-delegate", "running", TEST_ID);
-    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    diagramStore.setProgress("set-delegate");
+    diagramStore.setProgress("wait-for-user");
     const delegation = await Tezos.wallet
       .setDelegate({ delegate: address })
       .send();
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
+    diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await delegation.confirmation();
 
     if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
+      diagramStore.setOperationHash(confirmation?.block.hash);
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted();
   } catch (error) {
     console.error(`Failed to delegate to '${address}': ${error}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     throw error;
   }
 };
@@ -65,7 +65,7 @@ const undelegate = async () => {
     if (!walletStore.getAddress)
       throw new Error("No address found remove delegation for");
 
-    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
+    diagramStore.setProgress("estimate-fees");
     estimate = await Tezos.estimate.setDelegate({
       source: walletStore.getAddress,
     });
@@ -78,20 +78,20 @@ const undelegate = async () => {
       });
     }
 
-    diagramStore.setProgress("remove-delegation", "running", TEST_ID);
-    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    diagramStore.setProgress("remove-delegation");
+    diagramStore.setProgress("wait-for-user");
     const delegation = await Tezos.wallet.setDelegate({}).send();
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
+    diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await delegation.confirmation();
 
     if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
+      diagramStore.setOperationHash(confirmation?.block.hash);
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted();
   } catch (error) {
     console.error(`Failed to undelegate: ${error}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     throw error;
   }
 };

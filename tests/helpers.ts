@@ -9,12 +9,12 @@ export const connectToWallet = async ({ page }: { page: Page }) => {
   // Connect wallet
   await page.getByRole("button", { name: "Connect Wallet" }).click();
   await page.getByRole("combobox").click();
-  await page.getByRole("option", { name: "Programmatic (Testing)" }).click();
+  await page.getByRole("option", { name: "Raw Private Key Access" }).click();
   const privateKey = process.env.TEST_WALLET_PRIVATE_KEY;
   if (!privateKey) {
     throw new Error("TEST_WALLET_PRIVATE_KEY is not set");
   }
-  await page.getByPlaceholder("Private Key").fill(privateKey);
+  await page.getByPlaceholder("edsk...").fill(privateKey);
   await page.getByRole("button", { name: "Connect" }).click();
   await page.waitForSelector("text=Wallet connected");
 };

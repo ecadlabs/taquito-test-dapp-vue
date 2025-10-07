@@ -67,12 +67,8 @@ export const useDiagramStore = defineStore("diagram", () => {
     }
   };
 
-  const setProgress = async (
-    stepId: string,
-    status: "running" | "completed",
-    testId?: string,
-  ) => {
-    if (testId && currentTestId.value !== testId) return;
+  const setProgress = async (stepId: string) => {
+    if (!currentTestId.value) return;
 
     // Reset diagram if there was an error - this allows users to retry
     // and should only run when the user interacts with something, since
@@ -80,7 +76,7 @@ export const useDiagramStore = defineStore("diagram", () => {
     if (errorMessage.value) {
       errorMessage.value = undefined;
       currentStep.value = stepId;
-      diagramStatus.value = status;
+      diagramStatus.value = "running";
     }
 
     if (currentDiagram.value && currentTestId.value) {
@@ -94,16 +90,35 @@ export const useDiagramStore = defineStore("diagram", () => {
       stepTimings.value.set(stepId, { startTime: performance.now() });
 
       currentStep.value = stepId;
-      diagramStatus.value = status;
-
-      if (status === "completed") {
-        await useWalletStore().fetchBalance();
-      }
+      diagramStatus.value = "running";
     }
   };
 
-  const setErrorMessage = (error: unknown, testId?: string) => {
-    if (testId && currentTestId.value !== testId) {
+  /** Helper function to mark the current test as completed */
+  const setCompleted = async () => {
+    if (!currentTestId.value) return;
+
+    // Mark the current step as completed (timing-wise) if it exists
+    if (currentStep.value && currentStep.value !== "success") {
+      const timing = stepTimings.value.get(currentStep.value);
+      if (timing?.startTime && !timing.endTime) {
+        timing.endTime = performance.now();
+        timing.duration = timing.endTime - timing.startTime;
+      }
+    }
+
+    // Set current step to "success" to highlight the success node in the diagram
+    stepTimings.value.set("success", { startTime: performance.now() });
+    currentStep.value = "success";
+
+    // Set diagram status to completed
+    diagramStatus.value = "completed";
+
+    await useWalletStore().fetchBalance();
+  };
+
+  const setErrorMessage = (error: unknown) => {
+    if (!currentTestId.value) {
       return;
     }
 
@@ -120,8 +135,8 @@ export const useDiagramStore = defineStore("diagram", () => {
     diagramStatus.value = "errored";
   };
 
-  const setOperationHash = (hash: string | number, testId?: string) => {
-    if (testId && currentTestId.value !== testId) {
+  const setOperationHash = (hash: string | number) => {
+    if (!currentTestId.value) {
       return;
     }
     operationHash.value = hash;
@@ -286,6 +301,7 @@ export const useDiagramStore = defineStore("diagram", () => {
     setDiagram,
     setTestDiagram,
     setProgress,
+    setCompleted,
     resetDiagram,
     setErrorMessage,
     setOperationHash,
