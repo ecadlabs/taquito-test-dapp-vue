@@ -1,0 +1,21 @@
+{
+  "name": "taquito-faucet-worker",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:preview": "wrangler deploy --env preview"
+  },
+  "dependencies": {
+    "@taquito/taquito": "^23.0.0",
+    "@taquito/signer": "^23.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250605.0",
+    "typescript": "^5.8.3",
+    "wrangler": "^3.93.0"
+  }
+}
