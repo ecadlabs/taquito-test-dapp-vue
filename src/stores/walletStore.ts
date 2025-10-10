@@ -1,7 +1,7 @@
 import { useSettingsStore } from "@/stores/settingsStore";
 import type { ProgrammaticWallet, WalletProvider } from "@/types/wallet";
 import { BeaconEvent } from "@airgap/beacon-dapp";
-import { NetworkType } from "@airgap/beacon-types";
+import { NetworkType, type ExtendedPeerInfo } from "@airgap/beacon-types";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import * as Sentry from "@sentry/vue";
 import { BeaconWallet } from "@taquito/beacon-wallet";
@@ -350,13 +350,16 @@ export const useWalletStore = defineStore("wallet", () => {
       }
 
       if (wallet.value instanceof BeaconWallet) {
+        const peers = await wallet.value.client.getPeers();
+        for (const peer of peers) {
+          await wallet.value.client.removePeer(peer as ExtendedPeerInfo, true);
+        }
+
         await wallet.value.client.disconnect();
         await wallet.value.client.clearActiveAccount();
       } else if (wallet.value instanceof WalletConnect) {
         await wallet.value.disconnect();
         await deleteWalletConnectSessionFromIndexedDB();
-      } else if (wallet.value instanceof LedgerSigner) {
-        // Ledger doesn't need explicit disconnection
       }
 
       // Reset wallet state after disconnection
