@@ -15,6 +15,7 @@ import {
 } from "@taquito/wallet-connect";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
+import { toast } from "vue-sonner";
 
 export const useWalletStore = defineStore("wallet", () => {
   const settingsStore = useSettingsStore();
@@ -27,6 +28,7 @@ export const useWalletStore = defineStore("wallet", () => {
   const address = ref<string>();
   const balance = ref<BigNumber>();
   const walletName = ref<string>();
+  const isDisconnecting = ref<boolean>(false);
 
   const getTezos = computed(() => Tezos);
   const getWallet = computed(() => wallet.value);
@@ -110,9 +112,14 @@ export const useWalletStore = defineStore("wallet", () => {
     beaconWallet.client.subscribeToEvent(
       BeaconEvent.ACTIVE_ACCOUNT_SET,
       (account) => {
-        // Beacon gets very upset if we don't subscribe to this event and do *something* with it
         if (account) {
           address.value = account.address;
+        } else if (
+          account === undefined &&
+          address.value &&
+          !isDisconnecting.value
+        ) {
+          disconnectWallet(true);
         }
       },
     );
@@ -341,7 +348,8 @@ export const useWalletStore = defineStore("wallet", () => {
    * @throws {ReferenceError} If no wallet is currently connected.
    * @throws {Error} If an error occurs during disconnection.
    */
-  const disconnectWallet = async () => {
+  const disconnectWallet = async (fromWallet: boolean = false) => {
+    isDisconnecting.value = true;
     try {
       if (!wallet.value) {
         throw new ReferenceError(
@@ -350,25 +358,36 @@ export const useWalletStore = defineStore("wallet", () => {
       }
 
       if (wallet.value instanceof BeaconWallet) {
-        const peers = await wallet.value.client.getPeers();
-        for (const peer of peers) {
-          await wallet.value.client.removePeer(peer as ExtendedPeerInfo, true);
+        if (!fromWallet) {
+          const peers = await wallet.value.client.getPeers();
+          for (const peer of peers) {
+            await wallet.value.client.removePeer(
+              peer as ExtendedPeerInfo,
+              true,
+            );
+          }
+          await wallet.value.client.disconnect();
         }
 
-        await wallet.value.client.disconnect();
         await wallet.value.client.clearActiveAccount();
       } else if (wallet.value instanceof WalletConnect) {
         await wallet.value.disconnect();
         await deleteWalletConnectSessionFromIndexedDB();
       }
 
-      // Reset wallet state after disconnection
       resetWalletState();
+
+      if (fromWallet) {
+        toast.info(
+          "Your wallet has been disconnected due to a disconnect request from your wallet.",
+        );
+      }
     } catch (error) {
       console.error("Error disconnecting wallet:", error);
-      // Still reset state even if disconnection fails
       resetWalletState();
       throw error;
+    } finally {
+      isDisconnecting.value = false;
     }
   };
 
