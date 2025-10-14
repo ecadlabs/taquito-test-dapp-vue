@@ -366,10 +366,7 @@ export const useWalletStore = defineStore("wallet", () => {
               true,
             );
           }
-          await wallet.value.client.disconnect();
         }
-
-        await wallet.value.client.clearActiveAccount();
       } else if (wallet.value instanceof WalletConnect) {
         await wallet.value.disconnect();
         await deleteWalletConnectSessionFromIndexedDB();
