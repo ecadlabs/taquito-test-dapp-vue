@@ -1,5 +1,20 @@
 <template>
   <div class="flex w-full flex-col items-center gap-6 px-6">
+    <!-- Baker warning alert -->
+    <Alert
+      v-if="isRegisteredAsBaker"
+      variant="destructive"
+      class="w-full max-w-md"
+    >
+      <AlertTriangle class="h-4 w-4" />
+      <AlertTitle>Registered as Baker</AlertTitle>
+      <AlertDescription>
+        You're currently registered as a baker (delegating to yourself). Tezos
+        does not currently allow you to un-register as a baker. To use this test
+        you'll need to use a different account.
+      </AlertDescription>
+    </Alert>
+
     <!-- Current delegate section -->
     <div v-if="currentDelegate" class="w-full max-w-md space-y-2">
       <!-- Display current delegate -->
@@ -71,7 +86,10 @@
         <Button
           @click="removeDelegation()"
           :disabled="
-            changingDelegate || removingDelegate || !walletStore.getAddress
+            changingDelegate ||
+            removingDelegate ||
+            !walletStore.getAddress ||
+            isRegisteredAsBaker
           "
           variant="destructive"
           class="w-full"
@@ -112,7 +130,10 @@
           <Button
             @click="delegateToCurrentAddress()"
             :disabled="
-              sending || loadingCurrentDelegate || !walletStore.getAddress
+              sending ||
+              loadingCurrentDelegate ||
+              !walletStore.getAddress ||
+              isRegisteredAsBaker
             "
             class="w-full"
             :aria-busy="sending"
@@ -134,6 +155,7 @@
 </template>
 
 <script setup lang="ts">
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -145,8 +167,14 @@ import {
 } from "@/modules/tests/tests/delegation/delegation";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
-import { CheckCircle, Cookie, Loader2, Unlink } from "lucide-vue-next";
-import { onMounted, ref, watch } from "vue";
+import {
+  AlertTriangle,
+  CheckCircle,
+  Cookie,
+  Loader2,
+  Unlink,
+} from "lucide-vue-next";
+import { computed, onMounted, ref, watch } from "vue";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
@@ -160,6 +188,14 @@ const currentDelegate = ref<string | null>();
 const loadingCurrentDelegate = ref<boolean>(true);
 const isValidAddress = (value: string): boolean =>
   validateTezosAddress(value.trim());
+
+const isRegisteredAsBaker = computed(() => {
+  return (
+    currentDelegate.value &&
+    walletStore.getAddress &&
+    currentDelegate.value === walletStore.getAddress
+  );
+});
 
 onMounted(async () => {
   diagramStore.setTestDiagram("delegation");
