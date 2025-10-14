@@ -117,7 +117,7 @@
                 variant="outline"
                 class="font-mono text-xs"
               >
-                {{ Math.round(getStepTiming(node.id)?.duration ?? 0) }}ms
+                {{ formatDuration(getStepTiming(node.id)?.duration) }}
               </Badge>
             </div>
           </div>
@@ -169,6 +169,16 @@ const operationHash = computed(() => diagramStore.operationHash);
 
 const getStepTiming = (stepId: string) => {
   return diagramStore.getStepTiming(stepId);
+};
+
+const formatDuration = (durationMs: number | undefined): string => {
+  if (durationMs === undefined) return "0ms";
+
+  const duration = Math.round(durationMs);
+  if (duration >= 1000) {
+    return `${(duration / 1000).toFixed(2)}s`;
+  }
+  return `${duration}ms`;
 };
 
 const networkType = import.meta.env.VITE_NETWORK_TYPE;
