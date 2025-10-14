@@ -8,6 +8,9 @@ import type {
   TurnstileResponse,
 } from "./types";
 
+// Default confirmation count - this should be configurable in production
+const DEFAULT_CONFIRMATION_COUNT = 1;
+
 // Export the Durable Object class separately
 export { RateLimiter };
 
@@ -269,7 +272,7 @@ async function sendTez(
     });
 
     const operation = await op.send();
-    await operation.confirmation(1);
+    await operation.confirmation(DEFAULT_CONFIRMATION_COUNT);
 
     return operation.opHash;
   } catch (error) {

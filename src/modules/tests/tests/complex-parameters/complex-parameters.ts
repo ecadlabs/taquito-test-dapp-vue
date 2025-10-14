@@ -1,5 +1,6 @@
 import contracts from "@/contracts/contract-config.json";
 import { useDiagramStore } from "@/stores/diagramStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 import {
   type ContractConfig,
@@ -34,6 +35,7 @@ export interface RecordParam {
  */
 const addUserRecord = async (record: RecordParam): Promise<void> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   diagramStore.setTestDiagram(TEST_ID, "add-record");
 
   const walletStore = useWalletStore();
@@ -63,7 +65,9 @@ const addUserRecord = async (record: RecordParam): Promise<void> => {
       .send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(3);
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation.block.hash);
@@ -85,6 +89,7 @@ const addUserRecord = async (record: RecordParam): Promise<void> => {
  */
 const setNestedRecord = async (nestedRecord: NestedRecord): Promise<void> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   diagramStore.setTestDiagram(TEST_ID, "set-nested-record");
 
   const walletStore = useWalletStore();
@@ -134,7 +139,9 @@ const setNestedRecord = async (nestedRecord: NestedRecord): Promise<void> => {
       .send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(3);
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation.block.hash);
@@ -160,6 +167,7 @@ const manageUserSet = async (
   userAddress: string,
 ): Promise<void> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   diagramStore.setTestDiagram(TEST_ID, "manage-user-set");
 
   const walletStore = useWalletStore();
@@ -194,7 +202,9 @@ const manageUserSet = async (
       .send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(3);
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation.block.hash);
@@ -217,6 +227,7 @@ const updateMetadata = async (
   updates: Record<string, string>,
 ): Promise<void> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   diagramStore.setTestDiagram(TEST_ID, "update-metadata");
 
   const walletStore = useWalletStore();
@@ -246,7 +257,9 @@ const updateMetadata = async (
       .send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(3);
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation.block.hash);
