@@ -1,5 +1,6 @@
 import { getOperationHash } from "@/lib/utils";
 import { useDiagramStore } from "@/stores/diagramStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 import type { Estimate } from "@taquito/taquito";
 import { PiggyBank } from "lucide-vue-next";
@@ -17,6 +18,7 @@ const registerGlobalConstant = async (
   value: object,
 ): Promise<string | undefined> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   const walletStore = useWalletStore();
   const Tezos = walletStore.getTezos;
 
@@ -36,7 +38,9 @@ const registerGlobalConstant = async (
     const operation = await Tezos.contract.registerGlobalConstant({ value });
 
     diagramStore.setProgress("wait-for-chain-confirmation");
-    const confirmation = await operation.confirmation(3);
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     const opHash = getOperationHash(confirmation);
     if (opHash) {

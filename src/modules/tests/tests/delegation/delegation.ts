@@ -10,6 +10,7 @@ let estimate: Estimate;
 
 const delegate = async (address: string) => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   diagramStore.setTestDiagram(TEST_ID, "set-delegate");
 
   const walletStore = useWalletStore();
@@ -41,7 +42,9 @@ const delegate = async (address: string) => {
       .send();
 
     diagramStore.setProgress("wait-for-chain-confirmation");
-    const confirmation = await delegation.confirmation();
+    const confirmation = await delegation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash);
@@ -56,6 +59,7 @@ const delegate = async (address: string) => {
 
 const undelegate = async () => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   diagramStore.setTestDiagram(TEST_ID, "remove-delegation");
 
   const walletStore = useWalletStore();
@@ -83,7 +87,9 @@ const undelegate = async () => {
     const delegation = await Tezos.wallet.setDelegate({}).send();
 
     diagramStore.setProgress("wait-for-chain-confirmation");
-    const confirmation = await delegation.confirmation();
+    const confirmation = await delegation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash);
