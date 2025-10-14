@@ -319,12 +319,13 @@ async function validateAndSelectRpcUrl(
     return env.RPC_URL; // Use default if not provided
   }
 
+  const trimmedRpcUrl = rpcUrl.trim().replace(/\/+$/, "");
   // Check if the provided RPC URL is in the allowed list
   if (env.ALLOWED_RPC_URLS) {
     const allowedUrls = env.ALLOWED_RPC_URLS.split(",").map((url: string) =>
-      url.trim(),
+      url.trim().replace(/\/+$/, ""),
     );
-    if (!allowedUrls.includes(rpcUrl)) {
+    if (!allowedUrls.includes(trimmedRpcUrl)) {
       console.warn(`RPC URL not allowed: ${rpcUrl}`);
       return null;
     }
@@ -332,8 +333,11 @@ async function validateAndSelectRpcUrl(
 
   // Validate URL format
   try {
-    new URL(rpcUrl);
-    if (!rpcUrl.startsWith("http://") && !rpcUrl.startsWith("https://")) {
+    new URL(trimmedRpcUrl);
+    if (
+      !trimmedRpcUrl.startsWith("http://") &&
+      !trimmedRpcUrl.startsWith("https://")
+    ) {
       return null;
     }
   } catch {
@@ -343,9 +347,9 @@ async function validateAndSelectRpcUrl(
 
   // Test RPC endpoint connectivity
   try {
-    const tezos = new TezosToolkit(rpcUrl);
-    await tezos.rpc.getChainId(); // Simple connectivity test
-    return rpcUrl;
+    const tezos = new TezosToolkit(trimmedRpcUrl);
+    await tezos.rpc.getChainId(); // connectivity test
+    return trimmedRpcUrl;
   } catch (error) {
     console.error(`RPC URL connectivity test failed for ${rpcUrl}:`, error);
     return null;
