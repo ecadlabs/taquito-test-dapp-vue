@@ -21,7 +21,11 @@ const routes = [
     name: "documentation",
     component: () => import("@/modules/home/views/HomeView.vue"),
     beforeEnter() {
-      window.open("https://taquito.io/docs/quick_start", "_blank");
+      window.open(
+        "https://taquito.io/docs/quick_start",
+        "_blank",
+        "noopener,noreferrer",
+      );
       return false;
     },
     meta: { external: true },
