@@ -1,5 +1,6 @@
 import contracts from "@/contracts/contract-config.json";
 import { useDiagramStore } from "@/stores/diagramStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 import { type ContractConfig } from "@/types/contract";
 
@@ -24,6 +25,7 @@ const interact = async (
   fee: number,
 ): Promise<void> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
 
   const walletStore = useWalletStore();
   const Tezos = walletStore.getTezos;
@@ -43,7 +45,9 @@ const interact = async (
     });
 
     diagramStore.setProgress("wait-chain-confirmation");
-    const confirmation = await operation.confirmation(3);
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash);

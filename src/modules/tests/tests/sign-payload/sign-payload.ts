@@ -1,6 +1,7 @@
 import { useTaquitoModules } from "@/composables/useTaquitoModules";
 import contracts from "@/contracts/contract-config.json";
 import { useDiagramStore } from "@/stores/diagramStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 import type { ContractConfig } from "@/types/contract";
 import { BeaconWallet } from "@taquito/beacon-wallet";
@@ -317,7 +318,10 @@ const verifyPayloadViaContract = async (
     const operation = await contract.methodsObject.default(parameter).send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(1);
+    const settingsStore = useSettingsStore();
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash);
     diagramStore.setCompleted();

@@ -1,9 +1,11 @@
 import { useDiagramStore } from "@/stores/diagramStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 const TEST_ID = "increase-paid-storage";
 
 const increaseStorage = async (contract: string, bytes: number) => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   const walletStore = useWalletStore();
 
   const Tezos = walletStore.getTezos;
@@ -25,7 +27,9 @@ const increaseStorage = async (contract: string, bytes: number) => {
       .send();
 
     diagramStore.setProgress("wait-for-chain-confirmation");
-    const confirmation = await operation.confirmation(3);
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash);
 

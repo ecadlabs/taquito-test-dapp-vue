@@ -1,5 +1,6 @@
 import contracts from "@/contracts/contract-config.json";
 import { useDiagramStore } from "@/stores/diagramStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 import type { FA2TokenStorage } from "@/types/contract";
 import {
@@ -61,6 +62,7 @@ export interface BurnParam {
  */
 export const mintTokens = async (param: MintParam): Promise<void> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   const walletStore = useWalletStore();
   const Tezos = walletStore.getTezos;
 
@@ -88,7 +90,9 @@ export const mintTokens = async (param: MintParam): Promise<void> => {
     const operation = await contract.methodsObject.mint(param).send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(3);
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation?.block.hash);
@@ -108,6 +112,7 @@ export const mintTokens = async (param: MintParam): Promise<void> => {
  */
 export const burnTokens = async (param: BurnParam): Promise<void> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   const walletStore = useWalletStore();
   const Tezos = walletStore.getTezos;
 
@@ -135,7 +140,9 @@ export const burnTokens = async (param: BurnParam): Promise<void> => {
     const operation = await contract.methodsObject.burn(param).send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(3);
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation?.block.hash);
@@ -157,6 +164,7 @@ export const transferTokens = async (
   transfers: TransferParam[],
 ): Promise<void> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   const walletStore = useWalletStore();
   const Tezos = walletStore.getTezos;
 
@@ -188,7 +196,9 @@ export const transferTokens = async (
     const operation = await contract.methodsObject.transfer(transfers).send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(3);
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation?.block.hash);
@@ -265,6 +275,7 @@ export const getTokenBalancesWithCallback = async (
   requests: Array<{ owner: string; token_id: string }>,
 ): Promise<TokenBalance[]> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   const walletStore = useWalletStore();
   const Tezos = walletStore.getTezos;
 
@@ -287,7 +298,9 @@ export const getTokenBalancesWithCallback = async (
       .send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(1);
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation?.block.hash);

@@ -31,6 +31,7 @@ export const availableIndexers: IndexerOption[] = [
 export type Settings = {
   indexer: IndexerOption;
   rpcUrl: string;
+  confirmationCount: number;
 };
 
 const defaultSettings: Settings = {
@@ -41,6 +42,7 @@ const defaultSettings: Settings = {
       ),
     ) || availableIndexers[0],
   rpcUrl: import.meta.env.VITE_RPC_URL,
+  confirmationCount: 3,
 };
 
 export const useSettingsStore = defineStore("settings", () => {
@@ -64,6 +66,7 @@ export const useSettingsStore = defineStore("settings", () => {
   const getSettings = computed(() => settings.value);
   const getIndexer = computed(() => settings.value.indexer);
   const getIsRevealed = computed(() => isRevealed.value);
+  const getConfirmationCount = computed(() => settings.value.confirmationCount);
   const isUsingCustomRpcUrl = computed(() => {
     return settings.value.rpcUrl !== import.meta.env.VITE_RPC_URL;
   });
@@ -87,6 +90,7 @@ export const useSettingsStore = defineStore("settings", () => {
     getSettings,
     getIndexer,
     getIsRevealed,
+    getConfirmationCount,
     isUsingCustomRpcUrl,
     resetRpcUrl,
   };

@@ -1,7 +1,10 @@
+import {
+  initializeBeaconEvents,
+  initializeWalletConnectEvents,
+} from "@/lib/walletEvents";
 import { useSettingsStore } from "@/stores/settingsStore";
 import type { ProgrammaticWallet, WalletProvider } from "@/types/wallet";
-import { BeaconEvent } from "@airgap/beacon-dapp";
-import { NetworkType } from "@airgap/beacon-types";
+import { NetworkType, type ExtendedPeerInfo } from "@airgap/beacon-types";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import * as Sentry from "@sentry/vue";
 import { BeaconWallet } from "@taquito/beacon-wallet";
@@ -15,6 +18,7 @@ import {
 } from "@taquito/wallet-connect";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
+import { toast } from "vue-sonner";
 
 export const useWalletStore = defineStore("wallet", () => {
   const settingsStore = useSettingsStore();
@@ -27,6 +31,7 @@ export const useWalletStore = defineStore("wallet", () => {
   const address = ref<string>();
   const balance = ref<BigNumber>();
   const walletName = ref<string>();
+  const isDisconnecting = ref<boolean>(false);
 
   const getTezos = computed(() => Tezos);
   const getWallet = computed(() => wallet.value);
@@ -93,10 +98,7 @@ export const useWalletStore = defineStore("wallet", () => {
 
   /** Initializes a Beacon wallet */
   const initializeBeaconWallet = async (): Promise<void> => {
-    const networkType =
-      import.meta.env.VITE_NETWORK_TYPE === "seoulnet"
-        ? NetworkType.CUSTOM
-        : (import.meta.env.VITE_NETWORK_TYPE as NetworkType);
+    const networkType = import.meta.env.VITE_NETWORK_TYPE as NetworkType;
 
     const options = {
       name: "Taquito Playground",
@@ -110,15 +112,8 @@ export const useWalletStore = defineStore("wallet", () => {
     };
 
     const beaconWallet = new BeaconWallet(options);
-    beaconWallet.client.subscribeToEvent(
-      BeaconEvent.ACTIVE_ACCOUNT_SET,
-      (account) => {
-        // Beacon gets very upset if we don't subscribe to this event and do *something* with it
-        if (account) {
-          address.value = account.address;
-        }
-      },
-    );
+
+    initializeBeaconEvents(beaconWallet);
 
     const cachedAccount = await beaconWallet.client.getActiveAccount();
 
@@ -160,6 +155,8 @@ export const useWalletStore = defineStore("wallet", () => {
         "Wallet not found after WalletConnect initialization should have finished.",
       );
 
+    initializeWalletConnectEvents(walletConnect);
+
     const latestSessionKey =
       await walletConnect.getAllExistingSessionKeys()?.[0];
 
@@ -168,7 +165,9 @@ export const useWalletStore = defineStore("wallet", () => {
     } else {
       await walletConnect.requestPermissions({
         permissionScope: {
-          networks: [WalletConnectNetworkType.SEOULNET],
+          networks: [
+            import.meta.env.VITE_NETWORK_TYPE as WalletConnectNetworkType,
+          ],
           events: [],
           methods: [
             PermissionScopeMethods.TEZOS_SEND,
@@ -342,7 +341,8 @@ export const useWalletStore = defineStore("wallet", () => {
    * @throws {ReferenceError} If no wallet is currently connected.
    * @throws {Error} If an error occurs during disconnection.
    */
-  const disconnectWallet = async () => {
+  const disconnectWallet = async (fromWallet: boolean = false) => {
+    isDisconnecting.value = true;
     try {
       if (!wallet.value) {
         throw new ReferenceError(
@@ -351,22 +351,33 @@ export const useWalletStore = defineStore("wallet", () => {
       }
 
       if (wallet.value instanceof BeaconWallet) {
-        await wallet.value.client.disconnect();
-        await wallet.value.client.clearActiveAccount();
+        if (!fromWallet) {
+          const peers = await wallet.value.client.getPeers();
+          for (const peer of peers) {
+            await wallet.value.client.removePeer(
+              peer as ExtendedPeerInfo,
+              true,
+            );
+          }
+        }
       } else if (wallet.value instanceof WalletConnect) {
         await wallet.value.disconnect();
         await deleteWalletConnectSessionFromIndexedDB();
-      } else if (wallet.value instanceof LedgerSigner) {
-        // Ledger doesn't need explicit disconnection
       }
 
-      // Reset wallet state after disconnection
       resetWalletState();
+
+      if (fromWallet) {
+        toast.info(
+          "Your wallet has been disconnected due to a disconnect request from your wallet.",
+        );
+      }
     } catch (error) {
       console.error("Error disconnecting wallet:", error);
-      // Still reset state even if disconnection fails
       resetWalletState();
       throw error;
+    } finally {
+      isDisconnecting.value = false;
     }
   };
 
@@ -473,6 +484,8 @@ export const useWalletStore = defineStore("wallet", () => {
 
   return {
     Tezos,
+    address,
+    isDisconnecting,
     getTezos,
     getAddress,
     getBalance,

@@ -21,11 +21,14 @@ import CommandMenu from "@/components/command-menu.vue";
 import HeaderComponent from "@/components/header-component.vue";
 import TestDialog from "@/components/test-dialog.vue";
 import { Toaster } from "@/components/ui/sonner";
+import { useFavicon } from "@/composables/useFavicon";
 import { useWalletStore } from "@/stores/walletStore";
 import { onMounted } from "vue";
 import "vue-sonner/style.css";
 
 const walletStore = useWalletStore();
+
+useFavicon();
 
 onMounted(async () => {
   // We check what the last provider they used was, then also check if they still have a saved session with that provider.
