@@ -109,15 +109,12 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { isRevealed } from "@/lib/utils";
 import { AvailableTests } from "@/modules/tests/tests";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { useWalletStore } from "@/stores/walletStore";
 import { Menu, Settings } from "lucide-vue-next";
 import { computed, ref, watch } from "vue";
 
 const settingsStore = useSettingsStore();
-const walletStore = useWalletStore();
 
 const showSettingsDialog = ref<boolean>(false);
 
@@ -130,28 +127,6 @@ const firstTestId = computed(() => {
 const openDocumentation = () => {
   window.open("https://taquito.io/docs/quick_start");
 };
-
-const updateRevealedStatus = async (address: string | undefined) => {
-  if (!address) {
-    settingsStore.isRevealed = false;
-    return;
-  }
-
-  try {
-    const revealed = await isRevealed(address);
-    settingsStore.isRevealed = revealed;
-  } catch {
-    settingsStore.isRevealed = false;
-  }
-};
-
-// Watch for wallet address changes and update revealed status
-watch(
-  () => walletStore.getAddress,
-  async (newAddress) => {
-    await updateRevealedStatus(newAddress);
-  },
-);
 
 // Reload the page if the RPC URL has changed to re-initialize the wallet with the new URL
 const previousSettings = ref(settingsStore.settings);

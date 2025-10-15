@@ -61,11 +61,9 @@ export const useSettingsStore = defineStore("settings", () => {
   };
 
   const settings = ref<Settings>(getMergedSettings());
-  const isRevealed = ref(true);
 
   const getSettings = computed(() => settings.value);
   const getIndexer = computed(() => settings.value.indexer);
-  const getIsRevealed = computed(() => isRevealed.value);
   const getConfirmationCount = computed(() => settings.value.confirmationCount);
   const isUsingCustomRpcUrl = computed(() => {
     return settings.value.rpcUrl !== import.meta.env.VITE_RPC_URL;
@@ -85,11 +83,9 @@ export const useSettingsStore = defineStore("settings", () => {
   };
 
   return {
-    isRevealed,
     settings,
     getSettings,
     getIndexer,
-    getIsRevealed,
     getConfirmationCount,
     isUsingCustomRpcUrl,
     resetRpcUrl,
