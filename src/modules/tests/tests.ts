@@ -1,4 +1,19 @@
 import type { TestDiagram, TestMetadata } from "@/modules/tests/test";
+import {
+  ArrowRightLeft,
+  ArrowUp10,
+  Calculator,
+  Coins,
+  Globe,
+  InfinityIcon,
+  Info,
+  Package,
+  Parentheses,
+  Plus,
+  Shield,
+  Users,
+  X,
+} from "lucide-vue-next";
 
 export const AvailableTests: Record<string, TestMetadata> = {
   transfer: {
@@ -21,6 +36,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://octez.tezos.com/docs/seoul/token_management.html",
     },
     component: () => import("@/modules/tests/tests/transfer/transfer-tez.vue"),
+    icon: ArrowRightLeft,
     diagrams: {
       transfer: {
         nodes: [
@@ -74,6 +90,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     },
     component: () =>
       import("@/modules/tests/tests/counter/counter-contract.vue"),
+    icon: ArrowUp10,
     diagrams: {
       increment: {
         nodes: [
@@ -163,6 +180,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
       import(
         "@/modules/tests/tests/increase-paid-storage/increase-paid-storage.vue"
       ),
+    icon: Plus,
     diagrams: {
       increase: {
         nodes: [
@@ -182,7 +200,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     id: "estimate-fees",
     title: "Estimating Fees",
     description: `Taquito's estimate method can be used to estimate fees, gas, and storage associated with an operation.
-      
+
       An estimate has the following properties:
       - burnFeeMutez: The number of mutez that will be burned for the storage of the operation. Type: number
       - gasLimit: The limit on the amount of gas a given operation can consume. Type: number
@@ -214,6 +232,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     },
     component: () =>
       import("@/modules/tests/tests/estimate-fees/estimate-fees.vue"),
+    icon: Calculator,
     diagrams: {
       "estimate-fees": {
         noIndexer: true,
@@ -248,6 +267,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://octez.tezos.com/docs/seoul/baking_power.html#delegate-delegators-stakers",
     },
     component: () => import("@/modules/tests/tests/delegation/delegation.vue"),
+    icon: Users,
     diagrams: {
       "set-delegate": {
         nodes: [
@@ -306,6 +326,7 @@ Users can control their staked funds using the 'stake', 'unstake', and 'finalize
         "https://octez.tezos.com/docs/seoul/baking_power.html#delegate-delegators-stakers",
     },
     component: () => import("@/modules/tests/tests/staking/staking.vue"),
+    icon: Coins,
     diagrams: {
       stake: {
         nodes: [
@@ -363,7 +384,7 @@ Users can control their staked funds using the 'stake', 'unstake', and 'finalize
     description: `Each Tezos account holds a counter that increments every time an operation is included in a block on the network. This feature prevents users from sending two or multiple transactions in a row.
 
       A batch operation is used to group multiple operations together, avoiding this restriction.
-      
+
       That being said, the limitations of batched operations are similar to the constraints of single processes. For example, the gas limit of the Tezos blockchain limits the number of functions that can batch together. In addition to that, only a single account can sign batched operations.
       `,
     category: "Advanced Operations",
@@ -388,6 +409,7 @@ Users can control their staked funds using the 'stake', 'unstake', and 'finalize
         "https://octez.tezos.com/docs/seoul/blocks_ops.html#manager-operation-batches",
     },
     component: () => import("@/modules/tests/tests/batch/batch.vue"),
+    icon: Package,
     diagrams: {
       batch: {
         nodes: [
@@ -416,7 +438,7 @@ Users can control their staked funds using the 'stake', 'unstake', and 'finalize
     title: "Sign and Verify Payloads",
     description: `Signing arbitrary chunks of data is a common practice in a blockchain environment and is usually done to prove that a user has access to a certain account or that a message comes from a certain account.
 
-A signature is a string that is usually based58 encoded for better readability and starts with 'edsig'. It requires a signer to hash the input bytes and thus can only be done if the signer has access to the private key of the account. Therefore, it is impossible to forge a signature for an account of which you don't have access to the private key. 
+A signature is a string that is usually based58 encoded for better readability and starts with 'edsig'. It requires a signer to hash the input bytes and thus can only be done if the signer has access to the private key of the account. Therefore, it is impossible to forge a signature for an account of which you don't have access to the private key.
 
 Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to retrieve the public key of the account that created the signature.
       `,
@@ -441,6 +463,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     },
     component: () =>
       import("@/modules/tests/tests/sign-payload/sign-payload.vue"),
+    icon: Shield,
     diagrams: {
       sign: {
         noIndexer: true,
@@ -550,6 +573,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     },
     component: () =>
       import("@/modules/tests/tests/transaction-limit/transaction-limit.vue"),
+    icon: InfinityIcon,
     diagrams: {
       "set-transaction-limit": {
         nodes: [
@@ -598,6 +622,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     },
     component: () =>
       import("@/modules/tests/tests/failing-noop/failing-noop.vue"),
+    icon: X,
     diagrams: {
       "failing-noop-operation": {
         noIndexer: true,
@@ -646,6 +671,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     },
     component: () =>
       import("@/modules/tests/tests/failing-contract/failing-contract.vue"),
+    icon: X,
     diagrams: {
       "failing-contract": {
         nodes: [
@@ -669,7 +695,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     id: "global-constants",
     title: "Global Constants",
     description: `Global Constants allow users to register Michelson expressions in a global table and reference them across multiple contracts. This feature helps reduce contract size and storage costs by enabling code reuse.
-    
+
     This is particularly useful for large contracts that exceed size limits or when sharing common code patterns between multiple contracts.`,
     category: "Advanced Operations",
     setup: [
@@ -695,6 +721,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     },
     component: () =>
       import("@/modules/tests/tests/global-constants/global-constants.vue"),
+    icon: Globe,
     diagrams: {
       "register-constant": {
         nodes: [
@@ -743,6 +770,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     },
     component: () =>
       import("@/modules/tests/tests/complex-parameters/complex-parameters.vue"),
+    icon: Parentheses,
     diagrams: {
       "add-record": {
         nodes: [
@@ -882,6 +910,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     },
     component: () =>
       import("@/modules/tests/tests/tzip16-metadata/tzip16-metadata.vue"),
+    icon: Info,
     diagrams: {
       "get-metadata": {
         noIndexer: true,
@@ -942,6 +971,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
         "https://gitlab.com/tezos/tzip/-/blob/master/proposals/tzip-12/tzip-12.md",
     },
     component: () => import("@/modules/tests/tests/fa2-token/fa2-token.vue"),
+    icon: Coins,
     diagrams: {
       mint: {
         nodes: [

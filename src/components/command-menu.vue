@@ -21,7 +21,8 @@
           :value="test.value"
           @select="() => handleSelect(test.value, true)"
         >
-          {{ test.label }}
+          <Component :is="test.icon" class="size-4" />
+          <p>{{ test.label }}</p>
         </CommandItem>
       </CommandGroup>
     </CommandList>
@@ -65,6 +66,7 @@ const tests = computed(() => {
   return Object.values(AvailableTests).map((test) => ({
     label: test.title,
     value: test.id,
+    icon: test.icon,
   }));
 });
 
