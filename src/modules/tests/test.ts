@@ -31,4 +31,5 @@ export interface TestMetadata {
   };
   component?: () => Promise<{ default: Component }>;
   diagrams?: TestDiagrams;
+  icon?: Component;
 }

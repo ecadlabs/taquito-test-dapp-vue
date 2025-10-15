@@ -3,14 +3,26 @@
     <CommandInput placeholder="Search for a test..." />
     <CommandList>
       <CommandEmpty>No results found.</CommandEmpty>
+      <CommandGroup heading="Pages">
+        <CommandItem
+          v-for="page in pages"
+          :key="page.value"
+          :value="page.value"
+          @select="() => handleSelect(page.value, false)"
+        >
+          <Component v-if="page.icon" :is="page.icon" class="size-4" />
+          <p>{{ page.label }}</p>
+        </CommandItem>
+      </CommandGroup>
       <CommandGroup heading="Tests">
         <CommandItem
           v-for="test in tests"
           :key="test.value"
           :value="test.value"
-          @select="() => handleSelect(test.value)"
+          @select="() => handleSelect(test.value, true)"
         >
-          {{ test.label }}
+          <Component v-if="test.icon" :is="test.icon" class="size-4" />
+          <p>{{ test.label }}</p>
         </CommandItem>
       </CommandGroup>
     </CommandList>
@@ -28,6 +40,7 @@ import {
 } from "@/components/ui/command";
 import { AvailableTests } from "@/modules/tests/tests";
 import { useMagicKeys } from "@vueuse/core";
+import { BookOpenIcon, HandCoinsIcon, HomeIcon } from "lucide-vue-next";
 import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
@@ -53,11 +66,29 @@ const tests = computed(() => {
   return Object.values(AvailableTests).map((test) => ({
     label: test.title,
     value: test.id,
+    icon: test.icon,
   }));
 });
 
-const handleSelect = (id: string) => {
+const handleSelect = (id: string, test: boolean = false) => {
   open.value = false;
-  router.push({ name: "tests", params: { test: id } });
+
+  if (test) {
+    router.push({ name: "tests", params: { test: id } });
+  } else {
+    router.push({ name: id });
+  }
 };
+
+const pages = computed(() => {
+  return [
+    { label: "Home", value: "home", icon: HomeIcon },
+    { label: "Faucet", value: "faucet", icon: HandCoinsIcon },
+    {
+      label: "Taquito Documentation",
+      value: "documentation",
+      icon: BookOpenIcon,
+    },
+  ];
+});
 </script>

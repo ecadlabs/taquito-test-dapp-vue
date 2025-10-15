@@ -23,7 +23,12 @@
                   :to="{ name: 'tests', params: { test: childItem.test } }"
                   @click="handleNavigationClick"
                 >
-                  {{ childItem.title }}
+                  <Component
+                    v-if="childItem.icon"
+                    :is="childItem.icon"
+                    class="size-4"
+                  />
+                  <p class="truncate">{{ childItem.title }}</p>
                 </RouterLink>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -77,6 +82,7 @@ const data = computed(() => {
         items: testsInCategory.map((test) => ({
           title: test.title,
           test: test.id,
+          icon: test.icon,
         })),
       };
     }),
