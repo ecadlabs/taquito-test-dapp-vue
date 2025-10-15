@@ -4,7 +4,6 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 import { type ContractConfig } from "@/types/contract";
 import type { Estimate } from "@taquito/taquito";
-import { PiggyBank } from "lucide-vue-next";
 
 const CONTRACT_ADDRESS =
   (contracts as ContractConfig[]).find(
@@ -43,18 +42,13 @@ const increment = async (amount: number): Promise<number | undefined> => {
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
     console.log(`Incrementing storage value by ${amount}...`);
 
-    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .increment(amount)
       .toTransferParams();
     estimate = await Tezos.estimate.transfer(transferParams);
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
     diagramStore.setProgress("execute-operation");
@@ -105,18 +99,13 @@ const decrement = async (amount: number): Promise<number | undefined> => {
     diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .decrement(amount)
       .toTransferParams();
     estimate = await Tezos.estimate.transfer(transferParams);
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
     diagramStore.setProgress("execute-operation");
@@ -154,18 +143,13 @@ const reset = async (): Promise<void> => {
     diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .reset()
       .toTransferParams();
     estimate = await Tezos.estimate.transfer(transferParams);
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
     diagramStore.setProgress("execute-operation");

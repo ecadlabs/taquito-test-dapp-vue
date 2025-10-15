@@ -25,10 +25,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
       transfer: {
         nodes: [
           {
-            id: "estimate-fees",
-            label: "Estimate Fees",
-          },
-          {
             id: "wait-for-user",
             label: "Wait for User Confirmation",
           },
@@ -86,10 +82,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
             label: "Get Contract",
           },
           {
-            id: "estimate-fees",
-            label: "Estimate Fees",
-          },
-          {
             id: "execute-operation",
             label: "Execute Increment",
           },
@@ -106,10 +98,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
             label: "Get Contract",
           },
           {
-            id: "estimate-fees",
-            label: "Estimate Fees",
-          },
-          {
             id: "execute-operation",
             label: "Execute Decrement",
           },
@@ -124,10 +112,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
           {
             id: "get-contract",
             label: "Get Contract",
-          },
-          {
-            id: "estimate-fees",
-            label: "Estimate Fees",
           },
           {
             id: "execute-operation",
@@ -182,10 +166,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
     diagrams: {
       increase: {
         nodes: [
-          {
-            id: "estimate-fees",
-            label: "Estimate Fees",
-          },
           {
             id: "wait-for-user",
             label: "Wait for User Confirmation",
@@ -272,10 +252,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "set-delegate": {
         nodes: [
           {
-            id: "estimate-fees",
-            label: "Estimate Fees",
-          },
-          {
             id: "set-delegate",
             label: "Set Delegate",
           },
@@ -291,10 +267,6 @@ export const AvailableTests: Record<string, TestMetadata> = {
       },
       "remove-delegation": {
         nodes: [
-          {
-            id: "estimate-fees",
-            label: "Estimate Fees",
-          },
           {
             id: "remove-delegation",
             label: "Remove Delegation",
@@ -338,10 +310,6 @@ Users can control their staked funds using the 'stake', 'unstake', and 'finalize
       stake: {
         nodes: [
           {
-            id: "estimate-fees",
-            label: "Estimate Fees",
-          },
-          {
             id: "stake",
             label: "Stake Funds",
           },
@@ -358,10 +326,6 @@ Users can control their staked funds using the 'stake', 'unstake', and 'finalize
       unstake: {
         nodes: [
           {
-            id: "estimate-fees",
-            label: "Estimate Fees",
-          },
-          {
             id: "unstake",
             label: "Unstake Funds",
           },
@@ -377,10 +341,6 @@ Users can control their staked funds using the 'stake', 'unstake', and 'finalize
       },
       "finalize-unstake": {
         nodes: [
-          {
-            id: "estimate-fees",
-            label: "Estimate Fees",
-          },
           {
             id: "finalize-unstake",
             label: "Finalize Unstake",
@@ -553,10 +513,6 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
           {
             id: "get-contract",
             label: "Get Contract",
-          },
-          {
-            id: "estimate-fees",
-            label: "Estimate Fees",
           },
           {
             id: "wait-for-user",
@@ -743,10 +699,6 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       "register-constant": {
         nodes: [
           {
-            id: "estimate-fees",
-            label: "Estimate Fees",
-          },
-          {
             id: "register-constant",
             label: "Register Global Constant",
           },
@@ -799,10 +751,6 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
             label: "Get Contract",
           },
           {
-            id: "estimate-fees",
-            label: "Estimate Fees",
-          },
-          {
             id: "execute-operation",
             label: "Execute Add Record",
           },
@@ -817,10 +765,6 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
           {
             id: "get-contract",
             label: "Get Contract",
-          },
-          {
-            id: "estimate-fees",
-            label: "Estimate Fees",
           },
           {
             id: "execute-operation",
@@ -839,10 +783,6 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
             label: "Get Contract",
           },
           {
-            id: "estimate-fees",
-            label: "Estimate Fees",
-          },
-          {
             id: "execute-operation",
             label: "Execute Set Operation",
           },
@@ -857,10 +797,6 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
           {
             id: "get-contract",
             label: "Get Contract",
-          },
-          {
-            id: "estimate-fees",
-            label: "Estimate Fees",
           },
           {
             id: "execute-operation",
@@ -1014,10 +950,6 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
             label: "Get FA2 Contract",
           },
           {
-            id: "estimate-fees",
-            label: "Estimate Fees",
-          },
-          {
             id: "execute-operation",
             label: "Execute Mint Operation",
           },
@@ -1034,10 +966,6 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
             label: "Get FA2 Contract",
           },
           {
-            id: "estimate-fees",
-            label: "Estimate Fees",
-          },
-          {
             id: "execute-operation",
             label: "Execute Burn Operation",
           },
@@ -1052,10 +980,6 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
           {
             id: "get-contract",
             label: "Get FA2 Contract",
-          },
-          {
-            id: "estimate-fees",
-            label: "Estimate Fees",
           },
           {
             id: "execute-operation",

@@ -8,7 +8,6 @@ import {
   type ContractConfig,
 } from "@/types/contract";
 import type { Estimate } from "@taquito/taquito";
-import { PiggyBank } from "lucide-vue-next";
 
 const CONTRACT_ADDRESS =
   (contracts as ContractConfig[]).find(
@@ -72,18 +71,13 @@ export const mintTokens = async (param: MintParam): Promise<void> => {
 
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .mint(param)
       .toTransferParams();
     estimate = await Tezos.estimate.transfer(transferParams);
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
     diagramStore.setProgress("execute-operation");
@@ -122,18 +116,13 @@ export const burnTokens = async (param: BurnParam): Promise<void> => {
 
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .burn(param)
       .toTransferParams();
     estimate = await Tezos.estimate.transfer(transferParams);
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
     diagramStore.setProgress("execute-operation");
@@ -178,18 +167,13 @@ export const transferTokens = async (
       throw new Error("No transfer parameters provided");
     }
 
-    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .transfer(transfers)
       .toTransferParams();
     estimate = await Tezos.estimate.transfer(transferParams);
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
     diagramStore.setProgress("execute-operation");

@@ -5,12 +5,6 @@ import type { Estimate } from "@taquito/taquito";
 import { defineStore } from "pinia";
 import { ref, watch, type Component } from "vue";
 
-export interface DialogContent {
-  title: string;
-  description?: string;
-  content: string; // HTML string
-}
-
 export interface StepTiming {
   startTime: DOMHighResTimeStamp;
   endTime?: DOMHighResTimeStamp;
@@ -27,6 +21,7 @@ export const useDiagramStore = defineStore("diagram", () => {
   const operationHash = ref<string | number>();
   const currentTestId = ref<string | null>(null);
   const currentDiagramKey = ref<string | null>(null);
+  const feeEstimate = ref<Estimate | null>(null);
 
   // Timing tracking for each step
   const stepTimings = ref<Map<string, StepTiming>>(new Map());
@@ -35,10 +30,6 @@ export const useDiagramStore = defineStore("diagram", () => {
   const nodeButtons = ref<
     Map<string, { icon: Component; text: string; onClick: () => void }>
   >(new Map());
-
-  // Dialog state management
-  const showDialog = ref<boolean>(false);
-  const dialogContent = ref<DialogContent | null>(null);
 
   const setDiagram = (
     diagram: TestDiagram,
@@ -142,6 +133,10 @@ export const useDiagramStore = defineStore("diagram", () => {
     operationHash.value = hash;
   };
 
+  const setFeeEstimate = (estimate: Estimate | null) => {
+    feeEstimate.value = estimate;
+  };
+
   /**
    * Get timing information for a specific step
    *
@@ -162,19 +157,6 @@ export const useDiagramStore = defineStore("diagram", () => {
   };
 
   /**
-   * Set a button for a specific node
-   *
-   * @param nodeId - The node ID to add the button to
-   * @param button - The button configuration
-   */
-  const setNodeButton = (
-    nodeId: string,
-    button: { icon: Component; text: string; onClick: () => void },
-  ) => {
-    nodeButtons.value.set(nodeId, button);
-  };
-
-  /**
    * Remove a button from a specific node
    *
    * @param nodeId - The node ID to remove the button from
@@ -192,22 +174,6 @@ export const useDiagramStore = defineStore("diagram", () => {
     return nodeButtons.value.get(nodeId);
   };
 
-  /**
-   * Show a dialog with custom content
-   *
-   * @param content - The dialog content configuration
-   */
-  const openDialog = (content: DialogContent) => {
-    dialogContent.value = content;
-    showDialog.value = true;
-  };
-
-  /** Hide the dialog */
-  const closeDialog = () => {
-    showDialog.value = false;
-    dialogContent.value = null;
-  };
-
   const resetDiagram = () => {
     if (currentDiagram.value) {
       currentDiagram.value = null;
@@ -217,10 +183,9 @@ export const useDiagramStore = defineStore("diagram", () => {
       operationHash.value = undefined;
       currentTestId.value = null;
       currentDiagramKey.value = null;
+      feeEstimate.value = null;
       stepTimings.value.clear();
       nodeButtons.value.clear();
-      showDialog.value = false;
-      dialogContent.value = null;
     }
   };
 
@@ -244,48 +209,6 @@ export const useDiagramStore = defineStore("diagram", () => {
     },
   );
 
-  const showFeeEstimationDialog = (estimate: Estimate) => {
-    const dialogContent = {
-      title: "Transaction Fee Estimate",
-      description:
-        "Transaction fee estimate breakdown for the current operation.",
-      content: `
-					<div class="space-y-2">
-						<div class="flex justify-between">
-							<span class="font-medium">Burn Fee:</span>
-							<span>${estimate.burnFeeMutez} mutez</span>
-						</div>
-						<div class="flex justify-between">
-							<span class="font-medium">Gas Limit:</span>
-							<span>${estimate.gasLimit}</span>
-						</div>
-						<div class="flex justify-between">
-							<span class="font-medium">Minimal Fee:</span>
-							<span>${estimate.minimalFeeMutez} mutez</span>
-						</div>
-						<div class="flex justify-between">
-							<span class="font-medium">Storage Limit:</span>
-							<span>${estimate.storageLimit}</span>
-						</div>
-						<div class="flex justify-between">
-							<span class="font-medium">Suggested Fee:</span>
-							<span>${estimate.suggestedFeeMutez} mutez</span>
-						</div>
-						<div class="flex justify-between">
-							<span class="font-medium">Total Cost:</span>
-							<span>${estimate.totalCost} mutez</span>
-						</div>
-						<div class="flex justify-between">
-							<span class="font-medium">Using Base Fee:</span>
-							<span>${estimate.usingBaseFeeMutez} mutez</span>
-						</div>
-					</div>
-				`,
-    };
-
-    openDialog(dialogContent);
-  };
-
   return {
     currentDiagram,
     currentStep,
@@ -294,10 +217,9 @@ export const useDiagramStore = defineStore("diagram", () => {
     operationHash,
     currentTestId,
     currentDiagramKey,
+    feeEstimate,
     stepTimings,
     nodeButtons,
-    showDialog,
-    dialogContent,
     setDiagram,
     setTestDiagram,
     setProgress,
@@ -305,14 +227,11 @@ export const useDiagramStore = defineStore("diagram", () => {
     resetDiagram,
     setErrorMessage,
     setOperationHash,
+    setFeeEstimate,
     getStepTiming,
     getAllStepTimings,
-    setNodeButton,
     removeNodeButton,
     getNodeButton,
-    openDialog,
-    closeDialog,
     cancelCurrentTest,
-    showFeeEstimationDialog,
   };
 });

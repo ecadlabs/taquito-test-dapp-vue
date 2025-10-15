@@ -3,7 +3,6 @@ import { useDiagramStore } from "@/stores/diagramStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 import type { Estimate } from "@taquito/taquito";
-import { PiggyBank } from "lucide-vue-next";
 
 let estimate: Estimate;
 
@@ -23,15 +22,10 @@ const registerGlobalConstant = async (
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("estimate-fees");
     estimate = await Tezos.estimate.registerGlobalConstant({ value });
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
     diagramStore.setProgress("register-constant");

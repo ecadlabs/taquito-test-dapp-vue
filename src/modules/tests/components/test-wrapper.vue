@@ -180,9 +180,12 @@
         <!-- Operational Flow -->
         <Card>
           <CardHeader>
-            <CardTitle class="flex items-center gap-2">
-              <Workflow class="h-5 w-5" />
-              Operational Flow
+            <CardTitle class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <Workflow class="h-5 w-5" />
+                <p class="w-fit">Operational Flow</p>
+              </div>
+              <FeeEstimation />
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -195,6 +198,7 @@
 </template>
 
 <script setup lang="ts">
+import FeeEstimation from "@/components/fee-estimation.vue";
 import TestDiagram from "@/components/test-diagram.vue";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
