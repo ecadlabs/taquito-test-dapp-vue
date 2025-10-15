@@ -18,7 +18,7 @@ import {
 export const AvailableTests: Record<string, TestMetadata> = {
   transfer: {
     id: "transfer",
-    title: "Transfer Tez Between Addresses",
+    title: "Transfer Tez",
     description:
       "In Tezos, a transfer operation transfers tokens between two addresses. The transfer of tokens from a KT1 account is completed by calling the KT1's smart contract do method. The do method takes a lambda function, and it's the logic of this function that causes the desired transfer of tokens to happen.",
     category: "Core Operations",
