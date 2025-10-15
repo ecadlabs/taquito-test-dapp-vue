@@ -1,6 +1,9 @@
+import {
+  initializeBeaconEvents,
+  initializeWalletConnectEvents,
+} from "@/lib/walletEvents";
 import { useSettingsStore } from "@/stores/settingsStore";
 import type { ProgrammaticWallet, WalletProvider } from "@/types/wallet";
-import { BeaconEvent } from "@airgap/beacon-dapp";
 import { NetworkType, type ExtendedPeerInfo } from "@airgap/beacon-types";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import * as Sentry from "@sentry/vue";
@@ -109,20 +112,8 @@ export const useWalletStore = defineStore("wallet", () => {
     };
 
     const beaconWallet = new BeaconWallet(options);
-    beaconWallet.client.subscribeToEvent(
-      BeaconEvent.ACTIVE_ACCOUNT_SET,
-      (account) => {
-        if (account) {
-          address.value = account.address;
-        } else if (
-          account === undefined &&
-          address.value &&
-          !isDisconnecting.value
-        ) {
-          disconnectWallet(true);
-        }
-      },
-    );
+
+    initializeBeaconEvents(beaconWallet);
 
     const cachedAccount = await beaconWallet.client.getActiveAccount();
 
@@ -163,6 +154,8 @@ export const useWalletStore = defineStore("wallet", () => {
       throw ReferenceError(
         "Wallet not found after WalletConnect initialization should have finished.",
       );
+
+    initializeWalletConnectEvents(walletConnect);
 
     const latestSessionKey =
       await walletConnect.getAllExistingSessionKeys()?.[0];
@@ -491,6 +484,8 @@ export const useWalletStore = defineStore("wallet", () => {
 
   return {
     Tezos,
+    address,
+    isDisconnecting,
     getTezos,
     getAddress,
     getBalance,
