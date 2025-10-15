@@ -345,8 +345,8 @@ export const useWalletStore = defineStore("wallet", () => {
     isDisconnecting.value = true;
     try {
       if (!wallet.value) {
-        throw new ReferenceError(
-          "Failed to disconnect wallet. No wallet currently connected",
+        console.warn(
+          "Failed to disconnect wallet. No wallet currently connected. Assuming it's been disconnected somewhere else.",
         );
       }
 
@@ -360,6 +360,8 @@ export const useWalletStore = defineStore("wallet", () => {
             );
           }
         }
+
+        await wallet.value.client.clearActiveAccount();
       } else if (wallet.value instanceof WalletConnect) {
         await wallet.value.disconnect();
         await deleteWalletConnectSessionFromIndexedDB();
