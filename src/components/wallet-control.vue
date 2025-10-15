@@ -23,11 +23,6 @@
           <p v-if="address">
             {{ address.slice(0, 6) }}...{{ address.slice(-4) }}
           </p>
-          <AlertTriangle
-            v-if="!settingsStore.getIsRevealed"
-            class="size-4 flex-shrink-0 text-red-600"
-            aria-hidden="true"
-          />
         </Button>
       </div>
     </div>
@@ -206,37 +201,6 @@
           <p class="font-medium">{{ walletName }}</p>
         </DialogDescription>
       </DialogHeader>
-
-      <!-- Warning for unrevealed wallet -->
-      <div
-        v-if="!settingsStore.getIsRevealed"
-        class="rounded-lg border border-yellow-200 bg-yellow-50 p-2.5"
-      >
-        <div class="flex items-start gap-1.5">
-          <AlertTriangle class="mt-0.5 size-4 flex-shrink-0 text-yellow-600" />
-          <div>
-            <p class="text-sm font-medium text-yellow-800">
-              Wallet key not revealed
-            </p>
-            <div class="mt-1 text-xs text-yellow-700">
-              <p>
-                Your wallets public key has not been revealed on the blockchain.
-                Most operations will fail. Reveal your key by sending a
-                transaction to yourself via your wallet.
-              </p>
-              <p class="mt-1">
-                Learn more from the
-                <a
-                  href="https://docs.tezos.com/tutorials/build-your-first-app/wallets-tokens"
-                  target="_blank"
-                  class="text-blue-400 hover:underline"
-                  >Tezos documentation</a
-                >.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <div class="text-sm">
         <div class="flex items-center gap-1">
