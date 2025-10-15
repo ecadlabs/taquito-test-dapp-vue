@@ -10,7 +10,7 @@
           :value="page.value"
           @select="() => handleSelect(page.value, false)"
         >
-          <Component :is="page.icon" class="size-4" />
+          <Component v-if="page.icon" :is="page.icon" class="size-4" />
           <p>{{ page.label }}</p>
         </CommandItem>
       </CommandGroup>
@@ -21,7 +21,7 @@
           :value="test.value"
           @select="() => handleSelect(test.value, true)"
         >
-          <Component :is="test.icon" class="size-4" />
+          <Component v-if="test.icon" :is="test.icon" class="size-4" />
           <p>{{ test.label }}</p>
         </CommandItem>
       </CommandGroup>

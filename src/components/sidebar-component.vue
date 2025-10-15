@@ -23,7 +23,11 @@
                   :to="{ name: 'tests', params: { test: childItem.test } }"
                   @click="handleNavigationClick"
                 >
-                  <Component :is="childItem.icon" class="size-4" />
+                  <Component
+                    v-if="childItem.icon"
+                    :is="childItem.icon"
+                    class="size-4"
+                  />
                   <p class="truncate">{{ childItem.title }}</p>
                 </RouterLink>
               </SidebarMenuButton>
