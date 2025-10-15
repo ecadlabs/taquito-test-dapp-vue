@@ -3,7 +3,6 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 import { RpcClient } from "@taquito/rpc";
 import type { Estimate } from "@taquito/taquito";
-import { PiggyBank } from "lucide-vue-next";
 
 const TEST_ID = "delegation";
 let estimate: Estimate;
@@ -21,18 +20,13 @@ const delegate = async (address: string) => {
     if (!walletStore.getAddress)
       throw new Error("No address found to delegate from");
 
-    diagramStore.setProgress("estimate-fees");
     estimate = await Tezos.estimate.setDelegate({
       source: walletStore.getAddress,
       delegate: address,
     });
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
     diagramStore.setProgress("set-delegate");
@@ -69,17 +63,12 @@ const undelegate = async () => {
     if (!walletStore.getAddress)
       throw new Error("No address found remove delegation for");
 
-    diagramStore.setProgress("estimate-fees");
     estimate = await Tezos.estimate.setDelegate({
       source: walletStore.getAddress,
     });
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
     diagramStore.setProgress("remove-delegation");

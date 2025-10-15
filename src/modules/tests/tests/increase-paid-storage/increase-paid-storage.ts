@@ -17,7 +17,6 @@ const increaseStorage = async (contract: string, bytes: number) => {
     }
 
     diagramStore.setTestDiagram(TEST_ID, "increase");
-    diagramStore.setProgress("estimate-fees");
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
 

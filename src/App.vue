@@ -9,9 +9,6 @@
     </main>
   </div>
 
-  <!-- Global Test Dialog -->
-  <TestDialog />
-
   <!-- Global Command Palette -->
   <CommandMenu />
 </template>
@@ -19,7 +16,6 @@
 <script setup lang="ts">
 import CommandMenu from "@/components/command-menu.vue";
 import HeaderComponent from "@/components/header-component.vue";
-import TestDialog from "@/components/test-dialog.vue";
 import { Toaster } from "@/components/ui/sonner";
 import { useFavicon } from "@/composables/useFavicon";
 import { useWalletStore } from "@/stores/walletStore";
