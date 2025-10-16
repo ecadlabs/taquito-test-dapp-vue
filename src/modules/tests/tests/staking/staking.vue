@@ -172,7 +172,7 @@ onMounted(async () => {
   diagramStore.setTestDiagram("staking");
 
   if (!walletStore.getAddress) {
-    return null;
+    return;
   }
 
   try {
