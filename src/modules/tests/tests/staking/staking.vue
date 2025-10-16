@@ -172,7 +172,7 @@ onMounted(async () => {
   diagramStore.setTestDiagram("staking");
 
   if (!walletStore.getAddress) {
-    throw new Error("No current address found");
+    return null;
   }
 
   try {

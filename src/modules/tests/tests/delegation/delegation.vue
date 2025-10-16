@@ -258,10 +258,10 @@ const removeDelegation = async () => {
 };
 
 const getCurrentDelegate = async () => {
-  if (!walletStore.getAddress) {
-    throw new Error("No current address found");
+  if (walletStore.getAddress) {
+    return await getDelegate(walletStore.getAddress);
   }
 
-  return await getDelegate(walletStore.getAddress);
+  return null;
 };
 </script>
