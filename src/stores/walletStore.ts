@@ -16,7 +16,6 @@ import {
   WalletConnect,
   NetworkType as WalletConnectNetworkType,
 } from "@taquito/wallet-connect";
-import BigNumber from "bignumber.js";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { toast } from "vue-sonner";
