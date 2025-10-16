@@ -123,7 +123,7 @@ interface Emits {
   (e: "connect"): void;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   loading: false,
   hidSupported: true,
 });
