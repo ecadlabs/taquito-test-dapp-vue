@@ -58,133 +58,132 @@
   <!-- Connection Dialog -->
   <Dialog :open="showConnectDialog" @update:open="showConnectDialog = $event">
     <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Connect Wallet</DialogTitle>
-        <DialogDescription>
-          <div>
-            <div class="flex flex-wrap items-center space-x-1 text-left">
-              <span>Taquito Playground supports both</span>
-              <a
-                href="https://www.walletbeacon.io/"
-                target="_blank"
-                class="text-blue-400 hover:underline"
-                >Beacon</a
-              >
-              <span>and</span>
-              <a
-                href="https://walletconnect.network/"
-                target="_blank"
-                class="text-blue-400 hover:underline"
-                >WalletConnect.</a
-              >
-              <p>Select your preference and hit connect to get started.</p>
-            </div>
+      <!-- Provider Selection Step -->
+      <div v-if="connectionStep === 'provider-selection'">
+        <DialogHeader>
+          <DialogTitle>Connect Wallet</DialogTitle>
+          <DialogDescription>
+            <div>
+              <div class="flex flex-wrap items-center space-x-1 text-left">
+                <span>Taquito Playground supports both</span>
+                <a
+                  href="https://www.walletbeacon.io/"
+                  target="_blank"
+                  class="text-blue-400 hover:underline"
+                  >Beacon</a
+                >
+                <span>and</span>
+                <a
+                  href="https://walletconnect.network/"
+                  target="_blank"
+                  class="text-blue-400 hover:underline"
+                  >WalletConnect.</a
+                >
+                <p>Select your preference and hit connect to get started.</p>
+              </div>
 
-            <p class="mt-2 text-left italic">
-              Just a note: when building your own dApp, you shouldn't use both
-              Beacon and WalletConnect. Instead, you should pick one that works
-              best for your use-case. We use both here for testing and
-              illustration purposes, but this is not best practice in production
-              applications.
+              <p class="mt-2 text-left italic">
+                Just a note: when building your own dApp, you shouldn't use both
+                Beacon and WalletConnect. Instead, you should pick one that
+                works best for your use-case. We use both here for testing and
+                illustration purposes, but this is not best practice in
+                production applications.
+              </p>
+            </div>
+          </DialogDescription>
+        </DialogHeader>
+
+        <div>
+          <Alert v-if="provider === 'ledger' && !hidSupported" class="mb-2">
+            <AlertTriangle class="size-4 !text-red-500" aria-hidden="true" />
+            <AlertTitle>
+              <p>Heads up!</p>
+            </AlertTitle>
+            <AlertDescription>
+              The API's used to connect to the Ledger device are not supported
+              on this browser. Please use a Chromium-based browser to connect to
+              the Ledger device.
+            </AlertDescription>
+          </Alert>
+          <Alert v-if="provider === 'programmatic'" class="mb-2">
+            <AlertTriangle class="size-4 !text-red-500" aria-hidden="true" />
+            <AlertTitle>
+              <p>Important!</p>
+            </AlertTitle>
+            <AlertDescription>
+              Raw private key access is designed for testing purposes only, such
+              as automated test scripts. It has less security measures and will
+              NOT ask for confirmation before carrying out operations. This
+              should not be used with a real, personally owned wallet key.
+            </AlertDescription>
+          </Alert>
+          <div class="mt-2 space-y-2">
+            <Label :for="providerSelectId">Wallet Provider</Label>
+            <Select v-model="provider">
+              <SelectTrigger class="w-[220px]" :id="providerSelectId">
+                <SelectValue placeholder="Select a wallet provider" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="beacon"> Beacon </SelectItem>
+                <SelectItem value="walletconnect"> WalletConnect </SelectItem>
+                <SelectItem value="ledger"> Ledger Device </SelectItem>
+                <SelectItem value="programmatic">
+                  Raw Private Key Access
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div v-if="provider === 'programmatic'" class="mt-2 space-y-2">
+            <Label :for="privateKeyInputId"> Private Key </Label>
+            <Input
+              :id="privateKeyInputId"
+              v-model="privateKey"
+              type="text"
+              placeholder="edsk..."
+              class="w-full"
+              autocomplete="off"
+              spellcheck="false"
+              :aria-describedby="privateKeyHelpId"
+            />
+            <p :id="privateKeyHelpId" class="text-muted-foreground text-xs">
+              Stored only in-memory for this demo. Provide a throwaway key.
             </p>
           </div>
-        </DialogDescription>
-      </DialogHeader>
-
-      <div>
-        <Alert v-if="provider === 'ledger' && hidSupported" class="mb-2">
-          <AlertTriangle class="size-4 !text-yellow-500" />
-          <AlertTitle>
-            <p>Important</p>
-          </AlertTitle>
-          <AlertDescription class="inline-block"
-            >Use of an HID (your Ledger device) within this browser requires the
-            <code class="bg-muted rounded px-1 py-0.5 font-mono text-xs"
-              >enable-experimental-web-platform-features</code
-            >
-            experimental flag to be enabled. Learn more
-            <a
-              href="https://developer.chrome.com/docs/web-platform/chrome-flags"
-              target="_blank"
-              class="text-blue-400 hover:underline"
-              >here.
-            </a>
-          </AlertDescription>
-        </Alert>
-        <Alert v-if="provider === 'ledger' && !hidSupported" class="mb-2">
-          <AlertTriangle class="size-4 !text-red-500" aria-hidden="true" />
-          <AlertTitle>
-            <p>Heads up!</p>
-          </AlertTitle>
-          <AlertDescription>
-            The API's used to connect to the Ledger device are not supported on
-            this browser. Please use a Chromium-based browser to connect to the
-            Ledger device.
-          </AlertDescription>
-        </Alert>
-        <Alert v-if="provider === 'programmatic'" class="mb-2">
-          <AlertTriangle class="size-4 !text-red-500" aria-hidden="true" />
-          <AlertTitle>
-            <p>Important!</p>
-          </AlertTitle>
-          <AlertDescription>
-            Raw private key access is designed for testing purposes only, such
-            as automated test scripts. It has less security measures and will
-            NOT ask for confirmation before carrying out operations. This should
-            not be used with a real, personally owned wallet key.
-          </AlertDescription>
-        </Alert>
-        <div class="space-y-2">
-          <Label :for="providerSelectId">Wallet Provider</Label>
-          <Select v-model="provider">
-            <SelectTrigger class="w-[220px]" :id="providerSelectId">
-              <SelectValue placeholder="Select a wallet provider" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="beacon"> Beacon </SelectItem>
-              <SelectItem value="walletconnect"> WalletConnect </SelectItem>
-              <SelectItem value="ledger"> Ledger Device </SelectItem>
-              <SelectItem value="programmatic">
-                Raw Private Key Access
-              </SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
-        <div v-if="provider === 'programmatic'" class="mt-2 space-y-2">
-          <Label :for="privateKeyInputId"> Private Key </Label>
-          <Input
-            :id="privateKeyInputId"
-            v-model="privateKey"
-            type="text"
-            placeholder="edsk..."
-            class="w-full"
-            autocomplete="off"
-            spellcheck="false"
-            :aria-describedby="privateKeyHelpId"
-          />
-          <p :id="privateKeyHelpId" class="text-muted-foreground text-xs">
-            Stored only in-memory for this demo. Provide a throwaway key.
-          </p>
-        </div>
+        <DialogFooter>
+          <Button
+            variant="secondary"
+            @click="provider === 'ledger' ? nextStep() : connect()"
+            :disabled="
+              loading ||
+              !provider ||
+              (provider === 'programmatic' && !privateKey) ||
+              (provider === 'ledger' && !hidSupported)
+            "
+            :aria-busy="loading"
+          >
+            <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
+            <p>{{ provider === "ledger" ? "Next" : "Connect" }}</p>
+          </Button>
+        </DialogFooter>
       </div>
 
-      <DialogFooter>
-        <Button
-          variant="secondary"
-          @click="connect()"
-          :disabled="
-            loading ||
-            !provider ||
-            (provider === 'programmatic' && !privateKey) ||
-            (provider === 'ledger' && !hidSupported)
-          "
-          :aria-busy="loading"
-        >
-          <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
-          <p>Connect</p>
-        </Button>
-      </DialogFooter>
+      <!-- Ledger Preparation Step -->
+      <LedgerPreparationStep
+        v-else-if="connectionStep === 'ledger-preparation'"
+        :loading="loading"
+        :hid-supported="hidSupported"
+        @back="backToProviderSelection"
+        @connect="connect"
+      />
+
+      <!-- Ledger Waiting Step -->
+      <LedgerWaitingStep
+        v-else-if="connectionStep === 'ledger-waiting'"
+        :loading="loading"
+      />
     </DialogContent>
   </Dialog>
 
@@ -279,6 +278,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import LedgerPreparationStep from "@/components/ui/ledger-preparation-step.vue";
+import LedgerWaitingStep from "@/components/ui/ledger-waiting-step.vue";
 import {
   Select,
   SelectContent,
@@ -313,6 +314,9 @@ const loading = ref<boolean>(false);
 const showConnectDialog = ref<boolean>(false);
 const showDisconnectDialog = ref<boolean>(false);
 const privateKey = ref<string>("");
+const connectionStep = ref<
+  "provider-selection" | "ledger-preparation" | "ledger-waiting"
+>("provider-selection");
 const providerSelectId = "wallet-provider-select";
 const privateKeyInputId = "programmatic-private-key";
 const privateKeyHelpId = "programmatic-private-key-help";
@@ -320,6 +324,7 @@ const privateKeyHelpId = "programmatic-private-key-help";
 watch([showConnectDialog, showDisconnectDialog], ([newValue]) => {
   if (newValue === false) {
     loading.value = false;
+    connectionStep.value = "provider-selection";
   }
 });
 
@@ -343,14 +348,32 @@ const openExplorer = () => {
 const connect = async () => {
   try {
     loading.value = true;
+
+    // For Ledger, show waiting step first
+    if (provider.value === "ledger") {
+      connectionStep.value = "ledger-waiting";
+    }
+
     await walletStore.initializeWallet(provider.value, privateKey.value);
+
     toast.success("Wallet connected");
-  } catch (error) {
-    toast.error("Wallet connection failed", {
-      description: error instanceof Error ? error.message : String(error),
-    });
-  } finally {
     showConnectDialog.value = false;
+    loading.value = false;
+  } catch (error) {
+    // Handle errors differently for Ledger vs other providers
+    if (provider.value === "ledger") {
+      // For Ledger, go back to preparation step and show error
+      connectionStep.value = "ledger-preparation";
+      toast.error("Ledger connection failed", {
+        description: error instanceof Error ? error.message : String(error),
+      });
+    } else {
+      // For other providers, just show error and close dialog
+      toast.error("Wallet connection failed", {
+        description: error instanceof Error ? error.message : String(error),
+      });
+      showConnectDialog.value = false;
+    }
     loading.value = false;
   }
 };
@@ -373,6 +396,16 @@ const disconnect = async () => {
 const change = async () => {
   await disconnect();
   showConnectDialog.value = true;
+};
+
+const nextStep = () => {
+  if (provider.value === "ledger") {
+    connectionStep.value = "ledger-preparation";
+  }
+};
+
+const backToProviderSelection = () => {
+  connectionStep.value = "provider-selection";
 };
 
 const hidSupported = computed(() => {
