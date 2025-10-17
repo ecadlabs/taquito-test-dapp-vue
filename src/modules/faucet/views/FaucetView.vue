@@ -100,23 +100,38 @@
               <label for="amount" class="text-sm font-medium">
                 Amount (XTZ)
               </label>
-              <div class="relative">
-                <input
+              <div class="relative mt-1">
+                <NumberField
                   id="amount"
                   v-model.number="requestAmount"
-                  type="number"
-                  min="0.1"
-                  max="10"
-                  step="0.1"
+                  :min="0.1"
+                  :max="10"
+                  :step="0.1"
                   :disabled="isLoading || hasExceededLimit"
-                  class="bg-background/50 w-full rounded-lg border px-4 py-3 pr-12 text-lg backdrop-blur-sm transition-all duration-200 focus:border-[#D3832B] focus:ring-2 focus:ring-[#D3832B]/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                  placeholder="Enter amount (0.1 - 10 XTZ)"
-                />
-                <div
-                  class="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2"
+                  class="bg-background/50 w-full rounded-lg border px-4 py-1 text-lg transition-all duration-200 focus-within:border-[#D3832B] focus-within:ring-2 focus-within:ring-[#D3832B]/20 focus-within:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  XTZ
-                </div>
+                  <NumberFieldContent class="relative">
+                    <NumberFieldDecrement
+                      class="text-muted-foreground hover:text-foreground absolute top-1/2 left-3 -translate-y-1/2 p-2 disabled:cursor-not-allowed disabled:opacity-20"
+                    >
+                      <Minus class="h-4 w-4" />
+                    </NumberFieldDecrement>
+                    <NumberFieldInput
+                      class="w-full border-0 bg-transparent py-3 pr-16 pl-12 text-center text-lg shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                      placeholder="Enter amount (0.1 - 10 XTZ)"
+                    />
+                    <NumberFieldIncrement
+                      class="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 p-2 disabled:cursor-not-allowed disabled:opacity-20"
+                    >
+                      <Plus class="h-4 w-4" />
+                    </NumberFieldIncrement>
+                    <div
+                      class="text-muted-foreground pointer-events-none absolute top-1/2 right-16 -translate-y-1/2"
+                    >
+                      XTZ
+                    </div>
+                  </NumberFieldContent>
+                </NumberField>
               </div>
               <div class="text-muted-foreground text-xs">
                 Maximum: 10 XTZ per request. Maximum balance: 50 XTZ.
@@ -269,6 +284,13 @@
 <script setup lang="ts">
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  NumberField,
+  NumberFieldContent,
+  NumberFieldDecrement,
+  NumberFieldIncrement,
+  NumberFieldInput,
+} from "@/components/ui/number-field";
 import { useWalletStore } from "@/stores/walletStore";
 import BigNumber from "bignumber.js";
 import {
@@ -277,6 +299,8 @@ import {
   Droplets,
   Hourglass,
   Info,
+  Minus,
+  Plus,
   Shield,
   Wallet,
   XCircle,
