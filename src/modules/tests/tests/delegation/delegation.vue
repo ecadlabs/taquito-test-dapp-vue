@@ -175,7 +175,6 @@ const removingDelegate = ref<boolean>(false);
 const currentDelegate = ref<string | null>();
 const loadingCurrentDelegate = ref<boolean>(true);
 const isPopoverOpen = ref<boolean>(false);
-const isChangePopoverOpen = ref<boolean>(false);
 
 const isRegisteredAsBaker = computed(() => {
   return (
