@@ -29,12 +29,12 @@ const delegate = async (address: string) => {
       diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("set-delegate");
     diagramStore.setProgress("wait-for-user");
     const delegation = await Tezos.wallet
       .setDelegate({ delegate: address })
       .send();
 
+    diagramStore.setProgress("set-delegate");
     diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await delegation.confirmation(
       settingsStore.getConfirmationCount,
@@ -71,10 +71,10 @@ const undelegate = async () => {
       diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("remove-delegation");
     diagramStore.setProgress("wait-for-user");
     const delegation = await Tezos.wallet.setDelegate({}).send();
 
+    diagramStore.setProgress("remove-delegation");
     diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await delegation.confirmation(
       settingsStore.getConfirmationCount,
