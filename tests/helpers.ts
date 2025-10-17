@@ -63,7 +63,7 @@ export const waitForBalanceLoaded = async ({ page }: { page: Page }) => {
 export const delegate = async ({ page }: { page: Page }) => {
   await goToTest({ page, testName: "Delegation" });
 
-  await page.waitForTimeout(2000);
+  await page.waitForSelector('[role="combobox"]', { state: "visible" });
   await page.getByRole("combobox").click();
   await page.waitForSelector('[data-slot="command-input"]');
   await page.fill('[data-slot="command-input"]', "ECAD");
