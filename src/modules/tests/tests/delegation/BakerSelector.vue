@@ -6,9 +6,6 @@
         role="combobox"
         :aria-expanded="isPopoverOpen"
         class="w-full justify-between font-mono text-sm"
-        :class="{
-          'font-mono text-sm': true,
-        }"
       >
         <span v-if="selectedBakerInfo" class="truncate">
           {{ selectedBakerInfo.alias }} ({{
