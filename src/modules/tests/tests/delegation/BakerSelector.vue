@@ -4,7 +4,7 @@
       <Button
         variant="outline"
         role="combobox"
-        aria-expanded="isPopoverOpen"
+        :aria-expanded="isPopoverOpen"
         class="w-full justify-between font-mono text-sm"
         :class="{
           'font-mono text-sm': true,
