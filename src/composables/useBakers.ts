@@ -1,14 +1,13 @@
 import { computed, ref } from "vue";
 
-const bakers = ref<Baker[]>([]);
-const loading = ref<boolean>(false);
-const error = ref<string | null>(null);
-
 interface Baker {
   address: string;
   alias: string;
 }
 
+const bakers = ref<Baker[]>([]);
+const loading = ref<boolean>(false);
+const error = ref<string | null>(null);
 const fetchBakers = async (): Promise<void> => {
   const network = import.meta.env.VITE_NETWORK_TYPE;
 
