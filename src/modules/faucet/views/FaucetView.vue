@@ -14,7 +14,7 @@
         <div class="bg-grid-pattern absolute inset-0 opacity-5"></div>
         <!-- Gradient Overlay -->
         <div
-          class="absolute inset-0 bg-gradient-to-br from-[#D3832B]/5 via-transparent to-blue-500/5"
+          class="from-brand/5 absolute inset-0 bg-gradient-to-br via-transparent to-blue-500/5"
         />
       </div>
 
@@ -22,7 +22,7 @@
         <div class="space-y-4">
           <h1 class="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
             <span
-              class="bg-gradient-to-r from-[#D3832B] to-orange-600 bg-clip-text text-transparent"
+              class="from-brand bg-gradient-to-r to-orange-600 bg-clip-text text-transparent"
             >
               Taquito Faucet
             </span>
@@ -39,7 +39,7 @@
     <section class="relative overflow-hidden px-4 py-16">
       <!-- Background decorations -->
       <div
-        class="absolute top-0 left-1/4 h-96 w-96 rounded-full bg-[#D3832B]/5 blur-3xl"
+        class="bg-brand/5 absolute top-0 left-1/4 h-96 w-96 rounded-full blur-3xl"
       />
       <div
         class="absolute right-1/4 bottom-0 h-96 w-96 rounded-full bg-blue-500/5 blur-3xl"
@@ -108,7 +108,7 @@
                   :max="10"
                   :step="0.1"
                   :disabled="isLoading || hasExceededLimit"
-                  class="bg-background/50 w-full rounded-lg border px-4 py-1 text-lg transition-all duration-200 focus-within:border-[#D3832B] focus-within:ring-2 focus-within:ring-[#D3832B]/20 focus-within:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                  class="bg-background/50 focus-within:border-brand focus-within:ring-brand/20 w-full rounded-lg border px-4 py-1 text-lg transition-all duration-200 focus-within:ring-2 focus-within:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <NumberFieldContent class="relative">
                     <NumberFieldDecrement
@@ -161,7 +161,7 @@
                   !captchaToken
                 "
                 size="lg"
-                class="w-full bg-[#D3832B] transition-all duration-200 hover:scale-105 hover:bg-[#B8722A] hover:shadow-lg hover:shadow-[#D3832B]/25 disabled:opacity-50 disabled:hover:scale-100"
+                class="bg-brand hover:bg-brand/90 hover:shadow-brand/25 w-full transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:hover:scale-100"
               >
                 <div v-if="isLoading" class="flex items-center gap-2">
                   <div
@@ -244,7 +244,7 @@
             data-delay="100"
           >
             <div class="flex items-start gap-4">
-              <div class="rounded-lg bg-[#D3832B]/10 p-3 text-[#D3832B]">
+              <div class="bg-brand/10 text-brand rounded-lg p-3">
                 <Info class="h-6 w-6" />
               </div>
               <div class="space-y-2">
@@ -543,7 +543,11 @@ onUnmounted(() => {
 /* Floating Orbs */
 .floating-orb {
   position: absolute;
-  background: linear-gradient(45deg, #d3832b20, #ff6b3520);
+  background: linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--brand) 12.5%, transparent),
+    #ff6b3520
+  );
   border-radius: 50%;
   filter: blur(40px);
   animation: float 4s ease-in-out infinite;
@@ -576,8 +580,15 @@ onUnmounted(() => {
 /* Grid Pattern */
 .bg-grid-pattern {
   background-image:
-    linear-gradient(rgba(139, 69, 19, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(139, 69, 19, 0.1) 1px, transparent 1px);
+    linear-gradient(
+      color-mix(in srgb, var(--brand) 10%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--brand) 10%, transparent) 1px,
+      transparent 1px
+    );
   background-size: 50px 50px;
 }
 
