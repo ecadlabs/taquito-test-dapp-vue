@@ -43,17 +43,12 @@
             <Label class="mb-2 block text-sm font-medium"
               >New Delegate Address</Label
             >
-            <Input
-              placeholder="Enter new delegate address..."
-              v-model="newDelegateAddress"
-              class="w-full font-mono text-sm"
-              autocapitalize="none"
-              autocomplete="off"
-              spellcheck="false"
-              :aria-invalid="
-                newDelegateAddress.length > 0 &&
-                !isValidAddress(newDelegateAddress)
-              "
+            <BakerSelector
+              :selected-baker="selectedBaker"
+              :model-value="isPopoverOpen"
+              placeholder="Select a baker..."
+              @update:selected-baker="handleBakerSelection"
+              @update:model-value="handlePopoverChange"
             />
           </div>
           <Button
@@ -61,9 +56,9 @@
             :disabled="
               changingDelegate ||
               removingDelegate ||
-              loadingCurrentDelegate ||
               !walletStore.getAddress ||
-              !isValidAddress(newDelegateAddress)
+              !selectedBaker ||
+              isRegisteredAsBaker
             "
             class="w-full"
             :aria-busy="changingDelegate"
@@ -117,14 +112,12 @@
             <Label class="mb-2 block text-sm font-medium"
               >Delegate Address</Label
             >
-            <Input
-              placeholder="Enter delegate address..."
-              v-model="toAddress"
-              class="w-full font-mono text-sm"
-              autocapitalize="none"
-              autocomplete="off"
-              spellcheck="false"
-              :aria-invalid="toAddress.length > 0 && !isValidAddress(toAddress)"
+            <BakerSelector
+              :selected-baker="selectedBaker"
+              :model-value="isPopoverOpen"
+              placeholder="Select a baker..."
+              @update:selected-baker="handleBakerSelection"
+              @update:model-value="handlePopoverChange"
             />
           </div>
           <Button
@@ -133,6 +126,7 @@
               sending ||
               loadingCurrentDelegate ||
               !walletStore.getAddress ||
+              !selectedBaker ||
               isRegisteredAsBaker
             "
             class="w-full"
@@ -157,14 +151,7 @@
 <script setup lang="ts">
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { validateTezosAddress } from "@/lib/utils";
-import {
-  delegate,
-  getDelegate,
-  undelegate,
-} from "@/modules/tests/tests/delegation/delegation";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
 import {
@@ -175,19 +162,19 @@ import {
   Unlink,
 } from "lucide-vue-next";
 import { computed, onMounted, ref, watch } from "vue";
+import BakerSelector from "./BakerSelector.vue";
+import { delegate, getDelegate, undelegate } from "./delegation";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
 
-const toAddress = ref<string>("tz1cjyja1TU6fiyiFav3mFAdnDsCReJ12hPD");
-const newDelegateAddress = ref<string>("");
+const selectedBaker = ref<string>("");
 const sending = ref<boolean>(false);
 const changingDelegate = ref<boolean>(false);
 const removingDelegate = ref<boolean>(false);
 const currentDelegate = ref<string | null>();
 const loadingCurrentDelegate = ref<boolean>(true);
-const isValidAddress = (value: string): boolean =>
-  validateTezosAddress(value.trim());
+const isPopoverOpen = ref<boolean>(false);
 
 const isRegisteredAsBaker = computed(() => {
   return (
@@ -218,12 +205,25 @@ const loadCurrentDelegate = async () => {
   loadingCurrentDelegate.value = false;
 };
 
+const handleBakerSelection = (bakerAddress: string) => {
+  selectedBaker.value = bakerAddress;
+  isPopoverOpen.value = false;
+};
+
+const handlePopoverChange = (isOpen: boolean) => {
+  isPopoverOpen.value = isOpen;
+};
+
 const delegateToCurrentAddress = async () => {
   try {
-    if (!isValidAddress(toAddress.value)) return;
+    if (!selectedBaker.value) return;
     sending.value = true;
-    await delegate(toAddress.value);
-    currentDelegate.value = toAddress.value;
+    await delegate(selectedBaker.value);
+    currentDelegate.value = selectedBaker.value;
+
+    // Clear selection on successful delegation
+    selectedBaker.value = "";
+    isPopoverOpen.value = false;
   } catch (error) {
     console.error(error);
   } finally {
@@ -233,11 +233,14 @@ const delegateToCurrentAddress = async () => {
 
 const changeDelegate = async () => {
   try {
-    if (!isValidAddress(newDelegateAddress.value)) return;
+    if (!selectedBaker.value) return;
     changingDelegate.value = true;
-    await delegate(newDelegateAddress.value);
-    currentDelegate.value = newDelegateAddress.value;
-    newDelegateAddress.value = "";
+    await delegate(selectedBaker.value);
+    currentDelegate.value = selectedBaker.value;
+
+    // Clear selection on successful change
+    selectedBaker.value = "";
+    isPopoverOpen.value = false;
   } catch (error) {
     console.error(error);
   } finally {

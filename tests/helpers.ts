@@ -62,6 +62,26 @@ export const waitForBalanceLoaded = async ({ page }: { page: Page }) => {
 
 export const delegate = async ({ page }: { page: Page }) => {
   await goToTest({ page, testName: "Delegation" });
+
+  await page.waitForSelector('[role="combobox"]', { state: "visible" });
+  await page.getByRole("combobox").click();
+  await page.waitForSelector('[data-slot="command-input"]');
+  await page.fill('[data-slot="command-input"]', "ECAD");
+  await page.waitForFunction(
+    () => {
+      const items = document.querySelectorAll('[data-slot="command-item"]');
+      return Array.from(items).some((item) =>
+        item.textContent?.toLowerCase().includes("ecad"),
+      );
+    },
+    { timeout: 10000 },
+  );
+
+  await page
+    .locator('[data-slot="command-item"]:has-text("ECAD")')
+    .first()
+    .click();
+
   await page.getByRole("button", { name: "Delegate" }).click();
   await waitForSuccess({ page });
 };

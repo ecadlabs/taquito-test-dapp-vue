@@ -272,12 +272,12 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "set-delegate": {
         nodes: [
           {
-            id: "set-delegate",
-            label: "Set Delegate",
-          },
-          {
             id: "wait-for-user",
             label: "Wait for User Confirmation",
+          },
+          {
+            id: "set-delegate",
+            label: "Set Delegate",
           },
           {
             id: "wait-for-chain-confirmation",
@@ -288,12 +288,12 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "remove-delegation": {
         nodes: [
           {
-            id: "remove-delegation",
-            label: "Remove Delegation",
-          },
-          {
             id: "wait-for-user",
             label: "Wait for User Confirmation",
+          },
+          {
+            id: "remove-delegation",
+            label: "Remove Delegation",
           },
           {
             id: "wait-for-chain-confirmation",
