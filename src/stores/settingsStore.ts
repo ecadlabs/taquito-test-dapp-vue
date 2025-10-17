@@ -28,10 +28,13 @@ export const availableIndexers: IndexerOption[] = [
   },
 ];
 
+export type ThemeMode = "light" | "dark" | "system";
+
 export type Settings = {
   indexer: IndexerOption;
   rpcUrl: string;
   confirmationCount: number;
+  themeMode: ThemeMode;
 };
 
 const defaultSettings: Settings = {
@@ -43,6 +46,7 @@ const defaultSettings: Settings = {
     ) || availableIndexers[0],
   rpcUrl: import.meta.env.VITE_RPC_URL,
   confirmationCount: 3,
+  themeMode: "light",
 };
 
 export const useSettingsStore = defineStore("settings", () => {
@@ -65,9 +69,14 @@ export const useSettingsStore = defineStore("settings", () => {
   const getSettings = computed(() => settings.value);
   const getIndexer = computed(() => settings.value.indexer);
   const getConfirmationCount = computed(() => settings.value.confirmationCount);
+  const getThemeMode = computed(() => settings.value.themeMode);
   const isUsingCustomRpcUrl = computed(() => {
     return settings.value.rpcUrl !== import.meta.env.VITE_RPC_URL;
   });
+
+  const setThemeMode = (themeMode: ThemeMode) => {
+    settings.value.themeMode = themeMode;
+  };
 
   // Update the settings in localStorage when the settings change so they persist across sessions
   watch(
@@ -87,7 +96,9 @@ export const useSettingsStore = defineStore("settings", () => {
     getSettings,
     getIndexer,
     getConfirmationCount,
+    getThemeMode,
     isUsingCustomRpcUrl,
+    setThemeMode,
     resetRpcUrl,
   };
 });
