@@ -233,12 +233,8 @@ const rpcUrlRef = computed(() => settingsStore.settings.rpcUrl);
 const debouncedRpcUrl = useDebounce(rpcUrlRef, 500);
 const runningHealthCheck = ref(false);
 
-const versionUrl = ref(
-  `https://github.com/ecadlabs/taquito-test-dapp-vue/releases/tag/${version}`,
-);
-const shaUrl = ref(
-  `https://github.com/ecadlabs/taquito-test-dapp-vue/commit/${gitSha}`,
-);
+const versionUrl = `https://github.com/ecadlabs/taquito-test-dapp-vue/releases/tag/${version}`;
+const shaUrl = `https://github.com/ecadlabs/taquito-test-dapp-vue/commit/${gitSha}`;
 
 watch(debouncedRpcUrl, (newRpcUrl: string) => {
   const checkRpcHealth = async (url: string) => {
