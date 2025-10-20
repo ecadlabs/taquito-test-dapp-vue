@@ -31,19 +31,7 @@ export const useTheme = () => {
   };
 
   const getCurrentTheme = (): ThemeMode => {
-    const root = window.document.documentElement;
-    if (root.classList.contains("dark")) {
-      // Check if it's dark due to system preference or explicit setting
-      const systemPrefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)",
-      ).matches;
-      const currentThemeMode = settingsStore.getThemeMode;
-      if (currentThemeMode === "system" && systemPrefersDark) {
-        return "system";
-      }
-      return "dark";
-    }
-    return "light";
+    return settingsStore.getThemeMode;
   };
 
   // Apply theme when it changes
