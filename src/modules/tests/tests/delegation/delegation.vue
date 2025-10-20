@@ -1,5 +1,20 @@
 <template>
   <div class="flex w-full flex-col items-center gap-6 px-6">
+    <!-- Baker warning alert -->
+    <Alert
+      v-if="isRegisteredAsBaker"
+      variant="destructive"
+      class="w-full max-w-md"
+    >
+      <AlertTriangle class="h-4 w-4" />
+      <AlertTitle>Registered as Baker</AlertTitle>
+      <AlertDescription>
+        You're currently registered as a baker (delegating to yourself). Tezos
+        does not currently allow you to un-register as a baker. To use this test
+        you'll need to use a different account.
+      </AlertDescription>
+    </Alert>
+
     <!-- Current delegate section -->
     <div v-if="currentDelegate" class="w-full max-w-md space-y-2">
       <!-- Display current delegate -->
@@ -28,17 +43,12 @@
             <Label class="mb-2 block text-sm font-medium"
               >New Delegate Address</Label
             >
-            <Input
-              placeholder="Enter new delegate address..."
-              v-model="newDelegateAddress"
-              class="w-full font-mono text-sm"
-              autocapitalize="none"
-              autocomplete="off"
-              spellcheck="false"
-              :aria-invalid="
-                newDelegateAddress.length > 0 &&
-                !isValidAddress(newDelegateAddress)
-              "
+            <BakerSelector
+              :selected-baker="selectedBaker"
+              :model-value="isPopoverOpen"
+              placeholder="Select a baker..."
+              @update:selected-baker="handleBakerSelection"
+              @update:model-value="handlePopoverChange"
             />
           </div>
           <Button
@@ -46,9 +56,9 @@
             :disabled="
               changingDelegate ||
               removingDelegate ||
-              loadingCurrentDelegate ||
               !walletStore.getAddress ||
-              !isValidAddress(newDelegateAddress)
+              !selectedBaker ||
+              isRegisteredAsBaker
             "
             class="w-full"
             :aria-busy="changingDelegate"
@@ -71,7 +81,10 @@
         <Button
           @click="removeDelegation()"
           :disabled="
-            changingDelegate || removingDelegate || !walletStore.getAddress
+            changingDelegate ||
+            removingDelegate ||
+            !walletStore.getAddress ||
+            isRegisteredAsBaker
           "
           variant="destructive"
           class="w-full"
@@ -99,20 +112,22 @@
             <Label class="mb-2 block text-sm font-medium"
               >Delegate Address</Label
             >
-            <Input
-              placeholder="Enter delegate address..."
-              v-model="toAddress"
-              class="w-full font-mono text-sm"
-              autocapitalize="none"
-              autocomplete="off"
-              spellcheck="false"
-              :aria-invalid="toAddress.length > 0 && !isValidAddress(toAddress)"
+            <BakerSelector
+              :selected-baker="selectedBaker"
+              :model-value="isPopoverOpen"
+              placeholder="Select a baker..."
+              @update:selected-baker="handleBakerSelection"
+              @update:model-value="handlePopoverChange"
             />
           </div>
           <Button
             @click="delegateToCurrentAddress()"
             :disabled="
-              sending || loadingCurrentDelegate || !walletStore.getAddress
+              sending ||
+              loadingCurrentDelegate ||
+              !walletStore.getAddress ||
+              !selectedBaker ||
+              isRegisteredAsBaker
             "
             class="w-full"
             :aria-busy="sending"
@@ -134,32 +149,40 @@
 </template>
 
 <script setup lang="ts">
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { validateTezosAddress } from "@/lib/utils";
-import {
-  delegate,
-  getDelegate,
-  undelegate,
-} from "@/modules/tests/tests/delegation/delegation";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
-import { CheckCircle, Cookie, Loader2, Unlink } from "lucide-vue-next";
-import { onMounted, ref, watch } from "vue";
+import {
+  AlertTriangle,
+  CheckCircle,
+  Cookie,
+  Loader2,
+  Unlink,
+} from "lucide-vue-next";
+import { computed, onMounted, ref, watch } from "vue";
+import BakerSelector from "./BakerSelector.vue";
+import { delegate, getDelegate, undelegate } from "./delegation";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
 
-const toAddress = ref<string>("tz1cjyja1TU6fiyiFav3mFAdnDsCReJ12hPD");
-const newDelegateAddress = ref<string>("");
+const selectedBaker = ref<string>("");
 const sending = ref<boolean>(false);
 const changingDelegate = ref<boolean>(false);
 const removingDelegate = ref<boolean>(false);
 const currentDelegate = ref<string | null>();
 const loadingCurrentDelegate = ref<boolean>(true);
-const isValidAddress = (value: string): boolean =>
-  validateTezosAddress(value.trim());
+const isPopoverOpen = ref<boolean>(false);
+
+const isRegisteredAsBaker = computed(() => {
+  return (
+    currentDelegate.value &&
+    walletStore.getAddress &&
+    currentDelegate.value === walletStore.getAddress
+  );
+});
 
 onMounted(async () => {
   diagramStore.setTestDiagram("delegation");
@@ -182,12 +205,25 @@ const loadCurrentDelegate = async () => {
   loadingCurrentDelegate.value = false;
 };
 
+const handleBakerSelection = (bakerAddress: string) => {
+  selectedBaker.value = bakerAddress;
+  isPopoverOpen.value = false;
+};
+
+const handlePopoverChange = (isOpen: boolean) => {
+  isPopoverOpen.value = isOpen;
+};
+
 const delegateToCurrentAddress = async () => {
   try {
-    if (!isValidAddress(toAddress.value)) return;
+    if (!selectedBaker.value) return;
     sending.value = true;
-    await delegate(toAddress.value);
-    currentDelegate.value = toAddress.value;
+    await delegate(selectedBaker.value);
+    currentDelegate.value = selectedBaker.value;
+
+    // Clear selection on successful delegation
+    selectedBaker.value = "";
+    isPopoverOpen.value = false;
   } catch (error) {
     console.error(error);
   } finally {
@@ -197,11 +233,14 @@ const delegateToCurrentAddress = async () => {
 
 const changeDelegate = async () => {
   try {
-    if (!isValidAddress(newDelegateAddress.value)) return;
+    if (!selectedBaker.value) return;
     changingDelegate.value = true;
-    await delegate(newDelegateAddress.value);
-    currentDelegate.value = newDelegateAddress.value;
-    newDelegateAddress.value = "";
+    await delegate(selectedBaker.value);
+    currentDelegate.value = selectedBaker.value;
+
+    // Clear selection on successful change
+    selectedBaker.value = "";
+    isPopoverOpen.value = false;
   } catch (error) {
     console.error(error);
   } finally {
@@ -222,10 +261,10 @@ const removeDelegation = async () => {
 };
 
 const getCurrentDelegate = async () => {
-  if (!walletStore.getAddress) {
-    throw new Error("No current address found");
+  if (walletStore.getAddress) {
+    return await getDelegate(walletStore.getAddress);
   }
 
-  return await getDelegate(walletStore.getAddress);
+  return null;
 };
 </script>

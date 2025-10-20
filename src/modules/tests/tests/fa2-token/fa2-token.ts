@@ -1,5 +1,6 @@
 import contracts from "@/contracts/contract-config.json";
 import { useDiagramStore } from "@/stores/diagramStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 import type { FA2TokenStorage } from "@/types/contract";
 import {
@@ -7,7 +8,6 @@ import {
   type ContractConfig,
 } from "@/types/contract";
 import type { Estimate } from "@taquito/taquito";
-import { PiggyBank } from "lucide-vue-next";
 
 const CONTRACT_ADDRESS =
   (contracts as ContractConfig[]).find(
@@ -61,6 +61,7 @@ export interface BurnParam {
  */
 export const mintTokens = async (param: MintParam): Promise<void> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   const walletStore = useWalletStore();
   const Tezos = walletStore.getTezos;
 
@@ -70,25 +71,22 @@ export const mintTokens = async (param: MintParam): Promise<void> => {
 
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .mint(param)
       .toTransferParams();
     estimate = await Tezos.estimate.transfer(transferParams);
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
     diagramStore.setProgress("execute-operation");
     const operation = await contract.methodsObject.mint(param).send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(3);
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation?.block.hash);
@@ -108,6 +106,7 @@ export const mintTokens = async (param: MintParam): Promise<void> => {
  */
 export const burnTokens = async (param: BurnParam): Promise<void> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   const walletStore = useWalletStore();
   const Tezos = walletStore.getTezos;
 
@@ -117,25 +116,22 @@ export const burnTokens = async (param: BurnParam): Promise<void> => {
 
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .burn(param)
       .toTransferParams();
     estimate = await Tezos.estimate.transfer(transferParams);
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
     diagramStore.setProgress("execute-operation");
     const operation = await contract.methodsObject.burn(param).send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(3);
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation?.block.hash);
@@ -157,6 +153,7 @@ export const transferTokens = async (
   transfers: TransferParam[],
 ): Promise<void> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   const walletStore = useWalletStore();
   const Tezos = walletStore.getTezos;
 
@@ -170,25 +167,22 @@ export const transferTokens = async (
       throw new Error("No transfer parameters provided");
     }
 
-    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .transfer(transfers)
       .toTransferParams();
     estimate = await Tezos.estimate.transfer(transferParams);
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
     diagramStore.setProgress("execute-operation");
     const operation = await contract.methodsObject.transfer(transfers).send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(3);
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation?.block.hash);
@@ -265,6 +259,7 @@ export const getTokenBalancesWithCallback = async (
   requests: Array<{ owner: string; token_id: string }>,
 ): Promise<TokenBalance[]> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   const walletStore = useWalletStore();
   const Tezos = walletStore.getTezos;
 
@@ -287,7 +282,9 @@ export const getTokenBalancesWithCallback = async (
       .send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(1);
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     if (confirmation?.block.hash) {
       diagramStore.setOperationHash(confirmation?.block.hash);

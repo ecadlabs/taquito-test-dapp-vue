@@ -1,6 +1,9 @@
+import {
+  initializeBeaconEvents,
+  initializeWalletConnectEvents,
+} from "@/lib/walletEvents";
 import { useSettingsStore } from "@/stores/settingsStore";
 import type { ProgrammaticWallet, WalletProvider } from "@/types/wallet";
-import { BeaconEvent } from "@airgap/beacon-dapp";
 import { NetworkType, type ExtendedPeerInfo } from "@airgap/beacon-types";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import * as Sentry from "@sentry/vue";
@@ -25,6 +28,7 @@ export const useWalletStore = defineStore("wallet", () => {
   const wallet = ref<
     BeaconWallet | WalletConnect | LedgerSigner | ProgrammaticWallet
   >();
+  const ledgerTransport = ref<TransportWebHID | null>(null);
   const address = ref<string>();
   const balance = ref<BigNumber>();
   const walletName = ref<string>();
@@ -77,7 +81,18 @@ export const useWalletStore = defineStore("wallet", () => {
   const getWalletName = computed(() => walletName.value);
 
   /** Resets all wallet state variables to undefined and clears the local storage */
-  const resetWalletState = (): void => {
+  const resetWalletState = async (): Promise<void> => {
+    // Clean up Ledger transport if it exists
+    if (ledgerTransport.value) {
+      try {
+        await ledgerTransport.value.close();
+      } catch (error) {
+        console.error("Error closing Ledger transport during reset:", error);
+      } finally {
+        ledgerTransport.value = null;
+      }
+    }
+
     wallet.value = undefined;
     address.value = undefined;
     balance.value = undefined;
@@ -109,20 +124,8 @@ export const useWalletStore = defineStore("wallet", () => {
     };
 
     const beaconWallet = new BeaconWallet(options);
-    beaconWallet.client.subscribeToEvent(
-      BeaconEvent.ACTIVE_ACCOUNT_SET,
-      (account) => {
-        if (account) {
-          address.value = account.address;
-        } else if (
-          account === undefined &&
-          address.value &&
-          !isDisconnecting.value
-        ) {
-          disconnectWallet(true);
-        }
-      },
-    );
+
+    initializeBeaconEvents(beaconWallet);
 
     const cachedAccount = await beaconWallet.client.getActiveAccount();
 
@@ -163,6 +166,8 @@ export const useWalletStore = defineStore("wallet", () => {
       throw ReferenceError(
         "Wallet not found after WalletConnect initialization should have finished.",
       );
+
+    initializeWalletConnectEvents(walletConnect);
 
     const latestSessionKey =
       await walletConnect.getAllExistingSessionKeys()?.[0];
@@ -240,13 +245,27 @@ export const useWalletStore = defineStore("wallet", () => {
 
   /** Initializes a Ledger hardware wallet */
   const initializeLedgerWallet = async (): Promise<void> => {
-    const transport = await TransportWebHID.create();
-    const ledgerSigner = new LedgerSigner(transport);
+    let transport: TransportWebHID | null = null;
 
-    Tezos.setProvider({ signer: ledgerSigner });
-    wallet.value = ledgerSigner;
-    walletName.value = "Ledger Device";
-    localStorage.setItem("wallet-provider", "ledger");
+    try {
+      transport = (await TransportWebHID.create()) as TransportWebHID;
+      const ledgerSigner = new LedgerSigner(transport);
+      Tezos.setProvider({ signer: ledgerSigner });
+      wallet.value = ledgerSigner;
+      walletName.value = "Ledger Device";
+      ledgerTransport.value = transport; // Store reference for cleanup
+      localStorage.setItem("wallet-provider", "ledger");
+    } catch (error) {
+      // Clean up the transport if it was created but connection failed
+      if (transport) {
+        try {
+          await transport.close();
+        } catch (closeError) {
+          console.error("Error closing Ledger transport:", closeError);
+        }
+      }
+      throw error;
+    }
   };
 
   /**
@@ -277,7 +296,7 @@ export const useWalletStore = defineStore("wallet", () => {
       // Until then, if the wallet variable has already been set by a previous session, we will reset the wallet state.
       // This should never be called unless the user wants to connect a new wallet, so this is safe.
       if (wallet.value) {
-        resetWalletState();
+        await resetWalletState();
         console.warn(
           "A wallet seems to already be initialized in this session. Resetting wallet state and assuming it is a new session.",
         );
@@ -332,7 +351,7 @@ export const useWalletStore = defineStore("wallet", () => {
         "Failed to initialize wallet or request permissions:",
         error,
       );
-      resetWalletState();
+      await resetWalletState();
       Sentry.captureException(error);
       throw error;
     }
@@ -352,8 +371,8 @@ export const useWalletStore = defineStore("wallet", () => {
     isDisconnecting.value = true;
     try {
       if (!wallet.value) {
-        throw new ReferenceError(
-          "Failed to disconnect wallet. No wallet currently connected",
+        console.warn(
+          "Failed to disconnect wallet. No wallet currently connected. Assuming it's been disconnected somewhere else.",
         );
       }
 
@@ -366,16 +385,30 @@ export const useWalletStore = defineStore("wallet", () => {
               true,
             );
           }
-          await wallet.value.client.disconnect();
         }
 
         await wallet.value.client.clearActiveAccount();
       } else if (wallet.value instanceof WalletConnect) {
         await wallet.value.disconnect();
         await deleteWalletConnectSessionFromIndexedDB();
+      } else if (
+        wallet.value instanceof LedgerSigner &&
+        ledgerTransport.value
+      ) {
+        // Clean up Ledger transport when disconnecting
+        try {
+          await ledgerTransport.value.close();
+        } catch (error) {
+          console.error(
+            "Error closing Ledger transport during disconnect:",
+            error,
+          );
+        } finally {
+          ledgerTransport.value = null;
+        }
       }
 
-      resetWalletState();
+      await resetWalletState();
 
       if (fromWallet) {
         toast.info(
@@ -384,7 +417,7 @@ export const useWalletStore = defineStore("wallet", () => {
       }
     } catch (error) {
       console.error("Error disconnecting wallet:", error);
-      resetWalletState();
+      await resetWalletState();
       throw error;
     } finally {
       isDisconnecting.value = false;
@@ -494,6 +527,8 @@ export const useWalletStore = defineStore("wallet", () => {
 
   return {
     Tezos,
+    address,
+    isDisconnecting,
     getTezos,
     getAddress,
     getBalance,

@@ -1,9 +1,9 @@
 import contracts from "@/contracts/contract-config.json";
 import { useDiagramStore } from "@/stores/diagramStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 import { type ContractConfig } from "@/types/contract";
 import type { Estimate } from "@taquito/taquito";
-import { PiggyBank } from "lucide-vue-next";
 
 const CONTRACT_ADDRESS =
   (contracts as ContractConfig[]).find(
@@ -24,6 +24,7 @@ let estimate: Estimate;
  */
 const increment = async (amount: number): Promise<number | undefined> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
 
   if (amount <= 0 || amount > 100)
     throw new Error(
@@ -41,18 +42,13 @@ const increment = async (amount: number): Promise<number | undefined> => {
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
     console.log(`Incrementing storage value by ${amount}...`);
 
-    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .increment(amount)
       .toTransferParams();
     estimate = await Tezos.estimate.transfer(transferParams);
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
     diagramStore.setProgress("execute-operation");
@@ -60,7 +56,11 @@ const increment = async (amount: number): Promise<number | undefined> => {
     const operation = await contract.methodsObject.increment(amount).send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(3);
+    console.log(settingsStore.getConfirmationCount);
+
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash);
@@ -83,6 +83,7 @@ const increment = async (amount: number): Promise<number | undefined> => {
  */
 const decrement = async (amount: number): Promise<number | undefined> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
 
   if (amount <= 0 || amount > 100)
     throw new Error(
@@ -98,24 +99,21 @@ const decrement = async (amount: number): Promise<number | undefined> => {
     diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .decrement(amount)
       .toTransferParams();
     estimate = await Tezos.estimate.transfer(transferParams);
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
     diagramStore.setProgress("execute-operation");
     const operation = await contract.methodsObject.decrement(amount).send();
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(3);
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash);
     diagramStore.setCompleted();
@@ -134,6 +132,7 @@ const decrement = async (amount: number): Promise<number | undefined> => {
  */
 const reset = async (): Promise<void> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
 
   diagramStore.setTestDiagram(TEST_ID, "reset");
 
@@ -144,24 +143,21 @@ const reset = async (): Promise<void> => {
     diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .reset()
       .toTransferParams();
     estimate = await Tezos.estimate.transfer(transferParams);
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
     diagramStore.setProgress("execute-operation");
     const operation = await contract.methodsObject.reset().send();
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(3);
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash);
     diagramStore.setCompleted();

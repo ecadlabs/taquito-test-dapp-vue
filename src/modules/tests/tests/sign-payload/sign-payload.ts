@@ -1,6 +1,7 @@
 import { useTaquitoModules } from "@/composables/useTaquitoModules";
 import contracts from "@/contracts/contract-config.json";
 import { useDiagramStore } from "@/stores/diagramStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 import type { ContractConfig } from "@/types/contract";
 import { BeaconWallet } from "@taquito/beacon-wallet";
@@ -8,7 +9,6 @@ import { LedgerSigner } from "@taquito/ledger-signer";
 import type { MichelsonData, MichelsonType } from "@taquito/michel-codec";
 import type { Estimate } from "@taquito/taquito";
 import { WalletConnect } from "@taquito/wallet-connect";
-import { PiggyBankIcon } from "lucide-vue-next";
 
 const TEST_ID = "sign-payload";
 let estimate: Estimate;
@@ -292,7 +292,6 @@ const verifyPayloadViaContract = async (
     diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(SIGNATURE_CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("estimate-fees");
     const parameter = {
       public_key: publicKey,
       signature: signature,
@@ -305,19 +304,17 @@ const verifyPayloadViaContract = async (
     estimate = await Tezos.estimate.transfer(transferParams);
 
     if (estimate) {
-      // Load icon only when needed
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBankIcon,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
     diagramStore.setProgress("wait-for-user");
     const operation = await contract.methodsObject.default(parameter).send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(1);
+    const settingsStore = useSettingsStore();
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
     if (confirmation?.block.hash)
       diagramStore.setOperationHash(confirmation?.block.hash);
     diagramStore.setCompleted();

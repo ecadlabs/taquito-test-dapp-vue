@@ -48,19 +48,23 @@
     <!-- Error Visualization Section -->
     <div
       v-if="errorMessage"
-      class="w-full max-w-2xl rounded-lg border border-red-200 bg-red-50 p-4"
+      class="w-full max-w-2xl rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950"
     >
-      <h4 class="text-md mb-2 flex items-center font-medium text-red-800">
+      <h4
+        class="text-md mb-2 flex items-center font-medium text-red-800 dark:text-red-200"
+      >
         <AlertTriangle class="mr-2 h-4 w-4" />
         Error Details
       </h4>
-      <div class="rounded border bg-red-100 p-3 text-sm">
+      <div
+        class="rounded border bg-red-100 p-3 text-sm dark:border-red-700 dark:bg-red-900"
+      >
         <pre
-          class="overflow-auto font-mono text-xs whitespace-pre-wrap text-red-700"
+          class="overflow-auto font-mono text-xs whitespace-pre-wrap text-red-700 dark:text-red-300"
           >{{ formattedError }}</pre
         >
       </div>
-      <p class="mt-2 text-xs text-red-600">
+      <p class="mt-2 text-xs text-red-600 dark:text-red-400">
         This error was expected and demonstrates how Taquito handles contract
         call failures.
       </p>

@@ -46,11 +46,11 @@
         >
           <!-- Circle node -->
           <div
-            class="node-circle h-5 w-5 rounded-full border-2 border-gray-300 bg-white transition-all duration-300"
+            class="node-circle bg-background h-5 w-5 rounded-full border-2 border-gray-300 transition-all duration-300"
           ></div>
           <!-- Text label -->
           <div
-            class="absolute text-center text-xs leading-[1.2] font-medium text-gray-700"
+            class="text-primary absolute text-center text-xs leading-[1.2] font-medium"
             :class="node.type === 'error' ? 'top-6' : 'bottom-6'"
           >
             <!-- Locator for automated tests to know when an example is completed -->
@@ -117,7 +117,7 @@
                 variant="outline"
                 class="font-mono text-xs"
               >
-                {{ Math.round(getStepTiming(node.id)?.duration ?? 0) }}ms
+                {{ formatDuration(getStepTiming(node.id)?.duration) }}
               </Badge>
             </div>
           </div>
@@ -169,6 +169,16 @@ const operationHash = computed(() => diagramStore.operationHash);
 
 const getStepTiming = (stepId: string) => {
   return diagramStore.getStepTiming(stepId);
+};
+
+const formatDuration = (durationMs: number | undefined): string => {
+  if (durationMs === undefined) return "0ms";
+
+  const duration = Math.round(durationMs);
+  if (duration >= 1000) {
+    return `${(duration / 1000).toFixed(2)}s`;
+  }
+  return `${duration}ms`;
 };
 
 const networkType = import.meta.env.VITE_NETWORK_TYPE;
@@ -645,6 +655,17 @@ function isNodeCompleted(node: TypedNode | undefined): boolean {
 .neutral-path .connection-line.vertical {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' %3E%3Cline x1='50%25' y1='0' x2='50%25' y2='100%25' stroke='%23d1d5dc' stroke-width='3' stroke-dasharray='5 5'/%3E%3C/svg%3E");
   background-repeat: repeat-y;
+}
+
+.dark .caution-path .connection-line.horizontal {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' %3E%3Cline x1='0' y1='50%25' x2='100%25' y2='50%25' stroke='%23f97316' stroke-width='3' stroke-dasharray='5 5'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-color: var(--background);
+}
+
+.dark .neutral-path .connection-line.horizontal {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' %3E%3Cline x1='0' y1='50%25' x2='100%25' y2='50%25' stroke='oklch(0.209 0 0)' stroke-width='3' stroke-dasharray='5 5'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
 }
 
 .neutral-path .connection-line.horizontal.animated {

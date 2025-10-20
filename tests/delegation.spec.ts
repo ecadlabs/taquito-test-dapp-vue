@@ -14,6 +14,7 @@ test.describe("Delegation", () => {
 
   test("should undelegate from a baker", async () => {
     const page = getSharedPage();
+    await delegate({ page });
     await goToTest({ page, testName: "Delegation" });
     const removeDelegationButton = page.getByRole("button", {
       name: "Remove Delegation",

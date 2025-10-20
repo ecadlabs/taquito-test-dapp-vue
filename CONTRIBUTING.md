@@ -152,7 +152,7 @@ export const mainTestFunction = async (param: string): Promise<void> => {
     const operation = await contract.methodsObject.yourMethod(param).send();
 
     diagramStore.setProgress("wait-for-confirmation");
-    await operation.confirmation(3);
+    await operation.confirmation(settingsStore.getConfirmationCount.value);
 
     diagramStore.setCompleted();
   } catch (error) {

@@ -34,6 +34,49 @@
         </div>
       </div>
       <div class="flex flex-col gap-2">
+        <Label :for="confirmationInputId" class="font-medium"
+          >Confirmation Count</Label
+        >
+        <div class="w-full space-y-2 sm:w-auto">
+          <NumberField
+            :min="1"
+            :max="8"
+            v-model="settingsStore.settings.confirmationCount"
+          >
+            <NumberFieldContent class="w-24">
+              <NumberFieldDecrement />
+              <NumberFieldInput
+                :id="confirmationInputId"
+                :aria-describedby="confirmationHelpId"
+                placeholder="3"
+              />
+              <NumberFieldIncrement />
+            </NumberFieldContent>
+          </NumberField>
+
+          <p :id="confirmationHelpId" class="text-muted-foreground text-xs">
+            Number of block confirmations to wait for (1-8)
+          </p>
+        </div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <Label class="font-medium">Theme</Label>
+        <div class="w-full space-y-2 sm:w-auto">
+          <Select v-model="settingsStore.settings.themeMode">
+            <SelectTrigger class="w-full sm:w-[220px]">
+              <SelectValue placeholder="Select theme" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="system">System</SelectItem>
+                <SelectItem value="light">Light</SelectItem>
+                <SelectItem value="dark">Dark</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div class="flex flex-col gap-2">
         <div class="flex items-center justify-between gap-2">
           <Label :for="rpcInputId" class="flex items-center gap-2 font-medium">
             RPC URL
@@ -123,6 +166,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  NumberField,
+  NumberFieldContent,
+  NumberFieldDecrement,
+  NumberFieldIncrement,
+  NumberFieldInput,
+} from "@/components/ui/number-field";
+import {
   Select,
   SelectContent,
   SelectGroup,
@@ -157,6 +207,8 @@ const network = import.meta.env.VITE_NETWORK_TYPE;
 
 const indexerSelectId = "settings-indexer-select";
 const indexerHelpId = "settings-indexer-help";
+const confirmationInputId = "settings-confirmation-count";
+const confirmationHelpId = "settings-confirmation-help";
 const rpcInputId = "settings-rpc-url";
 const rpcStatusId = "settings-rpc-status";
 

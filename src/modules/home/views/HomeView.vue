@@ -14,7 +14,7 @@
         <div class="bg-grid-pattern absolute inset-0 opacity-5"></div>
         <!-- Gradient Overlay -->
         <div
-          class="absolute inset-0 bg-gradient-to-br from-[#D3832B]/5 via-transparent to-blue-500/5"
+          class="from-brand/5 absolute inset-0 bg-gradient-to-br via-transparent to-blue-500/5"
         ></div>
       </div>
 
@@ -24,7 +24,7 @@
             class="animate-fade-in-up text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
           >
             <span
-              class="bg-gradient-to-r from-[#D3832B] to-orange-600 bg-clip-text text-transparent"
+              class="from-brand bg-gradient-to-r to-orange-600 bg-clip-text text-transparent"
             >
               Taquito
             </span>
@@ -46,7 +46,7 @@
           <RouterLink :to="{ name: 'tests', params: { test: 'transfer' } }">
             <Button
               size="lg"
-              class="group bg-[#D3832B] px-8 transition-all duration-200 hover:scale-105 hover:bg-[#B8722A] hover:shadow-lg hover:shadow-[#D3832B]/25"
+              class="group bg-brand hover:bg-brand/90 hover:shadow-brand/25 px-8 transition-all duration-200 hover:scale-105 hover:shadow-lg"
             >
               <span
                 class="transition-transform duration-200 group-hover:translate-x-1"
@@ -77,7 +77,7 @@
     <section class="bg-muted/30 relative overflow-hidden border-y px-4 py-12">
       <!-- Background decoration -->
       <div
-        class="absolute inset-0 bg-gradient-to-r from-[#D3832B]/5 via-transparent to-[#D3832B]/5"
+        class="from-brand/5 to-brand/5 absolute inset-0 bg-gradient-to-r via-transparent"
       ></div>
 
       <div class="relative mx-auto max-w-6xl">
@@ -90,7 +90,7 @@
             data-delay="0"
           >
             <div
-              class="text-3xl font-bold text-[#D3832B] transition-transform duration-200 group-hover:scale-110"
+              class="text-brand text-3xl font-bold transition-transform duration-200 group-hover:scale-110"
             >
               <AnimatedCounter :target="testCount" />
             </div>
@@ -102,7 +102,7 @@
           </div>
           <div class="group animate-on-scroll space-y-2" data-delay="100">
             <div
-              class="text-3xl font-bold text-[#D3832B] transition-transform duration-200 group-hover:scale-110"
+              class="text-brand text-3xl font-bold transition-transform duration-200 group-hover:scale-110"
             >
               <AnimatedCounter :target="3" />
             </div>
@@ -114,7 +114,7 @@
           </div>
           <div class="group animate-on-scroll space-y-2" data-delay="200">
             <div
-              class="text-3xl font-bold text-[#D3832B] transition-transform duration-200 group-hover:scale-110"
+              class="text-brand text-3xl font-bold transition-transform duration-200 group-hover:scale-110"
             >
               <AnimatedCounter :target="100" suffix="%" />
             </div>
@@ -132,7 +132,7 @@
     <section id="features" class="relative overflow-hidden px-4 py-16">
       <!-- Background decorations -->
       <div
-        class="absolute top-0 left-1/4 h-96 w-96 rounded-full bg-[#D3832B]/5 blur-3xl"
+        class="bg-brand/5 absolute top-0 left-1/4 h-96 w-96 rounded-full blur-3xl"
       ></div>
       <div
         class="absolute right-1/4 bottom-0 h-96 w-96 rounded-full bg-blue-500/5 blur-3xl"
@@ -151,18 +151,18 @@
           <div
             v-for="(category, index) in featuredCategories"
             :key="category.name"
-            class="group animate-on-scroll cursor-pointer rounded-lg border p-6 transition-all duration-300 hover:-translate-y-2 hover:border-[#D3832B]/30 hover:shadow-xl hover:shadow-[#D3832B]/10"
+            class="group animate-on-scroll hover:border-brand/30 hover:shadow-brand/10 cursor-pointer rounded-lg border p-6 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
             :data-delay="index * 50"
           >
             <div class="flex items-start space-x-4">
               <div
-                class="rounded-lg bg-[#D3832B]/10 p-3 text-[#D3832B] transition-all duration-200 group-hover:scale-110 group-hover:bg-[#D3832B]/20"
+                class="bg-brand/10 text-brand group-hover:bg-brand/20 rounded-lg p-3 transition-all duration-200 group-hover:scale-110"
               >
                 <component :is="category.icon" class="h-6 w-6" />
               </div>
               <div class="flex-1 space-y-2">
                 <h3
-                  class="font-semibold transition-colors duration-200 group-hover:text-[#D3832B]"
+                  class="group-hover:text-brand font-semibold transition-colors duration-200"
                 >
                   {{ category.name }}
                 </h3>
@@ -175,13 +175,13 @@
                   <span
                     v-for="test in category.tests.slice(0, 3)"
                     :key="test"
-                    class="bg-muted inline-flex items-center rounded-full px-2 py-1 text-xs transition-all duration-200 group-hover:bg-[#D3832B]/10 group-hover:text-[#D3832B]"
+                    class="bg-muted group-hover:bg-brand/10 group-hover:text-brand inline-flex items-center rounded-full px-2 py-1 text-xs transition-all duration-200"
                   >
                     {{ getTestTitle(test) }}
                   </span>
                   <span
                     v-if="category.tests.length > 3"
-                    class="bg-muted text-muted-foreground inline-flex items-center rounded-full px-2 py-1 text-xs transition-all duration-200 group-hover:text-[#D3832B]"
+                    class="bg-muted text-muted-foreground group-hover:text-brand inline-flex items-center rounded-full px-2 py-1 text-xs transition-all duration-200"
                   >
                     +{{ category.tests.length - 3 }} more
                   </span>
@@ -197,7 +197,7 @@
     <section class="bg-muted/30 relative overflow-hidden px-4 py-16">
       <!-- Floating shapes -->
       <div
-        class="animate-float absolute top-1/4 right-0 h-32 w-32 rounded-full bg-[#D3832B]/10 blur-xl"
+        class="animate-float bg-brand/10 absolute top-1/4 right-0 h-32 w-32 rounded-full blur-xl"
       ></div>
       <div
         class="animate-float-delay absolute bottom-1/4 left-0 h-24 w-24 rounded-full bg-blue-500/10 blur-xl"
@@ -216,12 +216,12 @@
             v-for="(test, index) in quickStartTests"
             :key="test.id"
             :to="{ name: 'tests', params: { test: test.id } }"
-            class="group bg-background animate-on-scroll rounded-lg border p-6 transition-all duration-250 hover:-translate-y-1 hover:border-[#D3832B]/30 hover:shadow-xl hover:shadow-[#D3832B]/10"
+            class="group bg-background animate-on-scroll hover:border-brand/30 hover:shadow-brand/10 rounded-lg border p-6 transition-all duration-250 hover:-translate-y-1 hover:shadow-xl"
             :data-delay="index * 50"
           >
             <div class="space-y-3">
               <h3
-                class="font-semibold transition-colors duration-200 group-hover:text-[#D3832B]"
+                class="group-hover:text-brand font-semibold transition-colors duration-200"
               >
                 {{ test.title }}
               </h3>
@@ -231,7 +231,7 @@
                 {{ test.description }}
               </p>
               <div
-                class="flex items-center text-sm text-[#D3832B] transition-transform duration-200 group-hover:translate-x-2"
+                class="text-brand flex items-center text-sm transition-transform duration-200 group-hover:translate-x-2"
               >
                 Try it out
                 <ArrowRightIcon class="ml-1 h-3 w-3" />
@@ -382,15 +382,15 @@
 
     <!-- Call to Action -->
     <section
-      class="relative overflow-hidden bg-gradient-to-br from-[#D3832B]/10 via-[#D3832B]/5 to-orange-500/10 px-4 py-16"
+      class="from-brand/10 via-brand/5 relative overflow-hidden bg-gradient-to-br to-orange-500/10 px-4 py-16"
     >
       <!-- Animated background -->
       <div class="absolute inset-0">
         <div
-          class="absolute top-0 left-0 h-full w-full animate-pulse bg-gradient-to-r from-[#D3832B]/5 via-transparent to-orange-500/5"
+          class="from-brand/5 absolute top-0 left-0 h-full w-full animate-pulse bg-gradient-to-r via-transparent to-orange-500/5"
         ></div>
         <div
-          class="animate-float absolute -top-24 -right-24 h-48 w-48 rounded-full bg-[#D3832B]/10 blur-3xl"
+          class="animate-float bg-brand/10 absolute -top-24 -right-24 h-48 w-48 rounded-full blur-3xl"
         ></div>
         <div
           class="animate-float-delay absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-orange-500/10 blur-3xl"
@@ -409,7 +409,7 @@
           <RouterLink :to="{ name: 'tests', params: { test: 'transfer' } }">
             <Button
               size="lg"
-              class="group bg-[#D3832B] px-8 transition-all duration-200 hover:scale-105 hover:bg-[#B8722A] hover:shadow-xl hover:shadow-[#D3832B]/25"
+              class="group bg-brand hover:shadow-brand/25 px-8 transition-all duration-200 hover:scale-105 hover:bg-[#B8722A] hover:shadow-xl"
             >
               <span
                 class="transition-transform duration-200 group-hover:translate-x-1"
@@ -601,7 +601,11 @@ onUnmounted(() => {
 /* Floating Orbs */
 .floating-orb {
   position: absolute;
-  background: linear-gradient(45deg, #d3832b20, #ff6b3520);
+  background: linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--brand) 12.5%, transparent),
+    #ff6b3520
+  );
   border-radius: 50%;
   filter: blur(40px);
   animation: float 4s ease-in-out infinite;
@@ -634,8 +638,15 @@ onUnmounted(() => {
 /* Grid Pattern */
 .bg-grid-pattern {
   background-image:
-    linear-gradient(rgba(139, 69, 19, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(139, 69, 19, 0.1) 1px, transparent 1px);
+    linear-gradient(
+      color-mix(in srgb, var(--brand) 10%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--brand) 10%, transparent) 1px,
+      transparent 1px
+    );
   background-size: 50px 50px;
 }
 

@@ -1,23 +1,34 @@
-import FaucetView from "@/modules/faucet/views/FaucetView.vue";
-import HomeView from "@/modules/home/views/HomeView.vue";
-import TestsView from "@/modules/tests/views/TestsView.vue";
 import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
   {
     path: "/",
     name: "home",
-    component: HomeView,
+    component: () => import("@/modules/home/views/HomeView.vue"),
   },
   {
     path: "/tests/:test?",
     name: "tests",
-    component: TestsView,
+    component: () => import("@/modules/tests/views/TestsView.vue"),
   },
   {
     path: "/faucet",
     name: "faucet",
-    component: FaucetView,
+    component: () => import("@/modules/faucet/views/FaucetView.vue"),
+  },
+  {
+    path: "/documentation",
+    name: "documentation",
+    component: () => import("@/modules/home/views/HomeView.vue"),
+    beforeEnter() {
+      window.open(
+        "https://taquito.io/docs/quick_start",
+        "_blank",
+        "noopener,noreferrer",
+      );
+      return false;
+    },
+    meta: { external: true },
   },
 ];
 
