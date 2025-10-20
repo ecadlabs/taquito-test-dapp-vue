@@ -141,9 +141,24 @@
     </div>
 
     <div class="text-muted-foreground min-w-0 text-xs">
-      <p>Version {{ version }}</p>
+      <a
+        :href="versionUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hover:underline"
+        >Version {{ version }}</a
+      >
       <p>Network: {{ network }}</p>
-      <p class="truncate">Git SHA: {{ gitSha }}</p>
+      <p class="truncate">
+        Git SHA:
+        <a
+          :href="shaUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hover:underline"
+          >{{ gitSha }}</a
+        >
+      </p>
     </div>
 
     <DialogFooter class="flex items-center">
@@ -217,6 +232,13 @@ const rpcHealthCheckDuration = ref(0);
 const rpcUrlRef = computed(() => settingsStore.settings.rpcUrl);
 const debouncedRpcUrl = useDebounce(rpcUrlRef, 500);
 const runningHealthCheck = ref(false);
+
+const versionUrl = ref(
+  `https://github.com/ecadlabs/taquito-test-dapp-vue/releases/tag/${version}`,
+);
+const shaUrl = ref(
+  `https://github.com/ecadlabs/taquito-test-dapp-vue/commit/${gitSha}`,
+);
 
 watch(debouncedRpcUrl, (newRpcUrl: string) => {
   const checkRpcHealth = async (url: string) => {
