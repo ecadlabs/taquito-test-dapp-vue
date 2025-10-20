@@ -1,10 +1,10 @@
 <template>
-  <DialogContent>
+  <DialogContent class="overflow-hidden">
     <DialogHeader>
       <DialogTitle>Settings</DialogTitle>
     </DialogHeader>
 
-    <div class="space-y-4">
+    <div class="min-w-0 space-y-4">
       <div class="flex flex-col gap-2">
         <Label :for="indexerSelectId" class="font-medium">Indexer</Label>
         <div class="w-full space-y-2 sm:w-auto">
@@ -140,13 +140,13 @@
       </div>
     </div>
 
+    <div class="text-muted-foreground min-w-0 text-xs">
+      <p>Version {{ version }}</p>
+      <p>Network: {{ network }}</p>
+      <p class="truncate">Git SHA: {{ gitSha }}</p>
+    </div>
+
     <DialogFooter class="flex items-center">
-      <div class="text-muted-foreground text-xs">
-        <p>Version {{ version }}</p>
-        <Separator orientation="vertical" class="h-4" />
-        <p>Network: {{ network }}</p>
-        <p>Git SHA: {{ gitSha }}</p>
-      </div>
       <Button variant="secondary" @click="emit('close')" class="ml-auto">
         <p>Close</p>
       </Button>
@@ -180,7 +180,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import {
   availableIndexers,
   useSettingsStore,
