@@ -517,6 +517,7 @@ const quickStartTests = computed(() => {
     "estimate-fees",
     "delegation",
     "sign-payload",
+    "sapling-single-state",
     "fa2-token",
   ];
   return testIds

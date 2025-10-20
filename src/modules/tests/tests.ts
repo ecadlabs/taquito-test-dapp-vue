@@ -1103,6 +1103,78 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       },
     },
   },
+  "sapling-single-state": {
+    id: "sapling-single-state",
+    title: "Sapling: Private Transactions",
+    description: `Sapling enables private transactions on Tezos using zero-knowledge proofs. Understand the complete lifecycle of shielded operations:
+    
+- **Shield**: Move tez from public (tz1) to private (zet) address
+- **Transfer**: Privately send funds between Sapling addresses (completely confidential)
+- **Unshield**: Return tez to public address
+    
+This test demonstrates all three operations with real transaction verification. Proof generation is CPU-intensive and may take 10-30 seconds per operation.`,
+    category: "Cryptography & Security",
+    setup: [
+      "Install Taquito Sapling package: `npm install @taquito/sapling`",
+      "Set up a Tezos wallet (Temple, Kukai, or other supported wallet)",
+      "Use a faucet to fund your wallet with testnet Tez (minimum 10 ℸ recommended)",
+      "Understand Sapling concepts: spending keys, viewing keys, payment addresses",
+      "Be aware that proof generation takes time - do not interrupt the process",
+    ],
+    relatedTests: ["transfer", "sign-payload", "counter-contract"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/sapling",
+      contract: [
+        {
+          name: "Sapling Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/sapling-contracts.ts",
+        },
+      ],
+      taqutioDocumentation: "https://taquito.io/docs/sapling",
+      tezosDocumentation: "https://tezos.gitlab.io/active/sapling.html",
+    },
+    component: () =>
+      import("@/modules/tests/tests/sapling/sapling-single-state.vue"),
+    diagrams: {
+      "sapling-single-state": {
+        nodes: [
+          {
+            id: "deploy-contract",
+            label: "Deploy Sapling Contract",
+          },
+          {
+            id: "generate-keys",
+            label: "Generate Spending & Viewing Keys",
+          },
+          {
+            id: "shield",
+            label: "Shield: Public → Private (3 ℸ)",
+          },
+          {
+            id: "verify-shield",
+            label: "Verify Shield Balance",
+          },
+          {
+            id: "transfer",
+            label: "Transfer: Private → Private (2 ℸ)",
+          },
+          {
+            id: "verify-transfer",
+            label: "Verify Transfer Balances",
+          },
+          {
+            id: "unshield",
+            label: "Unshield: Private → Public (1 ℸ)",
+          },
+          {
+            id: "verify-unshield",
+            label: "Verify Final Balances",
+          },
+        ],
+      },
+    },
+  },
 };
 
 export const getTestById = (id: string): TestMetadata | undefined => {
