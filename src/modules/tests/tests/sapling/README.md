@@ -68,7 +68,7 @@ Vue component providing the user interface:
 
 ```
 User Account (tz1...)
-    ↓ (3 ℸ + gas fees)
+    ↓ (3 ꜩ + gas fees)
 Shielded Pool
     ↓
 User's Sapling Address (zet...)
@@ -78,7 +78,7 @@ User's Sapling Address (zet...)
 
 ```
 Alice's Sapling Address (zet...alice)
-    ↓ (2 ℸ, completely private)
+    ↓ (2 ꜩ, completely private)
 Shielded Pool
     ↓
 Bob's Sapling Address (zet...bob)
@@ -90,7 +90,7 @@ _Note: This transaction is completely invisible on the blockchain - neither amou
 
 ```
 Alice's Sapling Address (zet...)
-    ↓ (1 ℸ)
+    ↓ (1 ꜩ)
 Shielded Pool
     ↓
 Recipient Account (tz1...)

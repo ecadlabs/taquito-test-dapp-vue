@@ -128,7 +128,7 @@
               </Button>
             </div>
             <p class="mt-2 text-xs text-gray-600">
-              💡 Tip: Reuse a contract to save time (~30s) and fees (~2-3 ℸ)
+              💡 Tip: Reuse a contract to save time (~30s) and fees (~2-3 ꜩ)
             </p>
           </div>
 
@@ -201,7 +201,7 @@
               </div>
               <div class="mb-2 text-sm text-purple-800">
                 Balance:
-                <strong>{{ noteData.aliceBalance.toFixed(2) }} ℸ</strong>
+                <strong>{{ noteData.aliceBalance.toFixed(2) }} ꜩ</strong>
               </div>
               <div
                 v-if="noteData.aliceNotes.length > 0"
@@ -212,7 +212,7 @@
                   :key="`alice-${idx}`"
                   class="rounded border bg-white p-2"
                 >
-                  <div>Note {{ idx + 1 }}: {{ note.amount }} ℸ</div>
+                  <div>Note {{ idx + 1 }}: {{ note.amount }} ꜩ</div>
                   <div class="text-gray-600">
                     Status: {{ note.spent ? "✅ Spent" : "⭕ Unspent" }}
                   </div>
@@ -226,7 +226,7 @@
                 Bob's Shielded Balance & Notes
               </div>
               <div class="mb-2 text-sm text-blue-800">
-                Balance: <strong>{{ noteData.bobBalance.toFixed(2) }} ℸ</strong>
+                Balance: <strong>{{ noteData.bobBalance.toFixed(2) }} ꜩ</strong>
               </div>
               <div
                 v-if="noteData.bobNotes.length > 0"
@@ -237,7 +237,7 @@
                   :key="`bob-${idx}`"
                   class="rounded border bg-white p-2"
                 >
-                  <div>Note {{ idx + 1 }}: {{ note.amount }} ℸ</div>
+                  <div>Note {{ idx + 1 }}: {{ note.amount }} ꜩ</div>
                   <div class="text-gray-600">
                     Status: {{ note.spent ? "✅ Spent" : "⭕ Unspent" }}
                   </div>
@@ -266,7 +266,7 @@
             <div class="space-y-3">
               <div>
                 <Label class="mb-1 block text-sm text-gray-600"
-                  >Amount (ℸ)</Label
+                  >Amount (ꜩ)</Label
                 >
                 <Input
                   v-model.number="txForms.shield.amount"
@@ -324,7 +324,7 @@
               </div>
               <div>
                 <Label class="mb-1 block text-sm text-gray-600"
-                  >Amount (ℸ)</Label
+                  >Amount (ꜩ)</Label
                 >
                 <Input
                   v-model.number="txForms.transfer.amount"
@@ -372,7 +372,7 @@
             <div class="space-y-3">
               <div>
                 <Label class="mb-1 block text-sm text-gray-600"
-                  >Amount (ℸ)</Label
+                  >Amount (ꜩ)</Label
                 >
                 <Input
                   v-model.number="txForms.unshield.amount"
@@ -577,15 +577,18 @@ const deployContract = async () => {
     const { singleSaplingStateContract } = await import(
       "@/contracts/sapling-contracts"
     );
-    const op = await walletStore.getTezos.wallet.originate({
-      code: singleSaplingStateContract(8),
-      init: "Unit",
-      balance: "0",
-    });
+    const op = await walletStore.getTezos.wallet
+      .originate({
+        code: singleSaplingStateContract(8),
+        init: "Unit",
+        balance: "0",
+      })
+      .send();
 
     toast.info("Waiting for confirmation... (~30 seconds)");
-    const confirmation = await op.confirmation(1);
-    const contractAddress = confirmation.contractAddress!;
+    await op.confirmation();
+    const contract = await op.contract();
+    const contractAddress = contract.address;
 
     deployedContract.value.address = contractAddress;
 
@@ -646,7 +649,7 @@ const executeShield = async () => {
     addProgress(
       "Executing shield operation",
       "success",
-      `Shielded ${txForms.value.shield.amount} ℸ`,
+      `Shielded ${txForms.value.shield.amount} ꜩ`,
     );
     toast.success("Shield operation completed");
   } catch (error) {
@@ -672,7 +675,7 @@ const executeTransfer = async () => {
     addProgress(
       "Executing private transfer",
       "success",
-      `Transferred ${txForms.value.transfer.amount} ℸ privately`,
+      `Transferred ${txForms.value.transfer.amount} ꜩ privately`,
     );
     toast.success("Private transfer completed");
   } catch (error) {
@@ -698,7 +701,7 @@ const executeUnshield = async () => {
     addProgress(
       "Executing unshield operation",
       "success",
-      `Unshielded ${txForms.value.unshield.amount} ℸ`,
+      `Unshielded ${txForms.value.unshield.amount} ꜩ`,
     );
     toast.success("Unshield operation completed");
   } catch (error) {
@@ -804,7 +807,7 @@ const runCompleteWorkflow = async () => {
       diagramStore.setProgress("shield");
       addProgress("Shielding 3 tez for Alice", "pending");
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      addProgress("Shielding 3 tez for Alice", "success", "Balance: 3.00 ℸ");
+      addProgress("Shielding 3 tez for Alice", "success", "Balance: 3.00 ꜩ");
 
       diagramStore.setProgress("transfer");
       addProgress("Private transfer: Alice sends 2 tez to Bob", "pending");
@@ -812,7 +815,7 @@ const runCompleteWorkflow = async () => {
       addProgress(
         "Private transfer: Alice sends 2 tez to Bob",
         "success",
-        "Alice: 1.00 ℸ, Bob: 2.00 ℸ",
+        "Alice: 1.00 ꜩ, Bob: 2.00 ꜩ",
       );
 
       diagramStore.setProgress("unshield");
@@ -821,7 +824,7 @@ const runCompleteWorkflow = async () => {
       addProgress(
         "Unshielding 1 tez to public address",
         "success",
-        "Balance: 0.00 ℸ",
+        "Balance: 0.00 ꜩ",
       );
 
       // Set demo addresses (simulated - not real!)
