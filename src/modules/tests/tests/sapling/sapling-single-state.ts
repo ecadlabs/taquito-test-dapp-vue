@@ -97,9 +97,12 @@ export async function runSaplingSingleStateTest(
   rpcClient.getSaplingDiffByContract = async (...args) => {
     try {
       return await originalGetSaplingDiff(...args);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If 404, contract has no Sapling state yet - return proper empty state structure
-      if (error?.status === 404 || error?.message?.includes("404")) {
+      if (
+        (error as { status?: number })?.status === 404 ||
+        (error as Error)?.message?.includes("404")
+      ) {
         console.log(
           "Sapling state not found (404) - using empty state for new contract",
         );
@@ -208,13 +211,13 @@ export async function runSaplingSingleStateTest(
     aliceAddress,
     bobAddress,
     operations: {
-      shield: { hash: shieldOp.hash, balance: aliceBalance1 },
+      shield: { hash: shieldOp.opHash, balance: aliceBalance1 },
       transfer: {
-        hash: transferOp.hash,
+        hash: transferOp.opHash,
         aliceBalance: aliceBalance2,
         bobBalance,
       },
-      unshield: { hash: unshieldOp.hash, balance: aliceBalance3 },
+      unshield: { hash: unshieldOp.opHash, balance: aliceBalance3 },
     },
   };
 }
