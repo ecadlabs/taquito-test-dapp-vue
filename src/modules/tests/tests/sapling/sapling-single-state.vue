@@ -1,17 +1,5 @@
 <template>
   <div class="flex w-full flex-col gap-6">
-    <!-- Information Alert -->
-    <Alert>
-      <Info class="h-4 w-4" />
-      <AlertTitle>Sapling Shield Operation Demo</AlertTitle>
-      <AlertDescription>
-        Demonstrates shielding funds from public to private addresses using
-        Taquito's Sapling features. Includes real key generation, zero-knowledge
-        proof creation (CPU-intensive, 10-30s), and on-chain transaction
-        submission. No simulation!
-      </AlertDescription>
-    </Alert>
-
     <div class="mx-auto w-full max-w-4xl space-y-6">
       <!-- Contract Deployment Section -->
       <Card>
@@ -36,7 +24,7 @@
             <Button
               size="icon"
               variant="ghost"
-              @click="handleCopyToClipboard(contractAddress)"
+              @click="copyToClipboard(contractAddress)"
               :disabled="!contractAddress"
             >
               <Copy class="h-4 w-4" />
@@ -60,7 +48,7 @@
             <Button
               size="icon"
               variant="ghost"
-              @click="handleCopyToClipboard(contractAddress)"
+              @click="copyToClipboard(contractAddress)"
             >
               <Copy class="h-4 w-4" />
             </Button>
@@ -101,7 +89,7 @@
                 <Button
                   size="icon"
                   variant="ghost"
-                  @click="handleCopyToClipboard(saplingKeys.aliceAddress)"
+                  @click="copyToClipboard(saplingKeys.aliceAddress)"
                 >
                   <Copy class="h-4 w-4" />
                 </Button>
@@ -119,7 +107,7 @@
                 <Button
                   size="icon"
                   variant="ghost"
-                  @click="handleCopyToClipboard(saplingKeys.bobAddress)"
+                  @click="copyToClipboard(saplingKeys.bobAddress)"
                 >
                   <Copy class="h-4 w-4" />
                 </Button>
@@ -180,7 +168,6 @@
 </template>
 
 <script setup lang="ts">
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -200,7 +187,7 @@ import {
 } from "@/modules/tests/tests/sapling/sapling-single-state";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
-import { Copy, Info, Key, Lock, Rocket, Zap } from "lucide-vue-next";
+import { Copy, Key, Lock, Rocket, Zap } from "lucide-vue-next";
 import { computed, onMounted, ref, shallowRef } from "vue";
 import { toast } from "vue-sonner";
 
@@ -226,10 +213,6 @@ const shieldAmount = ref(3);
 onMounted(() => {
   diagramStore.setTestDiagram("sapling-single-state", "complete-workflow");
 });
-
-const handleCopyToClipboard = async (text: string) => {
-  await copyToClipboard(text);
-};
 
 const deployContract = async () => {
   if (!walletStore.getTezos) return;
