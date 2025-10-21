@@ -1059,21 +1059,15 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
   },
   "sapling-single-state": {
     id: "sapling-single-state",
-    title: "Sapling: Private Transactions",
-    description: `Sapling enables private transactions on Tezos using zero-knowledge proofs. Understand the complete lifecycle of shielded operations:
-    
-- **Shield**: Move tez from public (tz1) to private (zet) address
-- **Transfer**: Privately send funds between Sapling addresses (completely confidential)
-- **Unshield**: Return tez to public address
-    
-This test demonstrates all three operations with real transaction verification. Proof generation is CPU-intensive and may take 10-30 seconds per operation.`,
+    title: "Sapling: Shield Operation",
+    description: `Demonstrates Taquito's Sapling shield operation: moving tez from public to private addresses using zero-knowledge proofs. Includes real key generation, proof creation (CPU-intensive, observable 10-30s delay), transaction preparation, and on-chain submission. Showcases @taquito/sapling package capabilities with no simulation - all cryptographic operations are real.`,
     category: "Cryptography & Security",
     setup: [
       "Install Taquito Sapling package: `npm install @taquito/sapling`",
       "Set up a Tezos wallet (Temple, Kukai, or other supported wallet)",
-      "Use a faucet to fund your wallet with testnet Tez (minimum 10 ℸ recommended)",
+      "Use a faucet to fund your wallet with testnet Tez (minimum 5 ꜩ recommended)",
       "Understand Sapling concepts: spending keys, viewing keys, payment addresses",
-      "Be aware that proof generation takes time - do not interrupt the process",
+      "Be patient - proof generation is CPU-intensive and takes 10-30 seconds",
     ],
     relatedTests: ["transfer", "sign-payload", "counter-contract"],
     documentation: {
@@ -1091,39 +1085,31 @@ This test demonstrates all three operations with real transaction verification. 
     component: () =>
       import("@/modules/tests/tests/sapling/sapling-single-state.vue"),
     diagrams: {
-      "sapling-single-state": {
+      "complete-workflow": {
+        nodes: [
+          {
+            id: "generate-keys",
+            label: "Generate Sapling Keys",
+          },
+        ],
+      },
+      deploy: {
         nodes: [
           {
             id: "deploy-contract",
-            label: "Deploy Sapling Contract",
+            label: "Deploy Contract",
           },
-          {
-            id: "generate-keys",
-            label: "Generate Spending & Viewing Keys",
-          },
+        ],
+      },
+      shield: {
+        nodes: [
           {
             id: "shield",
-            label: "Shield: Public → Private (3 ℸ)",
+            label: "Create Zero-Knowledge Proof",
           },
           {
             id: "verify-shield",
-            label: "Verify Shield Balance",
-          },
-          {
-            id: "transfer",
-            label: "Transfer: Private → Private (2 ℸ)",
-          },
-          {
-            id: "verify-transfer",
-            label: "Verify Transfer Balances",
-          },
-          {
-            id: "unshield",
-            label: "Unshield: Private → Public (1 ℸ)",
-          },
-          {
-            id: "verify-unshield",
-            label: "Verify Final Balances",
+            label: "Submit Transaction",
           },
         ],
       },

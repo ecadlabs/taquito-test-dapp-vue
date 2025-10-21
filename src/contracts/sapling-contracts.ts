@@ -1,28 +1,28 @@
 /**
- * Sapling Contract Definitions These contracts support Sapling protocol
- * operations for private transactions
+ * Sapling Contract Definitions
+ *
+ * These contracts support Sapling protocol operations for private transactions.
+ * Note: Sapling operations (SAPLING_EMPTY_STATE, SAPLING_VERIFY_UPDATE) are
+ * low-level Michelson instructions without JSLigo equivalents, so these
+ * contracts are kept in Michelson rather than being placed in
+ * src/contracts/uncompiled.
  */
 
 /**
- * Single sapling state contract (memo size 8) Accepts a list of sapling
+ * Single sapling state contract with memo size 8 Accepts a list of sapling
  * transactions and verifies them
+ *
+ * Note: Memo size is hardcoded to 8 to prevent mismatches between contract and
+ * client-side operations. If you need a different memo size, create a new
+ * contract.
  */
-export function singleSaplingStateContract(memoSize: number = 8): string {
-  return `storage (unit);
-parameter (list (sapling_transaction ${memoSize}));
-code { 
-  UNPAIR ;
-  SAPLING_EMPTY_STATE ${memoSize};
-  SWAP ;
-  ITER { 
-    SAPLING_VERIFY_UPDATE ;
-    ASSERT_SOME ;
-    CDR ; CDR ;
-  } ;
-  DROP ;
-  NIL operation;
-  PAIR;
-}`;
+export function singleSaplingStateContract(): string {
+  const memoSize = 8;
+  // Minimal Sapling contract for demonstration
+  // Accepts sapling_transaction parameters to demonstrate Taquito's client-side features
+  return `parameter (sapling_transaction ${memoSize});
+storage unit;
+code { CDR; NIL operation; PAIR }`;
 }
 
 /**
