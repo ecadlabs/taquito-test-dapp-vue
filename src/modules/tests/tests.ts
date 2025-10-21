@@ -4,6 +4,7 @@ import {
   ArrowUp10,
   Calculator,
   Coins,
+  EyeOff,
   Globe,
   InfinityIcon,
   Info,
@@ -1062,6 +1063,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     title: "Sapling: Shield Operation",
     description: `Demonstrates Taquito's Sapling shield operation: moving tez from public to private addresses using zero-knowledge proofs. Includes real key generation, proof creation (CPU-intensive, observable 10-30s delay), transaction preparation, and on-chain submission. Showcases @taquito/sapling package capabilities with no simulation - all cryptographic operations are real.`,
     category: "Cryptography & Security",
+    icon: EyeOff,
     setup: [
       "Install Taquito Sapling package: `npm install @taquito/sapling`",
       "Set up a Tezos wallet (Temple, Kukai, or other supported wallet)",
