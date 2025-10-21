@@ -36,16 +36,3 @@ dist-ssr
 contract-config.json
 /src/contracts/compiled/
 src/cloudflare/faucet/.wrangler/
-
-# Claude documentation files (not for repo)
-Claude-docs/
-
-# PR review response documents (local reference only)
-GITHUB_RESPONSES.md
-GITHUB_PR_RESPONSES.md
-GITHUB_PR_ACTUAL_RESPONSES.md
-HANDOFF_TO_NEXT_SESSION.md
-PR_SUMMARY.md
-REVIEW_RESPONSE.md
-SAPLING_REFACTOR_SUMMARY.md
-SAPLING_*.md
