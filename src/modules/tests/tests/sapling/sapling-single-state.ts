@@ -3,6 +3,9 @@ import { InMemorySpendingKey, SaplingToolkit } from "@taquito/sapling";
 import { RpcReadAdapter, type TezosToolkit } from "@taquito/taquito";
 import * as bip39 from "bip39";
 
+/** Memo size for Sapling contract - must match contract's memo size */
+const MEMO_SIZE = 8;
+
 export interface SaplingKeys {
   aliceSk: InMemorySpendingKey;
   bobSk: InMemorySpendingKey;
@@ -105,7 +108,7 @@ export async function shieldOperation(
 
   const aliceToolkit = new SaplingToolkit(
     { saplingSigner: keys.aliceSk },
-    { contractAddress, memoSize: 8 },
+    { contractAddress, memoSize: MEMO_SIZE },
     readProvider,
   );
 
@@ -135,13 +138,13 @@ export async function getSaplingBalances(
 
   const aliceToolkit = new SaplingToolkit(
     { saplingSigner: keys.aliceSk },
-    { contractAddress, memoSize: 8 },
+    { contractAddress, memoSize: MEMO_SIZE },
     readProvider,
   );
 
   const bobToolkit = new SaplingToolkit(
     { saplingSigner: keys.bobSk },
-    { contractAddress, memoSize: 8 },
+    { contractAddress, memoSize: MEMO_SIZE },
     readProvider,
   );
 
@@ -171,7 +174,7 @@ export async function transferOperation(
 
   const aliceToolkit = new SaplingToolkit(
     { saplingSigner: keys.aliceSk },
-    { contractAddress, memoSize: 8 },
+    { contractAddress, memoSize: MEMO_SIZE },
     readProvider,
   );
 
@@ -203,7 +206,7 @@ export async function unshieldOperation(
 
   const aliceToolkit = new SaplingToolkit(
     { saplingSigner: keys.aliceSk },
-    { contractAddress, memoSize: 8 },
+    { contractAddress, memoSize: MEMO_SIZE },
     readProvider,
   );
 
