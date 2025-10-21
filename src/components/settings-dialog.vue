@@ -1,10 +1,10 @@
 <template>
-  <DialogContent>
+  <DialogContent class="overflow-hidden">
     <DialogHeader>
       <DialogTitle>Settings</DialogTitle>
     </DialogHeader>
 
-    <div class="space-y-4">
+    <div class="min-w-0 space-y-4">
       <div class="flex flex-col gap-2">
         <Label :for="indexerSelectId" class="font-medium">Indexer</Label>
         <div class="w-full space-y-2 sm:w-auto">
@@ -140,13 +140,28 @@
       </div>
     </div>
 
+    <div class="text-muted-foreground min-w-0 text-xs">
+      <a
+        :href="versionUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hover:underline"
+        >Version {{ version }}</a
+      >
+      <p>Network: {{ network }}</p>
+      <p class="truncate">
+        Git SHA:
+        <a
+          :href="shaUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hover:underline"
+          >{{ gitSha }}</a
+        >
+      </p>
+    </div>
+
     <DialogFooter class="flex items-center">
-      <div class="text-muted-foreground text-xs">
-        <p>Version {{ version }}</p>
-        <Separator orientation="vertical" class="h-4" />
-        <p>Network: {{ network }}</p>
-        <p>Git SHA: {{ gitSha }}</p>
-      </div>
       <Button variant="secondary" @click="emit('close')" class="ml-auto">
         <p>Close</p>
       </Button>
@@ -180,7 +195,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import {
   availableIndexers,
   useSettingsStore,
@@ -218,6 +232,9 @@ const rpcHealthCheckDuration = ref(0);
 const rpcUrlRef = computed(() => settingsStore.settings.rpcUrl);
 const debouncedRpcUrl = useDebounce(rpcUrlRef, 500);
 const runningHealthCheck = ref(false);
+
+const versionUrl = `https://github.com/ecadlabs/taquito-test-dapp-vue/releases/tag/${version}`;
+const shaUrl = `https://github.com/ecadlabs/taquito-test-dapp-vue/commit/${gitSha}`;
 
 watch(debouncedRpcUrl, (newRpcUrl: string) => {
   const checkRpcHealth = async (url: string) => {
