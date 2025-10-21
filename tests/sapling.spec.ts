@@ -2,25 +2,25 @@ import { test } from "@playwright/test";
 import { goToTest, waitForSuccess } from "./helpers.ts";
 import { getSharedPage, setupSharedContext } from "./shared-context.ts";
 
-test.describe("Sapling: Private Transactions", () => {
+test.describe("Sapling: Shield Operation", () => {
   test.beforeAll(async () => {
     await setupSharedContext();
   });
 
   test("should deploy sapling contract", async () => {
     const page = getSharedPage();
-    await goToTest({ page, testName: "Sapling: Private Transactions" });
+    await goToTest({ page, testName: "Sapling: Shield Operation" });
 
     // Deploy contract
     await page.getByRole("button", { name: "Deploy Sapling Contract" }).click();
 
-    // Wait for deployment to complete (30-60 seconds)
+    // Wait for deployment to complete
     await waitForSuccess({ page, timeout: 90000 });
   });
 
   test("should generate sapling keys", async () => {
     const page = getSharedPage();
-    await goToTest({ page, testName: "Sapling: Private Transactions" });
+    await goToTest({ page, testName: "Sapling: Shield Operation" });
 
     // Generate keys
     await page.getByRole("button", { name: "Generate Keys" }).click();
@@ -29,18 +29,15 @@ test.describe("Sapling: Private Transactions", () => {
     await waitForSuccess({ page, timeout: 10000 });
   });
 
-  test("should run complete sapling workflow", async () => {
+  test("should execute shield operation with real proof generation", async () => {
     const page = getSharedPage();
-    await goToTest({ page, testName: "Sapling: Private Transactions" });
+    await goToTest({ page, testName: "Sapling: Shield Operation" });
 
-    // Click the "Run Complete Sapling Workflow" button
-    await page
-      .getByRole("button", { name: "Run Complete Sapling Workflow" })
-      .click();
+    // Click the Shield button
+    await page.getByRole("button", { name: "Shield" }).click();
 
-    // Wait for the complete workflow to finish
-    // This includes: deploy, generate keys, shield, transfer, unshield
-    // Total time: ~90-120 seconds on testnet
-    await waitForSuccess({ page, timeout: 180000 });
+    // Wait for shield operation to complete
+    // This includes real zero-knowledge proof generation (10-30s)
+    await waitForSuccess({ page, timeout: 90000 });
   });
 });
