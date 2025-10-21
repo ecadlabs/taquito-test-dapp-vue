@@ -711,7 +711,6 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       "batch",
       "sign-payload",
     ],
-    contractApi: true,
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/global-constants",

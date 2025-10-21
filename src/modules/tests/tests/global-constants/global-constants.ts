@@ -29,7 +29,9 @@ const registerGlobalConstant = async (
     }
 
     diagramStore.setProgress("register-constant");
-    const operation = await Tezos.contract.registerGlobalConstant({ value });
+    const operation = await Tezos.wallet
+      .registerGlobalConstant({ value })
+      .send();
 
     diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await operation.confirmation(
