@@ -18,11 +18,52 @@
  */
 export function singleSaplingStateContract(): string {
   const memoSize = 8;
-  // Minimal Sapling contract for demonstration
-  // Accepts sapling_transaction parameters to demonstrate Taquito's client-side features
-  return `parameter (sapling_transaction ${memoSize});
-storage unit;
-code { CDR; NIL operation; PAIR }`;
+  // Sapling shielded tez contract based on Tezos protocol reference implementation
+  // See: https://gitlab.com/tezos/tezos/-/tree/master/tests_python/contracts_*
+  return `parameter (list (pair (sapling_transaction ${memoSize}) (option key_hash)));
+storage (sapling_state ${memoSize});
+code {
+  UNPAIR;
+  SWAP;
+  NIL operation;
+  SWAP;
+  ITER {
+    UNPAIR;
+    SWAP;
+    DIP { SWAP };
+    SAPLING_VERIFY_UPDATE;
+    IF_NONE
+      { PUSH string "Invalid sapling transaction"; FAILWITH }
+      {
+        UNPAIR @new_state @balance;
+        DUP @balance;
+        ABS;
+        DIP {
+          IF_LEFT
+            { DROP; PUSH mutez 0 }
+            {
+              IF_NONE
+                { PUSH string "Unshield without recipient"; FAILWITH }
+                { IMPLICIT_ACCOUNT; PUSH mutez 0; SWAP; CONTRACT unit; ASSERT_SOME };
+            };
+        };
+        DUP @balance;
+        EQ;
+        IF
+          { DROP; DROP }
+          {
+            DUP @balance;
+            GT;
+            IF
+              { SWAP; UNIT; TRANSFER_TOKENS; DIP { SWAP }; CONS }
+              { AMOUNT; SWAP; NEG; DIP { PUSH mutez 0 }; SUB; ASSERT_CMPEQ };
+          };
+        SWAP;
+      };
+  };
+  SWAP;
+  PAIR;
+}`;
 }
 
 /**
