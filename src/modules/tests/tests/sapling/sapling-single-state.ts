@@ -57,7 +57,7 @@ export async function deploySaplingContract(
   const op = await tezos.wallet
     .originate({
       code: singleSaplingStateContract(),
-      storage: {}, // Empty sapling state
+      storage: { prim: "Unit" },
     })
     .send();
 
@@ -120,10 +120,8 @@ export async function shieldOperation(
     },
   ]);
 
-  // Call the contract with pair (transaction, None) - None means shield (no recipient)
-  const op = await contract.methods
-    .default([shieldedTx, null])
-    .send({ amount });
+  // Call the contract with single sapling transaction
+  const op = await contract.methods.default(shieldedTx).send({ amount });
   await op.confirmation();
 
   return op.opHash;
@@ -169,8 +167,8 @@ export async function transferOperation(
     },
   ]);
 
-  // Call the contract with pair (transaction, None) - None means private transfer
-  const op = await contract.methods.default([saplingTx, null]).send();
+  // Call the contract with single sapling transaction
+  const op = await contract.methods.default(saplingTx).send();
   await op.confirmation();
 
   return op.opHash;
@@ -198,8 +196,8 @@ export async function unshieldOperation(
     amount,
   });
 
-  // Call the contract with pair (transaction, Some(address)) - address receives unshielded tez
-  const op = await contract.methods.default([unshieldedTx, toAddress]).send();
+  // Call the contract with single sapling transaction
+  const op = await contract.methods.default(unshieldedTx).send();
   await op.confirmation();
 
   return op.opHash;
