@@ -151,7 +151,7 @@
                   isRunning
                 "
               >
-                <ArrowRight class="mr-2 h-4 w-4" />
+                <Lock class="mr-2 h-4 w-4" />
                 Shield
               </Button>
             </div>
