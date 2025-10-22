@@ -31,8 +31,12 @@ jobs:
             project_name: taquito-dapp-ghostnet
           - environment: shadownet
             project_name: taquito-dapp-shadownet
+          - environment: tezlink-alphanet
+            network_name: tezlink-alphanet
+            project_name: taquito-dapp-tezlink-alphanet
     env:
       VITE_NETWORK_TYPE: ${{ matrix.environment }}
+      VITE_NETWORK_NAME: ${{ matrix.network_name }}
       VITE_RPC_URL: ${{ vars.RPC_URL }}
       VITE_GITHUB_SHA: ${{ github.sha }}
       VITE_VERSION: ${{ github.ref_name }}

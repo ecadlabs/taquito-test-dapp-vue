@@ -110,14 +110,16 @@ export const useWalletStore = defineStore("wallet", () => {
 
   /** Initializes a Beacon wallet */
   const initializeBeaconWallet = async (): Promise<void> => {
-    const networkType = import.meta.env.VITE_NETWORK_TYPE as NetworkType;
+    let networkType = import.meta.env.VITE_NETWORK_TYPE as NetworkType;
 
     const options = {
       name: "Taquito Playground",
       iconUrl: "https://tezostaquito.io/img/favicon.svg",
       network: {
         type: networkType,
-        name: import.meta.env.VITE_NETWORK_TYPE,
+        name:
+          import.meta.env.VITE_NETWORK_NAME ||
+          import.meta.env.VITE_NETWORK_TYPE,
         rpcUrl: settingsStore.settings.rpcUrl,
       },
       enableMetrics: true,
