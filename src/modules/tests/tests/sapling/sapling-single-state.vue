@@ -215,7 +215,11 @@ onMounted(() => {
 });
 
 const deployContract = async () => {
-  if (!walletStore.getTezos) return;
+  console.log("deployContract called, wallet:", !!walletStore.getTezos);
+  if (!walletStore.getTezos) {
+    toast.error("Please connect wallet first");
+    return;
+  }
 
   try {
     isRunning.value = true;
