@@ -128,11 +128,7 @@ export async function shieldOperation(
 }
 
 /** Get Sapling balances for Alice and Bob */
-export async function getSaplingBalances(
-  _tezos: TezosToolkit,
-  _contractAddress: string,
-  _keys: SaplingKeys,
-): Promise<SaplingBalance> {
+export async function getSaplingBalances(): Promise<SaplingBalance> {
   // Minimal contract doesn't track sapling_state, so balances aren't available
   // Full implementation requires complex Michelson that fails wallet validation
   return {
