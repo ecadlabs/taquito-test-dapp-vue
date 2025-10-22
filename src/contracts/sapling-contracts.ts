@@ -18,12 +18,24 @@
  */
 export function singleSaplingStateContract(): string {
   const memoSize = 8;
-  // Minimal Sapling contract for demonstration
-  // Accepts sapling_transaction to demonstrate Taquito's client-side features
-  // Note: Full verification with sapling_state storage fails wallet type-checking
-  return `parameter (sapling_transaction ${memoSize});
-storage unit;
-code { CDR; NIL operation; PAIR }`;
+  // Simplified Sapling contract based on MadFish Solutions sapling-playground
+  // Reference: https://github.com/madfish-solutions/sapling-playground
+  return `parameter (pair (sapling_transaction ${memoSize}) (option address));
+storage (sapling_state ${memoSize});
+code {
+  UNPAIR;
+  SWAP;
+  UNPAIR;
+  DIP { SWAP };
+  SAPLING_VERIFY_UPDATE;
+  IF_NONE
+    { FAILWITH }
+    {
+      UNPAIR;
+      DIP { DROP; NIL operation };
+      PAIR
+    }
+}`;
 }
 
 /**
