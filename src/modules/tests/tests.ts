@@ -13,6 +13,7 @@ import {
   Shield,
   Users,
   X,
+  Zap,
 } from "lucide-vue-next";
 
 export const AvailableTests: Record<string, TestMetadata> = {
@@ -31,7 +32,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/transfer",
-      taqutioDocumentation: "https://taquito.io/docs/making_transfers",
+      taquitoDocumentation: "https://taquito.io/docs/making_transfers",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/token_management.html",
     },
@@ -84,7 +85,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
       ],
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/counter",
-      taqutioDocumentation: "https://taquito.io/docs/smartcontracts",
+      taquitoDocumentation: "https://taquito.io/docs/smartcontracts",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/accounts.html#smart-contracts",
     },
@@ -172,7 +173,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/increase-paid-storage",
-      taqutioDocumentation: "https://taquito.io/docs/increase_paid_storage",
+      taquitoDocumentation: "https://taquito.io/docs/increase_paid_storage",
       tezosDocumentation:
         "https://octez.tezos.com/docs/alpha/blocks_ops.html#manager-operations",
     },
@@ -228,7 +229,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/estimate-fees",
-      taqutioDocumentation: "https://taquito.io/docs/estimate",
+      taquitoDocumentation: "https://taquito.io/docs/estimate",
     },
     component: () =>
       import("@/modules/tests/tests/estimate-fees/estimate-fees.vue"),
@@ -262,7 +263,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/delegation",
-      taqutioDocumentation: "https://taquito.io/docs/set_delegate",
+      taquitoDocumentation: "https://taquito.io/docs/set_delegate",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/baking_power.html#delegate-delegators-stakers",
     },
@@ -321,7 +322,7 @@ Users can control their staked funds using the 'stake', 'unstake', and 'finalize
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/staking",
-      taqutioDocumentation: "https://taquito.io/docs/staking",
+      taquitoDocumentation: "https://taquito.io/docs/staking",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/baking_power.html#delegate-delegators-stakers",
     },
@@ -404,7 +405,7 @@ Users can control their staked funds using the 'stake', 'unstake', and 'finalize
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/batch",
-      taqutioDocumentation: "https://taquito.io/docs/batch_API/",
+      taquitoDocumentation: "https://taquito.io/docs/batch_API/",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/blocks_ops.html#manager-operation-batches",
     },
@@ -459,7 +460,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       ],
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/sign-payload",
-      taqutioDocumentation: "https://taquito.io/docs/signing/",
+      taquitoDocumentation: "https://taquito.io/docs/signing/",
     },
     component: () =>
       import("@/modules/tests/tests/sign-payload/sign-payload.vue"),
@@ -569,7 +570,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/transaction-limit",
-      taqutioDocumentation: "https://taquito.io/docs/transaction_limits/",
+      taquitoDocumentation: "https://taquito.io/docs/transaction_limits/",
     },
     component: () =>
       import("@/modules/tests/tests/transaction-limit/transaction-limit.vue"),
@@ -616,7 +617,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/failing-noop",
-      taqutioDocumentation: "https://taquito.io/docs/failing_noop/",
+      taquitoDocumentation: "https://taquito.io/docs/failing_noop/",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/blocks_ops.html#failing-noop-operation",
     },
@@ -665,7 +666,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/failing-contract",
-      taqutioDocumentation: "https://taquito.io/docs/smartcontracts",
+      taquitoDocumentation: "https://taquito.io/docs/smartcontracts",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/accounts.html#smart-contracts",
     },
@@ -715,7 +716,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/global-constants",
-      taqutioDocumentation: "https://taquito.io/docs/global_constant/",
+      taquitoDocumentation: "https://taquito.io/docs/global_constant/",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/global_constants.html",
     },
@@ -764,7 +765,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       ],
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/complex-parameters",
-      taqutioDocumentation: "https://taquito.io/docs/complex_parameters/",
+      taquitoDocumentation: "https://taquito.io/docs/complex_parameters/",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/michelson.html#data-structures",
     },
@@ -905,7 +906,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
           url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/metadata-https.jsligo",
         },
       ],
-      taqutioDocumentation: "https://taquito.io/docs/metadata-tzip16/",
+      taquitoDocumentation: "https://taquito.io/docs/metadata-tzip16/",
       tezosDocumentation: "https://tzip.tezosagora.org/proposal/tzip-16/",
     },
     component: () =>
@@ -966,7 +967,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
           url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/balance-callback.jsligo",
         },
       ],
-      taqutioDocumentation: "https://taquito.io/docs/tzip12/",
+      taquitoDocumentation: "https://taquito.io/docs/tzip12/",
       tezosDocumentation:
         "https://gitlab.com/tezos/tzip/-/blob/master/proposals/tzip-12/tzip-12.md",
     },
@@ -1052,6 +1053,53 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
           {
             id: "read-callback-storage",
             label: "Read Callback Storage",
+          },
+        ],
+      },
+    },
+  },
+  "contract-events": {
+    id: "contract-events",
+    title: "Contract Events",
+    description: `Contract events allow smart contracts to emit event-like information to off-chain applications using the EMIT instruction in Michelson.
+
+    This test demonstrates how to subscribe to contract events using Taquito's \`TezosToolkit.stream.subscribeEvent()\`. You can subscribe to specific event tags or all events from a contract, enabling real-time monitoring of contract state changes and operations.`,
+    category: "Smart Contracts",
+    setup: [
+      "Install Taquito: `npm install @taquito/taquito`",
+      "Set up a Tezos wallet with sufficient Tez for gas fees",
+      "Deploy a contract that emits events using EMIT instruction",
+    ],
+    relatedTests: ["counter-contract", "tzip16-metadata"],
+    documentation: {
+      contract: [
+        {
+          name: "Events Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/events-contract.jsligo",
+        },
+      ],
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/contract-events",
+      taquitoDocumentation: "https://taquito.io/docs/subscribe_event/",
+      tezosDocumentation: "https://octez.tezos.com/docs/t024/event.html",
+    },
+    component: () =>
+      import("@/modules/tests/tests/contract-events/contract-events.vue"),
+    icon: Zap,
+    diagrams: {
+      "emit-event": {
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get Contract",
+          },
+          {
+            id: "execute-operation",
+            label: "Execute Operation",
+          },
+          {
+            id: "wait-confirmation",
+            label: "Wait for Confirmation",
           },
         ],
       },

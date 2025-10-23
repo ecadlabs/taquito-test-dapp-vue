@@ -58,7 +58,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
       ],
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/my-new-test",
-      taqutioDocumentation: "https://taquito.io/docs/smartcontracts",
+      taquitoDocumentation: "https://taquito.io/docs/smartcontracts",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/accounts.html#smart-contracts",
     },
