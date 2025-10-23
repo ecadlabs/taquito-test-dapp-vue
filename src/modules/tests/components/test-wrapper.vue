@@ -138,12 +138,12 @@
                 </a>
               </div>
               <div
-                v-if="testMetadata.documentation.taqutioDocumentation"
+                v-if="testMetadata.documentation.taquitoDocumentation"
                 class="flex items-center gap-2"
               >
                 <BookOpenText class="text-muted-foreground h-4 w-4" />
                 <a
-                  :href="testMetadata.documentation.taqutioDocumentation"
+                  :href="testMetadata.documentation.taquitoDocumentation"
                   target="_blank"
                   rel="noopener noreferrer"
                   class="text-primary text-sm hover:underline"
