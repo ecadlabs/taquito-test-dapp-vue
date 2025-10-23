@@ -13,6 +13,7 @@ import {
   Shield,
   Users,
   X,
+  Zap,
 } from "lucide-vue-next";
 
 export const AvailableTests: Record<string, TestMetadata> = {
@@ -1052,6 +1053,53 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
           {
             id: "read-callback-storage",
             label: "Read Callback Storage",
+          },
+        ],
+      },
+    },
+  },
+  "contract-events": {
+    id: "contract-events",
+    title: "Contract Events",
+    description: `Contract events allow smart contracts to emit event-like information to off-chain applications using the EMIT instruction in Michelson.
+
+    This test demonstrates how to subscribe to contract events using Taquito's \`TezosToolkit.stream.subscribeEvent()\`. You can subscribe to specific event tags or all events from a contract, enabling real-time monitoring of contract state changes and operations.`,
+    category: "Smart Contracts",
+    setup: [
+      "Install Taquito: `npm install @taquito/taquito`",
+      "Set up a Tezos wallet with sufficient Tez for gas fees",
+      "Deploy a contract that emits events using EMIT instruction",
+    ],
+    relatedTests: ["counter-contract", "tzip16-metadata"],
+    documentation: {
+      contract: [
+        {
+          name: "Events Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/events-contract.jsligo",
+        },
+      ],
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/contract-events",
+      taqutioDocumentation: "https://taquito.io/docs/subscribe_event/",
+      tezosDocumentation: "https://octez.tezos.com/docs/t024/event.html",
+    },
+    component: () =>
+      import("@/modules/tests/tests/contract-events/contract-events.vue"),
+    icon: Zap,
+    diagrams: {
+      "emit-event": {
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get Contract",
+          },
+          {
+            id: "execute-operation",
+            label: "Execute Operation",
+          },
+          {
+            id: "wait-confirmation",
+            label: "Wait for Confirmation",
           },
         ],
       },
