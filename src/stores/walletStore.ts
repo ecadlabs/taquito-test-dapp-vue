@@ -110,7 +110,7 @@ export const useWalletStore = defineStore("wallet", () => {
 
   /** Initializes a Beacon wallet */
   const initializeBeaconWallet = async (): Promise<void> => {
-    let networkType = import.meta.env.VITE_NETWORK_TYPE as NetworkType;
+    const networkType = import.meta.env.VITE_NETWORK_TYPE as NetworkType;
 
     const options = {
       name: "Taquito Playground",
