@@ -4,6 +4,7 @@ import {
   ArrowUp10,
   Calculator,
   Coins,
+  FileText,
   Globe,
   InfinityIcon,
   Info,
@@ -884,7 +885,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     description: `TZIP-16 is a Tezos standard for adding metadata to smart contracts.
 
     Metadata can be stored on-chain (tezos-storage), off-chain via HTTP(S), or on IPFS. This test allows you to experiment with different contracts and see how their metadata is structured and accessed, along with allowing interaction with view execution for read-only data without creating a transaction.`,
-    category: "Smart Contracts",
+    category: "Viewing Data",
     setup: [
       "Install Taquito TZIP-16 package: `npm install @taquito/tzip16`",
       "Set up a Tezos wallet for contract interactions",
@@ -1064,7 +1065,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     description: `Contract events allow smart contracts to emit event-like information to off-chain applications using the EMIT instruction in Michelson.
 
     This test demonstrates how to subscribe to contract events using Taquito's \`TezosToolkit.stream.subscribeEvent()\`. You can subscribe to specific event tags or all events from a contract, enabling real-time monitoring of contract state changes and operations.`,
-    category: "Smart Contracts",
+    category: "Viewing Data",
     setup: [
       "Install Taquito: `npm install @taquito/taquito`",
       "Set up a Tezos wallet with sufficient Tez for gas fees",
@@ -1100,6 +1101,39 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
           {
             id: "wait-confirmation",
             label: "Wait for Confirmation",
+          },
+        ],
+      },
+    },
+  },
+  "viewing-blocks": {
+    id: "viewing-blocks",
+    title: "Viewing Blocks",
+    description: `Block inspection focused on finding transactions within blocks. This test demonstrates how to fetch block data using Taquito's RPC methods and filter for transaction operations. You can view the latest block or fetch any specific block by its number.`,
+    category: "Viewing Data",
+    setup: [
+      "Install Taquito: `npm install @taquito/taquito`",
+      "Configure Taquito with RPC endpoint",
+      "Understand Tezos block structure and transaction operations",
+      "Have access to a Tezos node or public RPC endpoint",
+    ],
+    relatedTests: ["transfer", "estimate-fees", "tzip16-metadata"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/viewing-blocks",
+      taquitoDocumentation: "https://taquito.io/docs/rpc_package/",
+      tezosDocumentation: "https://octez.tezos.com/docs/seoul/blocks_ops.html",
+    },
+    component: () =>
+      import("@/modules/tests/tests/viewing-blocks/viewing-blocks.vue"),
+    icon: FileText,
+    diagrams: {
+      "fetch-block": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "fetch-block",
+            label: "Fetch Block",
           },
         ],
       },
