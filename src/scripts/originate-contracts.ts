@@ -42,6 +42,7 @@ interface ContractDefinition {
 
 export const originateContracts = async (
   key: string,
+  specificContract?: string,
 ): Promise<OriginationResult[]> => {
   // Validate environment variables
   const rpcUrl = process.env.VITE_RPC_URL;
@@ -79,6 +80,12 @@ export const originateContracts = async (
 
     for (const file of files) {
       const contractName = file.replace(".tz", "");
+
+      // If a specific contract is requested, only include that contract
+      if (specificContract && contractName !== specificContract) {
+        continue;
+      }
+
       contracts.push({
         name: contractName,
         path: join(compiledDir, file),
@@ -88,12 +95,22 @@ export const originateContracts = async (
   }
 
   if (contracts.length === 0) {
-    throw new Error(
-      "No contracts found to originiate. Did you forget to compile?",
-    );
+    if (specificContract) {
+      throw new Error(
+        `Contract "${specificContract}" not found in compiled directory. Did you forget to compile it?`,
+      );
+    } else {
+      throw new Error(
+        "No contracts found to originate. Did you forget to compile?",
+      );
+    }
   }
 
-  console.log(`📄 Found ${contracts.length} contract(s) to originate`);
+  if (specificContract) {
+    console.log(`📄 Found contract "${specificContract}" to originate`);
+  } else {
+    console.log(`📄 Found ${contracts.length} contract(s) to originate`);
+  }
 
   const results: OriginationResult[] = [];
 
@@ -339,8 +356,18 @@ function getDefaultStorage(
 // If running this script directly
 if (process.argv[1] && process.argv[1].includes("originate-contracts")) {
   const key = process.argv[2];
+  const specificContract = process.argv[3];
 
-  originateContracts(key)
+  if (!key) {
+    console.error("Error: Private key is required as the first argument");
+    console.log(
+      "Usage: npm run originate-contracts <private-key> [contract-name]",
+    );
+    console.log("Example: npm run originate-contracts edsk... counter");
+    process.exit(1);
+  }
+
+  originateContracts(key, specificContract)
     .then((results) => {
       console.log(`\n📋 Origination Summary:`);
       results.forEach((result) => {
