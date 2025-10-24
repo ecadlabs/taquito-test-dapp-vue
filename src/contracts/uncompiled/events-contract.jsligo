@@ -1,0 +1,11 @@
+export type storage = unit;
+
+type ret = [list<operation>, storage];
+
+@entry
+const emit_event = (_param: unit, store: storage): ret => {
+  const operations = list([
+    Tezos.emit("%my_contract_event", { source: Tezos.get_source(), message: "Hello, World!" })
+  ]);
+  return [operations, store];
+};

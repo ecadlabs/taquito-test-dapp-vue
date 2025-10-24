@@ -9,9 +9,6 @@
     </main>
   </div>
 
-  <!-- Global Test Dialog -->
-  <TestDialog />
-
   <!-- Global Command Palette -->
   <CommandMenu />
 </template>
@@ -19,13 +16,17 @@
 <script setup lang="ts">
 import CommandMenu from "@/components/command-menu.vue";
 import HeaderComponent from "@/components/header-component.vue";
-import TestDialog from "@/components/test-dialog.vue";
 import { Toaster } from "@/components/ui/sonner";
+import { useFavicon } from "@/composables/useFavicon";
+import { useTheme } from "@/composables/useTheme";
 import { useWalletStore } from "@/stores/walletStore";
 import { onMounted } from "vue";
 import "vue-sonner/style.css";
 
 const walletStore = useWalletStore();
+
+useFavicon();
+useTheme();
 
 onMounted(async () => {
   // We check what the last provider they used was, then also check if they still have a saved session with that provider.

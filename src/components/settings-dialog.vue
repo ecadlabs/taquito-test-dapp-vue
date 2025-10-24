@@ -1,10 +1,10 @@
 <template>
-  <DialogContent>
+  <DialogContent class="overflow-hidden">
     <DialogHeader>
       <DialogTitle>Settings</DialogTitle>
     </DialogHeader>
 
-    <div class="space-y-4">
+    <div class="min-w-0 space-y-4">
       <div class="flex flex-col gap-2">
         <Label :for="indexerSelectId" class="font-medium">Indexer</Label>
         <div class="w-full space-y-2 sm:w-auto">
@@ -31,6 +31,49 @@
           <p :id="indexerHelpId" class="text-muted-foreground text-xs">
             Determines which explorer the contract inspection links open.
           </p>
+        </div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <Label :for="confirmationInputId" class="font-medium"
+          >Confirmation Count</Label
+        >
+        <div class="w-full space-y-2 sm:w-auto">
+          <NumberField
+            :min="1"
+            :max="8"
+            v-model="settingsStore.settings.confirmationCount"
+          >
+            <NumberFieldContent class="w-24">
+              <NumberFieldDecrement />
+              <NumberFieldInput
+                :id="confirmationInputId"
+                :aria-describedby="confirmationHelpId"
+                placeholder="3"
+              />
+              <NumberFieldIncrement />
+            </NumberFieldContent>
+          </NumberField>
+
+          <p :id="confirmationHelpId" class="text-muted-foreground text-xs">
+            Number of block confirmations to wait for (1-8)
+          </p>
+        </div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <Label class="font-medium">Theme</Label>
+        <div class="w-full space-y-2 sm:w-auto">
+          <Select v-model="settingsStore.settings.themeMode">
+            <SelectTrigger class="w-full sm:w-[220px]">
+              <SelectValue placeholder="Select theme" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="system">System</SelectItem>
+                <SelectItem value="light">Light</SelectItem>
+                <SelectItem value="dark">Dark</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
       </div>
       <div class="flex flex-col gap-2">
@@ -97,13 +140,28 @@
       </div>
     </div>
 
+    <div class="text-muted-foreground min-w-0 text-xs">
+      <a
+        :href="versionUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hover:underline"
+        >Version {{ version }}</a
+      >
+      <p>Network: {{ network }}</p>
+      <p class="truncate">
+        Git SHA:
+        <a
+          :href="shaUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="hover:underline"
+          >{{ gitSha }}</a
+        >
+      </p>
+    </div>
+
     <DialogFooter class="flex items-center">
-      <div class="text-muted-foreground text-xs">
-        <p>Version {{ version }}</p>
-        <Separator orientation="vertical" class="h-4" />
-        <p>Network: {{ network }}</p>
-        <p>Git SHA: {{ gitSha }}</p>
-      </div>
       <Button variant="secondary" @click="emit('close')" class="ml-auto">
         <p>Close</p>
       </Button>
@@ -123,6 +181,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  NumberField,
+  NumberFieldContent,
+  NumberFieldDecrement,
+  NumberFieldIncrement,
+  NumberFieldInput,
+} from "@/components/ui/number-field";
+import {
   Select,
   SelectContent,
   SelectGroup,
@@ -130,7 +195,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import {
   availableIndexers,
   useSettingsStore,
@@ -157,6 +221,8 @@ const network = import.meta.env.VITE_NETWORK_TYPE;
 
 const indexerSelectId = "settings-indexer-select";
 const indexerHelpId = "settings-indexer-help";
+const confirmationInputId = "settings-confirmation-count";
+const confirmationHelpId = "settings-confirmation-help";
 const rpcInputId = "settings-rpc-url";
 const rpcStatusId = "settings-rpc-status";
 
@@ -166,6 +232,9 @@ const rpcHealthCheckDuration = ref(0);
 const rpcUrlRef = computed(() => settingsStore.settings.rpcUrl);
 const debouncedRpcUrl = useDebounce(rpcUrlRef, 500);
 const runningHealthCheck = ref(false);
+
+const versionUrl = `https://github.com/ecadlabs/taquito-test-dapp-vue/releases/tag/${version}`;
+const shaUrl = `https://github.com/ecadlabs/taquito-test-dapp-vue/commit/${gitSha}`;
 
 watch(debouncedRpcUrl, (newRpcUrl: string) => {
   const checkRpcHealth = async (url: string) => {

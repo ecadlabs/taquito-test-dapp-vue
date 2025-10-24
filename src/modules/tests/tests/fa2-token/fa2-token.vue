@@ -68,14 +68,18 @@
         <div class="flex flex-col gap-2">
           <Button
             @click="queryBalanceWithCallback"
-            :disabled="!walletConnected || !isValidBalanceQuery"
+            :disabled="
+              !walletConnected || !isValidBalanceQuery || isOperationRunning
+            "
           >
             <Search class="mr-2 h-4 w-4" />
             Query Balance (Callback)
           </Button>
           <Button
             @click="queryBalanceDirect"
-            :disabled="!walletConnected || !isValidBalanceQuery"
+            :disabled="
+              !walletConnected || !isValidBalanceQuery || isOperationRunning
+            "
           >
             <Search class="mr-2 h-4 w-4" />
             Query Balance (Direct)
@@ -182,7 +186,9 @@
         <div class="flex gap-2">
           <Button
             @click="executeTransfer"
-            :disabled="!walletConnected || !isValidTransferForm"
+            :disabled="
+              !walletConnected || !isValidTransferForm || isOperationRunning
+            "
           >
             <Send class="mr-2 h-4 w-4" />
             Transfer Tokens
@@ -249,7 +255,9 @@
         <div class="flex gap-2">
           <Button
             @click="executeMint"
-            :disabled="!walletConnected || !isValidMintForm"
+            :disabled="
+              !walletConnected || !isValidMintForm || isOperationRunning
+            "
           >
             <Plus class="mr-2 h-4 w-4" />
             Mint Tokens
@@ -317,7 +325,9 @@
           <Button
             variant="destructive"
             @click="executeBurn"
-            :disabled="!walletConnected || !isValidBurnForm"
+            :disabled="
+              !walletConnected || !isValidBurnForm || isOperationRunning
+            "
           >
             <Minus class="mr-2 h-4 w-4" />
             Burn Tokens
@@ -374,6 +384,10 @@ const walletStore = useWalletStore();
 const { getAddress } = storeToRefs(walletStore);
 
 const walletConnected = computed(() => !!getAddress.value);
+
+const isOperationRunning = computed(
+  () => diagramStore.diagramStatus === "running",
+);
 
 // Balance query state
 const balanceQuery = ref({

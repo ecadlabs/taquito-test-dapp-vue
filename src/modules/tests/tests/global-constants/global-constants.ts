@@ -1,10 +1,8 @@
 import { getOperationHash } from "@/lib/utils";
 import { useDiagramStore } from "@/stores/diagramStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 import type { Estimate } from "@taquito/taquito";
-import { PiggyBank } from "lucide-vue-next";
-
-const TEST_ID = "global-constants";
 
 let estimate: Estimate;
 
@@ -19,37 +17,35 @@ const registerGlobalConstant = async (
   value: object,
 ): Promise<string | undefined> => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   const walletStore = useWalletStore();
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
     estimate = await Tezos.estimate.registerGlobalConstant({ value });
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("register-constant", "running", TEST_ID);
+    diagramStore.setProgress("register-constant");
     const operation = await Tezos.contract.registerGlobalConstant({ value });
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
-    const confirmation = await operation.confirmation(3);
+    diagramStore.setProgress("wait-for-chain-confirmation");
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
 
     const opHash = getOperationHash(confirmation);
     if (opHash) {
-      diagramStore.setOperationHash(opHash, TEST_ID);
+      diagramStore.setOperationHash(opHash);
     }
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted();
     return operation.globalConstantHash;
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     throw error;
   }
 };

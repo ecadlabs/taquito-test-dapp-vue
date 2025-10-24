@@ -3,7 +3,6 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 import { RpcClient } from "@taquito/rpc";
 import type { Estimate } from "@taquito/taquito";
-import { PiggyBank } from "lucide-vue-next";
 
 const TEST_ID = "staking";
 let estimate: Estimate;
@@ -15,22 +14,17 @@ const stake = async (amount: number) => {
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
     estimate = await Tezos.estimate.stake({
       amount,
       mutez: false,
     });
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("stake", "running", TEST_ID);
-    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    diagramStore.setProgress("stake");
+    diagramStore.setProgress("wait-for-user");
     const op = await Tezos.wallet
       .stake({
         amount,
@@ -38,16 +32,16 @@ const stake = async (amount: number) => {
       })
       .send();
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
+    diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await op.confirmation();
 
     if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
+      diagramStore.setOperationHash(confirmation?.block.hash);
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted();
   } catch (error) {
     console.error(`Failed to stake '${amount}': ${error}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     throw error;
   }
 };
@@ -59,22 +53,17 @@ const unstake = async (amount: number) => {
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
     estimate = await Tezos.estimate.unstake({
       amount,
       mutez: false,
     });
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("unstake", "running", TEST_ID);
-    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    diagramStore.setProgress("unstake");
+    diagramStore.setProgress("wait-for-user");
     const op = await Tezos.wallet
       .unstake({
         amount,
@@ -82,16 +71,16 @@ const unstake = async (amount: number) => {
       })
       .send();
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
+    diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await op.confirmation();
 
     if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
+      diagramStore.setOperationHash(confirmation?.block.hash);
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted();
   } catch (error) {
     console.error(`Failed to unstake '${amount}': ${error}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     throw error;
   }
 };
@@ -103,31 +92,26 @@ const finalizeUnstake = async () => {
   const Tezos = walletStore.getTezos;
 
   try {
-    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
     estimate = await Tezos.estimate.finalizeUnstake({});
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("finalize-unstake", "running", TEST_ID);
-    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    diagramStore.setProgress("finalize-unstake");
+    diagramStore.setProgress("wait-for-user");
     const op = await Tezos.wallet.finalizeUnstake({}).send();
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
+    diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await op.confirmation();
 
     if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
+      diagramStore.setOperationHash(confirmation?.block.hash);
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted();
   } catch (error) {
     console.error(`Failed to finalize unstake: ${error}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     throw error;
   }
 };
@@ -151,6 +135,11 @@ const getStakingInfo = async (address: string) => {
   }
 };
 
+type StakingLimit = {
+  limit_of_staking_over_baking_millionth: number;
+  edge_of_baking_over_staking_billionth: number;
+};
+
 const getDelegateAcceptsStaking = async (address: string): Promise<boolean> => {
   const settingsStore = useSettingsStore();
   try {
@@ -163,7 +152,8 @@ const getDelegateAcceptsStaking = async (address: string): Promise<boolean> => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const stakingData = await response.json();
+    const stakingData = (await response.json()) as StakingLimit;
+
     const { limit_of_staking_over_baking_millionth } = stakingData;
     return limit_of_staking_over_baking_millionth > 0;
   } catch (error) {

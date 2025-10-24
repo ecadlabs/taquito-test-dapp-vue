@@ -54,7 +54,9 @@
         <div class="space-y-3">
           <Button
             @click="handleAddSimpleRecord"
-            :disabled="!walletConnected || !isSimpleRecordValid"
+            :disabled="
+              !walletConnected || !isSimpleRecordValid || isOperationRunning
+            "
             class="w-full"
           >
             <UserPlus class="mr-2 h-4 w-4" />
@@ -110,7 +112,9 @@
         <div class="space-y-3">
           <Button
             @click="handleSetNestedObjects"
-            :disabled="!walletConnected || !isNestedRecordValid"
+            :disabled="
+              !walletConnected || !isNestedRecordValid || isOperationRunning
+            "
             class="w-full"
           >
             <Database class="mr-2 h-4 w-4" />
@@ -145,7 +149,9 @@
         <div class="flex gap-2">
           <Button
             @click="handlemanageUserSet('add')"
-            :disabled="!walletConnected || !authUserAddress"
+            :disabled="
+              !walletConnected || !authUserAddress || isOperationRunning
+            "
             class="flex-1"
           >
             <UserCheck class="mr-2 h-4 w-4" />
@@ -153,7 +159,9 @@
           </Button>
           <Button
             @click="handlemanageUserSet('remove')"
-            :disabled="!walletConnected || !authUserAddress"
+            :disabled="
+              !walletConnected || !authUserAddress || isOperationRunning
+            "
             variant="destructive"
             class="flex-1"
           >
@@ -191,7 +199,9 @@
         <div class="space-y-3">
           <Button
             @click="handleUpdateMetadata"
-            :disabled="!walletConnected || !isMetadataUpdatesValid"
+            :disabled="
+              !walletConnected || !isMetadataUpdatesValid || isOperationRunning
+            "
             class="w-full"
           >
             <Settings class="mr-2 h-4 w-4" />
@@ -219,7 +229,9 @@
         <div class="flex gap-2">
           <Button
             @click="handleGetSimpleRecord"
-            :disabled="!walletConnected || !viewUserAddress"
+            :disabled="
+              !walletConnected || !viewUserAddress || isOperationRunning
+            "
             class="flex-1"
           >
             <Eye class="mr-2 h-4 w-4" />
@@ -227,7 +239,9 @@
           </Button>
           <Button
             @click="handleGetNestedObjects"
-            :disabled="!walletConnected || !viewUserAddress"
+            :disabled="
+              !walletConnected || !viewUserAddress || isOperationRunning
+            "
             class="flex-1"
           >
             <FileText class="mr-2 h-4 w-4" />
@@ -243,7 +257,7 @@
           <div class="flex gap-2">
             <Button
               @click="handleGetAllMetadata"
-              :disabled="!walletConnected"
+              :disabled="!walletConnected || isOperationRunning"
               class="flex-1"
             >
               <Database class="mr-2 h-4 w-4" />
@@ -305,6 +319,10 @@ const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
 
 const walletConnected = computed(() => !!walletStore.getAddress);
+
+const isOperationRunning = computed(
+  () => diagramStore.diagramStatus === "running",
+);
 
 watch(walletConnected, () => {
   if (walletConnected.value && walletStore.getAddress) {

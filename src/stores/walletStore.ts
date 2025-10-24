@@ -1,8 +1,12 @@
+import {
+  initializeBeaconEvents,
+  initializeWalletConnectEvents,
+} from "@/lib/walletEvents";
 import { useSettingsStore } from "@/stores/settingsStore";
 import type { ProgrammaticWallet, WalletProvider } from "@/types/wallet";
-import { BeaconEvent } from "@airgap/beacon-dapp";
-import { NetworkType } from "@airgap/beacon-types";
+import { NetworkType, type ExtendedPeerInfo } from "@airgap/beacon-types";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
+import * as Sentry from "@sentry/vue";
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { LedgerSigner } from "@taquito/ledger-signer";
 import { importKey, InMemorySigner } from "@taquito/signer";
@@ -14,6 +18,7 @@ import {
 } from "@taquito/wallet-connect";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
+import { toast } from "vue-sonner";
 
 export const useWalletStore = defineStore("wallet", () => {
   const settingsStore = useSettingsStore();
@@ -23,9 +28,11 @@ export const useWalletStore = defineStore("wallet", () => {
   const wallet = ref<
     BeaconWallet | WalletConnect | LedgerSigner | ProgrammaticWallet
   >();
+  const ledgerTransport = ref<TransportWebHID | null>(null);
   const address = ref<string>();
   const balance = ref<BigNumber>();
   const walletName = ref<string>();
+  const isDisconnecting = ref<boolean>(false);
 
   const getTezos = computed(() => Tezos);
   const getWallet = computed(() => wallet.value);
@@ -49,6 +56,7 @@ export const useWalletStore = defineStore("wallet", () => {
       }
     } catch (error) {
       console.error("Error getting address:", error);
+      Sentry.captureException(error);
       return undefined;
     }
   };
@@ -65,6 +73,7 @@ export const useWalletStore = defineStore("wallet", () => {
       }
     } catch (error) {
       console.error("Error getting public key:", error);
+      Sentry.captureException(error);
       return undefined;
     }
   };
@@ -72,7 +81,18 @@ export const useWalletStore = defineStore("wallet", () => {
   const getWalletName = computed(() => walletName.value);
 
   /** Resets all wallet state variables to undefined and clears the local storage */
-  const resetWalletState = (): void => {
+  const resetWalletState = async (): Promise<void> => {
+    // Clean up Ledger transport if it exists
+    if (ledgerTransport.value) {
+      try {
+        await ledgerTransport.value.close();
+      } catch (error) {
+        console.error("Error closing Ledger transport during reset:", error);
+      } finally {
+        ledgerTransport.value = null;
+      }
+    }
+
     wallet.value = undefined;
     address.value = undefined;
     balance.value = undefined;
@@ -90,10 +110,7 @@ export const useWalletStore = defineStore("wallet", () => {
 
   /** Initializes a Beacon wallet */
   const initializeBeaconWallet = async (): Promise<void> => {
-    const networkType =
-      import.meta.env.VITE_NETWORK_TYPE === "seoulnet"
-        ? NetworkType.CUSTOM
-        : (import.meta.env.VITE_NETWORK_TYPE as NetworkType);
+    const networkType = import.meta.env.VITE_NETWORK_TYPE as NetworkType;
 
     const options = {
       name: "Taquito Playground",
@@ -107,15 +124,8 @@ export const useWalletStore = defineStore("wallet", () => {
     };
 
     const beaconWallet = new BeaconWallet(options);
-    beaconWallet.client.subscribeToEvent(
-      BeaconEvent.ACTIVE_ACCOUNT_SET,
-      (account) => {
-        // Beacon gets very upset if we don't subscribe to this event and do *something* with it
-        if (account) {
-          address.value = account.address;
-        }
-      },
-    );
+
+    initializeBeaconEvents(beaconWallet);
 
     const cachedAccount = await beaconWallet.client.getActiveAccount();
 
@@ -157,6 +167,8 @@ export const useWalletStore = defineStore("wallet", () => {
         "Wallet not found after WalletConnect initialization should have finished.",
       );
 
+    initializeWalletConnectEvents(walletConnect);
+
     const latestSessionKey =
       await walletConnect.getAllExistingSessionKeys()?.[0];
 
@@ -165,7 +177,9 @@ export const useWalletStore = defineStore("wallet", () => {
     } else {
       await walletConnect.requestPermissions({
         permissionScope: {
-          networks: [WalletConnectNetworkType.SEOULNET],
+          networks: [
+            import.meta.env.VITE_NETWORK_TYPE as WalletConnectNetworkType,
+          ],
           events: [],
           methods: [
             PermissionScopeMethods.TEZOS_SEND,
@@ -222,6 +236,7 @@ export const useWalletStore = defineStore("wallet", () => {
       Tezos.setProvider({ signer });
     } catch (error) {
       console.error("Failed to initialize programmatic wallet:", error);
+      Sentry.captureException(error);
       throw new Error(
         `Programmatic wallet initialization failed: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -230,13 +245,27 @@ export const useWalletStore = defineStore("wallet", () => {
 
   /** Initializes a Ledger hardware wallet */
   const initializeLedgerWallet = async (): Promise<void> => {
-    const transport = await TransportWebHID.create();
-    const ledgerSigner = new LedgerSigner(transport);
+    let transport: TransportWebHID | null = null;
 
-    Tezos.setProvider({ signer: ledgerSigner });
-    wallet.value = ledgerSigner;
-    walletName.value = "Ledger Device";
-    localStorage.setItem("wallet-provider", "ledger");
+    try {
+      transport = (await TransportWebHID.create()) as TransportWebHID;
+      const ledgerSigner = new LedgerSigner(transport);
+      Tezos.setProvider({ signer: ledgerSigner });
+      wallet.value = ledgerSigner;
+      walletName.value = "Ledger Device";
+      ledgerTransport.value = transport; // Store reference for cleanup
+      localStorage.setItem("wallet-provider", "ledger");
+    } catch (error) {
+      // Clean up the transport if it was created but connection failed
+      if (transport) {
+        try {
+          await transport.close();
+        } catch (closeError) {
+          console.error("Error closing Ledger transport:", closeError);
+        }
+      }
+      throw error;
+    }
   };
 
   /**
@@ -267,7 +296,7 @@ export const useWalletStore = defineStore("wallet", () => {
       // Until then, if the wallet variable has already been set by a previous session, we will reset the wallet state.
       // This should never be called unless the user wants to connect a new wallet, so this is safe.
       if (wallet.value) {
-        resetWalletState();
+        await resetWalletState();
         console.warn(
           "A wallet seems to already be initialized in this session. Resetting wallet state and assuming it is a new session.",
         );
@@ -322,7 +351,8 @@ export const useWalletStore = defineStore("wallet", () => {
         "Failed to initialize wallet or request permissions:",
         error,
       );
-      resetWalletState();
+      await resetWalletState();
+      Sentry.captureException(error);
       throw error;
     }
   };
@@ -337,31 +367,60 @@ export const useWalletStore = defineStore("wallet", () => {
    * @throws {ReferenceError} If no wallet is currently connected.
    * @throws {Error} If an error occurs during disconnection.
    */
-  const disconnectWallet = async () => {
+  const disconnectWallet = async (fromWallet: boolean = false) => {
+    isDisconnecting.value = true;
     try {
       if (!wallet.value) {
-        throw new ReferenceError(
-          "Failed to disconnect wallet. No wallet currently connected",
+        console.warn(
+          "Failed to disconnect wallet. No wallet currently connected. Assuming it's been disconnected somewhere else.",
         );
       }
 
       if (wallet.value instanceof BeaconWallet) {
-        await wallet.value.client.disconnect();
+        if (!fromWallet) {
+          const peers = await wallet.value.client.getPeers();
+          for (const peer of peers) {
+            await wallet.value.client.removePeer(
+              peer as ExtendedPeerInfo,
+              true,
+            );
+          }
+        }
+
         await wallet.value.client.clearActiveAccount();
       } else if (wallet.value instanceof WalletConnect) {
         await wallet.value.disconnect();
         await deleteWalletConnectSessionFromIndexedDB();
-      } else if (wallet.value instanceof LedgerSigner) {
-        // Ledger doesn't need explicit disconnection
+      } else if (
+        wallet.value instanceof LedgerSigner &&
+        ledgerTransport.value
+      ) {
+        // Clean up Ledger transport when disconnecting
+        try {
+          await ledgerTransport.value.close();
+        } catch (error) {
+          console.error(
+            "Error closing Ledger transport during disconnect:",
+            error,
+          );
+        } finally {
+          ledgerTransport.value = null;
+        }
       }
 
-      // Reset wallet state after disconnection
-      resetWalletState();
+      await resetWalletState();
+
+      if (fromWallet) {
+        toast.info(
+          "Your wallet has been disconnected due to a disconnect request from your wallet.",
+        );
+      }
     } catch (error) {
       console.error("Error disconnecting wallet:", error);
-      // Still reset state even if disconnection fails
-      resetWalletState();
+      await resetWalletState();
       throw error;
+    } finally {
+      isDisconnecting.value = false;
     }
   };
 
@@ -384,6 +443,7 @@ export const useWalletStore = defineStore("wallet", () => {
       balance.value = await Tezos.tz.getBalance(address.value);
     } catch (error) {
       console.error("Error fetching balance:", error);
+      Sentry.captureException(error);
       throw error;
     }
   };
@@ -467,6 +527,8 @@ export const useWalletStore = defineStore("wallet", () => {
 
   return {
     Tezos,
+    address,
+    isDisconnecting,
     getTezos,
     getAddress,
     getBalance,

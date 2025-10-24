@@ -1,9 +1,11 @@
 import { useDiagramStore } from "@/stores/diagramStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 const TEST_ID = "increase-paid-storage";
 
 const increaseStorage = async (contract: string, bytes: number) => {
   const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
   const walletStore = useWalletStore();
 
   const Tezos = walletStore.getTezos;
@@ -15,26 +17,27 @@ const increaseStorage = async (contract: string, bytes: number) => {
     }
 
     diagramStore.setTestDiagram(TEST_ID, "increase");
-    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    diagramStore.setProgress("wait-for-user");
     const operation = await Tezos.wallet
       .increasePaidStorage({ amount: bytes, destination: contract })
       .send();
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
-    const confirmation = await operation.confirmation(3);
+    diagramStore.setProgress("wait-for-chain-confirmation");
+    const confirmation = await operation.confirmation(
+      settingsStore.getConfirmationCount,
+    );
     if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash, TEST_ID);
+      diagramStore.setOperationHash(confirmation?.block.hash);
 
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setCompleted();
   } catch (error) {
     console.error(
       `Failed to increase paid storage on contract '${contract}': ${error}`,
     );
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
     throw error;
   }
 };

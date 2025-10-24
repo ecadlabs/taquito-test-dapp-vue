@@ -2,7 +2,7 @@
   <div class="flex w-full items-center justify-center gap-4">
     <Button
       @click="decrementCounter()"
-      :disabled="!walletConnected"
+      :disabled="!walletConnected || isOperationRunning"
       aria-label="Decrement"
     >
       <Minus class="size-6" aria-hidden="true" />
@@ -11,7 +11,7 @@
       <Button
         variant="ghost"
         @click="getStorageValue()"
-        :disabled="!walletConnected"
+        :disabled="!walletConnected || isOperationRunning"
         aria-label="Get Storage Value"
       >
         <RefreshCw class="size-4" aria-hidden="true" />
@@ -21,7 +21,7 @@
       <Button
         variant="ghost"
         @click="resetCounter()"
-        :disabled="!walletConnected"
+        :disabled="!walletConnected || isOperationRunning"
         aria-label="Reset"
       >
         <Trash class="size-4" aria-hidden="true" />
@@ -29,7 +29,7 @@
     </div>
     <Button
       @click="incrementCounter()"
-      :disabled="!walletConnected"
+      :disabled="!walletConnected || isOperationRunning"
       aria-label="Increment"
     >
       <Plus class="size-6" aria-hidden="true" />
@@ -54,6 +54,10 @@ const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
 
 const walletConnected = computed(() => !!walletStore.getAddress);
+
+const isOperationRunning = computed(
+  () => diagramStore.diagramStatus === "running",
+);
 
 const storageValue = ref<number>();
 

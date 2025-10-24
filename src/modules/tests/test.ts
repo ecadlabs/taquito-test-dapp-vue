@@ -26,9 +26,10 @@ export interface TestMetadata {
   documentation: {
     contract?: { name: string; url: string }[];
     script?: string;
-    taqutioDocumentation?: string;
+    taquitoDocumentation?: string;
     tezosDocumentation?: string;
   };
   component?: () => Promise<{ default: Component }>;
   diagrams?: TestDiagrams;
+  icon?: Component;
 }

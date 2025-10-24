@@ -2,9 +2,6 @@ import { getOperationHash } from "@/lib/utils";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
 import type { Estimate, TransactionWalletOperation } from "@taquito/taquito";
-import { PiggyBank } from "lucide-vue-next";
-
-const TEST_ID = "transfer";
 
 let estimate: Estimate;
 const send = async (to: string, amount: number) => {
@@ -19,31 +16,26 @@ const send = async (to: string, amount: number) => {
       throw new Error("Invalid recipient address or amount");
     }
 
-    diagramStore.setProgress("estimate-fees", "running", TEST_ID);
     estimate = await Tezos.estimate.transfer({ to, amount: amount });
 
     if (estimate) {
-      diagramStore.setNodeButton("estimate-fees", {
-        icon: PiggyBank,
-        text: "View Fees",
-        onClick: () => diagramStore.showFeeEstimationDialog(estimate),
-      });
+      diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("wait-for-user", "running", TEST_ID);
+    diagramStore.setProgress("wait-for-user");
     const transfer: TransactionWalletOperation = await Tezos.wallet
       .transfer({ to, amount })
       .send();
 
-    diagramStore.setProgress("wait-for-chain-confirmation", "running", TEST_ID);
+    diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await transfer.confirmation();
 
     const opHash = getOperationHash(confirmation);
-    diagramStore.setOperationHash(opHash, TEST_ID);
-    diagramStore.setProgress("success", "completed", TEST_ID);
+    diagramStore.setOperationHash(opHash);
+    diagramStore.setCompleted();
   } catch (error) {
     console.error(`Failed to send transfer to '${to}': ${error}`);
-    diagramStore.setErrorMessage(error, TEST_ID);
+    diagramStore.setErrorMessage(error);
   }
 };
 

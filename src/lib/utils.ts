@@ -1,6 +1,5 @@
-import { useSettingsStore, type IndexerOption } from "@/stores/settingsStore";
+import type { IndexerOption } from "@/stores/settingsStore";
 import type { Confirmation } from "@/types/wallet";
-import { RpcClient } from "@taquito/rpc";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { toast } from "vue-sonner";
@@ -34,19 +33,6 @@ export const buildIndexerUrl = (
     return identifier ? `${baseUrl}/${identifier}` : baseUrl;
   }
   throw new Error(`Unsupported indexer value: ${indexer.value}`);
-};
-
-export const isRevealed = async (address: string): Promise<boolean> => {
-  const settingsStore = useSettingsStore();
-  try {
-    const rpc = new RpcClient(settingsStore.settings.rpcUrl);
-    const managerKey = await rpc.getManagerKey(address);
-
-    // If managerKey exists and is not null/undefined, the public key is revealed
-    return !!managerKey;
-  } catch {
-    return false;
-  }
 };
 
 export const getOperationHash = (confirmation: Confirmation) => {
