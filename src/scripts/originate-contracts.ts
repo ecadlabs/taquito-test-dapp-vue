@@ -101,7 +101,7 @@ export const originateContracts = async (
       );
     } else {
       throw new Error(
-        "No contracts found to originiate. Did you forget to compile?",
+        "No contracts found to originate. Did you forget to compile?",
       );
     }
   }
