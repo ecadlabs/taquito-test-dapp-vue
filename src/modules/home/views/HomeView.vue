@@ -591,7 +591,9 @@ const originatedContracts = computed(() => {
   return (contractConfig as ContractConfig[]).map((contract) => ({
     ...contract,
     tzktUrl: buildTzktUrl(contract.address, contract.network),
-    githubUrl: buildGitHubContractUrl(contract.contractName || ""),
+    githubUrl: contract.contractName
+      ? buildGitHubContractUrl(contract.contractName)
+      : undefined,
   }));
 });
 
