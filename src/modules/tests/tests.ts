@@ -4,6 +4,7 @@ import {
   ArrowUp10,
   Calculator,
   Coins,
+  Eye,
   FileText,
   Globe,
   InfinityIcon,
@@ -879,12 +880,71 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       },
     },
   },
+  "contract-views": {
+    id: "contract-views",
+    title: "Contract Views",
+    description: `Contract views allow you to execute read-only operations on smart contracts without creating a transaction or paying fees.
+
+    Views read contract storage and potentially call other contracts to compute results. This makes them useful for getting computed values from contracts without modifying blockchain state.`,
+    category: "Viewing Data",
+    setup: [
+      "Install Taquito: `npm install @taquito/taquito @taquito/tzip16`",
+      "Set up a Tezos wallet for contract interactions",
+      "Deploy contracts with view definitions or use existing ones",
+      "Configure Taquito with RPC endpoint",
+    ],
+    relatedTests: ["tzip16-metadata", "contract-events", "viewing-blocks"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/contract-views",
+      contract: [
+        {
+          name: "Metadata Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/metadata.jsligo",
+        },
+      ],
+      taquitoDocumentation: "https://taquito.io/docs/metadata-tzip16/",
+      tezosDocumentation:
+        "https://octez.tezos.com/docs/t024/michelson.html#views",
+    },
+    component: () =>
+      import("@/modules/tests/tests/contract-views/contract-views.vue"),
+    icon: Eye,
+    diagrams: {
+      "get-metadata": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get Contract",
+          },
+          {
+            id: "retrieve-metadata",
+            label: "Retrieve Metadata",
+          },
+        ],
+      },
+      "execute-view": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "setup-contract",
+            label: "Setup Contract",
+          },
+          {
+            id: "execute-view",
+            label: "Execute View",
+          },
+        ],
+      },
+    },
+  },
   "tzip16-metadata": {
     id: "tzip16-metadata",
     title: "TZIP-16 Contract Metadata",
     description: `TZIP-16 is a Tezos standard for adding metadata to smart contracts.
 
-    Metadata can be stored on-chain (tezos-storage), off-chain via HTTP(S), or on IPFS. This test allows you to experiment with different contracts and see how their metadata is structured and accessed, along with allowing interaction with view execution for read-only data without creating a transaction.`,
+    Metadata can be stored on-chain (tezos-storage), off-chain via HTTP(S), or on IPFS. This test allows you to experiment with different contracts and see how their metadata is structured and accessed.`,
     category: "Viewing Data",
     setup: [
       "Install Taquito TZIP-16 package: `npm install @taquito/tzip16`",
@@ -893,7 +953,12 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       "Configure Taquito with RPC endpoint",
       "Understand different metadata storage approaches (big_map, URI, JSON)",
     ],
-    relatedTests: ["counter-contract", "complex-parameters", "sign-payload"],
+    relatedTests: [
+      "contract-views",
+      "counter-contract",
+      "complex-parameters",
+      "sign-payload",
+    ],
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/tzip16-metadata",
@@ -924,19 +989,6 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
           {
             id: "retrieve-metadata",
             label: "Retrieve Metadata",
-          },
-        ],
-      },
-      "execute-view": {
-        noIndexer: true,
-        nodes: [
-          {
-            id: "get-contract",
-            label: "Get Contract",
-          },
-          {
-            id: "execute-metadata-view",
-            label: "Execute Metadata View",
           },
         ],
       },
