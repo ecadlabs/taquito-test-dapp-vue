@@ -220,7 +220,8 @@ export const originateContracts = async (
         existingConfig = JSON.parse(existingContent);
       } catch (error) {
         console.warn(
-          "⚠️  Failed to read existing config file, starting fresh.",
+          `Failed to read existing config file. Starting with a fresh config. Error:`,
+          error,
         );
         existingConfig = [];
       }
