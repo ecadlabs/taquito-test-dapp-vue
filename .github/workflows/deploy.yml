@@ -75,7 +75,9 @@ jobs:
           echo "$HOME/.ligo/bin" >> $GITHUB_PATH
       
       - run: npm run compile-contracts
-      - run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
+      - name: Originate contracts
+        if: ${{ vars.DISABLE_ORIGINATION != 'true' }}
+        run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
       - run: npm run build
 
       - name: Publish to Cloudflare Pages
