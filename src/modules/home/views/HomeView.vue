@@ -242,6 +242,62 @@
       </div>
     </section>
 
+    <!-- Originated Contracts -->
+    <section class="bg-muted/30 relative overflow-hidden px-4 py-16">
+      <div
+        class="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-transparent to-purple-500/5"
+      ></div>
+
+      <div class="relative mx-auto max-w-6xl space-y-12">
+        <div class="animate-on-scroll space-y-4 text-center">
+          <h2 class="text-3xl font-bold">Originated Contracts</h2>
+          <p class="text-muted-foreground">
+            Smart contracts deployed on Ghostnet for testing and exploration
+          </p>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-4">
+          <a
+            v-for="(contract, index) in originatedContracts"
+            :key="contract.address"
+            :href="contract.tzktUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group bg-background animate-on-scroll w-full max-w-sm rounded-lg border p-6 transition-all duration-250 hover:-translate-y-1 hover:border-purple-500/30 hover:shadow-xl hover:shadow-purple-500/10 md:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)]"
+            :data-delay="index * 50"
+          >
+            <div class="space-y-3">
+              <div class="flex items-start justify-between">
+                <div class="space-y-1">
+                  <h3
+                    class="font-semibold transition-colors duration-200 group-hover:text-purple-500"
+                  >
+                    {{ getContractDisplayName(contract.contractName) }}
+                  </h3>
+                  <p
+                    class="text-muted-foreground group-hover:text-foreground font-mono text-xs transition-colors duration-200"
+                  >
+                    {{ contract.address }}
+                  </p>
+                </div>
+                <div
+                  class="rounded-lg bg-purple-500/10 p-2 text-purple-500 transition-all duration-200 group-hover:scale-110 group-hover:bg-purple-500/20 dark:text-purple-400"
+                >
+                  <ExternalLinkIcon class="h-4 w-4" />
+                </div>
+              </div>
+              <div
+                class="dark:text-purple-400ad flex items-center text-xs text-purple-500 transition-transform duration-200 group-hover:translate-x-1"
+              >
+                View on tzkt
+                <ArrowRightIcon class="ml-1 h-3 w-3" />
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
     <!-- Resources & Links -->
     <section class="relative overflow-hidden px-4 py-16">
       <!-- Background effects -->
@@ -445,12 +501,15 @@
 
 <script setup lang="ts">
 import { Button } from "@/components/ui/button";
+import contractConfig from "@/contracts/contract-config.json";
+import { buildTzktUrl } from "@/lib/utils";
 import AnimatedCounter from "@/modules/home/components/animated-counter.vue";
 import {
   AvailableTests,
   getTestById,
   getTestsByCategory,
 } from "@/modules/tests/tests";
+import type { ContractConfig } from "@/types/contract";
 import {
   ArrowRightIcon,
   BookOpenIcon,
@@ -523,6 +582,21 @@ const quickStartTests = computed(() => {
     .map((id) => getTestById(id))
     .filter((test): test is NonNullable<typeof test> => test !== undefined);
 });
+
+const originatedContracts = computed(() => {
+  return (contractConfig as ContractConfig[]).map((contract) => ({
+    ...contract,
+    tzktUrl: buildTzktUrl(contract.address, contract.network),
+  }));
+});
+
+const getContractDisplayName = (contractName: string | undefined): string => {
+  if (!contractName) return "Unknown Contract";
+  return contractName
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
 
 const getTestTitle = (testId: string): string => {
   return getTestById(testId)?.title || testId;
