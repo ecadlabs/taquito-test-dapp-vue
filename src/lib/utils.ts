@@ -93,3 +93,14 @@ export const buildTzktUrl = (
   const baseUrl = `https://${networkType}.tzkt.io`;
   return `${baseUrl}/${contractAddress}`;
 };
+
+/**
+ * Builds a GitHub URL for a contract source file
+ *
+ * @param contractName - The contract name (e.g., 'counter')
+ * @returns The GitHub URL for the contract source file
+ */
+export const buildGitHubContractUrl = (contractName: string): string => {
+  const repoUrl = "https://github.com/ecadlabs/taquito-test-dapp-vue";
+  return `${repoUrl}/blob/main/src/contracts/uncompiled/${contractName}.jsligo`;
+};

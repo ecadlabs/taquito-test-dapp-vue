@@ -257,43 +257,47 @@
         </div>
 
         <div class="flex flex-wrap justify-center gap-4">
-          <a
+          <div
             v-for="(contract, index) in originatedContracts"
             :key="contract.address"
-            :href="contract.tzktUrl"
-            target="_blank"
-            rel="noopener noreferrer"
             class="group bg-background animate-on-scroll w-full max-w-sm rounded-lg border p-6 transition-all duration-250 hover:-translate-y-1 hover:border-purple-500/30 hover:shadow-xl hover:shadow-purple-500/10 md:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)]"
             :data-delay="index * 50"
           >
             <div class="space-y-3">
-              <div class="flex items-start justify-between">
-                <div class="space-y-1">
-                  <h3
-                    class="font-semibold transition-colors duration-200 group-hover:text-purple-500"
-                  >
-                    {{ getContractDisplayName(contract.contractName) }}
-                  </h3>
-                  <p
-                    class="text-muted-foreground group-hover:text-foreground font-mono text-xs transition-colors duration-200"
-                  >
-                    {{ contract.address }}
-                  </p>
-                </div>
-                <div
-                  class="rounded-lg bg-purple-500/10 p-2 text-purple-500 transition-all duration-200 group-hover:scale-110 group-hover:bg-purple-500/20 dark:text-purple-400"
+              <div class="space-y-1">
+                <h3
+                  class="font-semibold transition-colors duration-200 group-hover:text-purple-500"
                 >
-                  <ExternalLinkIcon class="h-4 w-4" />
-                </div>
+                  {{ getContractDisplayName(contract.contractName) }}
+                </h3>
+                <p
+                  class="text-muted-foreground group-hover:text-foreground font-mono text-xs transition-colors duration-200"
+                >
+                  {{ contract.address }}
+                </p>
               </div>
-              <div
-                class="dark:text-purple-400ad flex items-center text-xs text-purple-500 transition-transform duration-200 group-hover:translate-x-1"
-              >
-                View on tzkt
-                <ArrowRightIcon class="ml-1 h-3 w-3" />
+              <div class="flex items-center gap-4 text-xs">
+                <a
+                  :href="contract.githubUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center text-gray-700 transition-transform duration-200 hover:translate-x-1 dark:text-gray-300"
+                >
+                  View source
+                  <ArrowRightIcon class="ml-1 h-3 w-3" />
+                </a>
+                <a
+                  :href="contract.tzktUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center text-purple-500 transition-transform duration-200 hover:translate-x-1 dark:text-purple-400"
+                >
+                  View on tzkt
+                  <ArrowRightIcon class="ml-1 h-3 w-3" />
+                </a>
               </div>
             </div>
-          </a>
+          </div>
         </div>
       </div>
     </section>
@@ -502,7 +506,7 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button";
 import contractConfig from "@/contracts/contract-config.json";
-import { buildTzktUrl } from "@/lib/utils";
+import { buildGitHubContractUrl, buildTzktUrl } from "@/lib/utils";
 import AnimatedCounter from "@/modules/home/components/animated-counter.vue";
 import {
   AvailableTests,
@@ -587,6 +591,7 @@ const originatedContracts = computed(() => {
   return (contractConfig as ContractConfig[]).map((contract) => ({
     ...contract,
     tzktUrl: buildTzktUrl(contract.address, contract.network),
+    githubUrl: buildGitHubContractUrl(contract.contractName || ""),
   }));
 });
 
