@@ -14,14 +14,15 @@ test.describe("Contract Views", () => {
     await page.getByTestId("get-metadata-button").click();
     await waitForSuccess({ page });
 
-    // Wait a bit for the view options to appear
-    await page.waitForTimeout(500);
-
+    // Wait for the view options to appear
+    await page
+      .locator('button:has-text("Execute")')
+      .first()
+      .waitFor({ state: "visible" });
     await page.locator('button:has-text("Execute")').first().click();
 
     // Wait for the view result to appear
-    await page.waitForTimeout(1000);
-
+    await page.locator("text=Hello, World").waitFor({ state: "visible" });
     await expect(page.locator("text=Hello, World")).toBeVisible();
   });
 });
