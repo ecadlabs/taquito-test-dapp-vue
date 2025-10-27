@@ -65,7 +65,9 @@ jobs:
           echo "ALICE_WALLET_ADDRESS: ${{ vars.ALICE_WALLET_ADDRESS }}"
           echo "REOWN_PROJECT_ID: ${{ secrets.REOWN_PROJECT_ID }}"
       
-      - run: npm run fund-wallet ${{ vars.ALICE_WALLET_ADDRESS }}
+      - name: Fund wallet
+        if: ${{ vars.DISABLE_WALLET_FUNDING != 'true' }}
+        run: npm run fund-wallet ${{ vars.ALICE_WALLET_ADDRESS }}
       
       # Install LIGO for contract compilation
       - name: Install LIGO
