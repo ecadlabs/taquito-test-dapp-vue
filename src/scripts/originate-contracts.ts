@@ -204,13 +204,6 @@ export const originateContracts = async (
 
   // Save contract configuration
   if (results.length > 0) {
-    const contractConfig: ContractConfig[] = results.map((result) => ({
-      address: result.contractAddress,
-      originatedAt: new Date().toISOString(),
-      network: networkType,
-      contractName: result.contractName,
-    }));
-
     const configDir = join(process.cwd(), "src", "contracts");
     const configPath = join(configDir, "contract-config.json");
 
@@ -219,7 +212,61 @@ export const originateContracts = async (
       mkdirSync(configDir, { recursive: true });
     }
 
-    writeFileSync(configPath, JSON.stringify(contractConfig, null, 2));
+    // Read existing config if it exists
+    let existingConfig: ContractConfig[] = [];
+    if (existsSync(configPath)) {
+      try {
+        const existingContent = readFileSync(configPath, "utf8");
+        existingConfig = JSON.parse(existingContent);
+      } catch (error) {
+        console.warn(
+          `Failed to read existing config file. Starting with a fresh config. Error:`,
+          error,
+        );
+        existingConfig = [];
+      }
+    }
+
+    // Create new entries for the originated contracts
+    const newEntries: ContractConfig[] = results.map((result) => ({
+      address: result.contractAddress,
+      originatedAt: new Date().toISOString(),
+      network: networkType,
+      contractName: result.contractName,
+    }));
+
+    // If originating a specific contract, update or append to existing config
+    // Otherwise, replace the entire config (originating all contracts)
+    let finalConfig: ContractConfig[];
+    if (specificContract) {
+      finalConfig = [...existingConfig];
+
+      // Update existing entries or add new ones
+      for (const newEntry of newEntries) {
+        const existingIndex = finalConfig.findIndex(
+          (entry) => entry.contractName === newEntry.contractName,
+        );
+
+        if (existingIndex >= 0) {
+          // Update existing contract
+          finalConfig[existingIndex] = newEntry;
+          console.log(
+            `📝 Updated existing contract "${newEntry.contractName}" in config`,
+          );
+        } else {
+          // Append new contract
+          finalConfig.push(newEntry);
+          console.log(
+            `➕ Added new contract "${newEntry.contractName}" to config`,
+          );
+        }
+      }
+    } else {
+      // Originating all contracts, replace entire config
+      finalConfig = newEntries;
+    }
+
+    writeFileSync(configPath, JSON.stringify(finalConfig, null, 2));
     console.log(
       `\n💾 Contract configuration created or updated at: ${configPath}`,
     );
