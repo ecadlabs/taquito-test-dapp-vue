@@ -42,6 +42,7 @@ interface ContractDefinition {
 
 export const originateContracts = async (
   key: string,
+  specificContract?: string,
 ): Promise<OriginationResult[]> => {
   // Validate environment variables
   const rpcUrl = process.env.VITE_RPC_URL;
@@ -79,6 +80,12 @@ export const originateContracts = async (
 
     for (const file of files) {
       const contractName = file.replace(".tz", "");
+
+      // If a specific contract is requested, only include that contract
+      if (specificContract && contractName !== specificContract) {
+        continue;
+      }
+
       contracts.push({
         name: contractName,
         path: join(compiledDir, file),
@@ -88,12 +95,22 @@ export const originateContracts = async (
   }
 
   if (contracts.length === 0) {
-    throw new Error(
-      "No contracts found to originiate. Did you forget to compile?",
-    );
+    if (specificContract) {
+      throw new Error(
+        `Contract "${specificContract}" not found in compiled directory. Did you forget to compile it?`,
+      );
+    } else {
+      throw new Error(
+        "No contracts found to originate. Did you forget to compile?",
+      );
+    }
   }
 
-  console.log(`📄 Found ${contracts.length} contract(s) to originate`);
+  if (specificContract) {
+    console.log(`📄 Found contract "${specificContract}" to originate`);
+  } else {
+    console.log(`📄 Found ${contracts.length} contract(s) to originate`);
+  }
 
   const results: OriginationResult[] = [];
 
@@ -187,13 +204,6 @@ export const originateContracts = async (
 
   // Save contract configuration
   if (results.length > 0) {
-    const contractConfig: ContractConfig[] = results.map((result) => ({
-      address: result.contractAddress,
-      originatedAt: new Date().toISOString(),
-      network: networkType,
-      contractName: result.contractName,
-    }));
-
     const configDir = join(process.cwd(), "src", "contracts");
     const configPath = join(configDir, "contract-config.json");
 
@@ -202,7 +212,61 @@ export const originateContracts = async (
       mkdirSync(configDir, { recursive: true });
     }
 
-    writeFileSync(configPath, JSON.stringify(contractConfig, null, 2));
+    // Read existing config if it exists
+    let existingConfig: ContractConfig[] = [];
+    if (existsSync(configPath)) {
+      try {
+        const existingContent = readFileSync(configPath, "utf8");
+        existingConfig = JSON.parse(existingContent);
+      } catch (error) {
+        console.warn(
+          `Failed to read existing config file. Starting with a fresh config. Error:`,
+          error,
+        );
+        existingConfig = [];
+      }
+    }
+
+    // Create new entries for the originated contracts
+    const newEntries: ContractConfig[] = results.map((result) => ({
+      address: result.contractAddress,
+      originatedAt: new Date().toISOString(),
+      network: networkType,
+      contractName: result.contractName,
+    }));
+
+    // If originating a specific contract, update or append to existing config
+    // Otherwise, replace the entire config (originating all contracts)
+    let finalConfig: ContractConfig[];
+    if (specificContract) {
+      finalConfig = [...existingConfig];
+
+      // Update existing entries or add new ones
+      for (const newEntry of newEntries) {
+        const existingIndex = finalConfig.findIndex(
+          (entry) => entry.contractName === newEntry.contractName,
+        );
+
+        if (existingIndex >= 0) {
+          // Update existing contract
+          finalConfig[existingIndex] = newEntry;
+          console.log(
+            `📝 Updated existing contract "${newEntry.contractName}" in config`,
+          );
+        } else {
+          // Append new contract
+          finalConfig.push(newEntry);
+          console.log(
+            `➕ Added new contract "${newEntry.contractName}" to config`,
+          );
+        }
+      }
+    } else {
+      // Originating all contracts, replace entire config
+      finalConfig = newEntries;
+    }
+
+    writeFileSync(configPath, JSON.stringify(finalConfig, null, 2));
     console.log(
       `\n💾 Contract configuration created or updated at: ${configPath}`,
     );
@@ -339,8 +403,18 @@ function getDefaultStorage(
 // If running this script directly
 if (process.argv[1] && process.argv[1].includes("originate-contracts")) {
   const key = process.argv[2];
+  const specificContract = process.argv[3];
 
-  originateContracts(key)
+  if (!key) {
+    console.error("Error: Private key is required as the first argument");
+    console.log(
+      "Usage: npm run originate-contracts <private-key> [contract-name]",
+    );
+    console.log("Example: npm run originate-contracts edsk... counter");
+    process.exit(1);
+  }
+
+  originateContracts(key, specificContract)
     .then((results) => {
       console.log(`\n📋 Origination Summary:`);
       results.forEach((result) => {
