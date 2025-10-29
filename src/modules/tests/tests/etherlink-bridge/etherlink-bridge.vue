@@ -447,7 +447,6 @@ onMounted(() => {
 });
 
 watch(useFastWithdrawal, (newUseFastWithdrawal) => {
-  console.log("newUseFastWithdrawal", newUseFastWithdrawal);
   if (newUseFastWithdrawal) {
     diagramStore.setTestDiagram("etherlink-bridge", "withdraw-fast");
   } else {
@@ -456,7 +455,6 @@ watch(useFastWithdrawal, (newUseFastWithdrawal) => {
 });
 
 watch(activeTab, (newTab) => {
-  console.log("newTab", newTab);
   if (newTab === "withdraw") {
     if (useFastWithdrawal.value) {
       diagramStore.setTestDiagram("etherlink-bridge", "withdraw-fast");
@@ -481,6 +479,9 @@ const performDeposit = async () => {
 
 const performWithdraw = async () => {
   try {
+    if (!window.ethereum) {
+      throw new Error("EVM wallet not connected");
+    }
     withdrawLoading.value = true;
     await withdrawFromEtherlink(
       withdrawAmount.value,

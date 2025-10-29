@@ -5,9 +5,14 @@ import type { Estimate } from "@taquito/taquito";
 import { getBridgeConfig } from "./bridge-config";
 
 const TEST_ID = "etherlink-bridge";
-let estimate: Estimate;
 
-/** Validates an Etherlink/EVM address */
+/**
+ * Validates an Etherlink/EVM address
+ *
+ * @param address - The Etherlink address to validate
+ * @returns True if the address is valid (0x followed by 40 hex characters),
+ *   false otherwise
+ */
 const isValidEtherlinkAddress = (address: string): boolean => {
   try {
     // Basic validation: 0x followed by 40 hex characters
@@ -29,6 +34,13 @@ const isValidEtherlinkAddress = (address: string): boolean => {
  *    - Recipient's Etherlink wallet address
  * 2. The bridge contract forwards to exchanger contract
  * 3. Exchanger creates tickets and sends to Smart Rollup inbox
+ *
+ * @param amount - The amount of XTZ to deposit (in tez)
+ * @param etherlinkAddress - The recipient's Etherlink wallet address (0x
+ *   prefixed)
+ * @returns Promise that resolves when the deposit is confirmed
+ * @throws Error if the Etherlink address is invalid, amount is invalid, or
+ *   transaction fails
  */
 const depositToEtherlink = async (
   amount: number,
@@ -36,6 +48,7 @@ const depositToEtherlink = async (
 ): Promise<void> => {
   const diagramStore = useDiagramStore();
   diagramStore.setTestDiagram(TEST_ID, "deposit");
+  let estimate: Estimate;
 
   // Validate inputs
   if (!etherlinkAddress || !isValidEtherlinkAddress(etherlinkAddress)) {
@@ -115,9 +128,16 @@ const depositToEtherlink = async (
 };
 
 /**
- * Send a withdrawal transaction on Etherlink using ethers.js This sends the
- * transaction directly to the Etherlink withdrawal precompile Returns the
- * transaction hash
+ * Send a withdrawal transaction on Etherlink using ethers.js
+ *
+ * This sends the transaction directly to the Etherlink withdrawal precompile.
+ *
+ * @param amount - The amount of XTZ to withdraw (in tez)
+ * @param tezosDestination - The destination Tezos L1 address (base58 encoded)
+ * @param evmProvider - The EVM wallet provider (e.g., MetaMask)
+ * @param useFastWithdrawal - Whether to use fast withdrawal (default: false)
+ * @returns Promise that resolves to the transaction hash
+ * @throws Error if the EVM wallet is not connected or transaction fails
  */
 const sendWithdrawalTransaction = async (
   amount: number,
@@ -224,8 +244,17 @@ const sendWithdrawalTransaction = async (
 };
 
 /**
- * Withdraw from Etherlink L2 to Tezos L1 using EVM wallet Sends the withdrawal
- * transaction directly on Etherlink
+ * Withdraw from Etherlink L2 to Tezos L1 using EVM wallet
+ *
+ * Sends the withdrawal transaction directly on Etherlink.
+ *
+ * @param amount - The amount of XTZ to withdraw (in tez)
+ * @param tezosDestination - The destination Tezos L1 address (base58 encoded)
+ * @param evmProvider - The EVM wallet provider (e.g., MetaMask)
+ * @param useFastWithdrawal - Whether to use fast withdrawal (default: false)
+ * @returns Promise that resolves when the withdrawal is confirmed
+ * @throws Error if the Tezos destination is invalid, EVM wallet is not
+ *   connected, or transaction fails
  */
 const withdrawFromEtherlink = async (
   amount: number,

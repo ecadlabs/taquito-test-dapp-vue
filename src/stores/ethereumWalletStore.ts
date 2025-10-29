@@ -36,8 +36,13 @@ export const useEthereumWalletStore = defineStore("ethereumWallet", () => {
     }
   };
 
-  /** Connects to the Ethereum wallet (e.g., MetaMask) */
-  const connectWallet = async (): Promise<void> => {
+  /**
+   * Connects to the Ethereum wallet (e.g., MetaMask)
+   *
+   * @param existingAccounts - Optional array of accounts to use instead of
+   *   requesting them
+   */
+  const connectWallet = async (existingAccounts?: string[]): Promise<void> => {
     if (typeof window.ethereum === "undefined") {
       error.value = "MetaMask or another EVM wallet is not installed";
       throw new Error(error.value);
@@ -49,7 +54,21 @@ export const useEthereumWalletStore = defineStore("ethereumWallet", () => {
 
       provider = new BrowserProvider(window.ethereum as Eip1193Provider);
 
-      const accounts = await provider.send("eth_requestAccounts", []);
+      let accounts: string[];
+
+      if (existingAccounts && existingAccounts.length > 0) {
+        accounts = existingAccounts;
+      } else {
+        const fetchedAccounts = await provider.send("eth_requestAccounts", []);
+
+        if (!Array.isArray(fetchedAccounts)) {
+          throw new Error(
+            "Invalid response from provider: accounts is not an array",
+          );
+        }
+
+        accounts = fetchedAccounts;
+      }
 
       if (accounts.length === 0) {
         throw new Error("No accounts found");
@@ -94,6 +113,8 @@ export const useEthereumWalletStore = defineStore("ethereumWallet", () => {
       }
     }
 
+    removeEventListeners();
+
     address.value = null;
     balance.value = null;
     chainId.value = null;
@@ -116,8 +137,14 @@ export const useEthereumWalletStore = defineStore("ethereumWallet", () => {
       const accounts = await window.ethereum.request({
         method: "eth_accounts",
       });
+
+      if (!Array.isArray(accounts)) {
+        console.error("Invalid response from eth_accounts: not an array");
+        return;
+      }
+
       if (accounts.length > 0) {
-        await connectWallet();
+        await connectWallet(accounts);
       }
     } catch (err) {
       console.error("Failed to check connection:", err);
@@ -169,7 +196,6 @@ export const useEthereumWalletStore = defineStore("ethereumWallet", () => {
 
   /** Initializes the store (should be called when the app starts) */
   const initialize = async (): Promise<void> => {
-    attachEventListeners();
     await checkConnection();
   };
 
