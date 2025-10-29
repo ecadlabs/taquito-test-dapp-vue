@@ -1,4 +1,5 @@
 import type { TestDiagram, TestMetadata } from "@/modules/tests/test";
+import { NetworkType } from "@airgap/beacon-types";
 import {
   ArrowRightLeft,
   ArrowUp10,
@@ -1203,6 +1204,7 @@ Etherlink is an EVM-compatible rollup built on Tezos. This test demonstrates how
 
 The bridge uses Smart Rollup technology to enable cross-layer communication.`,
     category: "Advanced Operations",
+    supportedNetworks: [NetworkType.GHOSTNET],
     setup: [
       "Connect to Ghostnet testnet (only network currently supported)",
       "Set up a Tezos wallet with Beacon/WalletConnect/Ledger",
