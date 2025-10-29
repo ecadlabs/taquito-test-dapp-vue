@@ -1,4 +1,5 @@
 import type { TestDiagram, TestMetadata } from "@/modules/tests/test";
+import { NetworkType } from "@airgap/beacon-types";
 import {
   ArrowRightLeft,
   ArrowUp10,
@@ -9,6 +10,7 @@ import {
   Globe,
   InfinityIcon,
   Info,
+  Network,
   Package,
   Parentheses,
   Plus,
@@ -1186,6 +1188,103 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
           {
             id: "fetch-block",
             label: "Fetch Block",
+          },
+        ],
+      },
+    },
+  },
+  "etherlink-bridge": {
+    id: "etherlink-bridge",
+    title: "Etherlink Bridge",
+    description: `Bridge XTZ tokens between Tezos Layer 1 (L1) and Etherlink Layer 2 (L2). 
+
+Etherlink is an EVM-compatible rollup built on Tezos. This test demonstrates how to:
+- Deposit XTZ from Tezos L1 to Etherlink L2
+- Withdraw XTZ from Etherlink L2 to Tezos L1
+
+The bridge uses Smart Rollup technology to enable cross-layer communication.`,
+    category: "Advanced Operations",
+    supportedNetworks: [NetworkType.GHOSTNET],
+    setup: [
+      "Connect to Ghostnet testnet (only network currently supported)",
+      "Set up a Tezos wallet with Beacon/WalletConnect/Ledger",
+      "Set up an EVM wallet (e.g. MetaMask)",
+      "Have sufficient XTZ for gas fees and the amount to transfer",
+    ],
+    relatedTests: ["transfer", "batch", "transaction-limit"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/etherlink-bridge",
+      taquitoDocumentation: "https://taquito.io/docs/smart_rollups/",
+      tezosDocumentation: "https://docs.etherlink.com/bridging/bridging-tezos",
+    },
+    component: () =>
+      import("@/modules/tests/tests/etherlink-bridge/etherlink-bridge.vue"),
+    icon: Network,
+    diagrams: {
+      deposit: {
+        nodes: [
+          {
+            id: "get-bridge-contract",
+            label: "Get Bridge Contract",
+          },
+          {
+            id: "convert-etherlink-address",
+            label: "Convert Etherlink Address",
+          },
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "send-deposit-transaction",
+            label: "Send Deposit Transaction",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+      withdraw: {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "create-signer",
+            label: "Create Signer",
+          },
+          {
+            id: "get-withdrawal-contract",
+            label: "Get Withdrawal Contract",
+          },
+          {
+            id: "call-withdrawal-contract",
+            label: "Call Withdrawal Contract",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+      "withdraw-fast": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "create-signer",
+            label: "Create Signer",
+          },
+          {
+            id: "get-fast-withdrawal-contract",
+            label: "Get Fast Withdrawal Contract",
+          },
+          {
+            id: "call-fast-withdrawal-contract",
+            label: "Call Fast Withdrawal Contract",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
           },
         ],
       },

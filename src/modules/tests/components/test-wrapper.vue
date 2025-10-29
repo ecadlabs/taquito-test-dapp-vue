@@ -172,7 +172,28 @@
 
       <!-- Middle Section: Actual Test Content -->
       <div class="border-t pt-8">
-        <slot />
+        <div class="relative">
+          <!-- Network Restriction Warning Overlay -->
+          <div
+            v-if="!isNetworkSupported"
+            class="absolute inset-0 z-10 flex items-center justify-center"
+          >
+            <div
+              class="bg-background flex flex-col items-center justify-center rounded-lg border px-4 py-3"
+            >
+              <Frown class="size-6" />
+              <p class="font-semibold">Test Not Supported</p>
+              <p class="text-muted-foreground text-sm">
+                This test is only available on {{ supportedNetworksText }}.
+              </p>
+            </div>
+          </div>
+
+          <!-- Test Content (blurred if network not supported) -->
+          <div :class="{ 'pointer-events-none blur-sm': !isNetworkSupported }">
+            <slot />
+          </div>
+        </div>
       </div>
 
       <!-- Bottom Section: Operational Flow -->
@@ -207,12 +228,14 @@ import type { TestMetadata } from "@/modules/tests/test";
 import { getTestById } from "@/modules/tests/tests";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
+import type { NetworkType } from "@airgap/beacon-types";
 import {
   ArrowRight,
   BookOpenText,
   Code,
   FileCode,
   FileText,
+  Frown,
   Link,
   Settings,
   TriangleAlert,
@@ -235,6 +258,35 @@ const getTestTitle = (testId: string): string => {
   const test = getTestById(testId);
   return test?.title || testId;
 };
+
+const currentNetwork = computed(
+  () => import.meta.env.VITE_NETWORK_TYPE as NetworkType,
+);
+
+const isNetworkSupported = computed(() => {
+  if (!testMetadata.value?.supportedNetworks) {
+    // If no supportedNetworks is defined, the test is available on all networks
+    return true;
+  }
+  return testMetadata.value.supportedNetworks.includes(currentNetwork.value);
+});
+
+const supportedNetworksText = computed(() => {
+  if (!testMetadata.value?.supportedNetworks) {
+    return "all networks";
+  }
+
+  const networks = testMetadata.value.supportedNetworks;
+  if (networks.length === 1) {
+    return networks[0];
+  } else if (networks.length === 2) {
+    return `${networks[0]} and ${networks[1]}`;
+  } else {
+    const last = networks[networks.length - 1];
+    const rest = networks.slice(0, -1).join(", ");
+    return `${rest}, and ${last}`;
+  }
+});
 
 onUnmounted(() => {
   // Cancel current test when leaving test

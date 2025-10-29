@@ -38,6 +38,10 @@
 
 - **Payload Signing** - Sign and verify data
 
+### 🌉 **Layer 2 Integration**
+
+- **Etherlink Bridge** - Bridge XTZ between Tezos L1 and Etherlink L2
+
 ## 🎨 Key Features
 
 - **📊 Visual Learning** - Interactive diagrams showing operation flows
