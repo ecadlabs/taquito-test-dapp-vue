@@ -1368,7 +1368,6 @@ The bridge uses Smart Rollup technology to enable cross-layer communication.`,
       },
     },
   },
-
 };
 
 export const getTestById = (id: string): TestMetadata | undefined => {
