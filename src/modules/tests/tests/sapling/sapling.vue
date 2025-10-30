@@ -26,12 +26,12 @@
         <CardContent class="space-y-4">
           <div v-if="userKey" class="space-y-3">
             <div class="text-sm">
-              <Label class="font-medium text-gray-700"
+              <Label class="font-medium text-gray-700 dark:text-gray-300"
                 >Your Spending Key (Mnemonic):</Label
               >
               <div class="mt-1 flex items-center gap-2">
                 <code
-                  class="flex-1 rounded border bg-white px-3 py-2 font-mono text-xs break-all"
+                  class="bg-background border-input flex-1 rounded border px-3 py-2 font-mono text-xs break-all text-gray-900 dark:text-gray-100"
                 >
                   {{ userKey.mnemonic }}
                 </code>
@@ -45,12 +45,12 @@
               </div>
             </div>
             <div class="text-sm">
-              <Label class="font-medium text-gray-700"
+              <Label class="font-medium text-gray-700 dark:text-gray-300"
                 >Your Sapling Address:</Label
               >
               <div class="mt-1 flex items-center gap-2">
                 <code
-                  class="flex-1 rounded border bg-white px-3 py-2 font-mono text-xs break-all"
+                  class="bg-background border-input flex-1 rounded border px-3 py-2 font-mono text-xs break-all text-gray-900 dark:text-gray-100"
                 >
                   {{ userKey.address }}
                 </code>
@@ -67,12 +67,12 @@
 
           <div v-if="aliceAddress" class="space-y-3">
             <div class="text-sm">
-              <Label class="font-medium text-gray-700"
+              <Label class="font-medium text-gray-700 dark:text-gray-300"
                 >Alice's Sapling Address:</Label
               >
               <div class="mt-1 flex items-center gap-2">
                 <code
-                  class="flex-1 rounded border bg-white px-3 py-2 font-mono text-xs break-all"
+                  class="bg-background border-input flex-1 rounded border px-3 py-2 font-mono text-xs break-all text-gray-900 dark:text-gray-100"
                 >
                   {{ aliceAddress }}
                 </code>
