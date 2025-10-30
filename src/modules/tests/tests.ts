@@ -1,19 +1,24 @@
 import type { TestDiagram, TestMetadata } from "@/modules/tests/test";
+import { NetworkType } from "@airgap/beacon-types";
 import {
   ArrowRightLeft,
   ArrowUp10,
   Calculator,
   Coins,
+  Eye,
   EyeOff,
+  FileText,
   Globe,
   InfinityIcon,
   Info,
+  Network,
   Package,
   Parentheses,
   Plus,
   Shield,
   Users,
   X,
+  Zap,
 } from "lucide-vue-next";
 
 export const AvailableTests: Record<string, TestMetadata> = {
@@ -32,7 +37,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/transfer",
-      taqutioDocumentation: "https://taquito.io/docs/making_transfers",
+      taquitoDocumentation: "https://taquito.io/docs/making_transfers",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/token_management.html",
     },
@@ -85,7 +90,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
       ],
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/counter",
-      taqutioDocumentation: "https://taquito.io/docs/smartcontracts",
+      taquitoDocumentation: "https://taquito.io/docs/smartcontracts",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/accounts.html#smart-contracts",
     },
@@ -173,7 +178,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/increase-paid-storage",
-      taqutioDocumentation: "https://taquito.io/docs/increase_paid_storage",
+      taquitoDocumentation: "https://taquito.io/docs/increase_paid_storage",
       tezosDocumentation:
         "https://octez.tezos.com/docs/alpha/blocks_ops.html#manager-operations",
     },
@@ -229,7 +234,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/estimate-fees",
-      taqutioDocumentation: "https://taquito.io/docs/estimate",
+      taquitoDocumentation: "https://taquito.io/docs/estimate",
     },
     component: () =>
       import("@/modules/tests/tests/estimate-fees/estimate-fees.vue"),
@@ -263,7 +268,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/delegation",
-      taqutioDocumentation: "https://taquito.io/docs/set_delegate",
+      taquitoDocumentation: "https://taquito.io/docs/set_delegate",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/baking_power.html#delegate-delegators-stakers",
     },
@@ -322,7 +327,7 @@ Users can control their staked funds using the 'stake', 'unstake', and 'finalize
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/staking",
-      taqutioDocumentation: "https://taquito.io/docs/staking",
+      taquitoDocumentation: "https://taquito.io/docs/staking",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/baking_power.html#delegate-delegators-stakers",
     },
@@ -405,7 +410,7 @@ Users can control their staked funds using the 'stake', 'unstake', and 'finalize
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/batch",
-      taqutioDocumentation: "https://taquito.io/docs/batch_API/",
+      taquitoDocumentation: "https://taquito.io/docs/batch_API/",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/blocks_ops.html#manager-operation-batches",
     },
@@ -460,7 +465,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       ],
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/sign-payload",
-      taqutioDocumentation: "https://taquito.io/docs/signing/",
+      taquitoDocumentation: "https://taquito.io/docs/signing/",
     },
     component: () =>
       import("@/modules/tests/tests/sign-payload/sign-payload.vue"),
@@ -570,7 +575,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/transaction-limit",
-      taqutioDocumentation: "https://taquito.io/docs/transaction_limits/",
+      taquitoDocumentation: "https://taquito.io/docs/transaction_limits/",
     },
     component: () =>
       import("@/modules/tests/tests/transaction-limit/transaction-limit.vue"),
@@ -617,7 +622,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/failing-noop",
-      taqutioDocumentation: "https://taquito.io/docs/failing_noop/",
+      taquitoDocumentation: "https://taquito.io/docs/failing_noop/",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/blocks_ops.html#failing-noop-operation",
     },
@@ -666,7 +671,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/failing-contract",
-      taqutioDocumentation: "https://taquito.io/docs/smartcontracts",
+      taquitoDocumentation: "https://taquito.io/docs/smartcontracts",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/accounts.html#smart-contracts",
     },
@@ -716,7 +721,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/global-constants",
-      taqutioDocumentation: "https://taquito.io/docs/global_constant/",
+      taquitoDocumentation: "https://taquito.io/docs/global_constant/",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/global_constants.html",
     },
@@ -765,7 +770,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       ],
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/complex-parameters",
-      taqutioDocumentation: "https://taquito.io/docs/complex_parameters/",
+      taquitoDocumentation: "https://taquito.io/docs/complex_parameters/",
       tezosDocumentation:
         "https://octez.tezos.com/docs/seoul/michelson.html#data-structures",
     },
@@ -878,40 +883,36 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       },
     },
   },
-  "tzip16-metadata": {
-    id: "tzip16-metadata",
-    title: "TZIP-16 Contract Metadata",
-    description: `TZIP-16 is a Tezos standard for adding metadata to smart contracts.
+  "contract-views": {
+    id: "contract-views",
+    title: "Contract Views",
+    description: `Contract views allow you to execute read-only operations on smart contracts without creating a transaction or paying fees.
 
-    Metadata can be stored on-chain (tezos-storage), off-chain via HTTP(S), or on IPFS. This test allows you to experiment with different contracts and see how their metadata is structured and accessed, along with allowing interaction with view execution for read-only data without creating a transaction.`,
-    category: "Smart Contracts",
+    Views read contract storage and potentially call other contracts to compute results. This makes them useful for getting computed values from contracts without modifying blockchain state.`,
+    category: "Viewing Data",
     setup: [
-      "Install Taquito TZIP-16 package: `npm install @taquito/tzip16`",
+      "Install Taquito: `npm install @taquito/taquito @taquito/tzip16`",
       "Set up a Tezos wallet for contract interactions",
-      "Deploy contracts with TZIP-16 metadata or use existing ones",
+      "Deploy contracts with view definitions or use existing ones",
       "Configure Taquito with RPC endpoint",
-      "Understand different metadata storage approaches (big_map, URI, JSON)",
     ],
-    relatedTests: ["counter-contract", "complex-parameters", "sign-payload"],
+    relatedTests: ["tzip16-metadata", "contract-events", "viewing-blocks"],
     documentation: {
       script:
-        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/tzip16-metadata",
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/contract-views",
       contract: [
         {
           name: "Metadata Contract Source",
           url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/metadata.jsligo",
         },
-        {
-          name: "Metadata HTTPS Contract Source",
-          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/metadata-https.jsligo",
-        },
       ],
-      taqutioDocumentation: "https://taquito.io/docs/metadata-tzip16/",
-      tezosDocumentation: "https://tzip.tezosagora.org/proposal/tzip-16/",
+      taquitoDocumentation: "https://taquito.io/docs/metadata-tzip16/",
+      tezosDocumentation:
+        "https://octez.tezos.com/docs/t024/michelson.html#views",
     },
     component: () =>
-      import("@/modules/tests/tests/tzip16-metadata/tzip16-metadata.vue"),
-    icon: Info,
+      import("@/modules/tests/tests/contract-views/contract-views.vue"),
+    icon: Eye,
     diagrams: {
       "get-metadata": {
         noIndexer: true,
@@ -930,12 +931,67 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
         noIndexer: true,
         nodes: [
           {
+            id: "setup-contract",
+            label: "Setup Contract",
+          },
+          {
+            id: "execute-view",
+            label: "Execute View",
+          },
+        ],
+      },
+    },
+  },
+  "tzip16-metadata": {
+    id: "tzip16-metadata",
+    title: "TZIP-16 Contract Metadata",
+    description: `TZIP-16 is a Tezos standard for adding metadata to smart contracts.
+
+    Metadata can be stored on-chain (tezos-storage), off-chain via HTTP(S), or on IPFS. This test allows you to experiment with different contracts and see how their metadata is structured and accessed.`,
+    category: "Viewing Data",
+    setup: [
+      "Install Taquito TZIP-16 package: `npm install @taquito/tzip16`",
+      "Set up a Tezos wallet for contract interactions",
+      "Deploy contracts with TZIP-16 metadata or use existing ones",
+      "Configure Taquito with RPC endpoint",
+      "Understand different metadata storage approaches (big_map, URI, JSON)",
+    ],
+    relatedTests: [
+      "contract-views",
+      "counter-contract",
+      "complex-parameters",
+      "sign-payload",
+    ],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/tzip16-metadata",
+      contract: [
+        {
+          name: "Metadata Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/metadata.jsligo",
+        },
+        {
+          name: "Metadata HTTPS Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/metadata-https.jsligo",
+        },
+      ],
+      taquitoDocumentation: "https://taquito.io/docs/metadata-tzip16/",
+      tezosDocumentation: "https://tzip.tezosagora.org/proposal/tzip-16/",
+    },
+    component: () =>
+      import("@/modules/tests/tests/tzip16-metadata/tzip16-metadata.vue"),
+    icon: Info,
+    diagrams: {
+      "get-metadata": {
+        noIndexer: true,
+        nodes: [
+          {
             id: "get-contract",
             label: "Get Contract",
           },
           {
-            id: "execute-metadata-view",
-            label: "Execute Metadata View",
+            id: "retrieve-metadata",
+            label: "Retrieve Metadata",
           },
         ],
       },
@@ -967,7 +1023,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
           url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/balance-callback.jsligo",
         },
       ],
-      taqutioDocumentation: "https://taquito.io/docs/tzip12/",
+      taquitoDocumentation: "https://taquito.io/docs/tzip12/",
       tezosDocumentation:
         "https://gitlab.com/tezos/tzip/-/blob/master/proposals/tzip-12/tzip-12.md",
     },
@@ -1058,6 +1114,183 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       },
     },
   },
+  "contract-events": {
+    id: "contract-events",
+    title: "Contract Events",
+    description: `Contract events allow smart contracts to emit event-like information to off-chain applications using the EMIT instruction in Michelson.
+
+    This test demonstrates how to subscribe to contract events using Taquito's \`TezosToolkit.stream.subscribeEvent()\`. You can subscribe to specific event tags or all events from a contract, enabling real-time monitoring of contract state changes and operations.`,
+    category: "Viewing Data",
+    setup: [
+      "Install Taquito: `npm install @taquito/taquito`",
+      "Set up a Tezos wallet with sufficient Tez for gas fees",
+      "Deploy a contract that emits events using EMIT instruction",
+    ],
+    relatedTests: ["counter-contract", "tzip16-metadata"],
+    documentation: {
+      contract: [
+        {
+          name: "Events Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/events-contract.jsligo",
+        },
+      ],
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/contract-events",
+      taquitoDocumentation: "https://taquito.io/docs/subscribe_event/",
+      tezosDocumentation: "https://octez.tezos.com/docs/t024/event.html",
+    },
+    component: () =>
+      import("@/modules/tests/tests/contract-events/contract-events.vue"),
+    icon: Zap,
+    diagrams: {
+      "emit-event": {
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get Contract",
+          },
+          {
+            id: "execute-operation",
+            label: "Execute Operation",
+          },
+          {
+            id: "wait-confirmation",
+            label: "Wait for Confirmation",
+          },
+        ],
+      },
+    },
+  },
+  "viewing-blocks": {
+    id: "viewing-blocks",
+    title: "Viewing Blocks",
+    description: `Block inspection focused on finding transactions within blocks. This test demonstrates how to fetch block data using Taquito's RPC methods and filter for transaction operations. You can view the latest block or fetch any specific block by its number.`,
+    category: "Viewing Data",
+    setup: [
+      "Install Taquito: `npm install @taquito/taquito`",
+      "Configure Taquito with RPC endpoint",
+      "Understand Tezos block structure and transaction operations",
+      "Have access to a Tezos node or public RPC endpoint",
+    ],
+    relatedTests: ["transfer", "estimate-fees", "tzip16-metadata"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/viewing-blocks",
+      taquitoDocumentation: "https://taquito.io/docs/rpc_package/",
+      tezosDocumentation: "https://octez.tezos.com/docs/seoul/blocks_ops.html",
+    },
+    component: () =>
+      import("@/modules/tests/tests/viewing-blocks/viewing-blocks.vue"),
+    icon: FileText,
+    diagrams: {
+      "fetch-block": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "fetch-block",
+            label: "Fetch Block",
+          },
+        ],
+      },
+    },
+  },
+  "etherlink-bridge": {
+    id: "etherlink-bridge",
+    title: "Etherlink Bridge",
+    description: `Bridge XTZ tokens between Tezos Layer 1 (L1) and Etherlink Layer 2 (L2). 
+
+Etherlink is an EVM-compatible rollup built on Tezos. This test demonstrates how to:
+- Deposit XTZ from Tezos L1 to Etherlink L2
+- Withdraw XTZ from Etherlink L2 to Tezos L1
+
+The bridge uses Smart Rollup technology to enable cross-layer communication.`,
+    category: "Advanced Operations",
+    supportedNetworks: [NetworkType.GHOSTNET],
+    setup: [
+      "Connect to Ghostnet testnet (only network currently supported)",
+      "Set up a Tezos wallet with Beacon/WalletConnect/Ledger",
+      "Set up an EVM wallet (e.g. MetaMask)",
+      "Have sufficient XTZ for gas fees and the amount to transfer",
+    ],
+    relatedTests: ["transfer", "batch", "transaction-limit"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/etherlink-bridge",
+      taquitoDocumentation: "https://taquito.io/docs/smart_rollups/",
+      tezosDocumentation: "https://docs.etherlink.com/bridging/bridging-tezos",
+    },
+    component: () =>
+      import("@/modules/tests/tests/etherlink-bridge/etherlink-bridge.vue"),
+    icon: Network,
+    diagrams: {
+      deposit: {
+        nodes: [
+          {
+            id: "get-bridge-contract",
+            label: "Get Bridge Contract",
+          },
+          {
+            id: "convert-etherlink-address",
+            label: "Convert Etherlink Address",
+          },
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "send-deposit-transaction",
+            label: "Send Deposit Transaction",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+      withdraw: {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "create-signer",
+            label: "Create Signer",
+          },
+          {
+            id: "get-withdrawal-contract",
+            label: "Get Withdrawal Contract",
+          },
+          {
+            id: "call-withdrawal-contract",
+            label: "Call Withdrawal Contract",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+      "withdraw-fast": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "create-signer",
+            label: "Create Signer",
+          },
+          {
+            id: "get-fast-withdrawal-contract",
+            label: "Get Fast Withdrawal Contract",
+          },
+          {
+            id: "call-fast-withdrawal-contract",
+            label: "Call Fast Withdrawal Contract",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+    },
+  },
   sapling: {
     id: "sapling",
     title: "Sapling Transactions",
@@ -1080,7 +1313,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
           url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/michelson/sapling.tz",
         },
       ],
-      taqutioDocumentation: "https://taquito.io/docs/sapling",
+      taquitoDocumentation: "https://taquito.io/docs/sapling",
       tezosDocumentation: "https://tezos.gitlab.io/active/sapling.html",
     },
     component: () => import("@/modules/tests/tests/sapling/sapling.vue"),
@@ -1135,6 +1368,7 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       },
     },
   },
+
 };
 
 export const getTestById = (id: string): TestMetadata | undefined => {
