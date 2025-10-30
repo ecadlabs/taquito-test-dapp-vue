@@ -29,6 +29,7 @@
     "@taquito/ledger-signer": "^23.0.2",
     "@taquito/michel-codec": "^23.0.2",
     "@taquito/remote-signer": "^23.0.2",
+    "@taquito/sapling": "^23.0.3",
     "@taquito/signer": "^23.0.2",
     "@taquito/taquito": "^23.0.2",
     "@taquito/tzip12": "^23.0.2",

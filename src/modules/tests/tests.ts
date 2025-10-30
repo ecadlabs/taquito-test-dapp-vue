@@ -1058,18 +1058,17 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       },
     },
   },
-  "sapling-single-state": {
-    id: "sapling-single-state",
-    title: "Sapling: Shield Operation",
-    description: `Demonstrates Taquito's Sapling shield operation: moving tez from public to private addresses using zero-knowledge proofs. Includes real key generation, proof creation (CPU-intensive, observable 10-30s delay), transaction preparation, and on-chain submission. Showcases @taquito/sapling package capabilities with no simulation - all cryptographic operations are real.`,
+  sapling: {
+    id: "sapling",
+    title: "Sapling Transactions",
+    description: `Demonstrates Taquito's Sapling shield operation: moving tez from public to private addresses using zero-knowledge proofs.`,
     category: "Cryptography & Security",
     icon: EyeOff,
     setup: [
       "Install Taquito Sapling package: `npm install @taquito/sapling`",
       "Set up a Tezos wallet (Temple, Kukai, or other supported wallet)",
-      "Use a faucet to fund your wallet with testnet Tez (minimum 5 ꜩ recommended)",
+      "Use a faucet to fund your wallet with testnet Tez",
       "Understand Sapling concepts: spending keys, viewing keys, payment addresses",
-      "Be patient - proof generation is CPU-intensive and takes 10-30 seconds",
     ],
     relatedTests: ["transfer", "sign-payload", "counter-contract"],
     documentation: {
@@ -1077,41 +1076,60 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/sapling",
       contract: [
         {
-          name: "Sapling Contract Source",
-          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/sapling-contracts.ts",
+          name: "Sapling Contract",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/michelson/sapling.tz",
         },
       ],
       taqutioDocumentation: "https://taquito.io/docs/sapling",
       tezosDocumentation: "https://tezos.gitlab.io/active/sapling.html",
     },
-    component: () =>
-      import("@/modules/tests/tests/sapling/sapling-single-state.vue"),
+    component: () => import("@/modules/tests/tests/sapling/sapling.vue"),
     diagrams: {
-      "complete-workflow": {
-        nodes: [
-          {
-            id: "generate-keys",
-            label: "Generate Sapling Keys",
-          },
-        ],
-      },
-      deploy: {
-        nodes: [
-          {
-            id: "deploy-contract",
-            label: "Deploy Contract",
-          },
-        ],
-      },
       shield: {
         nodes: [
           {
-            id: "shield",
-            label: "Create Zero-Knowledge Proof",
+            id: "prepare-shield",
+            label: "Prepare Shield Transaction",
           },
           {
-            id: "verify-shield",
-            label: "Submit Transaction",
+            id: "call-contract",
+            label: "Call Contract",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+      transfer: {
+        nodes: [
+          {
+            id: "prepare-transfer",
+            label: "Prepare Private Transfer",
+          },
+          {
+            id: "call-contract",
+            label: "Call Contract",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+      unshield: {
+        nodes: [
+          {
+            id: "prepare-unshield",
+            label: "Prepare Unshield Transaction",
+          },
+          {
+            id: "call-contract",
+            label: "Call Contract",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
           },
         ],
       },

@@ -2,42 +2,54 @@ import { test } from "@playwright/test";
 import { goToTest, waitForSuccess } from "./helpers.ts";
 import { getSharedPage, setupSharedContext } from "./shared-context.ts";
 
-test.describe("Sapling: Shield Operation", () => {
+test.describe.configure({ mode: "serial" });
+
+test.describe("Sapling Transactions", () => {
   test.beforeAll(async () => {
     await setupSharedContext();
   });
 
-  test("should deploy sapling contract", async () => {
+  test("should execute shield operation", async () => {
     const page = getSharedPage();
-    await goToTest({ page, testName: "Sapling: Shield Operation" });
+    await goToTest({ page, testName: "Sapling Transactions" });
 
-    // Deploy contract
-    await page.getByRole("button", { name: "Deploy Sapling Contract" }).click();
+    // Wait for keys to auto-generate on mount
+    await page.waitForTimeout(2000);
 
-    // Wait for deployment to complete
+    // Execute shield operation (10-30s for zero-knowledge proof)
+    await page.getByTestId("sapling-shield-button").click();
     await waitForSuccess({ page, timeout: 90000 });
   });
 
-  test("should generate sapling keys", async () => {
+  test("should transfer to Alice's address", async () => {
     const page = getSharedPage();
-    await goToTest({ page, testName: "Sapling: Shield Operation" });
 
-    // Generate keys
-    await page.getByRole("button", { name: "Generate Keys" }).click();
-
-    // Keys should be generated quickly
-    await waitForSuccess({ page, timeout: 10000 });
+    // Execute private transfer (10-30s for zero-knowledge proof)
+    await page.getByTestId("sapling-transfer-button").click();
+    await waitForSuccess({ page, timeout: 90000 });
   });
 
-  test("should execute shield operation with real proof generation", async () => {
+  test("should unshield to user's tz1 address", async () => {
     const page = getSharedPage();
-    await goToTest({ page, testName: "Sapling: Shield Operation" });
 
-    // Click the Shield button
-    await page.getByRole("button", { name: "Shield" }).click();
-
-    // Wait for shield operation to complete
-    // This includes real zero-knowledge proof generation (10-30s)
+    // Execute unshield operation (10-30s for zero-knowledge proof)
+    await page.getByTestId("sapling-unshield-button").click();
     await waitForSuccess({ page, timeout: 90000 });
+  });
+
+  test("should get transaction history", async () => {
+    const page = getSharedPage();
+
+    // Fetch transaction history (should be quick)
+    await page.getByTestId("sapling-history-button").click();
+    await page.waitForTimeout(5000);
+  });
+
+  test("should get user balance", async () => {
+    const page = getSharedPage();
+
+    // Fetch balance from shielded pool (should be quick)
+    await page.getByTestId("sapling-balance-button").click();
+    await page.waitForTimeout(5000);
   });
 });
