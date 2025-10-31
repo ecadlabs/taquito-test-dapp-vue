@@ -462,7 +462,6 @@ const handleTransferToAlice = async () => {
     );
 
     diagramStore.setOperationHash(opHash);
-    toast.success("Transfer completed");
   } catch (error) {
     console.error("Transfer error:", error);
     diagramStore.setErrorMessage(error);
