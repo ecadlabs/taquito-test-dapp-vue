@@ -6,6 +6,7 @@ import {
   Calculator,
   Coins,
   Eye,
+  EyeOff,
   FileText,
   Globe,
   InfinityIcon,
@@ -1281,6 +1282,83 @@ The bridge uses Smart Rollup technology to enable cross-layer communication.`,
           {
             id: "call-fast-withdrawal-contract",
             label: "Call Fast Withdrawal Contract",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+    },
+  },
+  sapling: {
+    id: "sapling",
+    title: "Sapling Transactions",
+    description: `Demonstrates Taquito's Sapling shield operation: moving tez from public to private addresses using zero-knowledge proofs.`,
+    category: "Cryptography & Security",
+    icon: EyeOff,
+    setup: [
+      "Install Taquito Sapling package: `npm install @taquito/sapling`",
+      "Set up a Tezos wallet (Temple, Kukai, or other supported wallet)",
+      "Use a faucet to fund your wallet with testnet Tez",
+      "Understand Sapling concepts: spending keys, viewing keys, payment addresses",
+    ],
+    relatedTests: ["transfer", "sign-payload", "counter-contract"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/sapling",
+      contract: [
+        {
+          name: "Sapling Contract",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/michelson/sapling.tz",
+        },
+      ],
+      taquitoDocumentation: "https://taquito.io/docs/sapling",
+      tezosDocumentation: "https://tezos.gitlab.io/active/sapling.html",
+    },
+    component: () => import("@/modules/tests/tests/sapling/sapling.vue"),
+    diagrams: {
+      shield: {
+        nodes: [
+          {
+            id: "prepare-shield",
+            label: "Prepare Shield Transaction",
+          },
+          {
+            id: "call-contract",
+            label: "Call Contract",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+      transfer: {
+        nodes: [
+          {
+            id: "prepare-transfer",
+            label: "Prepare Private Transfer",
+          },
+          {
+            id: "call-contract",
+            label: "Call Contract",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+      unshield: {
+        nodes: [
+          {
+            id: "prepare-unshield",
+            label: "Prepare Unshield Transaction",
+          },
+          {
+            id: "call-contract",
+            label: "Call Contract",
           },
           {
             id: "wait-for-chain-confirmation",
