@@ -1,3 +1,4 @@
+import { getPrivateKey } from "@/composables/useWeb3Auth";
 import {
   initializeBeaconEvents,
   initializeWalletConnectEvents,
@@ -11,11 +12,14 @@ import { BeaconWallet } from "@taquito/beacon-wallet";
 import { LedgerSigner } from "@taquito/ledger-signer";
 import { importKey, InMemorySigner } from "@taquito/signer";
 import { TezosToolkit } from "@taquito/taquito";
+import { hex2buf } from "@taquito/utils";
 import {
   PermissionScopeMethods,
   WalletConnect,
   NetworkType as WalletConnectNetworkType,
 } from "@taquito/wallet-connect";
+import * as tezosCrypto from "@tezos-core-tools/crypto-utils";
+import type { IProvider } from "@web3auth/base";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { toast } from "vue-sonner";
@@ -100,6 +104,7 @@ export const useWalletStore = defineStore("wallet", () => {
 
     // Clear any persisted wallet state
     localStorage.removeItem("wallet-provider");
+    localStorage.removeItem("web3auth-social-provider");
 
     // Reset Tezos provider to clear any configured signers/wallets
     // and recreate a fresh instance to fully clear any imported keys.
@@ -268,6 +273,78 @@ export const useWalletStore = defineStore("wallet", () => {
     }
   };
 
+  /** Initializes a Web3Auth wallet using social login */
+  const initializeWeb3AuthWallet = async (
+    provider: IProvider,
+    userInfo: { name?: string; email?: string } | null,
+  ): Promise<void> => {
+    try {
+      if (!provider) {
+        throw new Error("No provider returned from Web3Auth");
+      }
+
+      // Get the private key from Web3Auth
+      const web3authPrivateKey = await getPrivateKey(provider);
+
+      // Remove '0x' prefix if present
+      const cleanHexKey = web3authPrivateKey.startsWith("0x")
+        ? web3authPrivateKey.slice(2)
+        : web3authPrivateKey;
+
+      // Convert hex private key to buffer
+      const seedBuffer = hex2buf(cleanHexKey);
+
+      // Derive Tezos key pair from the seed
+      const keyPair = tezosCrypto.utils.seedToKeyPair(seedBuffer);
+
+      // Initialize InMemorySigner with the derived Tezos secret key
+      const signer = await InMemorySigner.fromSecretKey(keyPair.sk);
+      Tezos.setProvider({ signer });
+
+      // Get the address
+      const importedAddress = await signer.publicKeyHash();
+
+      // Get display name from user info
+      const displayName = userInfo?.name || userInfo?.email || "Web3Auth User";
+
+      // Create a mock wallet object similar to programmatic wallet
+      const mockWallet: ProgrammaticWallet = {
+        getPKH: async () => {
+          return importedAddress;
+        },
+        getPK: async () => {
+          return signer.publicKey();
+        },
+        requestPermissions: async () => Promise.resolve(),
+        disconnect: async () => Promise.resolve(),
+        client: {
+          getActiveAccount: async () => ({
+            address: importedAddress,
+          }),
+          getPeers: async () => [{ name: `Web3Auth (${displayName})` }],
+          disconnect: async () => Promise.resolve(),
+          clearActiveAccount: async () => Promise.resolve(),
+        },
+        getAllExistingSessionKeys: async () => [],
+        configureWithExistingSessionKey: async () => Promise.resolve(),
+      };
+
+      wallet.value = mockWallet;
+      address.value = importedAddress;
+      walletName.value = `Web3Auth (${displayName})`;
+
+      fetchBalance();
+
+      localStorage.setItem("wallet-provider", "web3auth");
+    } catch (error) {
+      console.error("Failed to initialize Web3Auth wallet:", error);
+      Sentry.captureException(error);
+      throw new Error(
+        `Web3Auth wallet initialization failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  };
+
   /**
    * Initializes a wallet using the network configuration from environment
    * variables. Requests wallet permissions and sets the wallet as the provider
@@ -275,6 +352,9 @@ export const useWalletStore = defineStore("wallet", () => {
    *
    * @async
    * @param {WalletProvider} provider The provider used to connect the wallet
+   * @param {string} privateKeyOrSocialProvider Optional private key for
+   *   programmatic wallet or social provider for Web3Auth (google, discord,
+   *   email_passwordless)
    * @returns {Promise<void>} Resolves when the wallet is initialized and
    *   permissions are granted.
    * @throws {ReferenceError} If a wallet is already initialized in this
@@ -284,7 +364,7 @@ export const useWalletStore = defineStore("wallet", () => {
    */
   const initializeWallet = async (
     provider: WalletProvider,
-    privateKey?: string,
+    privateKeyOrSocialProvider?: string,
   ): Promise<void> => {
     console.log("Starting initialization of wallet using provider:", provider);
     try {
@@ -311,10 +391,10 @@ export const useWalletStore = defineStore("wallet", () => {
           await initializeWalletConnect();
           break;
         case "programmatic":
-          if (!privateKey) {
+          if (!privateKeyOrSocialProvider) {
             throw new Error("No private key found for programmatic wallet");
           }
-          await initializeProgrammaticWallet(privateKey);
+          await initializeProgrammaticWallet(privateKeyOrSocialProvider);
           break;
         case "ledger":
           await initializeLedgerWallet();
@@ -376,6 +456,8 @@ export const useWalletStore = defineStore("wallet", () => {
         );
       }
 
+      const walletProvider = localStorage.getItem("wallet-provider");
+
       if (wallet.value instanceof BeaconWallet) {
         if (!fromWallet) {
           const peers = await wallet.value.client.getPeers();
@@ -406,6 +488,9 @@ export const useWalletStore = defineStore("wallet", () => {
         } finally {
           ledgerTransport.value = null;
         }
+      } else if (walletProvider === "web3auth") {
+        // Web3Auth disconnection is handled at the component level
+        // using useWeb3AuthDisconnect composable
       }
 
       await resetWalletState();
@@ -535,6 +620,7 @@ export const useWalletStore = defineStore("wallet", () => {
     getWallet,
     getWalletName,
     initializeWallet,
+    initializeWeb3AuthWallet,
     disconnectWallet,
     fetchBalance,
     getWalletConnectSessionFromIndexedDB,

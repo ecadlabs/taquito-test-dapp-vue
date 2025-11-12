@@ -37,8 +37,10 @@ export default defineConfig({
             "@airgap/beacon-ui",
             "@airgap/beacon-types",
           ],
+          // Web3Auth packages
+          web3auth: ["@web3auth/modal", "@web3auth/base"],
           // Crypto dependencies
-          "crypto-libs": ["@noble/hashes"],
+          "crypto-libs": ["@noble/hashes", "@tezos-core-tools/crypto-utils"],
           // UI components (excluding lucide-vue-next to allow tree-shaking)
           "ui-components": ["reka-ui", "@vueuse/core"],
           // Vue ecosystem

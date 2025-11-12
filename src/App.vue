@@ -1,16 +1,18 @@
 <template>
-  <Toaster />
-  <div id="app">
-    <header class="bg-background sticky top-0 z-20">
-      <HeaderComponent />
-    </header>
-    <main>
-      <router-view />
-    </main>
-  </div>
+  <Web3AuthProvider :config="web3AuthContextConfig">
+    <Toaster />
+    <div id="app">
+      <header class="bg-background sticky top-0 z-20">
+        <HeaderComponent />
+      </header>
+      <main>
+        <router-view />
+      </main>
+    </div>
 
-  <!-- Global Command Palette -->
-  <CommandMenu />
+    <!-- Global Command Palette -->
+    <CommandMenu />
+  </Web3AuthProvider>
 </template>
 
 <script setup lang="ts">
@@ -21,6 +23,8 @@ import { useFavicon } from "@/composables/useFavicon";
 import { useTheme } from "@/composables/useTheme";
 import { useEthereumWalletStore } from "@/stores/ethereumWalletStore";
 import { useWalletStore } from "@/stores/walletStore";
+import web3AuthContextConfig from "@/web3authContext";
+import { Web3AuthProvider } from "@web3auth/modal/vue";
 import { onMounted, onUnmounted } from "vue";
 import "vue-sonner/style.css";
 
