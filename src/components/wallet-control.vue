@@ -83,17 +83,17 @@
               </div>
 
               <p class="mt-2 text-left italic">
-                Just a note: when building your own dApp, you shouldn't use both
-                Beacon and WalletConnect. Instead, you should pick one that
-                works best for your use-case. We use both here for testing and
-                illustration purposes, but this is not best practice in
-                production applications.
+                Just a note: when building your own dApp, you shouldn't use
+                multiple wallet connection providers/methods. Instead, you
+                should pick one that works best for your use-case. We use many
+                here for testing and illustration purposes, but this is not best
+                practice in production applications.
               </p>
             </div>
           </DialogDescription>
         </DialogHeader>
 
-        <div>
+        <div class="mt-2">
           <Alert v-if="provider === 'ledger' && !hidSupported" class="mb-2">
             <AlertTriangle class="size-4 !text-red-500" aria-hidden="true" />
             <AlertTitle>
@@ -115,6 +115,19 @@
               as automated test scripts. It has less security measures and will
               NOT ask for confirmation before carrying out operations. This
               should not be used with a real, personally owned wallet key.
+            </AlertDescription>
+          </Alert>
+          <Alert v-if="provider === 'web3auth'" class="mb-2">
+            <AlertTriangle class="size-4 !text-red-500" aria-hidden="true" />
+            <AlertTitle>
+              <p>Important!</p>
+            </AlertTitle>
+            <AlertDescription>
+              Web3Auth is not generally designed for dApps, but rather
+              authentication for wallet applications. It is available here for
+              demonstration purposes, but under the hood it simply relays a
+              private key to the dApp. This means transactions will not require
+              confirmation from the user.
             </AlertDescription>
           </Alert>
           <div class="mt-2 space-y-2">
