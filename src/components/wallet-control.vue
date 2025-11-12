@@ -257,11 +257,6 @@
 </template>
 
 <script setup lang="ts">
-import {
-  useWeb3Auth,
-  useWeb3AuthConnect,
-  useWeb3AuthDisconnect,
-} from "@/composables/useWeb3Auth";
 import { useWalletStore } from "@/stores/walletStore";
 import type { WalletProvider } from "@/types/wallet";
 import {
@@ -302,10 +297,6 @@ import { toast } from "vue-sonner";
 
 const walletStore = useWalletStore();
 const settingsStore = useSettingsStore();
-
-const { web3Auth } = useWeb3Auth();
-const { connect: connectWeb3AuthModal } = useWeb3AuthConnect();
-const { disconnect: disconnectWeb3AuthModal } = useWeb3AuthDisconnect();
 
 const address = computed(() => walletStore.getAddress);
 const walletName = computed(() => walletStore.getWalletName);
@@ -366,24 +357,8 @@ const connect = async () => {
       connectionStep.value = "ledger-waiting";
     }
 
-    // Handle Web3Auth specially since stores can't use composables
-    if (provider.value === "web3auth") {
-      const web3authProvider = await connectWeb3AuthModal();
-
-      if (!web3authProvider) {
-        throw new Error("No provider returned from Web3Auth");
-      }
-
-      // Get user info
-      const userInfo = web3Auth.value?.connected
-        ? await web3Auth.value.getUserInfo()
-        : null;
-
-      // Pass provider and userInfo to the store
-      await walletStore.initializeWeb3AuthWallet(web3authProvider, userInfo);
-    } else {
-      await walletStore.initializeWallet(provider.value, privateKey.value);
-    }
+    // All providers now use the unified initializeWallet function
+    await walletStore.initializeWallet(provider.value, privateKey.value);
 
     toast.success("Wallet connected");
     showConnectDialog.value = false;
@@ -410,12 +385,6 @@ const connect = async () => {
 const disconnect = async () => {
   try {
     loading.value = true;
-
-    // If Web3Auth is connected, disconnect it first
-    const walletProvider = localStorage.getItem("wallet-provider");
-    if (walletProvider === "web3auth" && web3Auth.value?.connected) {
-      await disconnectWeb3AuthModal();
-    }
 
     await walletStore.disconnectWallet();
     toast.success("Wallet disconnected");

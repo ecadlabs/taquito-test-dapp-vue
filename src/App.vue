@@ -1,18 +1,16 @@
 <template>
-  <Web3AuthProvider :config="web3AuthContextConfig">
-    <Toaster />
-    <div id="app">
-      <header class="bg-background sticky top-0 z-20">
-        <HeaderComponent />
-      </header>
-      <main>
-        <router-view />
-      </main>
-    </div>
+  <Toaster />
+  <div id="app">
+    <header class="bg-background sticky top-0 z-20">
+      <HeaderComponent />
+    </header>
+    <main>
+      <router-view />
+    </main>
+  </div>
 
-    <!-- Global Command Palette -->
-    <CommandMenu />
-  </Web3AuthProvider>
+  <!-- Global Command Palette -->
+  <CommandMenu />
 </template>
 
 <script setup lang="ts">
@@ -21,10 +19,9 @@ import HeaderComponent from "@/components/header-component.vue";
 import { Toaster } from "@/components/ui/sonner";
 import { useFavicon } from "@/composables/useFavicon";
 import { useTheme } from "@/composables/useTheme";
+import { web3AuthService } from "@/services/web3AuthService";
 import { useEthereumWalletStore } from "@/stores/ethereumWalletStore";
 import { useWalletStore } from "@/stores/walletStore";
-import web3AuthContextConfig from "@/web3authContext";
-import { Web3AuthProvider } from "@web3auth/modal/vue";
 import { onMounted, onUnmounted } from "vue";
 import "vue-sonner/style.css";
 
@@ -53,6 +50,17 @@ onMounted(async () => {
       await walletStore.getWalletConnectSessionFromIndexedDB();
     if (walletConnectActiveSession !== undefined) {
       walletStore.initializeWallet("walletconnect");
+    }
+  } else if (provider === "web3auth") {
+    // Restore Web3Auth session if the user was previously connected
+    try {
+      await web3AuthService.initialize();
+      if (web3AuthService.isConnected()) {
+        await walletStore.initializeWallet("web3auth");
+      }
+    } catch (error) {
+      console.error("Failed to restore Web3Auth session:", error);
+      localStorage.removeItem("wallet-provider");
     }
   }
 });

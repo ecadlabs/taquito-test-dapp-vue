@@ -1,8 +1,8 @@
-import { getPrivateKey } from "@/composables/useWeb3Auth";
 import {
   initializeBeaconEvents,
   initializeWalletConnectEvents,
 } from "@/lib/walletEvents";
+import { web3AuthService } from "@/services/web3AuthService";
 import { useSettingsStore } from "@/stores/settingsStore";
 import type { ProgrammaticWallet, WalletProvider } from "@/types/wallet";
 import { NetworkType, type ExtendedPeerInfo } from "@airgap/beacon-types";
@@ -19,7 +19,6 @@ import {
   NetworkType as WalletConnectNetworkType,
 } from "@taquito/wallet-connect";
 import * as tezosCrypto from "@tezos-core-tools/crypto-utils";
-import type { IProvider } from "@web3auth/base";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { toast } from "vue-sonner";
@@ -274,22 +273,34 @@ export const useWalletStore = defineStore("wallet", () => {
   };
 
   /** Initializes a Web3Auth wallet using social login */
-  const initializeWeb3AuthWallet = async (
-    provider: IProvider,
-    userInfo: { name?: string; email?: string } | null,
-  ): Promise<void> => {
+  const initializeWeb3AuthWallet = async (): Promise<void> => {
     try {
+      // Initialize Web3Auth if not already done
+      await web3AuthService.initialize();
+
+      // Connect and get provider
+      const provider = await web3AuthService.connect();
+
       if (!provider) {
         throw new Error("No provider returned from Web3Auth");
       }
 
-      // Get the private key from Web3Auth
-      const web3authPrivateKey = await getPrivateKey(provider);
+      // Get user info
+      const userInfo = await web3AuthService.getUserInfo();
+
+      // Get the private key from Web3Auth provider
+      const privateKeyResponse = await provider.request({
+        method: "private_key",
+      });
+
+      if (typeof privateKeyResponse !== "string") {
+        throw new Error("Failed to retrieve private key from Web3Auth");
+      }
 
       // Remove '0x' prefix if present
-      const cleanHexKey = web3authPrivateKey.startsWith("0x")
-        ? web3authPrivateKey.slice(2)
-        : web3authPrivateKey;
+      const cleanHexKey = privateKeyResponse.startsWith("0x")
+        ? privateKeyResponse.slice(2)
+        : privateKeyResponse;
 
       // Convert hex private key to buffer
       const seedBuffer = hex2buf(cleanHexKey);
@@ -332,8 +343,6 @@ export const useWalletStore = defineStore("wallet", () => {
       wallet.value = mockWallet;
       address.value = importedAddress;
       walletName.value = `Web3Auth (${displayName})`;
-
-      fetchBalance();
 
       localStorage.setItem("wallet-provider", "web3auth");
     } catch (error) {
@@ -399,20 +408,20 @@ export const useWalletStore = defineStore("wallet", () => {
         case "ledger":
           await initializeLedgerWallet();
           break;
+        case "web3auth":
+          await initializeWeb3AuthWallet();
+          break;
         default:
           throw new TypeError(`Unknown wallet provider: ${provider}`);
       }
 
       if (wallet.value) {
-        // Only set the wallet provider if we haven't already set a signer for programmatic wallet
-        // Note: Beacon wallet is already set as provider in initializeBeaconWallet
         if (provider === "walletconnect") {
           Tezos.setProvider({
             wallet: wallet.value as WalletConnect,
           });
         }
 
-        // Get the address using the wallet address function
         const walletAddress = await getWalletAddress();
         if (walletAddress) {
           address.value = walletAddress;
@@ -489,8 +498,7 @@ export const useWalletStore = defineStore("wallet", () => {
           ledgerTransport.value = null;
         }
       } else if (walletProvider === "web3auth") {
-        // Web3Auth disconnection is handled at the component level
-        // using useWeb3AuthDisconnect composable
+        await web3AuthService.disconnect();
       }
 
       await resetWalletState();
@@ -620,7 +628,6 @@ export const useWalletStore = defineStore("wallet", () => {
     getWallet,
     getWalletName,
     initializeWallet,
-    initializeWeb3AuthWallet,
     disconnectWallet,
     fetchBalance,
     getWalletConnectSessionFromIndexedDB,
