@@ -2,6 +2,7 @@ import {
   initializeBeaconEvents,
   initializeWalletConnectEvents,
 } from "@/lib/walletEvents";
+import { web3AuthService } from "@/services/web3AuthService";
 import { useSettingsStore } from "@/stores/settingsStore";
 import type { ProgrammaticWallet, WalletProvider } from "@/types/wallet";
 import { NetworkType, type ExtendedPeerInfo } from "@airgap/beacon-types";
@@ -11,11 +12,13 @@ import { BeaconWallet } from "@taquito/beacon-wallet";
 import { LedgerSigner } from "@taquito/ledger-signer";
 import { importKey, InMemorySigner } from "@taquito/signer";
 import { TezosToolkit } from "@taquito/taquito";
+import { hex2buf } from "@taquito/utils";
 import {
   PermissionScopeMethods,
   WalletConnect,
   NetworkType as WalletConnectNetworkType,
 } from "@taquito/wallet-connect";
+import * as tezosCrypto from "@tezos-core-tools/crypto-utils";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { toast } from "vue-sonner";
@@ -100,6 +103,7 @@ export const useWalletStore = defineStore("wallet", () => {
 
     // Clear any persisted wallet state
     localStorage.removeItem("wallet-provider");
+    localStorage.removeItem("web3auth-social-provider");
 
     // Reset Tezos provider to clear any configured signers/wallets
     // and recreate a fresh instance to fully clear any imported keys.
@@ -268,6 +272,98 @@ export const useWalletStore = defineStore("wallet", () => {
     }
   };
 
+  /** Initializes a Web3Auth wallet using social login */
+  const initializeWeb3AuthWallet = async (): Promise<void> => {
+    try {
+      // Initialize Web3Auth if not already done
+      await web3AuthService.initialize();
+
+      // Connect and get provider
+      const provider = await web3AuthService.connect();
+
+      if (!provider) {
+        throw new Error("No provider returned from Web3Auth");
+      }
+
+      // Get user info
+      const userInfo = await web3AuthService.getUserInfo();
+
+      // Get the private key from Web3Auth provider
+      const privateKeyResponse = await provider.request({
+        method: "private_key",
+      });
+
+      if (typeof privateKeyResponse !== "string") {
+        throw new Error("Failed to retrieve private key from Web3Auth");
+      }
+
+      // Remove '0x' prefix if present
+      const cleanHexKey = privateKeyResponse.startsWith("0x")
+        ? privateKeyResponse.slice(2)
+        : privateKeyResponse;
+
+      // Convert hex private key to buffer
+      const seedUint8Array = hex2buf(cleanHexKey);
+
+      // Derive Tezos key pair from the seed
+      // Cast as Buffer to satisfy type checker (Uint8Array is compatible at runtime)
+      const keyPair = tezosCrypto.utils.seedToKeyPair(
+        seedUint8Array as unknown as Buffer,
+      );
+
+      if (!keyPair.sk) {
+        throw new Error("Failed to derive secret key from seed");
+      }
+
+      // Initialize InMemorySigner with the derived Tezos secret key
+      // Cast to string as the crypto-utils types are inconsistent with some newer versions of TypeScript
+      const signer = await InMemorySigner.fromSecretKey(
+        keyPair.sk as unknown as string,
+      );
+      Tezos.setProvider({ signer });
+
+      // Get the address
+      const importedAddress = await signer.publicKeyHash();
+
+      // Get display name from user info
+      const displayName = userInfo?.name || userInfo?.email || "Web3Auth User";
+
+      // Create a mock wallet object similar to programmatic wallet
+      const mockWallet: ProgrammaticWallet = {
+        getPKH: async () => {
+          return importedAddress;
+        },
+        getPK: async () => {
+          return signer.publicKey();
+        },
+        requestPermissions: async () => Promise.resolve(),
+        disconnect: async () => Promise.resolve(),
+        client: {
+          getActiveAccount: async () => ({
+            address: importedAddress,
+          }),
+          getPeers: async () => [{ name: `Web3Auth (${displayName})` }],
+          disconnect: async () => Promise.resolve(),
+          clearActiveAccount: async () => Promise.resolve(),
+        },
+        getAllExistingSessionKeys: async () => [],
+        configureWithExistingSessionKey: async () => Promise.resolve(),
+      };
+
+      wallet.value = mockWallet;
+      address.value = importedAddress;
+      walletName.value = `Web3Auth (${displayName})`;
+
+      localStorage.setItem("wallet-provider", "web3auth");
+    } catch (error) {
+      console.error("Failed to initialize Web3Auth wallet:", error);
+      Sentry.captureException(error);
+      throw new Error(
+        `Web3Auth wallet initialization failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  };
+
   /**
    * Initializes a wallet using the network configuration from environment
    * variables. Requests wallet permissions and sets the wallet as the provider
@@ -275,6 +371,9 @@ export const useWalletStore = defineStore("wallet", () => {
    *
    * @async
    * @param {WalletProvider} provider The provider used to connect the wallet
+   * @param {string} privateKeyOrSocialProvider Optional private key for
+   *   programmatic wallet or social provider for Web3Auth (google, discord,
+   *   email_passwordless)
    * @returns {Promise<void>} Resolves when the wallet is initialized and
    *   permissions are granted.
    * @throws {ReferenceError} If a wallet is already initialized in this
@@ -284,7 +383,7 @@ export const useWalletStore = defineStore("wallet", () => {
    */
   const initializeWallet = async (
     provider: WalletProvider,
-    privateKey?: string,
+    privateKeyOrSocialProvider?: string,
   ): Promise<void> => {
     console.log("Starting initialization of wallet using provider:", provider);
     try {
@@ -311,28 +410,28 @@ export const useWalletStore = defineStore("wallet", () => {
           await initializeWalletConnect();
           break;
         case "programmatic":
-          if (!privateKey) {
+          if (!privateKeyOrSocialProvider) {
             throw new Error("No private key found for programmatic wallet");
           }
-          await initializeProgrammaticWallet(privateKey);
+          await initializeProgrammaticWallet(privateKeyOrSocialProvider);
           break;
         case "ledger":
           await initializeLedgerWallet();
+          break;
+        case "web3auth":
+          await initializeWeb3AuthWallet();
           break;
         default:
           throw new TypeError(`Unknown wallet provider: ${provider}`);
       }
 
       if (wallet.value) {
-        // Only set the wallet provider if we haven't already set a signer for programmatic wallet
-        // Note: Beacon wallet is already set as provider in initializeBeaconWallet
         if (provider === "walletconnect") {
           Tezos.setProvider({
             wallet: wallet.value as WalletConnect,
           });
         }
 
-        // Get the address using the wallet address function
         const walletAddress = await getWalletAddress();
         if (walletAddress) {
           address.value = walletAddress;
@@ -376,6 +475,8 @@ export const useWalletStore = defineStore("wallet", () => {
         );
       }
 
+      const walletProvider = localStorage.getItem("wallet-provider");
+
       if (wallet.value instanceof BeaconWallet) {
         if (!fromWallet) {
           const peers = await wallet.value.client.getPeers();
@@ -406,6 +507,8 @@ export const useWalletStore = defineStore("wallet", () => {
         } finally {
           ledgerTransport.value = null;
         }
+      } else if (walletProvider === "web3auth") {
+        await web3AuthService.disconnect();
       }
 
       await resetWalletState();
