@@ -303,13 +303,24 @@ export const useWalletStore = defineStore("wallet", () => {
         : privateKeyResponse;
 
       // Convert hex private key to buffer
-      const seedBuffer = hex2buf(cleanHexKey);
+      const seedUint8Array = hex2buf(cleanHexKey);
 
       // Derive Tezos key pair from the seed
-      const keyPair = tezosCrypto.utils.seedToKeyPair(seedBuffer);
+      // seedToKeyPair returns sk as a base58-encoded string (edsk...)
+      // Cast as Buffer to satisfy type checker (Uint8Array is compatible at runtime)
+      const keyPair = tezosCrypto.utils.seedToKeyPair(
+        seedUint8Array as unknown as Buffer,
+      );
+
+      if (!keyPair.sk) {
+        throw new Error("Failed to derive secret key from seed");
+      }
 
       // Initialize InMemorySigner with the derived Tezos secret key
-      const signer = await InMemorySigner.fromSecretKey(keyPair.sk);
+      // Cast to string as the crypto-utils types are inconsistent with TypeScript 5.7
+      const signer = await InMemorySigner.fromSecretKey(
+        keyPair.sk as unknown as string,
+      );
       Tezos.setProvider({ signer });
 
       // Get the address
