@@ -306,7 +306,6 @@ export const useWalletStore = defineStore("wallet", () => {
       const seedUint8Array = hex2buf(cleanHexKey);
 
       // Derive Tezos key pair from the seed
-      // seedToKeyPair returns sk as a base58-encoded string (edsk...)
       // Cast as Buffer to satisfy type checker (Uint8Array is compatible at runtime)
       const keyPair = tezosCrypto.utils.seedToKeyPair(
         seedUint8Array as unknown as Buffer,
@@ -317,7 +316,7 @@ export const useWalletStore = defineStore("wallet", () => {
       }
 
       // Initialize InMemorySigner with the derived Tezos secret key
-      // Cast to string as the crypto-utils types are inconsistent with TypeScript 5.7
+      // Cast to string as the crypto-utils types are inconsistent with some newer versions of TypeScript
       const signer = await InMemorySigner.fromSecretKey(
         keyPair.sk as unknown as string,
       );

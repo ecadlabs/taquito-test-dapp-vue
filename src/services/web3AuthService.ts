@@ -9,8 +9,15 @@ class Web3AuthService {
   async initialize(): Promise<void> {
     if (this.web3auth) return; // Already initialized
 
+    const clientId = import.meta.env.VITE_WEB3AUTH_CLIENT_ID;
+    if (!clientId) {
+      throw new Error(
+        "VITE_WEB3AUTH_CLIENT_ID environment variable is required for Web3Auth",
+      );
+    }
+
     this.web3auth = new Web3Auth({
-      clientId: import.meta.env.VITE_WEB3AUTH_CLIENT_ID || "",
+      clientId,
       web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
     });
 
