@@ -149,9 +149,10 @@ export const originateContracts = async (
       if (contract.name === "balance-callback") {
         const fa2TokenAddress = originatedAddresses.get("fa2-token");
         if (!fa2TokenAddress) {
-          throw new Error(
-            "FA2 token must be originated before balance-callback contract",
+          console.warn(
+            `⏭️  Skipping ${contract.name} because dependency "fa2-token" was not successfully originated`,
           );
+          continue;
         }
         console.log(
           `🔗 Adding FA2 token address ${fa2TokenAddress} to balance-callback authorized addresses`,
@@ -168,6 +169,8 @@ export const originateContracts = async (
       const originationOp = await Tezos.contract.originate({
         code: contractCode,
         storage: contractStorage,
+        gasLimit: 20000,
+        storageLimit: 5000,
       });
 
       if (!originationOp.contractAddress) {
@@ -178,24 +181,46 @@ export const originateContracts = async (
         `⏳ Waiting for confirmation of origination for ${originationOp.contractAddress}...`,
       );
 
-      // Wait for confirmation
-      await originationOp.contract();
-      console.log(`✅ Origination completed for ${contract.name}`);
-      console.log(`📍 Contract address: ${originationOp.contractAddress}`);
-
-      // Store the address for dependency injection
-      originatedAddresses.set(contract.name, originationOp.contractAddress);
-
-      // Get operation hash
-      const operationHash = originationOp.hash;
-      console.log(`🔗 Operation hash: ${operationHash}`);
-
-      results.push({
-        contractAddress: originationOp.contractAddress,
-        contractName: contract.name,
-        operationHash: operationHash,
-        storage: contractStorage,
+      // Wait for confirmation with 20-second timeout
+      const CONFIRMATION_TIMEOUT = 20000; // 20 seconds
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error("Confirmation timeout"));
+        }, CONFIRMATION_TIMEOUT);
       });
+
+      try {
+        await Promise.race([originationOp.contract(), timeoutPromise]);
+        console.log(`✅ Origination completed for ${contract.name}`);
+        console.log(`📍 Contract address: ${originationOp.contractAddress}`);
+
+        // Store the address for dependency injection
+        originatedAddresses.set(contract.name, originationOp.contractAddress);
+
+        // Get operation hash
+        const operationHash = originationOp.hash;
+        console.log(`🔗 Operation hash: ${operationHash}`);
+
+        results.push({
+          contractAddress: originationOp.contractAddress,
+          contractName: contract.name,
+          operationHash: operationHash,
+          storage: contractStorage,
+        });
+      } catch (timeoutError) {
+        if (
+          timeoutError instanceof Error &&
+          timeoutError.message === "Confirmation timeout"
+        ) {
+          console.warn(
+            `⏱️  Timeout waiting for confirmation of ${contract.name} (${originationOp.contractAddress}). Skipping this contract...`,
+          );
+          // Continue to next contract without adding to results
+          continue;
+        }
+        // Re-throw if it's not a timeout error
+        throw timeoutError;
+      }
     } catch (error) {
       console.error(`❌ Error originating ${contract.name} contract:`, error);
       throw error;
