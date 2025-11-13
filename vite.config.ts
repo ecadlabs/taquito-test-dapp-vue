@@ -2,28 +2,34 @@ import tailwindcss from "@tailwindcss/vite";
 import vue from "@vitejs/plugin-vue";
 import { fileURLToPath, URL } from "url";
 import { defineConfig } from "vite";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), tailwindcss()],
+  plugins: [
+    vue(),
+    tailwindcss(),
+    nodePolyfills({
+      protocolImports: true,
+    }),
+  ],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
-      "readable-stream": "vite-compatible-readable-stream",
-      stream: "vite-compatible-readable-stream",
-      buffer: "buffer",
-      process: "process/browser",
     },
   },
-  define: {
-    global: "globalThis",
-    Buffer: "globalThis.Buffer",
-    process: "globalThis.process",
-  },
   optimizeDeps: {
-    include: ["buffer", "events", "process"],
+    include: ["@taquito/sapling"],
+    esbuildOptions: {
+      define: {
+        global: "globalThis",
+      },
+    },
   },
   build: {
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
     rollupOptions: {
       external: (id) => {
         // Exclude the scripts directory from the build as they won't be used on the live site
