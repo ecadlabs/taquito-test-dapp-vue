@@ -19,6 +19,7 @@ import HeaderComponent from "@/components/header-component.vue";
 import { Toaster } from "@/components/ui/sonner";
 import { useFavicon } from "@/composables/useFavicon";
 import { useTheme } from "@/composables/useTheme";
+import { web3AuthService } from "@/services/web3AuthService";
 import { useEthereumWalletStore } from "@/stores/ethereumWalletStore";
 import { useWalletStore } from "@/stores/walletStore";
 import { onMounted, onUnmounted } from "vue";
@@ -49,6 +50,17 @@ onMounted(async () => {
       await walletStore.getWalletConnectSessionFromIndexedDB();
     if (walletConnectActiveSession !== undefined) {
       walletStore.initializeWallet("walletconnect");
+    }
+  } else if (provider === "web3auth") {
+    // Restore Web3Auth session if the user was previously connected
+    try {
+      await web3AuthService.initialize();
+      if (web3AuthService.isConnected()) {
+        await walletStore.initializeWallet("web3auth");
+      }
+    } catch (error) {
+      console.error("Failed to restore Web3Auth session:", error);
+      localStorage.removeItem("wallet-provider");
     }
   }
 });

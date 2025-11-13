@@ -420,6 +420,9 @@ function getDefaultStorage(
       };
       return callbackStorage;
     }
+    case "sapling":
+      // Sapling state must be initialized as empty object
+      return {};
     default:
       return 0;
   }
