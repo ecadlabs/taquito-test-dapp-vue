@@ -1,5 +1,5 @@
 import { Buffer } from "buffer";
-import * as process from "process";
+import process from "process/browser";
 
 // Extend global interfaces to include Node.js globals
 declare global {
@@ -19,6 +19,11 @@ declare global {
   var process: NodeJS.Process;
 }
 
+// Ensure process.env exists
+if (!process.env) {
+  process.env = {};
+}
+
 // Make Buffer and process available globally
 if (typeof globalThis !== "undefined") {
   globalThis.Buffer = Buffer;
@@ -31,6 +36,18 @@ if (typeof window !== "undefined") {
   window.Buffer = Buffer;
   window.process = process;
   window.global = globalThis;
+}
+
+// Provide a minimal require() stub for CommonJS modules
+// This is needed for @taquito/sapling which uses require() for parameter files
+if (typeof globalThis.require === "undefined") {
+  // @ts-expect-error - Adding require stub for browser compatibility
+  globalThis.require = (id: string) => {
+    console.warn(
+      `require('${id}') called - returning empty object (module not available in browser)`,
+    );
+    return {};
+  };
 }
 
 // Export them so they can be imported directly

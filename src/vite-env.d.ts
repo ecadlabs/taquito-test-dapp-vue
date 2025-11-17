@@ -13,3 +13,5 @@ declare module "@tezos-core-tools/crypto-utils" {
     };
   };
 }
+
+declare module "process/browser";
