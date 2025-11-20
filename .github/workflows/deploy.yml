@@ -25,6 +25,8 @@ jobs:
     strategy:
       matrix:
         include:
+          - environment: tallinnet
+            project_name: taquito-dapp-tallinnet
           - environment: seoulnet
             project_name: taquito-dapp
           - environment: ghostnet
