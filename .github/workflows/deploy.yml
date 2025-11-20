@@ -25,6 +25,8 @@ jobs:
     strategy:
       matrix:
         include:
+          - environment: tallinnet
+            project_name: taquito-dapp-tallinnet
           - environment: seoulnet
             project_name: taquito-dapp
           - environment: ghostnet
@@ -32,7 +34,8 @@ jobs:
           - environment: shadownet
             project_name: taquito-dapp-shadownet
     env:
-      VITE_NETWORK_TYPE: ${{ matrix.environment }}
+      VITE_NETWORK_TYPE: ${{ vars.NETWORK_TYPE || matrix.environment }}
+      VITE_NETWORK_NAME: ${{ vars.NETWORK_NAME }}
       VITE_RPC_URL: ${{ vars.RPC_URL }}
       VITE_GITHUB_SHA: ${{ github.sha }}
       VITE_VERSION: ${{ github.ref_name }}
