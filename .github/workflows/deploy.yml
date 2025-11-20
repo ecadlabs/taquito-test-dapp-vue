@@ -25,8 +25,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - environment: tallinnet
-            project_name: taquito-dapp-tallinnet
+          - environment: tallinnnet
+            project_name: taquito-dapp-tallinnnet
           - environment: seoulnet
             project_name: taquito-dapp
           - environment: ghostnet
@@ -43,6 +43,7 @@ jobs:
       VITE_FAUCET_URL: ${{ secrets.FAUCET_URL }}
       VITE_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
       VITE_TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
+      VITE_WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID }}
     outputs:
       preview-url: ${{ steps.cloudflare_publish.outputs.URL }}
       environment: ${{ matrix.environment }}
