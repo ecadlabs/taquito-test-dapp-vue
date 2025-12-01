@@ -6,7 +6,11 @@ import type {
   MetadataContractStorage,
 } from "@/types/contract";
 import { importKey } from "@taquito/signer";
-import { MichelsonMap, TezosToolkit } from "@taquito/taquito";
+import {
+  MichelsonMap,
+  PollingSubscribeProvider,
+  TezosToolkit,
+} from "@taquito/taquito";
 import { stringToBytes } from "@taquito/utils";
 import { config } from "dotenv";
 import {
@@ -60,6 +64,13 @@ export const originateContracts = async (
 
   // Initialize Tezos toolkit
   const Tezos = new TezosToolkit(rpcUrl);
+
+  // Configure polling provider for confirmation to work
+  Tezos.setStreamProvider(
+    Tezos.getFactory(PollingSubscribeProvider)({
+      pollingIntervalMilliseconds: 5000,
+    }),
+  );
 
   if (key) {
     await importKey(Tezos, key);
@@ -177,50 +188,26 @@ export const originateContracts = async (
         throw new Error("Contract address is undefined after origination");
       }
 
-      console.log(
-        `⏳ Waiting for confirmation of origination for ${originationOp.contractAddress}...`,
-      );
+      console.log(`⏳ Waiting for confirmation of ${contract.name}...`);
 
-      // Wait for confirmation with 20-second timeout
-      const CONFIRMATION_TIMEOUT = 20000; // 20 seconds
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => {
-          reject(new Error("Confirmation timeout"));
-        }, CONFIRMATION_TIMEOUT);
+      await originationOp.confirmation();
+      const contractInstance = await originationOp.contract();
+      console.log(`✅ Origination completed for ${contract.name}`);
+      console.log(`📍 Contract address: ${contractInstance.address}`);
+
+      // Store the address for dependency injection
+      originatedAddresses.set(contract.name, contractInstance.address);
+
+      // Get operation hash
+      const operationHash = originationOp.hash;
+      console.log(`🔗 Operation hash: ${operationHash}`);
+
+      results.push({
+        contractAddress: contractInstance.address,
+        contractName: contract.name,
+        operationHash: operationHash,
+        storage: contractStorage,
       });
-
-      try {
-        await Promise.race([originationOp.contract(), timeoutPromise]);
-        console.log(`✅ Origination completed for ${contract.name}`);
-        console.log(`📍 Contract address: ${originationOp.contractAddress}`);
-
-        // Store the address for dependency injection
-        originatedAddresses.set(contract.name, originationOp.contractAddress);
-
-        // Get operation hash
-        const operationHash = originationOp.hash;
-        console.log(`🔗 Operation hash: ${operationHash}`);
-
-        results.push({
-          contractAddress: originationOp.contractAddress,
-          contractName: contract.name,
-          operationHash: operationHash,
-          storage: contractStorage,
-        });
-      } catch (timeoutError) {
-        if (
-          timeoutError instanceof Error &&
-          timeoutError.message === "Confirmation timeout"
-        ) {
-          console.warn(
-            `⏱️  Timeout waiting for confirmation of ${contract.name} (${originationOp.contractAddress}). Skipping this contract...`,
-          );
-          // Continue to next contract without adding to results
-          continue;
-        }
-        // Re-throw if it's not a timeout error
-        throw timeoutError;
-      }
     } catch (error) {
       console.error(`❌ Error originating ${contract.name} contract:`, error);
       throw error;
