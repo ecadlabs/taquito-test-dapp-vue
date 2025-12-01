@@ -8,6 +8,40 @@
       // Ensure globals are available before any modules load
       const global = globalThis;
       window.global = globalThis;
+
+      // Set up minimal process object with nextTick for SES lockdown
+      globalThis.process = globalThis.process || {
+        env: {},
+        nextTick: function (callback, ...args) {
+          Promise.resolve().then(function () {
+            callback(...args);
+          });
+        },
+        version: "",
+        versions: {},
+        platform: "browser",
+        browser: true,
+      };
+      window.process = globalThis.process;
+
+      // Set up minimal Buffer for SES lockdown - will be replaced by full polyfill
+      if (!globalThis.Buffer) {
+        globalThis.Buffer = {
+          from: function () {
+            return new Uint8Array();
+          },
+          alloc: function () {
+            return new Uint8Array();
+          },
+          allocUnsafe: function () {
+            return new Uint8Array();
+          },
+          isBuffer: function () {
+            return false;
+          },
+        };
+      }
+      window.Buffer = globalThis.Buffer;
     </script>
     <title>Taquito Playground</title>
   </head>
