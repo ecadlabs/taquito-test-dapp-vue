@@ -192,19 +192,18 @@ export const originateContracts = async (
       console.log(`⏳ Waiting for confirmation of ${contract.name}...`);
 
       await originationOp.confirmation();
-      const contractInstance = await originationOp.contract();
       console.log(`✅ Origination completed for ${contract.name}`);
-      console.log(`📍 Contract address: ${contractInstance.address}`);
+      console.log(`📍 Contract address: ${originationOp.contractAddress}`);
 
       // Store the address for dependency injection
-      originatedAddresses.set(contract.name, contractInstance.address);
+      originatedAddresses.set(contract.name, originationOp.contractAddress);
 
       // Get operation hash
       const operationHash = originationOp.hash;
       console.log(`🔗 Operation hash: ${operationHash}`);
 
       results.push({
-        contractAddress: contractInstance.address,
+        contractAddress: originationOp.contractAddress,
         contractName: contract.name,
         operationHash: operationHash,
         storage: contractStorage,
