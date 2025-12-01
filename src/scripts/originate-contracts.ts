@@ -65,12 +65,46 @@ export const originateContracts = async (
   // Initialize Tezos toolkit
   const Tezos = new TezosToolkit(rpcUrl);
 
-  // Configure polling provider for confirmation to work
-  Tezos.setStreamProvider(
-    Tezos.getFactory(PollingSubscribeProvider)({
-      pollingIntervalMilliseconds: 1000,
-    }),
-  );
+  // Configure polling provider for confirmation on tezlink-alphanet
+  if (networkType === "tezlink-alphanet") {
+    Tezos.setStreamProvider(
+      Tezos.getFactory(PollingSubscribeProvider)({
+        pollingIntervalMilliseconds: 1000,
+      }),
+    );
+  }
+
+  // Custom polling function for networks where Taquito's confirmation doesn't work
+  const waitForConfirmation = async (
+    opHash: string,
+    timeoutSeconds = 180,
+    intervalMs = 3000,
+  ): Promise<void> => {
+    const startTime = Date.now();
+    const timeoutMs = timeoutSeconds * 1000;
+
+    while (Date.now() - startTime < timeoutMs) {
+      try {
+        const block = await Tezos.rpc.getBlock();
+        const opResult = block.operations
+          .flat()
+          .find((op) => op.hash === opHash);
+
+        if (opResult) {
+          console.log(
+            `✅ Operation ${opHash} found in block ${block.header.level}`,
+          );
+          return;
+        }
+      } catch {
+        // Ignore errors and keep polling
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+
+    throw new Error(`Timeout waiting for operation ${opHash} to be confirmed`);
+  };
 
   if (key) {
     await importKey(Tezos, key);
@@ -164,6 +198,7 @@ export const originateContracts = async (
           console.warn(
             `⏭️  Skipping ${contract.name} because dependency "fa2-token" was not successfully originated`,
           );
+          failedContracts.push(contract.name);
           continue;
         }
         console.log(
@@ -181,17 +216,22 @@ export const originateContracts = async (
       const originationOp = await Tezos.contract.originate({
         code: contractCode,
         storage: contractStorage,
-        gasLimit: 20000,
-        storageLimit: 5000,
       });
 
       if (!originationOp.contractAddress) {
         throw new Error("Contract address is undefined after origination");
       }
 
-      console.log(`⏳ Waiting for confirmation of ${contract.name}...`);
+      console.log(
+        `⏳ Waiting for confirmation of origination for ${originationOp.contractAddress}...`,
+      );
 
-      await originationOp.confirmation();
+      // Wait for confirmation
+      if (networkType === "tezlink-alphanet") {
+        await originationOp.contract();
+      } else {
+        await waitForConfirmation(originationOp.hash);
+      }
       console.log(`✅ Origination completed for ${contract.name}`);
       console.log(`📍 Contract address: ${originationOp.contractAddress}`);
 
@@ -211,7 +251,7 @@ export const originateContracts = async (
     } catch (error) {
       console.warn(`⚠️  Failed to originate ${contract.name} contract:`, error);
       failedContracts.push(contract.name);
-      // Continue to next contract
+      continue;
     }
   }
 
