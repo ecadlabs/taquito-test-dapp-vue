@@ -6,7 +6,11 @@ import type {
   MetadataContractStorage,
 } from "@/types/contract";
 import { importKey } from "@taquito/signer";
-import { MichelsonMap, TezosToolkit } from "@taquito/taquito";
+import {
+  MichelsonMap,
+  PollingSubscribeProvider,
+  TezosToolkit,
+} from "@taquito/taquito";
 import { stringToBytes } from "@taquito/utils";
 import { config } from "dotenv";
 import {
@@ -61,6 +65,13 @@ export const originateContracts = async (
   // Initialize Tezos toolkit
   const Tezos = new TezosToolkit(rpcUrl);
 
+  // Configure polling provider for confirmation to work
+  Tezos.setStreamProvider(
+    Tezos.getFactory(PollingSubscribeProvider)({
+      pollingIntervalMilliseconds: 1000,
+    }),
+  );
+
   if (key) {
     await importKey(Tezos, key);
   } else {
@@ -113,6 +124,7 @@ export const originateContracts = async (
   }
 
   const results: OriginationResult[] = [];
+  const failedContracts: string[] = [];
 
   const originationOrder = [
     "fa2-token",
@@ -149,9 +161,10 @@ export const originateContracts = async (
       if (contract.name === "balance-callback") {
         const fa2TokenAddress = originatedAddresses.get("fa2-token");
         if (!fa2TokenAddress) {
-          throw new Error(
-            "FA2 token must be originated before balance-callback contract",
+          console.warn(
+            `⏭️  Skipping ${contract.name} because dependency "fa2-token" was not successfully originated`,
           );
+          continue;
         }
         console.log(
           `🔗 Adding FA2 token address ${fa2TokenAddress} to balance-callback authorized addresses`,
@@ -168,18 +181,17 @@ export const originateContracts = async (
       const originationOp = await Tezos.contract.originate({
         code: contractCode,
         storage: contractStorage,
+        gasLimit: 20000,
+        storageLimit: 5000,
       });
 
       if (!originationOp.contractAddress) {
         throw new Error("Contract address is undefined after origination");
       }
 
-      console.log(
-        `⏳ Waiting for confirmation of origination for ${originationOp.contractAddress}...`,
-      );
+      console.log(`⏳ Waiting for confirmation of ${contract.name}...`);
 
-      // Wait for confirmation
-      await originationOp.contract();
+      await originationOp.confirmation();
       console.log(`✅ Origination completed for ${contract.name}`);
       console.log(`📍 Contract address: ${originationOp.contractAddress}`);
 
@@ -197,8 +209,9 @@ export const originateContracts = async (
         storage: contractStorage,
       });
     } catch (error) {
-      console.error(`❌ Error originating ${contract.name} contract:`, error);
-      throw error;
+      console.warn(`⚠️  Failed to originate ${contract.name} contract:`, error);
+      failedContracts.push(contract.name);
+      // Continue to next contract
     }
   }
 
@@ -272,7 +285,18 @@ export const originateContracts = async (
     );
   }
 
-  console.log(`\n🎉 All contracts originated successfully!`);
+  if (failedContracts.length > 0) {
+    console.warn(
+      `\n⚠️  ${failedContracts.length} contract(s) failed to originate: ${failedContracts.join(", ")}`,
+    );
+  }
+
+  if (results.length > 0) {
+    console.log(`\n🎉 ${results.length} contract(s) originated successfully!`);
+  } else {
+    console.error(`\n❌ No contracts were successfully originated.`);
+  }
+
   return results;
 };
 

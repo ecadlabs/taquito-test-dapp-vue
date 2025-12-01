@@ -33,6 +33,9 @@ jobs:
             project_name: taquito-dapp-ghostnet
           - environment: shadownet
             project_name: taquito-dapp-shadownet
+          - environment: tezlink-alphanet
+            network_name: tezlink-alphanet
+            project_name: taquito-dapp-tezlink-alphanet
     env:
       VITE_NETWORK_TYPE: ${{ vars.NETWORK_TYPE || matrix.environment }}
       VITE_NETWORK_NAME: ${{ vars.NETWORK_NAME }}
@@ -65,7 +68,9 @@ jobs:
           echo "ALICE_WALLET_ADDRESS: ${{ vars.ALICE_WALLET_ADDRESS }}"
           echo "REOWN_PROJECT_ID: ${{ secrets.REOWN_PROJECT_ID }}"
       
-      - run: npm run fund-wallet ${{ vars.ALICE_WALLET_ADDRESS }}
+      - name: Fund wallet
+        if: ${{ vars.DISABLE_WALLET_FUNDING != 'true' }}
+        run: npm run fund-wallet ${{ vars.ALICE_WALLET_ADDRESS }}
       
       # Install LIGO for contract compilation
       - name: Install LIGO
@@ -75,7 +80,9 @@ jobs:
           echo "$HOME/.ligo/bin" >> $GITHUB_PATH
       
       - run: npm run compile-contracts
-      - run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
+      - name: Originate contracts
+        if: ${{ vars.DISABLE_ORIGINATION != 'true' }}
+        run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
       - run: npm run build
 
       - name: Publish to Cloudflare Pages
