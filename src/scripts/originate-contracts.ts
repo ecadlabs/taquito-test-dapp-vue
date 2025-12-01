@@ -124,6 +124,7 @@ export const originateContracts = async (
   }
 
   const results: OriginationResult[] = [];
+  const failedContracts: string[] = [];
 
   const originationOrder = [
     "fa2-token",
@@ -209,8 +210,9 @@ export const originateContracts = async (
         storage: contractStorage,
       });
     } catch (error) {
-      console.error(`❌ Error originating ${contract.name} contract:`, error);
-      throw error;
+      console.warn(`⚠️  Failed to originate ${contract.name} contract:`, error);
+      failedContracts.push(contract.name);
+      // Continue to next contract
     }
   }
 
@@ -284,7 +286,18 @@ export const originateContracts = async (
     );
   }
 
-  console.log(`\n🎉 All contracts originated successfully!`);
+  if (failedContracts.length > 0) {
+    console.warn(
+      `\n⚠️  ${failedContracts.length} contract(s) failed to originate: ${failedContracts.join(", ")}`,
+    );
+  }
+
+  if (results.length > 0) {
+    console.log(`\n🎉 ${results.length} contract(s) originated successfully!`);
+  } else {
+    console.error(`\n❌ No contracts were successfully originated.`);
+  }
+
   return results;
 };
 
