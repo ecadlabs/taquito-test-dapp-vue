@@ -68,7 +68,7 @@ export const originateContracts = async (
   // Configure polling provider for confirmation to work
   Tezos.setStreamProvider(
     Tezos.getFactory(PollingSubscribeProvider)({
-      pollingIntervalMilliseconds: 5000,
+      pollingIntervalMilliseconds: 1000,
     }),
   );
 
