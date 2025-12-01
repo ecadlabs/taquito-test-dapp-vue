@@ -3,6 +3,7 @@ type WalletProvider =
   | "walletconnect"
   | "programmatic"
   | "ledger"
+  | "trezor"
   | "web3auth";
 
 export interface ProgrammaticWallet {

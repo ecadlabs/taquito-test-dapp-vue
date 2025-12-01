@@ -12,6 +12,7 @@ import { BeaconWallet } from "@taquito/beacon-wallet";
 import { LedgerSigner } from "@taquito/ledger-signer";
 import { importKey, InMemorySigner } from "@taquito/signer";
 import { TezosToolkit } from "@taquito/taquito";
+import { HDPathTemplate, TrezorSigner } from "@taquito/trezor-signer";
 import { hex2buf } from "@taquito/utils";
 import {
   PermissionScopeMethods,
@@ -29,7 +30,11 @@ export const useWalletStore = defineStore("wallet", () => {
   const Tezos = new TezosToolkit(settingsStore.settings.rpcUrl);
 
   const wallet = ref<
-    BeaconWallet | WalletConnect | LedgerSigner | ProgrammaticWallet
+    | BeaconWallet
+    | WalletConnect
+    | LedgerSigner
+    | ProgrammaticWallet
+    | TrezorSigner
   >();
   const ledgerTransport = ref<TransportWebHID | null>(null);
   const address = ref<string>();
@@ -51,7 +56,10 @@ export const useWalletStore = defineStore("wallet", () => {
         return activeAccount?.address;
       } else if (wallet.value instanceof WalletConnect) {
         return await wallet.value.getPKH();
-      } else if (wallet.value instanceof LedgerSigner) {
+      } else if (
+        wallet.value instanceof LedgerSigner ||
+        wallet.value instanceof TrezorSigner
+      ) {
         return await wallet.value.publicKeyHash();
       } else {
         // Programmatic wallet
@@ -272,6 +280,34 @@ export const useWalletStore = defineStore("wallet", () => {
     }
   };
 
+  /** Initializes a Trezor hardware wallet */
+  const initializeTrezorWallet = async (): Promise<void> => {
+    const transport: TransportWebHID | null = null;
+
+    try {
+      await TrezorSigner.init({
+        appName: "My Tezos App",
+        appUrl: "https://myapp.com",
+      });
+
+      const trezorSigner = new TrezorSigner(HDPathTemplate(0));
+
+      Tezos.setProvider({ signer: trezorSigner });
+      wallet.value = trezorSigner;
+      walletName.value = "Trezor Device";
+      ledgerTransport.value = transport; // Store reference for cleanup
+      localStorage.setItem("wallet-provider", "trezor");
+    } catch (error) {
+      // Clean up the transport if it was created but connection failed
+      try {
+        await TrezorSigner.dispose();
+      } catch (closeError) {
+        console.error("Error closing Trezor transport:", closeError);
+      }
+      throw error;
+    }
+  };
+
   /** Initializes a Web3Auth wallet using social login */
   const initializeWeb3AuthWallet = async (): Promise<void> => {
     try {
@@ -417,6 +453,9 @@ export const useWalletStore = defineStore("wallet", () => {
           break;
         case "ledger":
           await initializeLedgerWallet();
+          break;
+        case "trezor":
+          await initializeTrezorWallet();
           break;
         case "web3auth":
           await initializeWeb3AuthWallet();

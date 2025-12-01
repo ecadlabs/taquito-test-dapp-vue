@@ -140,6 +140,7 @@
                 <SelectItem value="beacon"> Beacon </SelectItem>
                 <SelectItem value="walletconnect"> WalletConnect </SelectItem>
                 <SelectItem value="ledger"> Ledger Device </SelectItem>
+                <SelectItem value="trezor"> Trezor Device </SelectItem>
                 <SelectItem value="web3auth">
                   Web3Auth (Social Login)
                 </SelectItem>

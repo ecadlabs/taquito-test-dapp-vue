@@ -32,6 +32,7 @@
     "@taquito/sapling": "^23.0.3",
     "@taquito/signer": "^23.0.3",
     "@taquito/taquito": "^23.0.3",
+    "@taquito/trezor-signer": "file:../taquito/packages/taquito-trezor-signer",
     "@taquito/tzip12": "^23.0.3",
     "@taquito/tzip16": "^23.0.3",
     "@taquito/utils": "^23.0.3",
