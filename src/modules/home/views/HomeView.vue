@@ -506,13 +506,14 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button";
 import contractConfig from "@/contracts/contract-config.json";
-import { buildGitHubContractUrl, buildTzktUrl } from "@/lib/utils";
+import { buildGitHubContractUrl, buildIndexerUrl } from "@/lib/utils";
 import AnimatedCounter from "@/modules/home/components/animated-counter.vue";
 import {
   AvailableTests,
   getTestById,
   getTestsByCategory,
 } from "@/modules/tests/tests";
+import { useSettingsStore } from "@/stores/settingsStore";
 import type { ContractConfig } from "@/types/contract";
 import {
   ArrowRightIcon,
@@ -529,6 +530,9 @@ import {
   TrendingUpIcon,
 } from "lucide-vue-next";
 import { computed, onMounted, onUnmounted, ref } from "vue";
+
+const settingsStore = useSettingsStore();
+const networkType = import.meta.env.VITE_NETWORK_TYPE;
 
 const testCount = computed(() => Object.keys(AvailableTests).length);
 
@@ -590,7 +594,13 @@ const quickStartTests = computed(() => {
 const originatedContracts = computed(() => {
   return (contractConfig as ContractConfig[]).map((contract) => ({
     ...contract,
-    tzktUrl: buildTzktUrl(contract.address, contract.network),
+    tzktUrl: buildIndexerUrl(
+      settingsStore.settings.indexer,
+      networkType,
+      contract.address,
+      "contract",
+      contract.network,
+    ),
     githubUrl: contract.contractName
       ? buildGitHubContractUrl(contract.contractName)
       : undefined,

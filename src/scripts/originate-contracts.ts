@@ -51,6 +51,7 @@ export const originateContracts = async (
   // Validate environment variables
   const rpcUrl = process.env.VITE_RPC_URL;
   const networkType = process.env.VITE_NETWORK_TYPE;
+  const networkName = process.env.VITE_NETWORK_NAME;
 
   if (!rpcUrl || !networkType) {
     throw new Error(
@@ -60,7 +61,7 @@ export const originateContracts = async (
 
   console.log(`🚀 Starting contract origination...`);
   console.log(`📡 Using RPC URL: ${rpcUrl}`);
-  console.log(`🌐 Using network: ${networkType}`);
+  console.log(`🌐 Using network: ${networkType} (${networkName})`);
 
   // Initialize Tezos toolkit
   const Tezos = new TezosToolkit(rpcUrl);
@@ -284,7 +285,7 @@ export const originateContracts = async (
     const newEntries: ContractConfig[] = results.map((result) => ({
       address: result.contractAddress,
       originatedAt: new Date().toISOString(),
-      network: networkType,
+      network: networkName || networkType,
       contractName: result.contractName,
     }));
 
