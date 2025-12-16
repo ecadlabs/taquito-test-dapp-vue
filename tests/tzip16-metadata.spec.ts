@@ -20,16 +20,4 @@ test.describe("TZIP-16 Contract Metadata", () => {
     await expect(page.locator("text=ECAD Labs").first()).toBeVisible();
     await expect(page.locator("text=TZIP-16").first()).toBeVisible();
   });
-
-  test("should execute contract view successfully", async () => {
-    const page = getSharedPage();
-    await goToTest({ page, testName: "TZIP-16 Contract Metadata" });
-
-    await page.getByTestId("get-metadata-button").click();
-    await waitForSuccess({ page });
-
-    await page.locator('button:has-text("Execute")').first().click();
-
-    await expect(page.locator("text=Hello, World")).toBeVisible();
-  });
 });

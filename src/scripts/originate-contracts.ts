@@ -6,7 +6,11 @@ import type {
   MetadataContractStorage,
 } from "@/types/contract";
 import { importKey } from "@taquito/signer";
-import { MichelsonMap, TezosToolkit } from "@taquito/taquito";
+import {
+  MichelsonMap,
+  PollingSubscribeProvider,
+  TezosToolkit,
+} from "@taquito/taquito";
 import { stringToBytes } from "@taquito/utils";
 import { config } from "dotenv";
 import {
@@ -42,10 +46,12 @@ interface ContractDefinition {
 
 export const originateContracts = async (
   key: string,
+  specificContract?: string,
 ): Promise<OriginationResult[]> => {
   // Validate environment variables
   const rpcUrl = process.env.VITE_RPC_URL;
   const networkType = process.env.VITE_NETWORK_TYPE;
+  const networkName = process.env.VITE_NETWORK_NAME;
 
   if (!rpcUrl || !networkType) {
     throw new Error(
@@ -55,10 +61,51 @@ export const originateContracts = async (
 
   console.log(`🚀 Starting contract origination...`);
   console.log(`📡 Using RPC URL: ${rpcUrl}`);
-  console.log(`🌐 Using network: ${networkType}`);
+  console.log(`🌐 Using network: ${networkType} (${networkName})`);
 
   // Initialize Tezos toolkit
   const Tezos = new TezosToolkit(rpcUrl);
+
+  // Configure polling provider for confirmation on tezlink-alphanet
+  if (networkType === "tezlink-alphanet") {
+    Tezos.setStreamProvider(
+      Tezos.getFactory(PollingSubscribeProvider)({
+        pollingIntervalMilliseconds: 1000,
+      }),
+    );
+  }
+
+  // Custom polling function for networks where Taquito's confirmation doesn't work
+  const waitForConfirmation = async (
+    opHash: string,
+    timeoutSeconds = 180,
+    intervalMs = 3000,
+  ): Promise<void> => {
+    const startTime = Date.now();
+    const timeoutMs = timeoutSeconds * 1000;
+
+    while (Date.now() - startTime < timeoutMs) {
+      try {
+        const block = await Tezos.rpc.getBlock();
+        const opResult = block.operations
+          .flat()
+          .find((op) => op.hash === opHash);
+
+        if (opResult) {
+          console.log(
+            `✅ Operation ${opHash} found in block ${block.header.level}`,
+          );
+          return;
+        }
+      } catch {
+        // Ignore errors and keep polling
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+
+    throw new Error(`Timeout waiting for operation ${opHash} to be confirmed`);
+  };
 
   if (key) {
     await importKey(Tezos, key);
@@ -79,6 +126,12 @@ export const originateContracts = async (
 
     for (const file of files) {
       const contractName = file.replace(".tz", "");
+
+      // If a specific contract is requested, only include that contract
+      if (specificContract && contractName !== specificContract) {
+        continue;
+      }
+
       contracts.push({
         name: contractName,
         path: join(compiledDir, file),
@@ -88,14 +141,25 @@ export const originateContracts = async (
   }
 
   if (contracts.length === 0) {
-    throw new Error(
-      "No contracts found to originiate. Did you forget to compile?",
-    );
+    if (specificContract) {
+      throw new Error(
+        `Contract "${specificContract}" not found in compiled directory. Did you forget to compile it?`,
+      );
+    } else {
+      throw new Error(
+        "No contracts found to originate. Did you forget to compile?",
+      );
+    }
   }
 
-  console.log(`📄 Found ${contracts.length} contract(s) to originate`);
+  if (specificContract) {
+    console.log(`📄 Found contract "${specificContract}" to originate`);
+  } else {
+    console.log(`📄 Found ${contracts.length} contract(s) to originate`);
+  }
 
   const results: OriginationResult[] = [];
+  const failedContracts: string[] = [];
 
   const originationOrder = [
     "fa2-token",
@@ -132,9 +196,11 @@ export const originateContracts = async (
       if (contract.name === "balance-callback") {
         const fa2TokenAddress = originatedAddresses.get("fa2-token");
         if (!fa2TokenAddress) {
-          throw new Error(
-            "FA2 token must be originated before balance-callback contract",
+          console.warn(
+            `⏭️  Skipping ${contract.name} because dependency "fa2-token" was not successfully originated`,
           );
+          failedContracts.push(contract.name);
+          continue;
         }
         console.log(
           `🔗 Adding FA2 token address ${fa2TokenAddress} to balance-callback authorized addresses`,
@@ -162,7 +228,11 @@ export const originateContracts = async (
       );
 
       // Wait for confirmation
-      await originationOp.contract();
+      if (networkType === "tezlink-alphanet") {
+        await originationOp.contract();
+      } else {
+        await waitForConfirmation(originationOp.hash);
+      }
       console.log(`✅ Origination completed for ${contract.name}`);
       console.log(`📍 Contract address: ${originationOp.contractAddress}`);
 
@@ -180,20 +250,14 @@ export const originateContracts = async (
         storage: contractStorage,
       });
     } catch (error) {
-      console.error(`❌ Error originating ${contract.name} contract:`, error);
-      throw error;
+      console.warn(`⚠️  Failed to originate ${contract.name} contract:`, error);
+      failedContracts.push(contract.name);
+      continue;
     }
   }
 
   // Save contract configuration
   if (results.length > 0) {
-    const contractConfig: ContractConfig[] = results.map((result) => ({
-      address: result.contractAddress,
-      originatedAt: new Date().toISOString(),
-      network: networkType,
-      contractName: result.contractName,
-    }));
-
     const configDir = join(process.cwd(), "src", "contracts");
     const configPath = join(configDir, "contract-config.json");
 
@@ -202,13 +266,78 @@ export const originateContracts = async (
       mkdirSync(configDir, { recursive: true });
     }
 
-    writeFileSync(configPath, JSON.stringify(contractConfig, null, 2));
+    // Read existing config if it exists
+    let existingConfig: ContractConfig[] = [];
+    if (existsSync(configPath)) {
+      try {
+        const existingContent = readFileSync(configPath, "utf8");
+        existingConfig = JSON.parse(existingContent);
+      } catch (error) {
+        console.warn(
+          `Failed to read existing config file. Starting with a fresh config. Error:`,
+          error,
+        );
+        existingConfig = [];
+      }
+    }
+
+    // Create new entries for the originated contracts
+    const newEntries: ContractConfig[] = results.map((result) => ({
+      address: result.contractAddress,
+      originatedAt: new Date().toISOString(),
+      network: networkName || networkType,
+      contractName: result.contractName,
+    }));
+
+    // If originating a specific contract, update or append to existing config
+    // Otherwise, replace the entire config (originating all contracts)
+    let finalConfig: ContractConfig[];
+    if (specificContract) {
+      finalConfig = [...existingConfig];
+
+      // Update existing entries or add new ones
+      for (const newEntry of newEntries) {
+        const existingIndex = finalConfig.findIndex(
+          (entry) => entry.contractName === newEntry.contractName,
+        );
+
+        if (existingIndex >= 0) {
+          // Update existing contract
+          finalConfig[existingIndex] = newEntry;
+          console.log(
+            `📝 Updated existing contract "${newEntry.contractName}" in config`,
+          );
+        } else {
+          // Append new contract
+          finalConfig.push(newEntry);
+          console.log(
+            `➕ Added new contract "${newEntry.contractName}" to config`,
+          );
+        }
+      }
+    } else {
+      // Originating all contracts, replace entire config
+      finalConfig = newEntries;
+    }
+
+    writeFileSync(configPath, JSON.stringify(finalConfig, null, 2));
     console.log(
       `\n💾 Contract configuration created or updated at: ${configPath}`,
     );
   }
 
-  console.log(`\n🎉 All contracts originated successfully!`);
+  if (failedContracts.length > 0) {
+    console.warn(
+      `\n⚠️  ${failedContracts.length} contract(s) failed to originate: ${failedContracts.join(", ")}`,
+    );
+  }
+
+  if (results.length > 0) {
+    console.log(`\n🎉 ${results.length} contract(s) originated successfully!`);
+  } else {
+    console.error(`\n❌ No contracts were successfully originated.`);
+  }
+
   return results;
 };
 
@@ -331,6 +460,9 @@ function getDefaultStorage(
       };
       return callbackStorage;
     }
+    case "sapling":
+      // Sapling state must be initialized as empty object
+      return {};
     default:
       return 0;
   }
@@ -339,8 +471,18 @@ function getDefaultStorage(
 // If running this script directly
 if (process.argv[1] && process.argv[1].includes("originate-contracts")) {
   const key = process.argv[2];
+  const specificContract = process.argv[3];
 
-  originateContracts(key)
+  if (!key) {
+    console.error("Error: Private key is required as the first argument");
+    console.log(
+      "Usage: npm run originate-contracts <private-key> [contract-name]",
+    );
+    console.log("Example: npm run originate-contracts edsk... counter");
+    process.exit(1);
+  }
+
+  originateContracts(key, specificContract)
     .then((results) => {
       console.log(`\n📋 Origination Summary:`);
       results.forEach((result) => {

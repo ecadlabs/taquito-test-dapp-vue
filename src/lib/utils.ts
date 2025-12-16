@@ -13,8 +13,25 @@ export const buildIndexerUrl = (
   networkType: string,
   identifier?: string,
   routeType: "contract" | "operations" = "contract",
+  networkName?: string,
 ) => {
   if (indexer.value === "tzkt") {
+    // Special handling for tezlink-alphanet which uses sandbox.tzkt.io
+    if (networkName === "tezlink-alphanet") {
+      const apiUrl = encodeURIComponent(
+        "https://api.tzkt.shared.tezlink.nomadic-labs.com",
+      );
+      const baseUrl = "https://sandbox.tzkt.io";
+      if (routeType === "operations") {
+        return identifier
+          ? `${baseUrl}/${identifier}/operations?tzkt_api_url=${apiUrl}`
+          : `${baseUrl}/blocks?tzkt_api_url=${apiUrl}`;
+      }
+      return identifier
+        ? `${baseUrl}/${identifier}/storage?tzkt_api_url=${apiUrl}`
+        : `${baseUrl}/blocks?tzkt_api_url=${apiUrl}`;
+    }
+
     const baseUrl = indexer.url.replace("[networkType]", networkType);
     if (routeType === "operations") {
       return identifier ? `${baseUrl}/${identifier}/operations` : baseUrl;
@@ -77,4 +94,15 @@ export const copyToClipboard = async (
 export const validateTezosAddress = (address: string): boolean => {
   const tezosAddressPattern = /^(tz[1-4]|KT1)[0-9A-Za-z]{33}$/;
   return tezosAddressPattern.test(address);
+};
+
+/**
+ * Builds a GitHub URL for a contract source file
+ *
+ * @param contractName - The contract name (e.g., 'counter')
+ * @returns The GitHub URL for the contract source file
+ */
+export const buildGitHubContractUrl = (contractName: string): string => {
+  const repoUrl = "https://github.com/ecadlabs/taquito-test-dapp-vue";
+  return `${repoUrl}/blob/main/src/contracts/uncompiled/${contractName}.jsligo`;
 };

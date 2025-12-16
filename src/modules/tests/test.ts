@@ -1,3 +1,4 @@
+import type { NetworkType } from "@airgap/beacon-types";
 import type { Component } from "vue";
 
 export interface DiagramNode {
@@ -23,10 +24,11 @@ export interface TestMetadata {
   setup: string[];
   relatedTests: string[];
   contractApi?: boolean;
+  supportedNetworks?: NetworkType[];
   documentation: {
     contract?: { name: string; url: string }[];
     script?: string;
-    taqutioDocumentation?: string;
+    taquitoDocumentation?: string;
     tezosDocumentation?: string;
   };
   component?: () => Promise<{ default: Component }>;

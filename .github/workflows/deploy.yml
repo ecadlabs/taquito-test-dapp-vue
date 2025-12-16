@@ -25,14 +25,20 @@ jobs:
     strategy:
       matrix:
         include:
+          - environment: tallinnnet
+            project_name: taquito-dapp-tallinnnet
           - environment: seoulnet
             project_name: taquito-dapp
           - environment: ghostnet
             project_name: taquito-dapp-ghostnet
           - environment: shadownet
             project_name: taquito-dapp-shadownet
+          - environment: tezlink-alphanet
+            network_name: tezlink-alphanet
+            project_name: taquito-dapp-tezlink-alphanet
     env:
-      VITE_NETWORK_TYPE: ${{ matrix.environment }}
+      VITE_NETWORK_TYPE: ${{ vars.NETWORK_TYPE || matrix.environment }}
+      VITE_NETWORK_NAME: ${{ vars.NETWORK_NAME }}
       VITE_RPC_URL: ${{ vars.RPC_URL }}
       VITE_GITHUB_SHA: ${{ github.sha }}
       VITE_VERSION: ${{ github.ref_name }}
@@ -40,6 +46,7 @@ jobs:
       VITE_FAUCET_URL: ${{ secrets.FAUCET_URL }}
       VITE_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
       VITE_TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
+      VITE_WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID }}
     outputs:
       preview-url: ${{ steps.cloudflare_publish.outputs.URL }}
       environment: ${{ matrix.environment }}
@@ -61,7 +68,9 @@ jobs:
           echo "ALICE_WALLET_ADDRESS: ${{ vars.ALICE_WALLET_ADDRESS }}"
           echo "REOWN_PROJECT_ID: ${{ secrets.REOWN_PROJECT_ID }}"
       
-      - run: npm run fund-wallet ${{ vars.ALICE_WALLET_ADDRESS }}
+      - name: Fund wallet
+        if: ${{ vars.DISABLE_WALLET_FUNDING != 'true' }}
+        run: npm run fund-wallet ${{ vars.ALICE_WALLET_ADDRESS }}
       
       # Install LIGO for contract compilation
       - name: Install LIGO
@@ -71,7 +80,9 @@ jobs:
           echo "$HOME/.ligo/bin" >> $GITHUB_PATH
       
       - run: npm run compile-contracts
-      - run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
+      - name: Originate contracts
+        if: ${{ vars.DISABLE_ORIGINATION != 'true' }}
+        run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
       - run: npm run build
 
       - name: Publish to Cloudflare Pages

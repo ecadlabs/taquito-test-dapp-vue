@@ -38,11 +38,15 @@
 
 - **Payload Signing** - Sign and verify data
 
+### 🌉 **Layer 2 Integration**
+
+- **Etherlink Bridge** - Bridge XTZ between Tezos L1 and Etherlink L2
+
 ## 🎨 Key Features
 
 - **📊 Visual Learning** - Interactive diagrams showing operation flows
 - **🌍 Multi-Network** - Available across multiple Tezos testnets
-- **🔐 Multiple Wallet Connection Methods** - Support for Beacon, WalletConnect, Ledger devices, and a direct private key
+- **🔐 Multiple Wallet Connection Methods** - Support for Beacon, WalletConnect, Ledger devices, Web3Auth (social login), and direct private key
 - **🎭 Modern UI** - Built with Vue 3 + Shadcn-vue
 
 ## 🛠️ Development

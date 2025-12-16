@@ -11,6 +11,7 @@
 
       <Badge v-if="network" variant="outline" class="h-fit">
         <p>{{ network }}</p>
+        <p v-if="networkName">({{ networkName }})</p>
       </Badge>
     </div>
 
@@ -119,6 +120,7 @@ const settingsStore = useSettingsStore();
 const showSettingsDialog = ref<boolean>(false);
 
 const network = ref<string>(import.meta.env.VITE_NETWORK_TYPE);
+const networkName = ref<string>(import.meta.env.VITE_NETWORK_NAME);
 
 const firstTestId = computed(() => {
   return Object.values(AvailableTests)[0].id;
