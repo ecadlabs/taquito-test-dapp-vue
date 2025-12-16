@@ -243,6 +243,17 @@
         </div>
 
         <p>Balance: {{ balance }} ꜩ</p>
+
+        <div
+          v-if="!isRevealed"
+          class="mt-2 flex items-center gap-1 text-gray-500"
+        >
+          <Info class="size-4" />
+          <p>Address not revealed</p>
+          <button @click="reveal()" class="hover:cursor-pointer">
+            <Badge variant="secondary">Reveal</Badge>
+          </button>
+        </div>
       </div>
 
       <DialogFooter class="flex flex-col gap-2">
@@ -276,6 +287,7 @@ import {
   AlertTriangle,
   Copy,
   ExternalLink,
+  Info,
   Loader2,
   Unplug,
   Wallet,
@@ -283,6 +295,7 @@ import {
 import { computed, ref, watch } from "vue";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -323,6 +336,10 @@ const balance = computed(() => {
   }
 
   return 0;
+});
+
+const isRevealed = computed(() => {
+  return walletStore.getIsRevealed;
 });
 
 const provider = ref<WalletProvider>("beacon");
@@ -431,4 +448,11 @@ const backToProviderSelection = () => {
 const hidSupported = computed(() => {
   return "hid" in navigator;
 });
+
+const loadingReveal = ref(false);
+const reveal = async () => {
+  loadingReveal.value = true;
+  await walletStore.revealAddress();
+  loadingReveal.value = false;
+};
 </script>

@@ -10,8 +10,8 @@ import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import * as Sentry from "@sentry/vue";
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { LedgerSigner } from "@taquito/ledger-signer";
-import { importKey, InMemorySigner } from "@taquito/signer";
-import { TezosToolkit } from "@taquito/taquito";
+import { InMemorySigner } from "@taquito/signer";
+import { TezosToolkit, importKey } from "@taquito/taquito";
 import { hex2buf } from "@taquito/utils";
 import {
   PermissionScopeMethods,
@@ -35,11 +35,13 @@ export const useWalletStore = defineStore("wallet", () => {
   const address = ref<string>();
   const balance = ref<BigNumber>();
   const walletName = ref<string>();
+  const isRevealed = ref<boolean>();
   const isDisconnecting = ref<boolean>(false);
 
   const getTezos = computed(() => Tezos);
   const getWallet = computed(() => wallet.value);
   const getAddress = computed(() => address.value);
+  const getIsRevealed = computed(() => isRevealed.value);
 
   /** Gets the address from the current wallet */
   const getWalletAddress = async (): Promise<string | undefined> => {
@@ -442,6 +444,8 @@ export const useWalletStore = defineStore("wallet", () => {
         }
 
         await fetchBalance();
+        const managerKey = await Tezos.rpc.getManagerKey(address.value);
+        isRevealed.value = managerKey !== null;
       } else {
         throw ReferenceError(
           "Wallet was not found after initialization should have finished.",
@@ -630,6 +634,18 @@ export const useWalletStore = defineStore("wallet", () => {
     );
   };
 
+  const revealAddress = async (): Promise<void> => {
+    if (!address.value) return;
+
+    const estimate = await Tezos.estimate.reveal();
+
+    console.log(estimate);
+
+    await Tezos.wallet.reveal().send();
+    const managerKey = await Tezos.rpc.getManagerKey(address.value);
+    isRevealed.value = managerKey !== null;
+  };
+
   return {
     Tezos,
     address,
@@ -645,5 +661,7 @@ export const useWalletStore = defineStore("wallet", () => {
     getWalletConnectSessionFromIndexedDB,
     getWalletAddress,
     getWalletPublicKey,
+    getIsRevealed,
+    revealAddress,
   };
 });
