@@ -641,7 +641,7 @@ export const useWalletStore = defineStore("wallet", () => {
 
     console.log(estimate);
 
-    await Tezos.wallet.reveal().send();
+    await Tezos.contract.reveal({});
     const managerKey = await Tezos.rpc.getManagerKey(address.value);
     isRevealed.value = managerKey !== null;
   };
