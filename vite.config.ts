@@ -6,23 +6,50 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), tailwindcss(), nodePolyfills()],
+  plugins: [
+    vue(),
+    tailwindcss(),
+    nodePolyfills({
+      include: [
+        "buffer",
+        "process",
+        "util",
+        "events",
+        "crypto",
+        "string_decoder",
+      ],
+      globals: {
+        Buffer: true,
+        global: true,
+        process: true,
+      },
+      overrides: {
+        // Let vite-compatible-readable-stream handle streams to avoid inherits issues
+        stream: "vite-compatible-readable-stream",
+      },
+    }),
+  ],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
       "readable-stream": "vite-compatible-readable-stream",
-      stream: "vite-compatible-readable-stream",
-      buffer: "buffer",
-      process: "process/browser",
     },
   },
   define: {
     global: "globalThis",
-    Buffer: "globalThis.Buffer",
-    process: "globalThis.process",
   },
   optimizeDeps: {
-    include: ["buffer", "events", "process"],
+    include: [
+      "buffer",
+      "events",
+      "process",
+      "util",
+      "vite-compatible-readable-stream",
+      "cross-fetch",
+      "eventemitter2",
+      "@metamask/sdk",
+      "@metamask/providers",
+    ],
   },
   build: {
     rollupOptions: {
