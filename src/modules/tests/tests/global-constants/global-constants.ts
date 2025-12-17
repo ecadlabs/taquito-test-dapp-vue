@@ -44,7 +44,7 @@ const registerGlobalConstant = async (
     }
 
     diagramStore.setCompleted();
-    return operation.globalConstantHash;
+    return operation.globalConstantHash();
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error);
