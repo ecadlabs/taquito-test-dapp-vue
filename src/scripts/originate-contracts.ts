@@ -6,7 +6,11 @@ import type {
   MetadataContractStorage,
 } from "@/types/contract";
 import { importKey } from "@taquito/signer";
-import { MichelsonMap, TezosToolkit } from "@taquito/taquito";
+import {
+  MichelsonMap,
+  PollingSubscribeProvider,
+  TezosToolkit,
+} from "@taquito/taquito";
 import { stringToBytes } from "@taquito/utils";
 import { config } from "dotenv";
 import {
@@ -47,6 +51,7 @@ export const originateContracts = async (
   // Validate environment variables
   const rpcUrl = process.env.VITE_RPC_URL;
   const networkType = process.env.VITE_NETWORK_TYPE;
+  const networkName = process.env.VITE_NETWORK_NAME;
 
   if (!rpcUrl || !networkType) {
     throw new Error(
@@ -56,10 +61,51 @@ export const originateContracts = async (
 
   console.log(`🚀 Starting contract origination...`);
   console.log(`📡 Using RPC URL: ${rpcUrl}`);
-  console.log(`🌐 Using network: ${networkType}`);
+  console.log(`🌐 Using network: ${networkType} (${networkName})`);
 
   // Initialize Tezos toolkit
   const Tezos = new TezosToolkit(rpcUrl);
+
+  // Configure polling provider for confirmation on tezlink-alphanet
+  if (networkType === "tezlink-alphanet") {
+    Tezos.setStreamProvider(
+      Tezos.getFactory(PollingSubscribeProvider)({
+        pollingIntervalMilliseconds: 1000,
+      }),
+    );
+  }
+
+  // Custom polling function for networks where Taquito's confirmation doesn't work
+  const waitForConfirmation = async (
+    opHash: string,
+    timeoutSeconds = 180,
+    intervalMs = 3000,
+  ): Promise<void> => {
+    const startTime = Date.now();
+    const timeoutMs = timeoutSeconds * 1000;
+
+    while (Date.now() - startTime < timeoutMs) {
+      try {
+        const block = await Tezos.rpc.getBlock();
+        const opResult = block.operations
+          .flat()
+          .find((op) => op.hash === opHash);
+
+        if (opResult) {
+          console.log(
+            `✅ Operation ${opHash} found in block ${block.header.level}`,
+          );
+          return;
+        }
+      } catch {
+        // Ignore errors and keep polling
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+
+    throw new Error(`Timeout waiting for operation ${opHash} to be confirmed`);
+  };
 
   if (key) {
     await importKey(Tezos, key);
@@ -113,6 +159,7 @@ export const originateContracts = async (
   }
 
   const results: OriginationResult[] = [];
+  const failedContracts: string[] = [];
 
   const originationOrder = [
     "fa2-token",
@@ -149,9 +196,11 @@ export const originateContracts = async (
       if (contract.name === "balance-callback") {
         const fa2TokenAddress = originatedAddresses.get("fa2-token");
         if (!fa2TokenAddress) {
-          throw new Error(
-            "FA2 token must be originated before balance-callback contract",
+          console.warn(
+            `⏭️  Skipping ${contract.name} because dependency "fa2-token" was not successfully originated`,
           );
+          failedContracts.push(contract.name);
+          continue;
         }
         console.log(
           `🔗 Adding FA2 token address ${fa2TokenAddress} to balance-callback authorized addresses`,
@@ -179,7 +228,11 @@ export const originateContracts = async (
       );
 
       // Wait for confirmation
-      await originationOp.contract();
+      if (networkType === "tezlink-alphanet") {
+        await originationOp.contract();
+      } else {
+        await waitForConfirmation(originationOp.hash);
+      }
       console.log(`✅ Origination completed for ${contract.name}`);
       console.log(`📍 Contract address: ${originationOp.contractAddress}`);
 
@@ -197,8 +250,9 @@ export const originateContracts = async (
         storage: contractStorage,
       });
     } catch (error) {
-      console.error(`❌ Error originating ${contract.name} contract:`, error);
-      throw error;
+      console.warn(`⚠️  Failed to originate ${contract.name} contract:`, error);
+      failedContracts.push(contract.name);
+      continue;
     }
   }
 
@@ -231,7 +285,7 @@ export const originateContracts = async (
     const newEntries: ContractConfig[] = results.map((result) => ({
       address: result.contractAddress,
       originatedAt: new Date().toISOString(),
-      network: networkType,
+      network: networkName || networkType,
       contractName: result.contractName,
     }));
 
@@ -272,7 +326,18 @@ export const originateContracts = async (
     );
   }
 
-  console.log(`\n🎉 All contracts originated successfully!`);
+  if (failedContracts.length > 0) {
+    console.warn(
+      `\n⚠️  ${failedContracts.length} contract(s) failed to originate: ${failedContracts.join(", ")}`,
+    );
+  }
+
+  if (results.length > 0) {
+    console.log(`\n🎉 ${results.length} contract(s) originated successfully!`);
+  } else {
+    console.error(`\n❌ No contracts were successfully originated.`);
+  }
+
   return results;
 };
 
