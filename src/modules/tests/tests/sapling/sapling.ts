@@ -160,8 +160,10 @@ export async function shieldToUser(
     },
   ]);
 
-  diagramStore.setProgress("wait-for-user");
-  const op = await contract.methods.default([shieldedTx]).send({ amount });
+  diagramStore.setProgress("call-contract");
+  const op = await contract.methodsObject
+    .default([shieldedTx])
+    .send({ amount });
 
   diagramStore.setProgress("wait-for-chain-confirmation");
   const confirmation = await op.confirmation(
@@ -223,7 +225,7 @@ export async function transferToAlice(
   ]);
 
   diagramStore.setProgress("call-contract");
-  const op = await contract.methods.default([saplingTx]).send();
+  const op = await contract.methodsObject.default([saplingTx]).send();
 
   diagramStore.setProgress("wait-for-chain-confirmation");
   const confirmation = await op.confirmation(
@@ -283,7 +285,7 @@ export async function unshieldToUser(
   });
 
   diagramStore.setProgress("call-contract");
-  const op = await contract.methods.default([unshieldedTx]).send();
+  const op = await contract.methodsObject.default([unshieldedTx]).send();
 
   diagramStore.setProgress("wait-for-chain-confirmation");
   const confirmation = await op.confirmation(
