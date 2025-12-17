@@ -17,6 +17,10 @@ export default defineConfig({
         "events",
         "crypto",
         "string_decoder",
+        "http",
+        "https",
+        "url",
+        "zlib",
       ],
       globals: {
         Buffer: true,
