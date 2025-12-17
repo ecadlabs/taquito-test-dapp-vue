@@ -5,8 +5,8 @@ import type {
   FA2TokenStorage,
   MetadataContractStorage,
 } from "@/types/contract";
-import { importKey } from "@taquito/signer";
 import {
+  importKey,
   MichelsonMap,
   PollingSubscribeProvider,
   TezosToolkit,

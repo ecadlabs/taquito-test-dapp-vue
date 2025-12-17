@@ -1,9 +1,12 @@
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { RpcClient } from "@taquito/rpc";
-import { InMemorySpendingKey, SaplingToolkit } from "@taquito/sapling";
+import type { InMemorySpendingKey } from "@taquito/sapling";
 import { RpcReadAdapter, type TezosToolkit } from "@taquito/taquito";
 import * as bip39 from "bip39";
+
+// Lazy load sapling to avoid bundling 70MB+ of proving parameters
+const getSaplingModule = () => import("@taquito/sapling");
 
 // Must match contract's memo size
 const MEMO_SIZE = 8;
@@ -46,6 +49,7 @@ export interface SaplingTransactionHistory {
  * @throws Error if key generation or address derivation fails
  */
 export async function generateUserSpendingKey(): Promise<UserSaplingKey> {
+  const { InMemorySpendingKey } = await getSaplingModule();
   const mnemonic = bip39.generateMnemonic();
   const spendingKey = await InMemorySpendingKey.fromMnemonic(mnemonic);
   const viewingKey = await spendingKey.getSaplingViewingKeyProvider();
@@ -68,6 +72,7 @@ export async function generateUserSpendingKey(): Promise<UserSaplingKey> {
  * @throws Error if address derivation fails
  */
 export async function generateAliceAddress(): Promise<string> {
+  const { InMemorySpendingKey } = await getSaplingModule();
   const aliceSk = await InMemorySpendingKey.fromMnemonic(ALICE_MNEMONIC);
   const aliceVk = await aliceSk.getSaplingViewingKeyProvider();
   const aliceAddress = (await aliceVk.getAddress()).address;
@@ -137,6 +142,7 @@ export async function shieldToUser(
   userKey: UserSaplingKey,
   amount: number,
 ): Promise<string> {
+  const { SaplingToolkit } = await getSaplingModule();
   const diagramStore = useDiagramStore();
   const settingsStore = useSettingsStore();
 
@@ -201,6 +207,7 @@ export async function transferToAlice(
   aliceAddress: string,
   amount: number,
 ): Promise<string> {
+  const { SaplingToolkit } = await getSaplingModule();
   const diagramStore = useDiagramStore();
   const settingsStore = useSettingsStore();
 
@@ -264,6 +271,7 @@ export async function unshieldToUser(
   toAddress: string,
   amount: number,
 ): Promise<string> {
+  const { SaplingToolkit } = await getSaplingModule();
   const diagramStore = useDiagramStore();
   const settingsStore = useSettingsStore();
 
@@ -319,6 +327,7 @@ export async function getUserTransactionHistory(
   contractAddress: string,
   userKey: UserSaplingKey,
 ): Promise<SaplingTransactionHistory> {
+  const { SaplingToolkit } = await getSaplingModule();
   const readProvider = createSaplingRpcAdapter(tezos.rpc.getRpcUrl());
 
   const toolkit = new SaplingToolkit(
@@ -331,7 +340,7 @@ export async function getUserTransactionHistory(
   const txData = await transactionViewer.getIncomingAndOutgoingTransactions();
 
   // Map transactions with their position index for chronological ordering
-  const incomingWithPosition = txData.incoming.map((tx, idx) => ({
+  const incomingWithPosition = txData.incoming.map((tx, idx: number) => ({
     type: "incoming" as const,
     amount: Number(tx.value),
     memo: tx.memo
@@ -341,7 +350,7 @@ export async function getUserTransactionHistory(
     isIncoming: true,
   }));
 
-  const outgoingWithPosition = txData.outgoing.map((tx, idx) => ({
+  const outgoingWithPosition = txData.outgoing.map((tx, idx: number) => ({
     type: "outgoing" as const,
     amount: Number(tx.value),
     memo: tx.memo
@@ -394,6 +403,7 @@ export async function getUserSaplingBalance(
   contractAddress: string,
   userKey: UserSaplingKey,
 ): Promise<number> {
+  const { SaplingToolkit } = await getSaplingModule();
   const readProvider = createSaplingRpcAdapter(tezos.rpc.getRpcUrl());
 
   const toolkit = new SaplingToolkit(

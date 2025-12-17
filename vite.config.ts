@@ -40,6 +40,8 @@ export default defineConfig({
           "crypto-libs": ["@noble/hashes", "@tezos-core-tools/crypto-utils"],
           "ui-components": ["reka-ui", "@vueuse/core"],
           "vue-ecosystem": ["vue", "vue-router", "pinia", "vue-sonner"],
+          // Sapling has large ZKP proving parameters - keep in separate chunk
+          sapling: ["@taquito/sapling"],
         },
       },
     },
