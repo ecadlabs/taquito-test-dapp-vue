@@ -1,17 +1,17 @@
 import { Buffer } from "buffer";
-import process from "process/browser";
+import processBase from "process";
 
 // Extend global interfaces to include Node.js globals
 declare global {
   interface Window {
     Buffer: typeof Buffer;
-    process: typeof process;
+    process: typeof processBase;
     global: typeof globalThis;
   }
 
   interface GlobalThis {
     Buffer: typeof Buffer;
-    process: typeof process;
+    process: typeof processBase;
     global: typeof globalThis;
   }
 
@@ -19,10 +19,15 @@ declare global {
   var process: NodeJS.Process;
 }
 
-// Ensure process.env exists
-if (!process.env) {
-  process.env = {};
-}
+// Create a full process object, merging with any existing minimal setup
+const process = Object.assign({}, globalThis.process || {}, processBase, {
+  nextTick:
+    processBase.nextTick ||
+    globalThis.process?.nextTick ||
+    ((callback: (...args: unknown[]) => void, ...args: unknown[]) => {
+      Promise.resolve().then(() => callback(...args));
+    }),
+});
 
 // Make Buffer and process available globally
 if (typeof globalThis !== "undefined") {
