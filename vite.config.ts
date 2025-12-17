@@ -9,16 +9,50 @@ export default defineConfig({
     vue(),
     tailwindcss(),
     nodePolyfills({
-      protocolImports: true,
+      include: [
+        "buffer",
+        "process",
+        "util",
+        "events",
+        "crypto",
+        "string_decoder",
+        "http",
+        "https",
+        "url",
+        "zlib",
+      ],
+      globals: {
+        Buffer: true,
+        global: true,
+        process: true,
+      },
+      overrides: {
+        // Let vite-compatible-readable-stream handle streams to avoid inherits issues
+        stream: "vite-compatible-readable-stream",
+      },
     }),
   ],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "readable-stream": "vite-compatible-readable-stream",
     },
   },
   define: {
     global: "globalThis",
+  },
+  optimizeDeps: {
+    include: [
+      "buffer",
+      "events",
+      "process",
+      "util",
+      "vite-compatible-readable-stream",
+      "cross-fetch",
+      "eventemitter2",
+      "@metamask/sdk",
+      "@metamask/providers",
+    ],
   },
   build: {
     commonjsOptions: {
