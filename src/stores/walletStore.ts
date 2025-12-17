@@ -10,8 +10,8 @@ import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import * as Sentry from "@sentry/vue";
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { LedgerSigner } from "@taquito/ledger-signer";
-import { importKey, InMemorySigner } from "@taquito/signer";
-import { TezosToolkit } from "@taquito/taquito";
+import { InMemorySigner } from "@taquito/signer";
+import { TezosToolkit, importKey } from "@taquito/taquito";
 import { hex2buf } from "@taquito/utils";
 import {
   PermissionScopeMethods,
