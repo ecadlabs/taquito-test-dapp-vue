@@ -351,6 +351,7 @@ const copyAddress = () => {
 };
 
 const networkType = import.meta.env.VITE_NETWORK_TYPE;
+const networkName = import.meta.env.VITE_NETWORK_NAME;
 
 const openExplorer = () => {
   const operationsUrl = buildIndexerUrl(
@@ -358,6 +359,7 @@ const openExplorer = () => {
     networkType,
     address.value,
     "operations",
+    networkName,
   );
   window.open(operationsUrl, "_blank");
 };

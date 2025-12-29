@@ -13,8 +13,25 @@ export const buildIndexerUrl = (
   networkType: string,
   identifier?: string,
   routeType: "contract" | "operations" = "contract",
+  networkName?: string,
 ) => {
   if (indexer.value === "tzkt") {
+    // Special handling for tezlink-alphanet which uses sandbox.tzkt.io
+    if (networkName === "tezlink-alphanet") {
+      const apiUrl = encodeURIComponent(
+        "https://api.tzkt.shared.tezlink.nomadic-labs.com",
+      );
+      const baseUrl = "https://sandbox.tzkt.io";
+      if (routeType === "operations") {
+        return identifier
+          ? `${baseUrl}/${identifier}/operations?tzkt_api_url=${apiUrl}`
+          : `${baseUrl}/blocks?tzkt_api_url=${apiUrl}`;
+      }
+      return identifier
+        ? `${baseUrl}/${identifier}/storage?tzkt_api_url=${apiUrl}`
+        : `${baseUrl}/blocks?tzkt_api_url=${apiUrl}`;
+    }
+
     const baseUrl = indexer.url.replace("[networkType]", networkType);
     if (routeType === "operations") {
       return identifier ? `${baseUrl}/${identifier}/operations` : baseUrl;
@@ -77,21 +94,6 @@ export const copyToClipboard = async (
 export const validateTezosAddress = (address: string): boolean => {
   const tezosAddressPattern = /^(tz[1-4]|KT1)[0-9A-Za-z]{33}$/;
   return tezosAddressPattern.test(address);
-};
-
-/**
- * Builds a tzkt URL for a contract on a given network
- *
- * @param contractAddress - The contract address
- * @param networkType - The network type (e.g., 'ghostnet')
- * @returns The tzkt URL for the contract
- */
-export const buildTzktUrl = (
-  contractAddress: string,
-  networkType: string,
-): string => {
-  const baseUrl = `https://${networkType}.tzkt.io`;
-  return `${baseUrl}/${contractAddress}`;
 };
 
 /**

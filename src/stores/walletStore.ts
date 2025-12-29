@@ -10,8 +10,8 @@ import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import * as Sentry from "@sentry/vue";
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { LedgerSigner } from "@taquito/ledger-signer";
-import { importKey, InMemorySigner } from "@taquito/signer";
-import { TezosToolkit } from "@taquito/taquito";
+import { InMemorySigner } from "@taquito/signer";
+import { TezosToolkit, importKey } from "@taquito/taquito";
 import { HDPathTemplate, TrezorSigner } from "@taquito/trezor-signer";
 import { hex2buf } from "@taquito/utils";
 import {
@@ -129,7 +129,9 @@ export const useWalletStore = defineStore("wallet", () => {
       iconUrl: "https://tezostaquito.io/img/favicon.svg",
       network: {
         type: networkType,
-        name: import.meta.env.VITE_NETWORK_TYPE,
+        name:
+          import.meta.env.VITE_NETWORK_NAME ||
+          import.meta.env.VITE_NETWORK_TYPE,
         rpcUrl: settingsStore.settings.rpcUrl,
       },
       enableMetrics: true,
