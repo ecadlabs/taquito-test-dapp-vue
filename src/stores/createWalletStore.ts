@@ -48,6 +48,7 @@ export interface WalletStoreState {
   getTezos: ComputedRef<TezosToolkit>;
   getAddress: ComputedRef<string | undefined>;
   getBalance: ComputedRef<BigNumber | undefined>;
+  getProvider: ComputedRef<string | undefined>;
   getWallet: ComputedRef<
     BeaconWallet | WalletConnect | LedgerSigner | ProgrammaticWallet | undefined
   >;
@@ -108,10 +109,12 @@ export const createWalletStore = (
     const balance = ref<BigNumber>();
     const walletName = ref<string>();
     const isDisconnecting = ref<boolean>(false);
+    const provider = ref<string | undefined>();
 
     const getTezos = computed(() => Tezos);
     const getWallet = computed(() => wallet.value);
     const getAddress = computed(() => address.value);
+    const getProvider = computed(() => provider.value);
 
     /** Gets the address from the current wallet */
     const getWalletAddress = async (): Promise<string | undefined> => {
@@ -175,6 +178,7 @@ export const createWalletStore = (
       address.value = undefined;
       balance.value = undefined;
       walletName.value = undefined;
+      provider.value = undefined;
 
       // Clear any persisted wallet state
       localStorage.removeItem(`${localStoragePrefix}-provider`);
@@ -215,6 +219,7 @@ export const createWalletStore = (
           getBalance,
           getWallet,
           getWalletName,
+          getProvider,
           initializeWallet,
           disconnectWallet,
           fetchBalance,
@@ -275,6 +280,7 @@ export const createWalletStore = (
           getBalance,
           getWallet,
           getWalletName,
+          getProvider,
           initializeWallet,
           disconnectWallet,
           fetchBalance,
@@ -493,13 +499,14 @@ export const createWalletStore = (
      * provider for the Tezos instance.
      */
     const initializeWallet = async (
-      provider: WalletProvider,
+      _provider: WalletProvider,
       privateKeyOrSocialProvider?: string,
     ): Promise<void> => {
       console.log(
         "Starting initialization of wallet using provider:",
-        provider,
+        _provider,
       );
+      provider.value = _provider;
       try {
         // There is a wontfix issue in the Beacon SDK where no event is fired when the popup is closed,
         // resulting in a hanging promise, and causing the wallet state to never be cleared in our code.
@@ -516,7 +523,7 @@ export const createWalletStore = (
         }
 
         // Initialize wallet based on provider
-        switch (provider) {
+        switch (_provider) {
           case "beacon":
             await initializeBeaconWallet();
             break;
@@ -536,11 +543,11 @@ export const createWalletStore = (
             await initializeWeb3AuthWallet();
             break;
           default:
-            throw new TypeError(`Unknown wallet provider: ${provider}`);
+            throw new TypeError(`Unknown wallet provider: ${_provider}`);
         }
 
         if (wallet.value) {
-          if (provider === "walletconnect") {
+          if (_provider === "walletconnect") {
             Tezos.setProvider({
               wallet: wallet.value as WalletConnect,
             });
@@ -709,6 +716,7 @@ export const createWalletStore = (
       getTezos,
       getAddress,
       getBalance,
+      getProvider,
       getWallet,
       getWalletName,
       initializeWallet,

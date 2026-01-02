@@ -15,7 +15,7 @@ import { NetworkType } from "@airgap/beacon-types";
 export const useTezlinkWalletStore = createWalletStore(
   {
     storeName: "tezlink-wallet",
-    rpcUrl: "https://node.shared.tezlink.nomadic-labs.com/",
+    rpcUrl: "https://rpc.shadownet.tezlink.nomadic-labs.com",
     networkType: NetworkType.CUSTOM,
     networkName: "Tezlink",
     localStoragePrefix: "tezlink-wallet",
