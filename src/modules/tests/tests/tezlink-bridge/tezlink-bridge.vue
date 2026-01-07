@@ -70,13 +70,15 @@
         </div>
 
         <Tabs v-model="activeTab" class="w-full">
-          <TabsList class="grid w-full grid-cols-2">
+          <TabsList class="grid w-full grid-cols-1">
             <TabsTrigger value="deposit" class="text-xs sm:text-sm"
               >Deposit</TabsTrigger
             >
+            <!-- TODO: Implement withdrawal functionality
             <TabsTrigger value="withdraw" class="text-xs sm:text-sm"
               >Withdraw</TabsTrigger
             >
+            -->
           </TabsList>
 
           <!-- Deposit Tab -->
@@ -135,9 +137,8 @@
             </Button>
           </TabsContent>
 
-          <!-- Withdraw Tab -->
+          <!-- TODO: Implement withdrawal functionality
           <TabsContent value="withdraw" class="space-y-4">
-            <!-- Withdrawal Form (only if Tezlink wallet connected) -->
             <div v-if="tezlinkWalletStore.address" class="space-y-4">
               <Alert class="border-blue-200 bg-blue-50">
                 <Info class="size-4 text-blue-600" />
@@ -194,7 +195,6 @@
               </Button>
             </div>
 
-            <!-- Message when Tezlink wallet is not connected -->
             <div
               v-else
               class="bg-muted/50 flex flex-col items-center gap-4 rounded-lg border p-8 text-center"
@@ -209,6 +209,7 @@
               </div>
             </div>
           </TabsContent>
+          -->
         </Tabs>
       </CardContent>
     </Card>
@@ -216,7 +217,8 @@
 </template>
 
 <script setup lang="ts">
-import { Alert, AlertDescription } from "@/components/ui/alert";
+// TODO: Re-enable when withdrawal is implemented
+// import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -228,8 +230,8 @@ import { useWalletStore } from "@/stores/walletStore";
 import { validateAddress, ValidationResult } from "@taquito/utils";
 import {
   ArrowDownToLine,
-  ArrowUpFromLine,
-  Info,
+  // ArrowUpFromLine,  // TODO: Re-enable when withdrawal is implemented
+  // Info,
   SquareDashed,
   Wallet,
 } from "lucide-vue-next";
@@ -244,11 +246,12 @@ const tezlinkWalletStore = useTezlinkWalletStore();
 const activeTab = ref("deposit");
 const depositAmount = ref<number>(1);
 const tezlinkAddress = ref("");
-const withdrawAmount = ref<number>(1);
-const tezosDestination = ref(walletStore.getAddress || "");
+// TODO: Re-enable when withdrawal is implemented
+// const withdrawAmount = ref<number>(1);
+// const tezosDestination = ref(walletStore.getAddress || "");
 
 const depositLoading = ref<boolean>(false);
-const withdrawLoading = ref<boolean>(false);
+// const withdrawLoading = ref<boolean>(false);
 
 const walletConnected = computed(() => !!walletStore.getAddress);
 
@@ -269,16 +272,17 @@ watch(
   { immediate: true },
 );
 
+// TODO: Re-enable when withdrawal is implemented
 // Auto-populate Tezos destination address when Tezos wallet connects
-watch(
-  () => walletStore.getAddress,
-  (newAddress) => {
-    if (newAddress) {
-      tezosDestination.value = newAddress;
-    }
-  },
-  { immediate: true },
-);
+// watch(
+//   () => walletStore.getAddress,
+//   (newAddress) => {
+//     if (newAddress) {
+//       tezosDestination.value = newAddress;
+//     }
+//   },
+//   { immediate: true },
+// );
 
 const connectTezlinkWallet = async () => {
   try {
@@ -325,13 +329,14 @@ const canDeposit = computed(() => {
   );
 });
 
-const canWithdrawDirect = computed(() => {
-  return (
-    withdrawAmount.value > 0 &&
-    tezosDestination.value.trim().length > 0 &&
-    tezlinkWalletStore.address
-  );
-});
+// TODO: Re-enable when withdrawal is implemented
+// const canWithdrawDirect = computed(() => {
+//   return (
+//     withdrawAmount.value > 0 &&
+//     tezosDestination.value.trim().length > 0 &&
+//     tezlinkWalletStore.address
+//   );
+// });
 
 onMounted(() => {
   diagramStore.setTestDiagram("tezlink-bridge", "deposit");
@@ -362,9 +367,10 @@ const performDeposit = async () => {
   }
 };
 
-const performWithdraw = async () => {
-  //
-};
+// TODO: Re-enable when withdrawal is implemented
+// const performWithdraw = async () => {
+//   //
+// };
 
 const disconnectTezlinkWallet = async () => {
   await tezlinkWalletStore.disconnectWallet();
