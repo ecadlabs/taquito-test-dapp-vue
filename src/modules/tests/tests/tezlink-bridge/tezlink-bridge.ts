@@ -87,25 +87,17 @@ const depositToTezlink = async (
 
     // Encode the Tezlink destination address to the ticket format
     const packedAddress = encodeTezlinkAddress(tezlinkAddress);
-
-    // Build the transfer params directly with Michelson parameter
-    // This bypasses Taquito's address validation which doesn't accept sr1 addresses
-    const transferParams = {
-      to: bridgeConfig.bridgeContract,
-      amount: amount,
-      parameter: {
-        entrypoint: "deposit",
-        value: {
-          prim: "Pair",
-          args: [
-            { string: bridgeConfig.rollupAddress },
-            { bytes: packedAddress },
-          ],
-        },
-      },
-    };
+    const contract = await Tezos.wallet.at(bridgeConfig.bridgeContract);
 
     diagramStore.setProgress("estimate-fees");
+
+    // Note: "evm_address" is misleading and is actually the sr1 rollup address
+    const depositMethod = contract.methodsObject.deposit({
+      evm_address: bridgeConfig.rollupAddress,
+      l2_address: packedAddress,
+    });
+
+    const transferParams = depositMethod.toTransferParams({ amount });
     estimate = await Tezos.estimate.transfer(transferParams);
 
     if (estimate) {
@@ -114,7 +106,7 @@ const depositToTezlink = async (
 
     diagramStore.setProgress("send-deposit-transaction");
 
-    const op = await Tezos.wallet.transfer(transferParams).send();
+    const op = await depositMethod.send({ amount });
 
     diagramStore.setProgress("wait-for-chain-confirmation");
     const confirmation = await op.confirmation();
