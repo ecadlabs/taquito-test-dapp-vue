@@ -16,20 +16,13 @@ export const buildIndexerUrl = (
   networkName?: string,
 ) => {
   if (indexer.value === "tzkt") {
-    // Special handling for tezlink-alphanet which uses sandbox.tzkt.io
-    if (networkName === "tezlink-alphanet") {
-      const apiUrl = encodeURIComponent(
-        "https://api.tzkt.shared.tezlink.nomadic-labs.com",
-      );
-      const baseUrl = "https://sandbox.tzkt.io";
+    // Special handling for tezlink-shadownet
+    if (networkName === "tezlink-shadownet") {
+      const baseUrl = "https://shadownet.tezlink.tzkt.io";
       if (routeType === "operations") {
-        return identifier
-          ? `${baseUrl}/${identifier}/operations?tzkt_api_url=${apiUrl}`
-          : `${baseUrl}/blocks?tzkt_api_url=${apiUrl}`;
+        return identifier ? `${baseUrl}/${identifier}/operations` : baseUrl;
       }
-      return identifier
-        ? `${baseUrl}/${identifier}/storage?tzkt_api_url=${apiUrl}`
-        : `${baseUrl}/blocks?tzkt_api_url=${apiUrl}`;
+      return identifier ? `${baseUrl}/${identifier}/storage` : baseUrl;
     }
 
     const baseUrl = indexer.url.replace("[networkType]", networkType);
