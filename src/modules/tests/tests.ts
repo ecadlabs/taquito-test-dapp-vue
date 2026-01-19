@@ -1290,6 +1290,49 @@ The bridge uses Smart Rollup technology to enable cross-layer communication.`,
       },
     },
   },
+  "tezlink-bridge": {
+    id: "tezlink-bridge",
+    title: "Tezlink Bridge",
+    description: `Bridge XTZ tokens between Tezos L1 and Tezlink.`,
+    category: "Advanced Operations",
+    supportedNetworks: [NetworkType.SHADOWNET],
+    setup: [
+      "Connect to Shadownet testnet (only network currently supported)",
+      "Set up a Tezos wallet with Beacon/WalletConnect/Ledger",
+      "Have sufficient XTZ for gas fees and the amount to transfer",
+    ],
+    relatedTests: ["transfer", "batch", "transaction-limit"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/tezlink-bridge",
+      taquitoDocumentation: "https://taquito.io/docs/smart_rollups/",
+    },
+    component: () =>
+      import("@/modules/tests/tests/tezlink-bridge/tezlink-bridge.vue"),
+    icon: Network,
+    diagrams: {
+      deposit: {
+        nodes: [
+          {
+            id: "pack-tezlink-address",
+            label: "Pack Tezlink Address",
+          },
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "send-deposit-transaction",
+            label: "Send Deposit Transaction",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+    },
+  },
   sapling: {
     id: "sapling",
     title: "Sapling Transactions",
