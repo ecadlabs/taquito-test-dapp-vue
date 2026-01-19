@@ -36,7 +36,7 @@
               size="sm"
               variant="outline"
               :disabled="tezlinkWalletStore.isConnecting"
-              @click="connectTezlinkWallet"
+              @click="showConnectDialog = true"
               class="shrink-0 text-xs sm:text-sm"
             >
               {{
@@ -213,6 +213,9 @@
         </Tabs>
       </CardContent>
     </Card>
+
+    <!-- Tezlink Wallet Connection Dialog -->
+    <TezlinkWalletDialog v-model:open="showConnectDialog" />
   </div>
 </template>
 
@@ -236,12 +239,14 @@ import {
   Wallet,
 } from "lucide-vue-next";
 import { computed, onMounted, ref, watch } from "vue";
-import { toast } from "vue-sonner";
 import { depositToTezlink } from "./tezlink-bridge";
+import TezlinkWalletDialog from "./TezlinkWalletDialog.vue";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
 const tezlinkWalletStore = useTezlinkWalletStore();
+
+const showConnectDialog = ref(false);
 
 const activeTab = ref("deposit");
 const depositAmount = ref<number>(1);
@@ -283,23 +288,6 @@ watch(
 //   },
 //   { immediate: true },
 // );
-
-const connectTezlinkWallet = async () => {
-  try {
-    const provider = walletStore.getProvider;
-    if (provider === "programmatic") {
-      const secretKey = await walletStore.getTezos.signer.secretKey();
-      await tezlinkWalletStore.initializeWallet("programmatic", secretKey);
-    } else if (provider === "beacon" || provider === "walletconnect") {
-      await tezlinkWalletStore.initializeWallet(provider);
-    } else if (provider === "ledger") {
-      await tezlinkWalletStore.initializeWallet("ledger");
-    }
-  } catch (error) {
-    toast.error(`${error}`);
-    console.error("Failed to connect Tezlink wallet:", error);
-  }
-};
 
 const formatAddress = (address: string | null): string => {
   if (!address) return "";
