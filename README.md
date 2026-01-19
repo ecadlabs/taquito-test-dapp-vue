@@ -2,13 +2,29 @@
 
 > **Test dApp demonstrating Tezos blockchain interactions with visual diagrams and examples**
 
+## Why this exists
+
+The Taquito Test dApp is how we validate that [Taquito](https://github.com/ecadlabs/taquito) actually works; not just in unit tests, but in real browser environments with real wallets on real testnets.
+
+**For the Taquito team**, it's our hands-on proving ground. Every release, we use this to verify the developer experience is solid and operations behave as expected.
+
+**For developers**, it's runnable documentation. Instead of copy-pasting snippets and hoping they work, you can see exactly how Taquito operations flow (transfers, contract calls, staking, bridging) with visual diagrams showing each step.
+
+**For wallet teams**, it's a quick interoperability check. Connect via Beacon or WalletConnect and validate your wallet's UX against real Tezos operations without building a test harness from scratch.
+
+**For the ecosystem**, it lowers the barrier to testnet participation. The more people experimenting on testnets, the healthier those networks are. An unused testnet is a wasted testnet.
+
+We consider this a **public good**. Our goal is to have a deployment ready on every new testnet as it launches.
+
 ## 🌐 Live Deployments
 
-| Network       | URL                                |
-| ------------- | ---------------------------------- |
-| **Seoulnet**  | https://seoulnet.dapp.taquito.io/  |
-| **Shadownet** | https://shadownet.dapp.taquito.io/ |
-| **Ghostnet**  | https://ghostnet.dapp.taquito.io/  |
+| Network              | URL                                        | Description                                      |
+| -------------------- | ------------------------------------------ | ------------------------------------------------ |
+| **Shadownet**        | https://shadownet.dapp.taquito.io/         | Long lived testnet                               |
+| **Ghostnet**         | https://ghostnet.dapp.taquito.io/          | Long lived testnet (will retire in ~March 2026)  |
+| **Tezlink Shadownet**| https://tezlink-shadownet.dapp.taquito.io/ | Tezos X Michelson Runtime connected to Shadownet |
+| **Seoulnet**         | https://seoulnet.dapp.taquito.io/          | Protocol 023 (PtSeouLo)                          |
+| **Tallinnnet**       | https://tallinnnet.dapp.taquito.io/        | Protocol 024 (PtTALLiN)                          |
 
 ## ✨ Available Tests
 
