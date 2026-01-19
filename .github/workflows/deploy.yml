@@ -83,7 +83,10 @@ jobs:
       - name: Originate contracts
         if: ${{ vars.DISABLE_ORIGINATION != 'true' }}
         run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
-      - run: npm run build
+      - name: Build application
+        run: |
+          export NODE_OPTIONS="--max_old_space_size=4096"
+          npm run build
 
       - name: Publish to Cloudflare Pages
         id: cloudflare_publish
