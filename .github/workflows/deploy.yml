@@ -47,6 +47,7 @@ jobs:
       VITE_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
       VITE_TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
       VITE_WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID }}
+      VITE_TEZLINK_SHADOWNET_RPC: ${{ vars.TEZLINK_SHADOWNET_RPC }}
     outputs:
       preview-url: ${{ steps.cloudflare_publish.outputs.URL }}
       environment: ${{ matrix.environment }}
