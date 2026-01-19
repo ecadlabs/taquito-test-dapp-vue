@@ -18,13 +18,13 @@ We consider this a **public good**. Our goal is to have a deployment ready on ev
 
 ## 🌐 Live Deployments
 
-| Network              | URL                                        | Description                                      |
-| -------------------- | ------------------------------------------ | ------------------------------------------------ |
-| **Shadownet**        | https://shadownet.dapp.taquito.io/         | Long lived testnet                               |
-| **Ghostnet**         | https://ghostnet.dapp.taquito.io/          | Long lived testnet (will retire in ~March 2026)  |
-| **Tezlink Shadownet**| https://tezlink-shadownet.dapp.taquito.io/ | Tezos X Michelson Runtime connected to Shadownet |
-| **Seoulnet**         | https://seoulnet.dapp.taquito.io/          | Protocol 023 (PtSeouLo)                          |
-| **Tallinnnet**       | https://tallinnnet.dapp.taquito.io/        | Protocol 024 (PtTALLiN)                          |
+| Network               | URL                                        | Description                                      |
+| --------------------- | ------------------------------------------ | ------------------------------------------------ |
+| **Shadownet**         | https://shadownet.dapp.taquito.io/         | Long lived testnet                               |
+| **Ghostnet**          | https://ghostnet.dapp.taquito.io/          | Long lived testnet (will retire in ~March 2026)  |
+| **Tezlink Shadownet** | https://tezlink-shadownet.dapp.taquito.io/ | Tezos X Michelson Runtime connected to Shadownet |
+| **Seoulnet**          | https://seoulnet.dapp.taquito.io/          | Protocol 023 (PtSeouLo)                          |
+| **Tallinnnet**        | https://tallinnnet.dapp.taquito.io/        | Protocol 024 (PtTALLiN)                          |
 
 ## ✨ Available Tests
 
