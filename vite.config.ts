@@ -26,6 +26,10 @@ export default defineConfig({
     },
     rollupOptions: {
       external: (id) => {
+        // Externalize sapling to load from CDN - it's 68MB+ and exceeds Cloudflare Pages limit
+        if (id === "@taquito/sapling" || id.startsWith("@taquito/sapling/")) {
+          return true;
+        }
         return id.includes("/src/scripts/") || id.includes("\\src\\scripts\\");
       },
       output: {
@@ -40,8 +44,6 @@ export default defineConfig({
           "crypto-libs": ["@noble/hashes", "@tezos-core-tools/crypto-utils"],
           "ui-components": ["reka-ui", "@vueuse/core"],
           "vue-ecosystem": ["vue", "vue-router", "pinia", "vue-sonner"],
-          // Sapling has large ZKP proving parameters - keep in separate chunk
-          sapling: ["@taquito/sapling"],
         },
       },
     },
