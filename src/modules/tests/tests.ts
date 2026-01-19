@@ -1314,12 +1314,8 @@ The bridge uses Smart Rollup technology to enable cross-layer communication.`,
       deposit: {
         nodes: [
           {
-            id: "get-bridge-contract",
-            label: "Get Bridge Contract",
-          },
-          {
-            id: "convert-tezlink-address",
-            label: "Convert Tezlink Address",
+            id: "pack-tezlink-address",
+            label: "Pack Tezlink Address",
           },
           {
             id: "estimate-fees",

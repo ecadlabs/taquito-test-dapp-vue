@@ -31,7 +31,6 @@ const encodeTezlinkAddress = (address: string): string => {
 
   // Build Tezlink format: prefix + decoded (tag + hash) + suffix
   return "01dad8019600" + decoded + "c0";
-  // return decoded;
 };
 
 /**
