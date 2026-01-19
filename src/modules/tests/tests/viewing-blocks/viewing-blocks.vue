@@ -202,6 +202,7 @@ const transactionList = ref<TransactionList>({
 });
 
 const networkType = import.meta.env.VITE_NETWORK_TYPE;
+const networkName = import.meta.env.VITE_NETWORK_NAME;
 
 onMounted(async () => {
   diagramStore.setTestDiagram("viewing-blocks", "fetch-block");
@@ -234,6 +235,7 @@ const openTransactionInTzkt = (transaction: Transaction) => {
     networkType,
     transaction.hash,
     "operations",
+    networkName,
   );
 
   window.open(tzktUrl, "_blank");
