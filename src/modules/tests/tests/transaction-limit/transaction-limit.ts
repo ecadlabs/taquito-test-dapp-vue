@@ -53,7 +53,7 @@ const interact = async (
       diagramStore.setOperationHash(confirmation?.block.hash);
     diagramStore.setCompleted();
   } catch (error) {
-    console.log(`Error: ${JSON.stringify(error, null, 2)}`);
+    console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error);
   }
 };
