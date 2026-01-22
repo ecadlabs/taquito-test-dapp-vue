@@ -735,6 +735,10 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
             label: "Register Global Constant",
           },
           {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
+          },
+          {
             id: "wait-for-chain-confirmation",
             label: "Wait for Chain Confirmation",
           },
