@@ -10,13 +10,18 @@ const loading = ref<boolean>(false);
 const error = ref<string | null>(null);
 const fetchBakers = async (): Promise<void> => {
   const network = import.meta.env.VITE_NETWORK_TYPE;
+  const networkName = import.meta.env.VITE_NETWORK_NAME;
 
   try {
     loading.value = true;
     error.value = null;
 
+    const baseUrl =
+      networkName === "tezlink-shadownet"
+        ? "https://api.shadownet.tezlink.tzkt.io"
+        : `https://api.${network}.tzkt.io`;
     const response = await fetch(
-      `https://api.${network}.tzkt.io/v1/delegates?active=true&select=address,alias`,
+      `${baseUrl}/v1/delegates?active=true&select=address,alias`,
     );
 
     if (!response.ok) {
@@ -25,16 +30,13 @@ const fetchBakers = async (): Promise<void> => {
 
     const data = await response.json();
 
-    // Filter out bakers with null aliases and map to our Baker interface
-    bakers.value = data
-      .filter(
-        (baker: { address: string; alias: string | null }) =>
-          baker.alias !== null && baker.alias !== "",
-      )
-      .map((baker: { address: string; alias: string }) => ({
+    // Map to Baker interface, using address as fallback when alias is null
+    bakers.value = data.map(
+      (baker: { address: string; alias: string | null }) => ({
         address: baker.address,
-        alias: baker.alias,
-      }));
+        alias: baker.alias || baker.address,
+      }),
+    );
   } catch (err) {
     error.value = err instanceof Error ? err.message : "Failed to fetch bakers";
     console.error("Error fetching bakers:", err);
