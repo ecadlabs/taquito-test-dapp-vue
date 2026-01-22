@@ -1,5 +1,5 @@
 import { useSettingsStore, type ThemeMode } from "@/stores/settingsStore";
-import { watch } from "vue";
+import { onScopeDispose, watch } from "vue";
 
 export const useTheme = () => {
   const settingsStore = useSettingsStore();
@@ -55,6 +55,11 @@ export const useTheme = () => {
     };
 
     mediaQuery.addEventListener("change", handleSystemThemeChange);
+
+    // Clean up event listener when scope is disposed
+    onScopeDispose(() => {
+      mediaQuery.removeEventListener("change", handleSystemThemeChange);
+    });
 
     // Apply initial theme
     const initialThemeMode = settingsStore.getThemeMode;
