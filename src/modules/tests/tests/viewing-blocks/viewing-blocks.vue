@@ -18,7 +18,12 @@
 
           <div class="flex items-center gap-2">
             <Label>Block Number:</Label>
-            <NumberField :min="1" v-model="blockNumber" class="w-32">
+            <NumberField
+              :min="minBlockNumber"
+              :max="latestBlockNumber"
+              v-model="blockNumber"
+              class="w-32"
+            >
               <NumberFieldContent>
                 <NumberFieldDecrement />
                 <NumberFieldInput />
@@ -187,13 +192,14 @@ import { useDiagramStore } from "@/stores/diagramStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 import { ExternalLink, FileText, Loader2 } from "lucide-vue-next";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 const walletStore = useWalletStore();
 const settingsStore = useSettingsStore();
 const diagramStore = useDiagramStore();
 
 const blockNumber = ref<number>(1);
+const latestBlockNumber = ref<number | undefined>(undefined);
 const loading = ref<boolean>(false);
 const transactionList = ref<TransactionList>({
   transactions: [],
@@ -204,8 +210,26 @@ const transactionList = ref<TransactionList>({
 const networkType = import.meta.env.VITE_NETWORK_TYPE;
 const networkName = import.meta.env.VITE_NETWORK_NAME;
 
+const minBlockNumber = computed(() => {
+  if (!latestBlockNumber.value) return 1;
+  return Math.max(1, latestBlockNumber.value - 10000);
+});
+
+const fetchLatestBlockNumber = async () => {
+  try {
+    const header = await walletStore.getTezos.rpc.getBlockHeader();
+    latestBlockNumber.value = header.level;
+    blockNumber.value = header.level;
+  } catch (error) {
+    console.error("Failed to fetch latest block number:", error);
+  }
+};
+
 onMounted(async () => {
   diagramStore.setTestDiagram("viewing-blocks", "fetch-block");
+  if (walletStore.getAddress) {
+    await fetchLatestBlockNumber();
+  }
 });
 
 const fetchBlock = async (blockNumber?: number) => {
