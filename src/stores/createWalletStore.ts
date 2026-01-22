@@ -265,7 +265,7 @@ export const createWalletStore = (
       });
 
       if (!walletConnect)
-        throw ReferenceError(
+        throw new ReferenceError(
           "Wallet not found after WalletConnect initialization should have finished.",
         );
 
