@@ -56,7 +56,7 @@ const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
 
 onMounted(() => {
-  diagramStore.setTestDiagram("transfer");
+  diagramStore.setTestDiagram("increase-paid-storage");
 
   const CONTRACT_ADDRESS =
     (contracts as ContractConfig[]).find(
