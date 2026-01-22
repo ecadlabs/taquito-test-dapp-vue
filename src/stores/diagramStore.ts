@@ -4,6 +4,7 @@ import { useWalletStore } from "@/stores/walletStore";
 import type { Estimate } from "@taquito/taquito";
 import { defineStore } from "pinia";
 import { ref, watch, type Component } from "vue";
+import { toast } from "vue-sonner";
 
 export interface StepTiming {
   startTime: DOMHighResTimeStamp;
@@ -82,6 +83,11 @@ export const useDiagramStore = defineStore("diagram", () => {
 
       currentStep.value = stepId;
       diagramStatus.value = "running";
+
+      // Show toast when waiting for user confirmation in wallet
+      if (stepId === "wait-for-user") {
+        toast.info("Check your wallet to confirm the operation");
+      }
     }
   };
 
