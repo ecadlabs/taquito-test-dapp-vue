@@ -562,7 +562,7 @@ export const createWalletStore = (
 
           await fetchBalance();
         } else {
-          throw ReferenceError(
+          throw new ReferenceError(
             "Wallet was not found after initialization should have finished.",
           );
         }
