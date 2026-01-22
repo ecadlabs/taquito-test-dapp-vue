@@ -247,7 +247,7 @@ const fetchBlock = async (blockNumber?: number) => {
 const formatFee = (fee: string | undefined): string => {
   if (!fee) return "N/A";
 
-  const feeInTez = parseInt(fee) / 1000000;
+  const feeInTez = parseInt(fee, 10) / 1000000;
   return feeInTez.toFixed(6);
 };
 

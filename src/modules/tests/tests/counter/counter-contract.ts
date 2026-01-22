@@ -67,7 +67,7 @@ const increment = async (amount: number): Promise<number | undefined> => {
     diagramStore.setCompleted();
     return await getContractStorage(true);
   } catch (error) {
-    console.log(`Error: ${JSON.stringify(error, null, 2)}`);
+    console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error);
   }
 };
@@ -119,7 +119,7 @@ const decrement = async (amount: number): Promise<number | undefined> => {
     diagramStore.setCompleted();
     return await getContractStorage(true);
   } catch (error) {
-    console.log(`Error: ${JSON.stringify(error, null, 2)}`);
+    console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error);
   }
 };
@@ -162,7 +162,7 @@ const reset = async (): Promise<void> => {
       diagramStore.setOperationHash(confirmation?.block.hash);
     diagramStore.setCompleted();
   } catch (error) {
-    console.log(`Error: ${JSON.stringify(error, null, 2)}`);
+    console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error);
   }
 };
@@ -193,7 +193,7 @@ const getContractStorage = async (
     if (!noDiagram) diagramStore.setCompleted();
     return storage as number;
   } catch (error) {
-    console.log(`Error: ${error}`);
+    console.error(`Error: ${error}`);
     diagramStore.setErrorMessage(error);
   }
 };
@@ -222,10 +222,10 @@ const getContractMethods = async (): Promise<void> => {
         diagramStore.setCompleted();
       })
       .catch((error) => {
-        console.log(`Error: ${error}`);
+        console.error(`Error: ${error}`);
       });
   } catch (error) {
-    console.log(`Error: ${error}`);
+    console.error(`Error: ${error}`);
     diagramStore.setErrorMessage(error);
   }
 

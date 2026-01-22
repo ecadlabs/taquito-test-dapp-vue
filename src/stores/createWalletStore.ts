@@ -265,7 +265,7 @@ export const createWalletStore = (
       });
 
       if (!walletConnect)
-        throw ReferenceError(
+        throw new ReferenceError(
           "Wallet not found after WalletConnect initialization should have finished.",
         );
 
@@ -562,7 +562,7 @@ export const createWalletStore = (
 
           await fetchBalance();
         } else {
-          throw ReferenceError(
+          throw new ReferenceError(
             "Wallet was not found after initialization should have finished.",
           );
         }

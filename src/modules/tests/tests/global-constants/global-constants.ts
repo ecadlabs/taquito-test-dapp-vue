@@ -29,6 +29,7 @@ const registerGlobalConstant = async (
     }
 
     diagramStore.setProgress("register-constant");
+    diagramStore.setProgress("wait-for-user");
     const operation = await Tezos.wallet
       .registerGlobalConstant({ value })
       .send();
