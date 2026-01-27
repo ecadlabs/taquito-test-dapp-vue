@@ -214,7 +214,7 @@
                 <div v-if="txHash" class="mt-2 text-xs">
                   Transaction:
                   <a
-                    :href="`https://ghostnet.tzkt.io/${txHash}`"
+                    :href="operationsUrl"
                     target="_blank"
                     class="underline hover:no-underline"
                   >
@@ -291,6 +291,8 @@ import {
   NumberFieldIncrement,
   NumberFieldInput,
 } from "@/components/ui/number-field";
+import { buildIndexerUrl } from "@/lib/utils";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 import BigNumber from "bignumber.js";
 import {
@@ -505,6 +507,19 @@ onUnmounted(() => {
     cooldownTimer.value = null;
   }
 });
+
+const networkType = import.meta.env.VITE_NETWORK_TYPE;
+const networkName = import.meta.env.VITE_NETWORK_NAME;
+const settingsStore = useSettingsStore();
+const operationsUrl = computed(() =>
+  buildIndexerUrl(
+    settingsStore.settings.indexer,
+    networkType,
+    txHash.value?.toString(),
+    "operations",
+    networkName,
+  ),
+);
 </script>
 
 <style scoped>
