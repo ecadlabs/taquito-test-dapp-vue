@@ -35,11 +35,9 @@ const registerGlobalConstant = async (
       .send();
 
     diagramStore.setProgress("wait-for-chain-confirmation");
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
+    await operation.confirmation(settingsStore.getConfirmationCount);
 
-    const opHash = getOperationHash(confirmation);
+    const opHash = getOperationHash(operation);
     if (opHash) {
       diagramStore.setOperationHash(opHash);
     }

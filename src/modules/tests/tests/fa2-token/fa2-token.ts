@@ -84,13 +84,9 @@ export const mintTokens = async (param: MintParam): Promise<void> => {
     const operation = await contract.methodsObject.mint(param).send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
+    await operation.confirmation(settingsStore.getConfirmationCount);
 
-    if (confirmation?.block.hash) {
-      diagramStore.setOperationHash(confirmation?.block.hash);
-    }
+    diagramStore.setOperationHash(operation.opHash);
     diagramStore.setCompleted();
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
@@ -129,13 +125,9 @@ export const burnTokens = async (param: BurnParam): Promise<void> => {
     const operation = await contract.methodsObject.burn(param).send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
+    await operation.confirmation(settingsStore.getConfirmationCount);
 
-    if (confirmation?.block.hash) {
-      diagramStore.setOperationHash(confirmation?.block.hash);
-    }
+    diagramStore.setOperationHash(operation.opHash);
     diagramStore.setCompleted();
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
@@ -180,13 +172,9 @@ export const transferTokens = async (
     const operation = await contract.methodsObject.transfer(transfers).send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
+    await operation.confirmation(settingsStore.getConfirmationCount);
 
-    if (confirmation?.block.hash) {
-      diagramStore.setOperationHash(confirmation?.block.hash);
-    }
+    diagramStore.setOperationHash(operation.opHash);
     diagramStore.setCompleted();
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
@@ -282,13 +270,9 @@ export const getTokenBalancesWithCallback = async (
       .send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
+    await operation.confirmation(settingsStore.getConfirmationCount);
 
-    if (confirmation?.block.hash) {
-      diagramStore.setOperationHash(confirmation?.block.hash);
-    }
+    diagramStore.setOperationHash(operation.opHash);
 
     diagramStore.setProgress("read-callback-storage");
     const callbackStorage =
