@@ -36,8 +36,8 @@ const sendBatch = async (): Promise<void> => {
     const batchOp = await batch.send();
 
     diagramStore.setProgress("wait-for-chain-confirmation");
-    const confirmation = await batchOp.confirmation();
-    const opHash = getOperationHash(confirmation);
+    await batchOp.confirmation();
+    const opHash = getOperationHash(batchOp);
     diagramStore.setOperationHash(opHash);
     diagramStore.setCompleted();
   } catch (error) {

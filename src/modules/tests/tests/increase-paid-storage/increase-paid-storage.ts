@@ -21,11 +21,9 @@ const increaseStorage = async (contract: string, bytes: number) => {
       .send();
 
     diagramStore.setProgress("wait-for-chain-confirmation");
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
-    if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash);
+    await operation.confirmation(settingsStore.getConfirmationCount);
+
+    diagramStore.setOperationHash(operation.opHash);
 
     diagramStore.setCompleted();
   } catch (error) {

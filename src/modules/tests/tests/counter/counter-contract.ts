@@ -58,12 +58,9 @@ const increment = async (amount: number): Promise<number | undefined> => {
     diagramStore.setProgress("wait-confirmation");
     console.log(settingsStore.getConfirmationCount);
 
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
+    await operation.confirmation(settingsStore.getConfirmationCount);
 
-    if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash);
+    diagramStore.setOperationHash(operation.opHash);
     diagramStore.setCompleted();
     return await getContractStorage(true);
   } catch (error) {
@@ -111,11 +108,9 @@ const decrement = async (amount: number): Promise<number | undefined> => {
     diagramStore.setProgress("execute-operation");
     const operation = await contract.methodsObject.decrement(amount).send();
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
-    if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash);
+    await operation.confirmation(settingsStore.getConfirmationCount);
+
+    diagramStore.setOperationHash(operation.opHash);
     diagramStore.setCompleted();
     return await getContractStorage(true);
   } catch (error) {
@@ -155,11 +150,9 @@ const reset = async (): Promise<void> => {
     diagramStore.setProgress("execute-operation");
     const operation = await contract.methodsObject.reset().send();
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
-    if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash);
+    await operation.confirmation(settingsStore.getConfirmationCount);
+
+    diagramStore.setOperationHash(operation.opHash);
     diagramStore.setCompleted();
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);

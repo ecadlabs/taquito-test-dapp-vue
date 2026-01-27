@@ -115,9 +115,9 @@ const depositToEtherlink = async (
     const op = await depositMethod.send({ amount: amount });
 
     diagramStore.setProgress("wait-for-chain-confirmation");
-    const confirmation = await op.confirmation();
+    await op.confirmation();
 
-    const opHash = getOperationHash(confirmation);
+    const opHash = getOperationHash(op);
     diagramStore.setOperationHash(opHash);
     diagramStore.setCompleted();
   } catch (error) {
