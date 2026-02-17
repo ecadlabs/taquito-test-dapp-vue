@@ -25,7 +25,7 @@
     "@ledgerhq/hw-transport-webhid": "^6.30.8",
     "@sentry/vue": "^10.17.0",
     "@tailwindcss/vite": "^4.1.14",
-    "@taquito/beacon-wallet": "file:taquito-beacon-wallet-24.0.1.tgz",
+    "@taquito/beacon-wallet": "^24.0.1",
     "@taquito/ledger-signer": "^24.0.1",
     "@taquito/michel-codec": "^24.0.1",
     "@taquito/remote-signer": "^24.0.1",
