@@ -1,6 +1,10 @@
 import { web3AuthService } from "@/services/web3AuthService";
 import type { ProgrammaticWallet, WalletProvider } from "@/types/wallet";
-import { NetworkType, type ExtendedPeerInfo } from "@airgap/beacon-types";
+import {
+  NetworkType,
+  Regions,
+  type ExtendedPeerInfo,
+} from "@airgap/beacon-types";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import * as Sentry from "@sentry/vue";
 import { BeaconWallet } from "@taquito/beacon-wallet";
@@ -202,6 +206,33 @@ export const createWalletStore = (
           rpcUrl: resolvedRpcUrl,
         },
         enableMetrics: true,
+        matrixNodes: {
+          [Regions.EUROPE_WEST]: [
+            "beacon-2.ecadinfra.com",
+            "beacon-3.ecadinfra.com",
+            "beacon-4.ecadinfra.com",
+          ],
+          [Regions.NORTH_AMERICA_EAST]: [
+            "beacon-2.ecadinfra.com",
+            "beacon-3.ecadinfra.com",
+            "beacon-4.ecadinfra.com",
+          ],
+          [Regions.NORTH_AMERICA_WEST]: [
+            "beacon-2.ecadinfra.com",
+            "beacon-3.ecadinfra.com",
+            "beacon-4.ecadinfra.com",
+          ],
+          [Regions.ASIA_EAST]: [
+            "beacon-2.ecadinfra.com",
+            "beacon-3.ecadinfra.com",
+            "beacon-4.ecadinfra.com",
+          ],
+          [Regions.AUSTRALIA]: [
+            "beacon-2.ecadinfra.com",
+            "beacon-3.ecadinfra.com",
+            "beacon-4.ecadinfra.com",
+          ],
+        },
       };
 
       console.log("Beacon wallet options:", options);
