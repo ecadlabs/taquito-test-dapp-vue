@@ -602,7 +602,7 @@ export const createWalletStore = (
             }
           }
 
-          await wallet.value.client.clearActiveAccount();
+          await wallet.value.disconnect();
         } else if (wallet.value instanceof WalletConnect) {
           await wallet.value.disconnect();
           await deleteWalletConnectSessionFromIndexedDB();
