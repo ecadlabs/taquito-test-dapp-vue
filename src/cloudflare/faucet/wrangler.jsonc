@@ -25,7 +25,7 @@
   "vars": {
     // Secret keys are stored in the Cloudflare Secrets Manager (npx wrangler secret put)
     "RPC_URL": "https://ghostnet.tezos.ecadinfra.com",
-    "ALLOWED_RPC_URLS": "https://ghostnet.tezos.ecadinfra.com,https://shadownet.tezos.ecadinfra.com,https://seoulnet.tezos.ecadinfra.com",
+    "ALLOWED_RPC_URLS": "https://ghostnet.tezos.ecadinfra.com,https://shadownet.tezos.ecadinfra.com,https://seoulnet.tezos.ecadinfra.com,https://rpc.shadownet.tezlink.nomadic-labs.com",
     "MIN_TEZ": "1",
     "MAX_TEZ": "10",
     "RATE_LIMIT_ENABLED": "true",

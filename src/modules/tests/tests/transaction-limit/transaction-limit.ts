@@ -45,15 +45,12 @@ const interact = async (
     });
 
     diagramStore.setProgress("wait-chain-confirmation");
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
+    await operation.confirmation(settingsStore.getConfirmationCount);
 
-    if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash);
+    diagramStore.setOperationHash(operation.opHash);
     diagramStore.setCompleted();
   } catch (error) {
-    console.log(`Error: ${JSON.stringify(error, null, 2)}`);
+    console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error);
   }
 };

@@ -136,57 +136,11 @@
           </div>
         </CardContent>
       </Card>
-
-      <!-- Views Section -->
-      <Card
-        v-if="
-          metadataResult.metadata?.views &&
-          Array.isArray(metadataResult.metadata.views) &&
-          metadataResult.metadata.views.length > 0
-        "
-      >
-        <CardHeader>
-          <CardTitle class="flex items-center gap-2">
-            <Eye class="h-5 w-5" />
-            Metadata Views
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div class="space-y-2">
-            <div
-              v-for="(view, index) in metadataResult.metadata.views"
-              :key="index"
-              class="rounded-lg border p-3"
-            >
-              <div class="flex items-center gap-2">
-                <Badge variant="outline">{{
-                  getViewName(view as string)
-                }}</Badge>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  @click="executeView(getViewName(view as string), index)"
-                  :disabled="isExecutingView"
-                >
-                  <Play class="mr-1 h-3 w-3" />
-                  Execute
-                </Button>
-              </div>
-              <pre
-                v-if="viewExecutionResult[index]"
-                class="bg-muted mt-2 w-full rounded p-2 text-xs break-words whitespace-pre-wrap"
-                >{{ viewExecutionResult[index] }}</pre
-              >
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Badge } from "@/components/ui/badge";
 import Button from "@/components/ui/button/Button.vue";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Input from "@/components/ui/input/Input.vue";
@@ -198,24 +152,17 @@ import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
 import type { ContractConfig } from "@/types/contract";
 import { Tzip16Module } from "@taquito/tzip16";
-import { Database, Eye, Info, Loader2, Play } from "lucide-vue-next";
+import { Database, Info, Loader2 } from "lucide-vue-next";
 import { computed, onMounted, ref } from "vue";
-import {
-  executeMetadataView,
-  getContractMetadata,
-  type MetadataResult,
-  type ViewExecutionResult,
-} from "./tzip16-metadata";
+import { getContractMetadata, type MetadataResult } from "./tzip16-metadata";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
 
 const walletConnected = computed(() => !!walletStore.getAddress);
 const isLoading = ref(false);
-const isExecutingView = ref(false);
 const contractAddress = ref("");
 const metadataResult = ref<MetadataResult | undefined>(undefined);
-const viewExecutionResult = ref<string[]>([]);
 const isValidContractAddress = (value: string): boolean =>
   validateTezosAddress(value.trim());
 
@@ -246,28 +193,6 @@ const getMetadata = async () => {
   } finally {
     isLoading.value = false;
   }
-};
-
-const executeView = async (viewName: string, index: number) => {
-  if (!isValidContractAddress(contractAddress.value.trim())) return;
-
-  isExecutingView.value = true;
-
-  try {
-    const result: ViewExecutionResult = await executeMetadataView(
-      contractAddress.value.trim(),
-      viewName,
-    );
-    viewExecutionResult.value[index] = JSON.stringify(result.result, null, 2);
-  } catch (error) {
-    console.error(`Failed to execute view ${viewName}:`, error);
-  } finally {
-    isExecutingView.value = false;
-  }
-};
-
-const getViewName = (view: string): string => {
-  return view.replace(/"/g, "");
 };
 
 const METADATA_CONTRACT_ADDRESS =

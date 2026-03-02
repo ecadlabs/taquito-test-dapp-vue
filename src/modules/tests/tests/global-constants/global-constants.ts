@@ -29,20 +29,21 @@ const registerGlobalConstant = async (
     }
 
     diagramStore.setProgress("register-constant");
-    const operation = await Tezos.contract.registerGlobalConstant({ value });
+    diagramStore.setProgress("wait-for-user");
+    const operation = await Tezos.wallet
+      .registerGlobalConstant({ value })
+      .send();
 
     diagramStore.setProgress("wait-for-chain-confirmation");
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
+    await operation.confirmation(settingsStore.getConfirmationCount);
 
-    const opHash = getOperationHash(confirmation);
+    const opHash = getOperationHash(operation);
     if (opHash) {
       diagramStore.setOperationHash(opHash);
     }
 
     diagramStore.setCompleted();
-    return operation.globalConstantHash;
+    return operation.globalConstantHash();
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error);

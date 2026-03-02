@@ -1,5 +1,4 @@
 import type { IndexerOption } from "@/stores/settingsStore";
-import type { Confirmation } from "@/types/wallet";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { toast } from "vue-sonner";
@@ -13,8 +12,18 @@ export const buildIndexerUrl = (
   networkType: string,
   identifier?: string,
   routeType: "contract" | "operations" = "contract",
+  networkName?: string,
 ) => {
   if (indexer.value === "tzkt") {
+    // Special handling for tezlink-shadownet
+    if (networkName === "tezlink-shadownet") {
+      const baseUrl = "https://shadownet.tezlink.tzkt.io";
+      if (routeType === "operations") {
+        return identifier ? `${baseUrl}/${identifier}/operations` : baseUrl;
+      }
+      return identifier ? `${baseUrl}/${identifier}/storage` : baseUrl;
+    }
+
     const baseUrl = indexer.url.replace("[networkType]", networkType);
     if (routeType === "operations") {
       return identifier ? `${baseUrl}/${identifier}/operations` : baseUrl;
@@ -35,14 +44,8 @@ export const buildIndexerUrl = (
   throw new Error(`Unsupported indexer value: ${indexer.value}`);
 };
 
-export const getOperationHash = (confirmation: Confirmation) => {
-  let opHash = "";
-  if (typeof confirmation === "object" && confirmation?.block?.hash) {
-    opHash = confirmation.block.hash;
-  } else if (typeof confirmation === "number") {
-    opHash = confirmation.toString();
-  }
-  return opHash;
+export const getOperationHash = (operation: { opHash: string }) => {
+  return operation.opHash;
 };
 
 /**
@@ -77,4 +80,15 @@ export const copyToClipboard = async (
 export const validateTezosAddress = (address: string): boolean => {
   const tezosAddressPattern = /^(tz[1-4]|KT1)[0-9A-Za-z]{33}$/;
   return tezosAddressPattern.test(address);
+};
+
+/**
+ * Builds a GitHub URL for a contract source file
+ *
+ * @param contractName - The contract name (e.g., 'counter')
+ * @returns The GitHub URL for the contract source file
+ */
+export const buildGitHubContractUrl = (contractName: string): string => {
+  const repoUrl = "https://github.com/ecadlabs/taquito-test-dapp-vue";
+  return `${repoUrl}/blob/main/src/contracts/uncompiled/${contractName}.jsligo`;
 };

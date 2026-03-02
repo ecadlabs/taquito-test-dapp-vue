@@ -59,13 +59,9 @@ const addUserRecord = async (record: RecordParam): Promise<void> => {
       .send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
+    await operation.confirmation(settingsStore.getConfirmationCount);
 
-    if (confirmation?.block.hash) {
-      diagramStore.setOperationHash(confirmation.block.hash);
-    }
+    diagramStore.setOperationHash(operation.opHash);
     diagramStore.setCompleted();
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
@@ -128,13 +124,9 @@ const setNestedRecord = async (nestedRecord: NestedRecord): Promise<void> => {
       .send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
+    await operation.confirmation(settingsStore.getConfirmationCount);
 
-    if (confirmation?.block.hash) {
-      diagramStore.setOperationHash(confirmation.block.hash);
-    }
+    diagramStore.setOperationHash(operation.opHash);
     diagramStore.setCompleted();
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
@@ -186,13 +178,9 @@ const manageUserSet = async (
       .send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
+    await operation.confirmation(settingsStore.getConfirmationCount);
 
-    if (confirmation?.block.hash) {
-      diagramStore.setOperationHash(confirmation.block.hash);
-    }
+    diagramStore.setOperationHash(operation.opHash);
     diagramStore.setCompleted();
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);
@@ -236,13 +224,9 @@ const updateMetadata = async (
       .send();
 
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
+    await operation.confirmation(settingsStore.getConfirmationCount);
 
-    if (confirmation?.block.hash) {
-      diagramStore.setOperationHash(confirmation.block.hash);
-    }
+    diagramStore.setOperationHash(operation.opHash);
     diagramStore.setCompleted();
   } catch (error) {
     console.error(`Error: ${JSON.stringify(error, null, 2)}`);

@@ -20,12 +20,6 @@ export interface MetadataResult {
   metadata: ContractMetadata;
 }
 
-export interface ViewExecutionResult {
-  viewName: string;
-  parameter: unknown;
-  result: unknown;
-}
-
 /**
  * Retrieves TZIP-16 metadata from a contract using the specified contract
  * address.
@@ -65,69 +59,4 @@ const getContractMetadata = async (
   }
 };
 
-/**
- * Executes a metadata view on the contract.
- *
- * @param {string} contractAddress - The contract address
- * @param {string} viewName - Name of the view to execute
- * @param {unknown} parameter - Parameter to pass to the view (defaults to unit
- *   for no params)
- * @returns {Promise<ViewExecutionResult>} The view execution result containing
- *   viewName, parameter, and result
- */
-const executeMetadataView = async (
-  contractAddress: string,
-  viewName: string,
-  parameter: unknown = undefined,
-): Promise<ViewExecutionResult> => {
-  const diagramStore = useDiagramStore();
-  const walletStore = useWalletStore();
-
-  diagramStore.setTestDiagram(TEST_ID, "execute-view");
-
-  try {
-    diagramStore.setProgress("setup-contract");
-
-    // Get Tezos instance
-    const Tezos = walletStore.getTezos;
-
-    // Get contract instance
-    const contract = await Tezos.contract.at(contractAddress);
-
-    diagramStore.setProgress("execute-view");
-
-    // Execute the view
-    // For views that take no parameters, use undefined or unit
-    const viewParam = parameter === undefined ? undefined : parameter;
-
-    // Get the current wallet address for view execution context
-    const walletAddress = walletStore.getAddress;
-    if (!walletAddress) {
-      throw new Error(
-        "Wallet not connected. Please connect your wallet to execute views.",
-      );
-    }
-
-    const viewResult = await contract.contractViews[viewName](
-      viewParam,
-    ).executeView({
-      viewCaller: walletAddress,
-    });
-
-    diagramStore.setCompleted();
-
-    return {
-      viewName,
-      parameter: viewParam,
-      result: viewResult,
-    };
-  } catch (error) {
-    console.error(
-      `Error executing view '${viewName}': ${JSON.stringify(error, null, 2)}`,
-    );
-    diagramStore.setErrorMessage(error);
-    throw error;
-  }
-};
-
-export { executeMetadataView, getContractMetadata };
+export { getContractMetadata };

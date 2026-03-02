@@ -1,5 +1,4 @@
-import { importKey } from "@taquito/signer";
-import { TezosToolkit } from "@taquito/taquito";
+import { TezosToolkit, importKey } from "@taquito/taquito";
 import { RateLimiter } from "./RateLimiter";
 import type {
   Env,

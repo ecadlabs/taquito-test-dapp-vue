@@ -1,13 +1,17 @@
 import type { TestDiagram, TestMetadata } from "@/modules/tests/test";
+import { NetworkType } from "@airgap/beacon-types";
 import {
   ArrowRightLeft,
   ArrowUp10,
   Calculator,
   Coins,
+  Eye,
+  EyeOff,
   FileText,
   Globe,
   InfinityIcon,
   Info,
+  Network,
   Package,
   Parentheses,
   Plus,
@@ -713,7 +717,6 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       "batch",
       "sign-payload",
     ],
-    contractApi: true,
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/global-constants",
@@ -730,6 +733,10 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
           {
             id: "register-constant",
             label: "Register Global Constant",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-for-chain-confirmation",
@@ -879,12 +886,71 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       },
     },
   },
+  "contract-views": {
+    id: "contract-views",
+    title: "Contract Views",
+    description: `Contract views allow you to execute read-only operations on smart contracts without creating a transaction or paying fees.
+
+    Views read contract storage and potentially call other contracts to compute results. This makes them useful for getting computed values from contracts without modifying blockchain state.`,
+    category: "Viewing Data",
+    setup: [
+      "Install Taquito: `npm install @taquito/taquito @taquito/tzip16`",
+      "Set up a Tezos wallet for contract interactions",
+      "Deploy contracts with view definitions or use existing ones",
+      "Configure Taquito with RPC endpoint",
+    ],
+    relatedTests: ["tzip16-metadata", "contract-events", "viewing-blocks"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/contract-views",
+      contract: [
+        {
+          name: "Metadata Contract Source",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/uncompiled/metadata.jsligo",
+        },
+      ],
+      taquitoDocumentation: "https://taquito.io/docs/metadata-tzip16/",
+      tezosDocumentation:
+        "https://octez.tezos.com/docs/t024/michelson.html#views",
+    },
+    component: () =>
+      import("@/modules/tests/tests/contract-views/contract-views.vue"),
+    icon: Eye,
+    diagrams: {
+      "get-metadata": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "get-contract",
+            label: "Get Contract",
+          },
+          {
+            id: "retrieve-metadata",
+            label: "Retrieve Metadata",
+          },
+        ],
+      },
+      "execute-view": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "setup-contract",
+            label: "Setup Contract",
+          },
+          {
+            id: "execute-view",
+            label: "Execute View",
+          },
+        ],
+      },
+    },
+  },
   "tzip16-metadata": {
     id: "tzip16-metadata",
     title: "TZIP-16 Contract Metadata",
     description: `TZIP-16 is a Tezos standard for adding metadata to smart contracts.
 
-    Metadata can be stored on-chain (tezos-storage), off-chain via HTTP(S), or on IPFS. This test allows you to experiment with different contracts and see how their metadata is structured and accessed, along with allowing interaction with view execution for read-only data without creating a transaction.`,
+    Metadata can be stored on-chain (tezos-storage), off-chain via HTTP(S), or on IPFS. This test allows you to experiment with different contracts and see how their metadata is structured and accessed.`,
     category: "Viewing Data",
     setup: [
       "Install Taquito TZIP-16 package: `npm install @taquito/tzip16`",
@@ -893,7 +959,12 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       "Configure Taquito with RPC endpoint",
       "Understand different metadata storage approaches (big_map, URI, JSON)",
     ],
-    relatedTests: ["counter-contract", "complex-parameters", "sign-payload"],
+    relatedTests: [
+      "contract-views",
+      "counter-contract",
+      "complex-parameters",
+      "sign-payload",
+    ],
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/tzip16-metadata",
@@ -924,19 +995,6 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
           {
             id: "retrieve-metadata",
             label: "Retrieve Metadata",
-          },
-        ],
-      },
-      "execute-view": {
-        noIndexer: true,
-        nodes: [
-          {
-            id: "get-contract",
-            label: "Get Contract",
-          },
-          {
-            id: "execute-metadata-view",
-            label: "Execute Metadata View",
           },
         ],
       },
@@ -1134,6 +1192,223 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
           {
             id: "fetch-block",
             label: "Fetch Block",
+          },
+        ],
+      },
+    },
+  },
+  "etherlink-bridge": {
+    id: "etherlink-bridge",
+    title: "Etherlink Bridge",
+    description: `Bridge XTZ tokens between Tezos Layer 1 (L1) and Etherlink Layer 2 (L2). 
+
+Etherlink is an EVM-compatible rollup built on Tezos. This test demonstrates how to:
+- Deposit XTZ from Tezos L1 to Etherlink L2
+- Withdraw XTZ from Etherlink L2 to Tezos L1
+
+The bridge uses Smart Rollup technology to enable cross-layer communication.`,
+    category: "Advanced Operations",
+    supportedNetworks: [NetworkType.GHOSTNET],
+    setup: [
+      "Connect to Ghostnet testnet (only network currently supported)",
+      "Set up a Tezos wallet with Beacon/WalletConnect/Ledger",
+      "Set up an EVM wallet (e.g. MetaMask)",
+      "Have sufficient XTZ for gas fees and the amount to transfer",
+    ],
+    relatedTests: ["transfer", "batch", "transaction-limit"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/etherlink-bridge",
+      taquitoDocumentation: "https://taquito.io/docs/smart_rollups/",
+      tezosDocumentation: "https://docs.etherlink.com/bridging/bridging-tezos",
+    },
+    component: () =>
+      import("@/modules/tests/tests/etherlink-bridge/etherlink-bridge.vue"),
+    icon: Network,
+    diagrams: {
+      deposit: {
+        nodes: [
+          {
+            id: "get-bridge-contract",
+            label: "Get Bridge Contract",
+          },
+          {
+            id: "convert-etherlink-address",
+            label: "Convert Etherlink Address",
+          },
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "send-deposit-transaction",
+            label: "Send Deposit Transaction",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+      withdraw: {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "create-signer",
+            label: "Create Signer",
+          },
+          {
+            id: "get-withdrawal-contract",
+            label: "Get Withdrawal Contract",
+          },
+          {
+            id: "call-withdrawal-contract",
+            label: "Call Withdrawal Contract",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+      "withdraw-fast": {
+        noIndexer: true,
+        nodes: [
+          {
+            id: "create-signer",
+            label: "Create Signer",
+          },
+          {
+            id: "get-fast-withdrawal-contract",
+            label: "Get Fast Withdrawal Contract",
+          },
+          {
+            id: "call-fast-withdrawal-contract",
+            label: "Call Fast Withdrawal Contract",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+    },
+  },
+  "tezlink-bridge": {
+    id: "tezlink-bridge",
+    title: "Tezlink Bridge",
+    description: `Bridge XTZ tokens between Tezos L1 and Tezlink.`,
+    category: "Advanced Operations",
+    supportedNetworks: [NetworkType.SHADOWNET],
+    setup: [
+      "Connect to Shadownet testnet (only network currently supported)",
+      "Set up a Tezos wallet with Beacon/WalletConnect/Ledger",
+      "Have sufficient XTZ for gas fees and the amount to transfer",
+    ],
+    relatedTests: ["transfer", "batch", "transaction-limit"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/tezlink-bridge",
+      taquitoDocumentation: "https://taquito.io/docs/smart_rollups/",
+    },
+    component: () =>
+      import("@/modules/tests/tests/tezlink-bridge/tezlink-bridge.vue"),
+    icon: Network,
+    diagrams: {
+      deposit: {
+        nodes: [
+          {
+            id: "pack-tezlink-address",
+            label: "Pack Tezlink Address",
+          },
+          {
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "send-deposit-transaction",
+            label: "Send Deposit Transaction",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+    },
+  },
+  sapling: {
+    id: "sapling",
+    title: "Sapling Transactions",
+    description: `Demonstrates Taquito's Sapling shield operation: moving tez from public to private addresses using zero-knowledge proofs.`,
+    category: "Cryptography & Security",
+    icon: EyeOff,
+    setup: [
+      "Install Taquito Sapling package: `npm install @taquito/sapling`",
+      "Set up a Tezos wallet (Temple, Kukai, or other supported wallet)",
+      "Use a faucet to fund your wallet with testnet Tez",
+      "Understand Sapling concepts: spending keys, viewing keys, payment addresses",
+    ],
+    relatedTests: ["transfer", "sign-payload", "counter-contract"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/sapling",
+      contract: [
+        {
+          name: "Sapling Contract",
+          url: "https://github.com/ecadlabs/taquito-test-dapp-vue/blob/main/src/contracts/michelson/sapling.tz",
+        },
+      ],
+      taquitoDocumentation: "https://taquito.io/docs/sapling",
+      tezosDocumentation: "https://tezos.gitlab.io/active/sapling.html",
+    },
+    component: () => import("@/modules/tests/tests/sapling/sapling.vue"),
+    diagrams: {
+      shield: {
+        nodes: [
+          {
+            id: "prepare-shield",
+            label: "Prepare Shield Transaction",
+          },
+          {
+            id: "call-contract",
+            label: "Call Contract",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+      transfer: {
+        nodes: [
+          {
+            id: "prepare-transfer",
+            label: "Prepare Private Transfer",
+          },
+          {
+            id: "call-contract",
+            label: "Call Contract",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
+          },
+        ],
+      },
+      unshield: {
+        nodes: [
+          {
+            id: "prepare-unshield",
+            label: "Prepare Unshield Transaction",
+          },
+          {
+            id: "call-contract",
+            label: "Call Contract",
+          },
+          {
+            id: "wait-for-chain-confirmation",
+            label: "Wait for Chain Confirmation",
           },
         ],
       },

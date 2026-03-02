@@ -21,7 +21,7 @@ const estimateFees = async () => {
     diagramStore.setCompleted();
   } catch (error) {
     console.error(
-      `Failed to estiimate fees for transfer to '${address}': ${error}`,
+      `Failed to estimate fees for transfer to '${address}': ${error}`,
     );
     diagramStore.setErrorMessage(error);
     throw error;

@@ -36,3 +36,5 @@ dist-ssr
 contract-config.json
 /src/contracts/compiled/
 src/cloudflare/faucet/.wrangler/
+
+claude.md

@@ -83,17 +83,17 @@
               </div>
 
               <p class="mt-2 text-left italic">
-                Just a note: when building your own dApp, you shouldn't use both
-                Beacon and WalletConnect. Instead, you should pick one that
-                works best for your use-case. We use both here for testing and
-                illustration purposes, but this is not best practice in
-                production applications.
+                Just a note: when building your own dApp, you shouldn't use
+                multiple wallet connection providers/methods. Instead, you
+                should pick one that works best for your use-case. We use many
+                here for testing and illustration purposes, but this is not best
+                practice in production applications.
               </p>
             </div>
           </DialogDescription>
         </DialogHeader>
 
-        <div>
+        <div class="mt-2">
           <Alert v-if="provider === 'ledger' && !hidSupported" class="mb-2">
             <AlertTriangle class="size-4 !text-red-500" aria-hidden="true" />
             <AlertTitle>
@@ -117,6 +117,19 @@
               should not be used with a real, personally owned wallet key.
             </AlertDescription>
           </Alert>
+          <Alert v-if="provider === 'web3auth'" class="mb-2">
+            <AlertTriangle class="size-4 !text-red-500" aria-hidden="true" />
+            <AlertTitle>
+              <p>Important!</p>
+            </AlertTitle>
+            <AlertDescription>
+              Web3Auth is not generally designed for dApps, but rather
+              authentication for wallet applications. It is available here for
+              demonstration purposes, but under the hood it simply relays a
+              private key to the dApp. This means transactions will not require
+              confirmation from the user.
+            </AlertDescription>
+          </Alert>
           <div class="mt-2 space-y-2">
             <Label :for="providerSelectId">Wallet Provider</Label>
             <Select v-model="provider">
@@ -127,6 +140,9 @@
                 <SelectItem value="beacon"> Beacon </SelectItem>
                 <SelectItem value="walletconnect"> WalletConnect </SelectItem>
                 <SelectItem value="ledger"> Ledger Device </SelectItem>
+                <SelectItem value="web3auth">
+                  Web3Auth (Social Login)
+                </SelectItem>
                 <SelectItem value="programmatic">
                   Raw Private Key Access
                 </SelectItem>
@@ -334,6 +350,7 @@ const copyAddress = () => {
 };
 
 const networkType = import.meta.env.VITE_NETWORK_TYPE;
+const networkName = import.meta.env.VITE_NETWORK_NAME;
 
 const openExplorer = () => {
   const operationsUrl = buildIndexerUrl(
@@ -341,6 +358,7 @@ const openExplorer = () => {
     networkType,
     address.value,
     "operations",
+    networkName,
   );
   window.open(operationsUrl, "_blank");
 };
@@ -354,6 +372,7 @@ const connect = async () => {
       connectionStep.value = "ledger-waiting";
     }
 
+    // All providers now use the unified initializeWallet function
     await walletStore.initializeWallet(provider.value, privateKey.value);
 
     toast.success("Wallet connected");
@@ -381,6 +400,7 @@ const connect = async () => {
 const disconnect = async () => {
   try {
     loading.value = true;
+
     await walletStore.disconnectWallet();
     toast.success("Wallet disconnected");
   } catch (error) {

@@ -77,4 +77,7 @@ export type ContractStorage =
   | MetadataContractStorage
   | FA2TokenStorage
   | BalanceCallbackStorage
+  | { prim: "Unit" }
+  | { left: Record<string, never>; right: Record<string, never> }
+  | Record<string, never> // Empty object for sapling_state
   | number;

@@ -182,6 +182,7 @@ const formatDuration = (durationMs: number | undefined): string => {
 };
 
 const networkType = import.meta.env.VITE_NETWORK_TYPE;
+const networkName = import.meta.env.VITE_NETWORK_NAME;
 
 const operationsUrl = computed(() =>
   buildIndexerUrl(
@@ -189,6 +190,7 @@ const operationsUrl = computed(() =>
     networkType,
     operationHash.value?.toString(),
     "operations",
+    networkName,
   ),
 );
 const selectedIndexerName = computed(() => settingsStore.settings.indexer.name);

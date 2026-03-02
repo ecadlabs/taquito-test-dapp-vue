@@ -33,10 +33,9 @@ const stake = async (amount: number) => {
       .send();
 
     diagramStore.setProgress("wait-for-chain-confirmation");
-    const confirmation = await op.confirmation();
+    await op.confirmation();
 
-    if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash);
+    diagramStore.setOperationHash(op.opHash);
 
     diagramStore.setCompleted();
   } catch (error) {
@@ -72,10 +71,9 @@ const unstake = async (amount: number) => {
       .send();
 
     diagramStore.setProgress("wait-for-chain-confirmation");
-    const confirmation = await op.confirmation();
+    await op.confirmation();
 
-    if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash);
+    diagramStore.setOperationHash(op.opHash);
 
     diagramStore.setCompleted();
   } catch (error) {
@@ -103,10 +101,9 @@ const finalizeUnstake = async () => {
     const op = await Tezos.wallet.finalizeUnstake({}).send();
 
     diagramStore.setProgress("wait-for-chain-confirmation");
-    const confirmation = await op.confirmation();
+    await op.confirmation();
 
-    if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash);
+    diagramStore.setOperationHash(op.opHash);
 
     diagramStore.setCompleted();
   } catch (error) {

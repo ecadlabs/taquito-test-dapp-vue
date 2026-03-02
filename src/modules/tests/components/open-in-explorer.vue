@@ -32,6 +32,7 @@ const props = defineProps<{
 
 const settingsStore = useSettingsStore();
 const networkType = import.meta.env.VITE_NETWORK_TYPE;
+const networkName = import.meta.env.VITE_NETWORK_NAME;
 
 const indexerName = computed(() => settingsStore.settings.indexer.name);
 
@@ -41,6 +42,7 @@ const indexerUrl = computed(() =>
     networkType,
     props.address,
     "contract",
+    networkName,
   ),
 );
 

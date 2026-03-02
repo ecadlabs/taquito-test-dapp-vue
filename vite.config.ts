@@ -2,31 +2,34 @@ import tailwindcss from "@tailwindcss/vite";
 import vue from "@vitejs/plugin-vue";
 import { fileURLToPath, URL } from "url";
 import { defineConfig } from "vite";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), tailwindcss()],
+  plugins: [
+    vue(),
+    tailwindcss(),
+    nodePolyfills({
+      protocolImports: true,
+    }),
+  ],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
-      "readable-stream": "vite-compatible-readable-stream",
-      stream: "vite-compatible-readable-stream",
-      buffer: "buffer",
-      process: "process/browser",
     },
   },
   define: {
     global: "globalThis",
-    Buffer: "globalThis.Buffer",
-    process: "globalThis.process",
-  },
-  optimizeDeps: {
-    include: ["buffer", "events", "process"],
   },
   build: {
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
     rollupOptions: {
       external: (id) => {
-        // Exclude the scripts directory from the build as they won't be used on the live site
+        // Externalize sapling to load from CDN - it's 68MB+ and exceeds Cloudflare Pages limit
+        if (id === "@taquito/sapling" || id.startsWith("@taquito/sapling/")) {
+          return true;
+        }
         return id.includes("/src/scripts/") || id.includes("\\src\\scripts\\");
       },
       output: {
@@ -37,11 +40,9 @@ export default defineConfig({
             "@airgap/beacon-ui",
             "@airgap/beacon-types",
           ],
-          // Crypto dependencies
-          "crypto-libs": ["@noble/hashes"],
-          // UI components (excluding lucide-vue-next to allow tree-shaking)
+          web3auth: ["@web3auth/modal", "@web3auth/base"],
+          "crypto-libs": ["@noble/hashes", "@tezos-core-tools/crypto-utils"],
           "ui-components": ["reka-ui", "@vueuse/core"],
-          // Vue ecosystem
           "vue-ecosystem": ["vue", "vue-router", "pinia", "vue-sonner"],
         },
       },
