@@ -58,16 +58,13 @@ const increment = async (amount: number): Promise<number | undefined> => {
     diagramStore.setProgress("wait-confirmation");
     console.log(settingsStore.getConfirmationCount);
 
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
+    await operation.confirmation(settingsStore.getConfirmationCount);
 
-    if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash);
+    diagramStore.setOperationHash(operation.opHash);
     diagramStore.setCompleted();
     return await getContractStorage(true);
   } catch (error) {
-    console.log(`Error: ${JSON.stringify(error, null, 2)}`);
+    console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error);
   }
 };
@@ -111,15 +108,13 @@ const decrement = async (amount: number): Promise<number | undefined> => {
     diagramStore.setProgress("execute-operation");
     const operation = await contract.methodsObject.decrement(amount).send();
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
-    if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash);
+    await operation.confirmation(settingsStore.getConfirmationCount);
+
+    diagramStore.setOperationHash(operation.opHash);
     diagramStore.setCompleted();
     return await getContractStorage(true);
   } catch (error) {
-    console.log(`Error: ${JSON.stringify(error, null, 2)}`);
+    console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error);
   }
 };
@@ -155,14 +150,12 @@ const reset = async (): Promise<void> => {
     diagramStore.setProgress("execute-operation");
     const operation = await contract.methodsObject.reset().send();
     diagramStore.setProgress("wait-confirmation");
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
-    if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash);
+    await operation.confirmation(settingsStore.getConfirmationCount);
+
+    diagramStore.setOperationHash(operation.opHash);
     diagramStore.setCompleted();
   } catch (error) {
-    console.log(`Error: ${JSON.stringify(error, null, 2)}`);
+    console.error(`Error: ${JSON.stringify(error, null, 2)}`);
     diagramStore.setErrorMessage(error);
   }
 };
@@ -193,7 +186,7 @@ const getContractStorage = async (
     if (!noDiagram) diagramStore.setCompleted();
     return storage as number;
   } catch (error) {
-    console.log(`Error: ${error}`);
+    console.error(`Error: ${error}`);
     diagramStore.setErrorMessage(error);
   }
 };
@@ -222,10 +215,10 @@ const getContractMethods = async (): Promise<void> => {
         diagramStore.setCompleted();
       })
       .catch((error) => {
-        console.log(`Error: ${error}`);
+        console.error(`Error: ${error}`);
       });
   } catch (error) {
-    console.log(`Error: ${error}`);
+    console.error(`Error: ${error}`);
     diagramStore.setErrorMessage(error);
   }
 

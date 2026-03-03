@@ -1,5 +1,4 @@
 import type { IndexerOption } from "@/stores/settingsStore";
-import type { Confirmation } from "@/types/wallet";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { toast } from "vue-sonner";
@@ -45,14 +44,8 @@ export const buildIndexerUrl = (
   throw new Error(`Unsupported indexer value: ${indexer.value}`);
 };
 
-export const getOperationHash = (confirmation: Confirmation) => {
-  let opHash = "";
-  if (typeof confirmation === "object" && confirmation?.block?.hash) {
-    opHash = confirmation.block.hash;
-  } else if (typeof confirmation === "number") {
-    opHash = confirmation.toString();
-  }
-  return opHash;
+export const getOperationHash = (operation: { opHash: string }) => {
+  return operation.opHash;
 };
 
 /**

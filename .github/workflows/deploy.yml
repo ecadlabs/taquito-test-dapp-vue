@@ -27,8 +27,6 @@ jobs:
         include:
           - environment: tallinnnet
             project_name: taquito-dapp-tallinnnet
-          - environment: seoulnet
-            project_name: taquito-dapp
           - environment: ghostnet
             project_name: taquito-dapp-ghostnet
           - environment: shadownet

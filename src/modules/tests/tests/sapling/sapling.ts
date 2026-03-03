@@ -172,13 +172,9 @@ export async function shieldToUser(
     .send({ amount });
 
   diagramStore.setProgress("wait-for-chain-confirmation");
-  const confirmation = await op.confirmation(
-    settingsStore.getConfirmationCount,
-  );
+  await op.confirmation(settingsStore.getConfirmationCount);
 
-  if (confirmation?.block.hash) {
-    diagramStore.setOperationHash(confirmation.block.hash);
-  }
+  diagramStore.setOperationHash(op.opHash);
 
   diagramStore.setCompleted();
   return op.opHash;
@@ -235,13 +231,9 @@ export async function transferToAlice(
   const op = await contract.methodsObject.default([saplingTx]).send();
 
   diagramStore.setProgress("wait-for-chain-confirmation");
-  const confirmation = await op.confirmation(
-    settingsStore.getConfirmationCount,
-  );
+  await op.confirmation(settingsStore.getConfirmationCount);
 
-  if (confirmation?.block.hash) {
-    diagramStore.setOperationHash(confirmation.block.hash);
-  }
+  diagramStore.setOperationHash(op.opHash);
 
   diagramStore.setCompleted();
   return op.opHash;
@@ -296,13 +288,9 @@ export async function unshieldToUser(
   const op = await contract.methodsObject.default([unshieldedTx]).send();
 
   diagramStore.setProgress("wait-for-chain-confirmation");
-  const confirmation = await op.confirmation(
-    settingsStore.getConfirmationCount,
-  );
+  await op.confirmation(settingsStore.getConfirmationCount);
 
-  if (confirmation?.block.hash) {
-    diagramStore.setOperationHash(confirmation.block.hash);
-  }
+  diagramStore.setOperationHash(op.opHash);
 
   diagramStore.setCompleted();
   return op.opHash;

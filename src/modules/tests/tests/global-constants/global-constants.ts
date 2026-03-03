@@ -29,16 +29,15 @@ const registerGlobalConstant = async (
     }
 
     diagramStore.setProgress("register-constant");
+    diagramStore.setProgress("wait-for-user");
     const operation = await Tezos.wallet
       .registerGlobalConstant({ value })
       .send();
 
     diagramStore.setProgress("wait-for-chain-confirmation");
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
+    await operation.confirmation(settingsStore.getConfirmationCount);
 
-    const opHash = getOperationHash(confirmation);
+    const opHash = getOperationHash(operation);
     if (opHash) {
       diagramStore.setOperationHash(opHash);
     }

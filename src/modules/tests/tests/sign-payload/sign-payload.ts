@@ -312,11 +312,9 @@ const verifyPayloadViaContract = async (
 
     diagramStore.setProgress("wait-confirmation");
     const settingsStore = useSettingsStore();
-    const confirmation = await operation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
-    if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash);
+    await operation.confirmation(settingsStore.getConfirmationCount);
+
+    diagramStore.setOperationHash(operation.opHash);
     diagramStore.setCompleted();
     return true;
   } catch (error) {

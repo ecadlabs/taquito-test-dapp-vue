@@ -35,7 +35,7 @@ export const compileContracts = async (): Promise<void> => {
           console.log(`⏳ Compiling ${file}...`);
 
           // Use LIGO to compile the contract
-          const command = `ligo compile contract "${inputPath}" --output-file "${outputPath}"`;
+          const command = `ligo compile contract "${inputPath}" --output-file "${outputPath}" --skip-analytics`;
 
           execSync(command, {
             stdio: "pipe",

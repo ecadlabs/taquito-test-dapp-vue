@@ -28,9 +28,9 @@ const send = async (to: string, amount: number) => {
       .send();
 
     diagramStore.setProgress("wait-for-chain-confirmation");
-    const confirmation = await transfer.confirmation();
+    await transfer.confirmation();
 
-    const opHash = getOperationHash(confirmation);
+    const opHash = getOperationHash(transfer);
     diagramStore.setOperationHash(opHash);
     diagramStore.setCompleted();
   } catch (error) {

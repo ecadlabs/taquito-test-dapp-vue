@@ -36,12 +36,9 @@ const delegate = async (address: string) => {
 
     diagramStore.setProgress("set-delegate");
     diagramStore.setProgress("wait-for-chain-confirmation");
-    const confirmation = await delegation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
+    await delegation.confirmation(settingsStore.getConfirmationCount);
 
-    if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash);
+    diagramStore.setOperationHash(delegation.opHash);
 
     diagramStore.setCompleted();
   } catch (error) {
@@ -76,12 +73,9 @@ const undelegate = async () => {
 
     diagramStore.setProgress("remove-delegation");
     diagramStore.setProgress("wait-for-chain-confirmation");
-    const confirmation = await delegation.confirmation(
-      settingsStore.getConfirmationCount,
-    );
+    await delegation.confirmation(settingsStore.getConfirmationCount);
 
-    if (confirmation?.block.hash)
-      diagramStore.setOperationHash(confirmation?.block.hash);
+    diagramStore.setOperationHash(delegation.opHash);
 
     diagramStore.setCompleted();
   } catch (error) {
