@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - '*'
+  pull_request:
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 concurrency:
@@ -16,6 +18,7 @@ env:
 jobs:
   deploy:
     name: Deploy to ${{ matrix.environment }}
+    if: github.event_name != 'pull_request'
     environment: ${{ matrix.environment }}
     permissions:
       contents: read
@@ -96,21 +99,66 @@ jobs:
           command: pages deploy dist --project-name=${{ matrix.project_name }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-  # Single PR comment with all preview URLs
-  comment-pr:
-    name: Comment PR with Preview URLs
+  preview:
+    name: Deploy PR Preview (Shadownet)
     if: github.event_name == 'pull_request'
-    needs: deploy
-    runs-on: ubuntu-latest
+    environment: shadownet
     permissions:
+      contents: read
+      deployments: write
       pull-requests: write
+    runs-on: ubuntu-latest
+    env:
+      VITE_NETWORK_TYPE: ${{ vars.NETWORK_TYPE || 'shadownet' }}
+      VITE_NETWORK_NAME: ${{ vars.NETWORK_NAME }}
+      VITE_RPC_URL: ${{ vars.RPC_URL }}
+      VITE_GITHUB_SHA: ${{ github.sha }}
+      VITE_VERSION: pr-${{ github.event.number }}
+      VITE_REOWN_PROJECT_ID: ${{ secrets.REOWN_PROJECT_ID }}
+      VITE_FAUCET_URL: ${{ secrets.FAUCET_URL }}
+      VITE_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      VITE_TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
+      VITE_WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID }}
+      VITE_TEZLINK_SHADOWNET_RPC: ${{ vars.TEZLINK_SHADOWNET_RPC }}
     steps:
-      - uses: marocchino/sticky-pull-request-comment@v2
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
         with:
-          header: Taquito Test dApp Preview URLs
+          node-version: 22.18.0
+
+      - run: npm ci
+      - run: npm run format:check
+
+      - name: Build application
+        run: |
+          export NODE_OPTIONS="--max_old_space_size=4096"
+          npm run build
+
+      - name: Sanitize branch name
+        id: branch_info
+        env:
+          RAW_BRANCH: ${{ github.head_ref }}
+        run: |
+          SAFE_BRANCH=$(printf '%s' "$RAW_BRANCH" | tr -cd '[:alnum:]/_.-')
+          echo "name=$SAFE_BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to Cloudflare Pages
+        id: cloudflare_publish
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=taquito-dapp-shadownet --branch=${{ steps.branch_info.outputs.name }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment PR with preview URL
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: shadownet-preview
           message: |
-            🚀 **Deploy previews are ready!**
-            
-            ${{ join(needs.deploy.outputs.*.preview-url, '\n') }}
-            
-            Each environment has been deployed with chain-specific configurations.
+            **Shadownet Preview**
+
+            ${{ steps.cloudflare_publish.outputs.deployment-url }}
+
+            Deployed from `${{ github.sha }}`
