@@ -1,6 +1,6 @@
 import { web3AuthService } from "@/services/web3AuthService";
 import type { ProgrammaticWallet, WalletProvider } from "@/types/wallet";
-import { NetworkType, type ExtendedPeerInfo } from "@airgap/beacon-types";
+import { NetworkType } from "@airgap/beacon-types";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import * as Sentry from "@sentry/vue";
 import { BeaconWallet } from "@taquito/beacon-wallet";
@@ -357,7 +357,6 @@ export const createWalletStore = (
             }),
             getPeers: async () => [{ name: "Raw Private Key Access" }],
             disconnect: async () => Promise.resolve(),
-            clearActiveAccount: async () => Promise.resolve(),
           },
           getAllExistingSessionKeys: async () => [],
           configureWithExistingSessionKey: async () => Promise.resolve(),
@@ -473,7 +472,6 @@ export const createWalletStore = (
             }),
             getPeers: async () => [{ name: `Web3Auth (${displayName})` }],
             disconnect: async () => Promise.resolve(),
-            clearActiveAccount: async () => Promise.resolve(),
           },
           getAllExistingSessionKeys: async () => [],
           configureWithExistingSessionKey: async () => Promise.resolve(),
@@ -592,16 +590,6 @@ export const createWalletStore = (
         );
 
         if (wallet.value instanceof BeaconWallet) {
-          if (!fromWallet) {
-            const peers = await wallet.value.client.getPeers();
-            for (const peer of peers) {
-              await wallet.value.client.removePeer(
-                peer as ExtendedPeerInfo,
-                true,
-              );
-            }
-          }
-
           await wallet.value.disconnect();
         } else if (wallet.value instanceof WalletConnect) {
           await wallet.value.disconnect();
