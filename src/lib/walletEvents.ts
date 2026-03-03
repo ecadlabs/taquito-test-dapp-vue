@@ -1,5 +1,5 @@
 import type { WalletStoreState } from "@/stores/createWalletStore";
-import { BeaconEvent } from "@airgap/beacon-dapp";
+import { BeaconEvent } from "@ecadlabs/beacon-dapp";
 import type { BeaconWallet } from "@taquito/beacon-wallet";
 import type { WalletConnect } from "@taquito/wallet-connect";
 

@@ -1,5 +1,5 @@
 import type { TestDiagram, TestMetadata } from "@/modules/tests/test";
-import { NetworkType } from "@airgap/beacon-types";
+import { NetworkType } from "@ecadlabs/beacon-types";
 import {
   ArrowRightLeft,
   ArrowUp10,
@@ -183,9 +183,7 @@ export const AvailableTests: Record<string, TestMetadata> = {
         "https://octez.tezos.com/docs/alpha/blocks_ops.html#manager-operations",
     },
     component: () =>
-      import(
-        "@/modules/tests/tests/increase-paid-storage/increase-paid-storage.vue"
-      ),
+      import("@/modules/tests/tests/increase-paid-storage/increase-paid-storage.vue"),
     icon: Plus,
     diagrams: {
       increase: {

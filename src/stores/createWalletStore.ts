@@ -1,6 +1,6 @@
 import { web3AuthService } from "@/services/web3AuthService";
 import type { ProgrammaticWallet, WalletProvider } from "@/types/wallet";
-import { NetworkType } from "@airgap/beacon-types";
+import { NetworkType } from "@ecadlabs/beacon-types";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import * as Sentry from "@sentry/vue";
 import { BeaconWallet } from "@taquito/beacon-wallet";

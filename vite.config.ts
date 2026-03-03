@@ -35,10 +35,9 @@ export default defineConfig({
       output: {
         manualChunks: {
           beacon: [
-            "@airgap/beacon-sdk",
-            "@airgap/beacon-dapp",
-            "@airgap/beacon-ui",
-            "@airgap/beacon-types",
+            "@ecadlabs/beacon-dapp",
+            "@ecadlabs/beacon-ui",
+            "@ecadlabs/beacon-types",
           ],
           web3auth: ["@web3auth/modal", "@web3auth/base"],
           "crypto-libs": ["@noble/hashes", "@tezos-core-tools/crypto-utils"],

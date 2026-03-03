@@ -1,4 +1,4 @@
-import { NetworkType } from "@airgap/beacon-types";
+import { NetworkType } from "@ecadlabs/beacon-types";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
 

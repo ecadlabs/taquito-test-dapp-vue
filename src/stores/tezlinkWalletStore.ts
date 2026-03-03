@@ -3,7 +3,7 @@ import {
   initializeWalletConnectEvents,
 } from "@/lib/walletEvents";
 import { createWalletStore } from "@/stores/createWalletStore";
-import { NetworkType } from "@airgap/beacon-types";
+import { NetworkType } from "@ecadlabs/beacon-types";
 
 /**
  * Wallet store for Tezlink L2 network. Used for bridging operations from

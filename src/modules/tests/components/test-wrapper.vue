@@ -228,7 +228,7 @@ import type { TestMetadata } from "@/modules/tests/test";
 import { getTestById } from "@/modules/tests/tests";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
-import type { NetworkType } from "@airgap/beacon-types";
+import type { NetworkType } from "@ecadlabs/beacon-types";
 import {
   ArrowRight,
   BookOpenText,
