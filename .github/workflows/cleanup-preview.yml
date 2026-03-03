@@ -1,0 +1,33 @@
+name: Cleanup PR Preview
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  cleanup:
+    name: Delete Shadownet Preview
+    environment: shadownet
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete preview deployments
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          BRANCH_NAME: ${{ github.head_ref }}
+        run: |
+          PROJECT="taquito-dapp-shadownet"
+          API="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$PROJECT/deployments"
+
+          DEPLOYMENT_IDS=$(curl -sf \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            "$API" \
+            | jq -r --arg branch "$BRANCH_NAME" \
+              '.result[] | select(.deployment_trigger.metadata.branch == $branch) | .id')
+
+          for ID in $DEPLOYMENT_IDS; do
+            echo "Deleting deployment $ID"
+            curl -sf -X DELETE \
+              -H "Authorization: Bearer $CF_API_TOKEN" \
+              "$API/$ID?force=true"
+          done
