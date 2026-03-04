@@ -29,7 +29,8 @@ const getAccountBalance = async (address: string): Promise<number> => {
 };
 
 const fundAccount = async (address: string, amount: number) => {
-  const network = process.env.VITE_NETWORK_TYPE;
+  const network =
+    process.env.VITE_NETWORK_NAME || process.env.VITE_NETWORK_TYPE;
 
   if (!network) {
     throw new Error(`Received invalid network: ${network}`);
