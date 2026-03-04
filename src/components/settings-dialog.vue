@@ -148,6 +148,7 @@
         class="hover:underline"
         >Version {{ version }}</a
       >
+      <p>Taquito: {{ taquitoVersion }}</p>
       <p>Network: {{ network }}</p>
       <p class="truncate">
         Git SHA:
@@ -201,6 +202,7 @@ import {
   type IndexerOption,
 } from "@/stores/settingsStore";
 import type { NetworkType } from "@taquito/beacon-wallet/types";
+import { version as taquitoVersion } from "@taquito/taquito/package.json";
 import { useDebounce } from "@vueuse/core";
 import { LoaderCircle, TriangleAlert, Undo2 } from "lucide-vue-next";
 import { computed, ref, watch } from "vue";
