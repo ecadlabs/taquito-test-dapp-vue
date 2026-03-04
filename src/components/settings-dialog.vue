@@ -200,7 +200,7 @@ import {
   useSettingsStore,
   type IndexerOption,
 } from "@/stores/settingsStore";
-import type { NetworkType } from "@airgap/beacon-types";
+import type { NetworkType } from "@taquito/beacon-wallet/types";
 import { useDebounce } from "@vueuse/core";
 import { LoaderCircle, TriangleAlert, Undo2 } from "lucide-vue-next";
 import { computed, ref, watch } from "vue";

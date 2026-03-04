@@ -13,7 +13,7 @@ export const useTaquitoModules = () => {
   };
 
   const loadBeaconTypes = async () => {
-    const module = await import("@airgap/beacon-types");
+    const module = await import("@taquito/beacon-wallet/types");
     return {
       SigningType: module.SigningType,
     };

@@ -1,4 +1,4 @@
-import type { NetworkType } from "@airgap/beacon-types";
+import type { NetworkType } from "@taquito/beacon-wallet/types";
 import type { Component } from "vue";
 
 export interface DiagramNode {

@@ -4,7 +4,7 @@ import {
 } from "@/lib/walletEvents";
 import { createWalletStore } from "@/stores/createWalletStore";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { NetworkType } from "@airgap/beacon-types";
+import { NetworkType } from "@taquito/beacon-wallet/types";
 
 const networkType = import.meta.env.VITE_NETWORK_TYPE as NetworkType;
 const networkName =
