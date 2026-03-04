@@ -1,5 +1,5 @@
 import type { TestDiagram, TestMetadata } from "@/modules/tests/test";
-import { NetworkType } from "@airgap/beacon-types";
+import { NetworkType } from "@taquito/beacon-wallet/types";
 import {
   ArrowRightLeft,
   ArrowUp10,
