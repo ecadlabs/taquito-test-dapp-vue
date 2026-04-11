@@ -14,10 +14,11 @@ import {
   NetworkType as WalletConnectNetworkType,
 } from "@taquito/wallet-connect";
 import * as tezosCrypto from "@tezos-core-tools/crypto-utils";
-import type BigNumber from "bignumber.js";
 import { defineStore, type StoreDefinition } from "pinia";
 import { computed, ref, type ComputedRef, type Ref } from "vue";
 import { toast } from "vue-sonner";
+
+type TezosBalance = Awaited<ReturnType<TezosToolkit["tz"]["getBalance"]>>;
 
 /** Configuration for creating a wallet store instance */
 export interface WalletStoreConfig {
@@ -47,7 +48,7 @@ export interface WalletStoreState {
   isDisconnecting: Ref<boolean>;
   getTezos: ComputedRef<TezosToolkit>;
   getAddress: ComputedRef<string | undefined>;
-  getBalance: ComputedRef<BigNumber | undefined>;
+  getBalance: ComputedRef<TezosBalance | undefined>;
   getProvider: ComputedRef<string | undefined>;
   getWallet: ComputedRef<
     BeaconWallet | WalletConnect | LedgerSigner | ProgrammaticWallet | undefined
@@ -106,7 +107,7 @@ export const createWalletStore = (
     >();
     const ledgerTransport = ref<TransportWebHID | null>(null);
     const address = ref<string>();
-    const balance = ref<BigNumber>();
+    const balance = ref<TezosBalance>();
     const walletName = ref<string>();
     const isDisconnecting = ref<boolean>(false);
     const provider = ref<string | undefined>();
@@ -290,11 +291,10 @@ export const createWalletStore = (
         });
       }
 
-      const latestSessionKey =
-        await walletConnect.getAllExistingSessionKeys()?.[0];
+      const latestSessionKey = walletConnect.getAllExistingSessionKeys()[0];
 
       if (latestSessionKey) {
-        await walletConnect.configureWithExistingSessionKey(latestSessionKey);
+        walletConnect.configureWithExistingSessionKey(latestSessionKey);
       } else {
         // Map network type to WalletConnect network type
         // Note: WalletConnect has a limited set of supported networks
@@ -358,8 +358,8 @@ export const createWalletStore = (
             getPeers: async () => [{ name: "Raw Private Key Access" }],
             disconnect: async () => Promise.resolve(),
           },
-          getAllExistingSessionKeys: async () => [],
-          configureWithExistingSessionKey: async () => Promise.resolve(),
+          getAllExistingSessionKeys: () => [],
+          configureWithExistingSessionKey: () => undefined,
         };
         wallet.value = mockWallet;
         address.value = await mockWallet.getPKH();
@@ -473,8 +473,8 @@ export const createWalletStore = (
             getPeers: async () => [{ name: `Web3Auth (${displayName})` }],
             disconnect: async () => Promise.resolve(),
           },
-          getAllExistingSessionKeys: async () => [],
-          configureWithExistingSessionKey: async () => Promise.resolve(),
+          getAllExistingSessionKeys: () => [],
+          configureWithExistingSessionKey: () => undefined,
         };
 
         wallet.value = mockWallet;

@@ -294,7 +294,6 @@ import {
 import { buildIndexerUrl } from "@/lib/utils";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
-import BigNumber from "bignumber.js";
 import {
   AlertTriangle,
   CheckCircle,
@@ -311,6 +310,9 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import VueTurnstile from "vue-turnstile";
 
 const walletStore = useWalletStore();
+type WalletBalance = Awaited<
+  ReturnType<(typeof walletStore.Tezos.tz)["getBalance"]>
+>;
 
 const ONE_XTZ_IN_MUTEZ = 1000000;
 const FAUCET_COOLDOWN_TIME_SECONDS = 10;
@@ -370,7 +372,7 @@ const formatAddress = (address: string | undefined): string => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 };
 
-const formatBalance = (balance: BigNumber | undefined): string => {
+const formatBalance = (balance: WalletBalance | undefined): string => {
   if (!balance) return "0";
   // Convert from mutez to XTZ
   const xtz = balance.toNumber() / ONE_XTZ_IN_MUTEZ;
