@@ -132,10 +132,10 @@
     <section id="features" class="relative overflow-hidden px-4 py-16">
       <!-- Background decorations -->
       <div
-        class="bg-brand/5 absolute left-1/4 top-0 h-96 w-96 rounded-full blur-3xl"
+        class="bg-brand/5 absolute top-0 left-1/4 h-96 w-96 rounded-full blur-3xl"
       ></div>
       <div
-        class="absolute bottom-0 right-1/4 h-96 w-96 rounded-full bg-blue-500/5 blur-3xl"
+        class="absolute right-1/4 bottom-0 h-96 w-96 rounded-full bg-blue-500/5 blur-3xl"
       ></div>
 
       <div class="relative mx-auto max-w-6xl space-y-12">
@@ -197,7 +197,7 @@
     <section class="bg-muted/30 relative overflow-hidden px-4 py-16">
       <!-- Floating shapes -->
       <div
-        class="animate-float bg-brand/10 absolute right-0 top-1/4 h-32 w-32 rounded-full blur-xl"
+        class="animate-float bg-brand/10 absolute top-1/4 right-0 h-32 w-32 rounded-full blur-xl"
       ></div>
       <div
         class="animate-float-delay absolute bottom-1/4 left-0 h-24 w-24 rounded-full bg-blue-500/10 blur-xl"
@@ -216,7 +216,7 @@
             v-for="(test, index) in quickStartTests"
             :key="test.id"
             :to="{ name: 'tests', params: { test: test.id } }"
-            class="bg-background animate-on-scroll hover:border-brand/30 hover:shadow-brand/10 duration-250 group rounded-lg border p-6 transition-all hover:-translate-y-1 hover:shadow-xl"
+            class="bg-background animate-on-scroll hover:border-brand/30 hover:shadow-brand/10 group rounded-lg border p-6 transition-all duration-250 hover:-translate-y-1 hover:shadow-xl"
             :data-delay="index * 50"
           >
             <div class="space-y-3">
@@ -260,7 +260,7 @@
           <div
             v-for="(contract, index) in originatedContracts"
             :key="contract.address"
-            class="bg-background animate-on-scroll duration-250 group w-full max-w-sm rounded-lg border p-6 transition-all hover:-translate-y-1 hover:border-purple-500/30 hover:shadow-xl hover:shadow-purple-500/10 md:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)]"
+            class="bg-background animate-on-scroll group w-full max-w-sm rounded-lg border p-6 transition-all duration-250 hover:-translate-y-1 hover:border-purple-500/30 hover:shadow-xl hover:shadow-purple-500/10 md:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)]"
             :data-delay="index * 50"
           >
             <div class="space-y-3">
@@ -323,7 +323,7 @@
             href="https://taquito.io/"
             target="_blank"
             rel="noopener noreferrer"
-            class="animate-on-scroll duration-250 group rounded-lg border p-6 transition-all hover:-translate-y-1 hover:border-blue-500/30 hover:shadow-xl hover:shadow-blue-500/10"
+            class="animate-on-scroll group rounded-lg border p-6 transition-all duration-250 hover:-translate-y-1 hover:border-blue-500/30 hover:shadow-xl hover:shadow-blue-500/10"
             data-delay="0"
           >
             <div class="flex items-start space-x-4">
@@ -358,7 +358,7 @@
             href="https://github.com/ecadlabs/taquito-test-dapp-vue"
             target="_blank"
             rel="noopener noreferrer"
-            class="animate-on-scroll duration-250 group rounded-lg border p-6 transition-all hover:-translate-y-1 hover:border-gray-500/30 hover:shadow-xl hover:shadow-gray-500/10"
+            class="animate-on-scroll group rounded-lg border p-6 transition-all duration-250 hover:-translate-y-1 hover:border-gray-500/30 hover:shadow-xl hover:shadow-gray-500/10"
             data-delay="100"
           >
             <div class="flex items-start space-x-4">
@@ -390,7 +390,7 @@
 
           <!-- Live Networks -->
           <div
-            class="animate-on-scroll duration-250 group rounded-lg border p-6 transition-all hover:-translate-y-1 hover:border-green-500/30 hover:shadow-xl hover:shadow-green-500/10"
+            class="animate-on-scroll group rounded-lg border p-6 transition-all duration-250 hover:-translate-y-1 hover:border-green-500/30 hover:shadow-xl hover:shadow-green-500/10"
             data-delay="200"
           >
             <div class="flex items-start space-x-4">
@@ -433,10 +433,10 @@
       <!-- Animated background -->
       <div class="absolute inset-0">
         <div
-          class="from-brand/5 absolute left-0 top-0 h-full w-full animate-pulse bg-gradient-to-r via-transparent to-orange-500/5"
+          class="from-brand/5 absolute top-0 left-0 h-full w-full animate-pulse bg-gradient-to-r via-transparent to-orange-500/5"
         ></div>
         <div
-          class="animate-float bg-brand/10 absolute -right-24 -top-24 h-48 w-48 rounded-full blur-3xl"
+          class="animate-float bg-brand/10 absolute -top-24 -right-24 h-48 w-48 rounded-full blur-3xl"
         ></div>
         <div
           class="animate-float-delay absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-orange-500/10 blur-3xl"
