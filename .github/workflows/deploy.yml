@@ -59,7 +59,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22.18.0
-      - run: npm ci
+      - run: npx -y npm@11 ci
       - run: npm run format:check
       
       # Debug environment variables
@@ -127,7 +127,7 @@ jobs:
         with:
           node-version: 22.18.0
 
-      - run: npm ci
+      - run: npx -y npm@11 ci
       - run: npm run format:check
 
       - name: Build application

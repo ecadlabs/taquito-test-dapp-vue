@@ -15,8 +15,8 @@ export interface ProgrammaticWallet {
     getPeers: () => Promise<{ name: string }[]>;
     disconnect: () => Promise<void>;
   };
-  getAllExistingSessionKeys: () => Promise<string[]>;
-  configureWithExistingSessionKey: (sessionKey: string) => Promise<void>;
+  getAllExistingSessionKeys: () => string[];
+  configureWithExistingSessionKey: (sessionKey: string) => void;
 }
 
 export type { WalletProvider };
