@@ -49,7 +49,7 @@ const response = await fetch("/fund", {
     address: "tz1...",
     amount: 5,
     captchaToken: "turnstile_token",
-    rpc: "https://ghostnet.tezos.ecadinfra.com", // optional
+    rpc: "https://shadownet.tezos.ecadinfra.com", // optional
   }),
 });
 
@@ -59,6 +59,4 @@ console.log("Transaction:", result.txHash);
 
 ## Supported Networks
 
-- **Ghostnet**: `https://ghostnet.tezos.ecadinfra.com`
 - **Shadownet**: `https://shadownet.tezos.ecadinfra.com`
-- **Seoulnet**: `https://seoulnet.tezos.ecadinfra.com`

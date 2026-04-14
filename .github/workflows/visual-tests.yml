@@ -12,31 +12,30 @@ jobs:
     strategy:
       matrix:
         include:
-          - environment: seoulnet
-          - environment: ghostnet
+          - environment: shadownet
     env:
       VITE_NETWORK_TYPE: ${{ matrix.environment }}
       VITE_RPC_URL: ${{ vars.RPC_URL }}
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npx -y npm@11 ci
-    - name: Originate Counter Contract
-      run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      run: npx playwright test staking.spec.ts
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-artifacts
-        path: |
-          playwright-report/
-          test-results/
-          test-results/**/*.zip
-          test-results/**/*.webm
-        retention-days: 15
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: npx -y npm@11 ci
+      - name: Originate Counter Contract
+        run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Run Playwright tests
+        run: npx playwright test staking.spec.ts
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-artifacts
+          path: |
+            playwright-report/
+            test-results/
+            test-results/**/*.zip
+            test-results/**/*.webm
+          retention-days: 15

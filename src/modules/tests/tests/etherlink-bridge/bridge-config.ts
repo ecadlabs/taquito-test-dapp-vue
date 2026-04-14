@@ -14,10 +14,10 @@ export interface BridgeConfig {
 
 /** Bridge configuration by network */
 export const bridgeConfigs: Record<string, BridgeConfig> = {
-  ghostnet: {
-    bridgeContract: "KT1VEjeQfDBSfpDH5WeBM5LukHPGM2htYEh3",
-    exchangerContract: "KT1Bp9YUvUBJgXxf5UrYTM2CGRUPixURqx4m",
-    rollupAddress: "sr18wx6ezkeRjt1SZSeZ2UQzQN3Uc3YLMLqg",
+  shadownet: {
+    bridgeContract: "KT19aBsSWvWtvEkbiqReJnD8UzQMWcD8SHUD",
+    exchangerContract: "KT1JYZsawXmeArts18nn4uT79tUJc4AGTYgc",
+    rollupAddress: "sr1N9XzPi4bpFzaJGymynstqu8WqurCE9eQy",
   },
 };
 

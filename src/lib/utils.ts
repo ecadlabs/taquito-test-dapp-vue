@@ -30,12 +30,7 @@ export const buildIndexerUrl = (
     }
     return identifier ? `${baseUrl}/${identifier}/storage` : baseUrl;
   } else if (indexer.value === "tzstats") {
-    let prefix = "";
-    if (networkType === "ghostnet") {
-      prefix = "ghost.";
-    }
-
-    const baseUrl = indexer.url.replace("[networkType]", prefix);
+    const baseUrl = indexer.url.replace("[networkType]", "");
     if (routeType === "operations") {
       return identifier ? `${baseUrl}/${identifier}/operations` : baseUrl;
     }

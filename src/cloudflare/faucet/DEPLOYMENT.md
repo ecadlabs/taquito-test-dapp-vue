@@ -57,9 +57,9 @@ Update `wrangler.jsonc` with production values:
 ```jsonc
 {
   "vars": {
-    "ALLOWED_ORIGINS": "ghostnet.dapp.taquito.io,seoulnet.dapp.taquito.io,shadownet.dapp.taquito.io",
-    "RPC_URL": "https://ghostnet.tezos.ecadinfra.com", // Default if user doesn't provide an RPC URL
-    "ALLOWED_RPC_URLS": "https://ghostnet.tezos.ecadinfra.com,https://shadownet.tezos.ecadinfra.com,https://seoulnet.tezos.ecadinfra.com",
+    "ALLOWED_ORIGINS": "shadownet.dapp.taquito.io",
+    "RPC_URL": "https://shadownet.tezos.ecadinfra.com", // Default if user doesn't provide an RPC URL
+    "ALLOWED_RPC_URLS": "https://shadownet.tezos.ecadinfra.com",
     "MIN_TEZ": "1",
     "MAX_TEZ": "10",
     "RATE_LIMIT_ENABLED": "true",

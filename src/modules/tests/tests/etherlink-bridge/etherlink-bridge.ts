@@ -72,7 +72,7 @@ const depositToEtherlink = async (
 
   if (!bridgeConfig) {
     const error = new Error(
-      `Bridge not configured for network: ${networkType}. Currently only Ghostnet is supported.`,
+      `Bridge not configured for network: ${networkType}. Currently only Shadownet is supported.`,
     );
     diagramStore.setErrorMessage(error);
     throw error;
