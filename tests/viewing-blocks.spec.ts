@@ -2,7 +2,8 @@ import { test } from "@playwright/test";
 import { goToTest, waitForSuccess } from "./helpers.ts";
 import { getSharedPage, setupSharedContext } from "./shared-context.ts";
 
-const RPC_URL = process.env.VITE_RPC_URL || "https://ghostnet.ecadinfra.com";
+const RPC_URL =
+  process.env.VITE_RPC_URL || "https://rpc.shadownet.teztnets.com/";
 
 async function getRandomBlockInLast10000(): Promise<number> {
   const response = await fetch(`${RPC_URL}/chains/main/blocks/head/header`);

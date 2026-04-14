@@ -3,7 +3,7 @@ name: taquito dapp pages deploy
 on:
   push:
     tags:
-      - '*'
+      - "*"
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
@@ -28,10 +28,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - environment: tallinnnet
-            project_name: taquito-dapp-tallinnnet
-          - environment: ghostnet
-            project_name: taquito-dapp-ghostnet
           - environment: shadownet
             project_name: taquito-dapp-shadownet
           - environment: tezlink-shadownet
@@ -61,7 +57,7 @@ jobs:
           node-version: 22.18.0
       - run: npx -y npm@11 ci
       - run: npm run format:check
-      
+
       # Debug environment variables
       - name: Debug Environment Variables
         run: |
@@ -69,18 +65,18 @@ jobs:
           echo "RPC_URL: ${{ vars.RPC_URL }}"
           echo "ALICE_WALLET_ADDRESS: ${{ vars.ALICE_WALLET_ADDRESS }}"
           echo "REOWN_PROJECT_ID: ${{ secrets.REOWN_PROJECT_ID }}"
-      
+
       - name: Fund wallet
         if: ${{ vars.DISABLE_WALLET_FUNDING != 'true' }}
         run: npm run fund-wallet ${{ vars.ALICE_WALLET_ADDRESS }}
-      
+
       # Install LIGO for contract compilation
       - name: Install LIGO
         run: |
           sudo systemctl start docker || true
           curl -sSL https://gitlab.com/ligolang/ligo/-/raw/dev/scripts/installer.sh | bash -s 1.10.0
           echo "$HOME/.ligo/bin" >> $GITHUB_PATH
-      
+
       - run: npm run compile-contracts
       - name: Originate contracts
         if: ${{ vars.DISABLE_ORIGINATION != 'true' }}

@@ -46,7 +46,7 @@
           <RouterLink :to="{ name: 'tests', params: { test: 'transfer' } }">
             <Button
               size="lg"
-              class="group bg-brand hover:bg-brand/90 hover:shadow-brand/25 px-8 transition-all duration-200 hover:scale-105 hover:shadow-lg"
+              class="bg-brand hover:bg-brand/90 hover:shadow-brand/25 group px-8 transition-all duration-200 hover:scale-105 hover:shadow-lg"
             >
               <span
                 class="transition-transform duration-200 group-hover:translate-x-1"
@@ -86,7 +86,7 @@
         >
           <div
             ref="statsSection"
-            class="group animate-on-scroll space-y-2"
+            class="animate-on-scroll group space-y-2"
             data-delay="0"
           >
             <div
@@ -100,7 +100,7 @@
               Interactive Tests
             </div>
           </div>
-          <div class="group animate-on-scroll space-y-2" data-delay="100">
+          <div class="animate-on-scroll group space-y-2" data-delay="100">
             <div
               class="text-brand text-3xl font-bold transition-transform duration-200 group-hover:scale-110"
             >
@@ -112,7 +112,7 @@
               Supported Networks
             </div>
           </div>
-          <div class="group animate-on-scroll space-y-2" data-delay="200">
+          <div class="animate-on-scroll group space-y-2" data-delay="200">
             <div
               class="text-brand text-3xl font-bold transition-transform duration-200 group-hover:scale-110"
             >
@@ -132,10 +132,10 @@
     <section id="features" class="relative overflow-hidden px-4 py-16">
       <!-- Background decorations -->
       <div
-        class="bg-brand/5 absolute top-0 left-1/4 h-96 w-96 rounded-full blur-3xl"
+        class="bg-brand/5 absolute left-1/4 top-0 h-96 w-96 rounded-full blur-3xl"
       ></div>
       <div
-        class="absolute right-1/4 bottom-0 h-96 w-96 rounded-full bg-blue-500/5 blur-3xl"
+        class="absolute bottom-0 right-1/4 h-96 w-96 rounded-full bg-blue-500/5 blur-3xl"
       ></div>
 
       <div class="relative mx-auto max-w-6xl space-y-12">
@@ -151,7 +151,7 @@
           <div
             v-for="(category, index) in featuredCategories"
             :key="category.name"
-            class="group animate-on-scroll hover:border-brand/30 hover:shadow-brand/10 cursor-pointer rounded-lg border p-6 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+            class="animate-on-scroll hover:border-brand/30 hover:shadow-brand/10 group cursor-pointer rounded-lg border p-6 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
             :data-delay="index * 50"
           >
             <div class="flex items-start space-x-4">
@@ -197,7 +197,7 @@
     <section class="bg-muted/30 relative overflow-hidden px-4 py-16">
       <!-- Floating shapes -->
       <div
-        class="animate-float bg-brand/10 absolute top-1/4 right-0 h-32 w-32 rounded-full blur-xl"
+        class="animate-float bg-brand/10 absolute right-0 top-1/4 h-32 w-32 rounded-full blur-xl"
       ></div>
       <div
         class="animate-float-delay absolute bottom-1/4 left-0 h-24 w-24 rounded-full bg-blue-500/10 blur-xl"
@@ -216,7 +216,7 @@
             v-for="(test, index) in quickStartTests"
             :key="test.id"
             :to="{ name: 'tests', params: { test: test.id } }"
-            class="group bg-background animate-on-scroll hover:border-brand/30 hover:shadow-brand/10 rounded-lg border p-6 transition-all duration-250 hover:-translate-y-1 hover:shadow-xl"
+            class="bg-background animate-on-scroll hover:border-brand/30 hover:shadow-brand/10 duration-250 group rounded-lg border p-6 transition-all hover:-translate-y-1 hover:shadow-xl"
             :data-delay="index * 50"
           >
             <div class="space-y-3">
@@ -260,7 +260,7 @@
           <div
             v-for="(contract, index) in originatedContracts"
             :key="contract.address"
-            class="group bg-background animate-on-scroll w-full max-w-sm rounded-lg border p-6 transition-all duration-250 hover:-translate-y-1 hover:border-purple-500/30 hover:shadow-xl hover:shadow-purple-500/10 md:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)]"
+            class="bg-background animate-on-scroll duration-250 group w-full max-w-sm rounded-lg border p-6 transition-all hover:-translate-y-1 hover:border-purple-500/30 hover:shadow-xl hover:shadow-purple-500/10 md:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)]"
             :data-delay="index * 50"
           >
             <div class="space-y-3">
@@ -323,7 +323,7 @@
             href="https://taquito.io/"
             target="_blank"
             rel="noopener noreferrer"
-            class="group animate-on-scroll rounded-lg border p-6 transition-all duration-250 hover:-translate-y-1 hover:border-blue-500/30 hover:shadow-xl hover:shadow-blue-500/10"
+            class="animate-on-scroll duration-250 group rounded-lg border p-6 transition-all hover:-translate-y-1 hover:border-blue-500/30 hover:shadow-xl hover:shadow-blue-500/10"
             data-delay="0"
           >
             <div class="flex items-start space-x-4">
@@ -358,7 +358,7 @@
             href="https://github.com/ecadlabs/taquito-test-dapp-vue"
             target="_blank"
             rel="noopener noreferrer"
-            class="group animate-on-scroll rounded-lg border p-6 transition-all duration-250 hover:-translate-y-1 hover:border-gray-500/30 hover:shadow-xl hover:shadow-gray-500/10"
+            class="animate-on-scroll duration-250 group rounded-lg border p-6 transition-all hover:-translate-y-1 hover:border-gray-500/30 hover:shadow-xl hover:shadow-gray-500/10"
             data-delay="100"
           >
             <div class="flex items-start space-x-4">
@@ -390,7 +390,7 @@
 
           <!-- Live Networks -->
           <div
-            class="group animate-on-scroll rounded-lg border p-6 transition-all duration-250 hover:-translate-y-1 hover:border-green-500/30 hover:shadow-xl hover:shadow-green-500/10"
+            class="animate-on-scroll duration-250 group rounded-lg border p-6 transition-all hover:-translate-y-1 hover:border-green-500/30 hover:shadow-xl hover:shadow-green-500/10"
             data-delay="200"
           >
             <div class="flex items-start space-x-4">
@@ -411,20 +411,6 @@
                   Test on real Tezos testnets
                 </p>
                 <div class="space-y-1 text-sm">
-                  <a
-                    href="https://ghostnet.dapp.taquito.io/"
-                    target="_blank"
-                    class="block text-green-500 transition-transform duration-200 hover:translate-x-1 hover:underline"
-                  >
-                    Ghostnet →
-                  </a>
-                  <a
-                    href="https://seoulnet.dapp.taquito.io/"
-                    target="_blank"
-                    class="block text-green-500 transition-transform duration-200 hover:translate-x-1 hover:underline"
-                  >
-                    Seoulnet →
-                  </a>
                   <a
                     href="https://shadownet.dapp.taquito.io/"
                     target="_blank"
@@ -447,10 +433,10 @@
       <!-- Animated background -->
       <div class="absolute inset-0">
         <div
-          class="from-brand/5 absolute top-0 left-0 h-full w-full animate-pulse bg-gradient-to-r via-transparent to-orange-500/5"
+          class="from-brand/5 absolute left-0 top-0 h-full w-full animate-pulse bg-gradient-to-r via-transparent to-orange-500/5"
         ></div>
         <div
-          class="animate-float bg-brand/10 absolute -top-24 -right-24 h-48 w-48 rounded-full blur-3xl"
+          class="animate-float bg-brand/10 absolute -right-24 -top-24 h-48 w-48 rounded-full blur-3xl"
         ></div>
         <div
           class="animate-float-delay absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-orange-500/10 blur-3xl"
@@ -469,7 +455,7 @@
           <RouterLink :to="{ name: 'tests', params: { test: 'transfer' } }">
             <Button
               size="lg"
-              class="group bg-brand hover:shadow-brand/25 px-8 transition-all duration-200 hover:scale-105 hover:bg-[#B8722A] hover:shadow-xl"
+              class="bg-brand hover:shadow-brand/25 group px-8 transition-all duration-200 hover:scale-105 hover:bg-[#B8722A] hover:shadow-xl"
             >
               <span
                 class="transition-transform duration-200 group-hover:translate-x-1"
