@@ -1,5 +1,5 @@
 import type { TestDiagram, TestMetadata } from "@/modules/tests/test";
-import { NetworkType } from "@taquito/beacon-wallet/types";
+import type { NetworkCapability, NetworkId } from "@/types/network";
 import {
   ArrowRightLeft,
   ArrowUp10,
@@ -20,6 +20,17 @@ import {
   X,
   Zap,
 } from "lucide-vue-next";
+
+const SHADOWNET = "shadownet" as NetworkId;
+const TEZLINK_SHADOWNET = "tezlink-shadownet" as NetworkId;
+const CONTRACT_FIXTURE_CAPABILITIES: NetworkCapability[] = [
+  "contract-fixtures",
+];
+const L1_WALLET_CAPABILITIES: NetworkCapability[] = ["l1-wallet"];
+const SAPLING_CAPABILITIES: NetworkCapability[] = [
+  "contract-fixtures",
+  "sapling",
+];
 
 export const AvailableTests: Record<string, TestMetadata> = {
   transfer: {
@@ -81,6 +92,8 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "transaction-limit",
       "increase-paid-storage",
     ],
+    requiredCapabilities: CONTRACT_FIXTURE_CAPABILITIES,
+    requiredContracts: ["counter"],
     documentation: {
       contract: [
         {
@@ -175,6 +188,8 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "Configure Taquito with RPC endpoint and signer",
     ],
     relatedTests: ["counter-contract", "estimate-fees", "transaction-limit"],
+    requiredCapabilities: CONTRACT_FIXTURE_CAPABILITIES,
+    requiredContracts: ["counter"],
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/increase-paid-storage",
@@ -263,6 +278,9 @@ export const AvailableTests: Record<string, TestMetadata> = {
       "Configure Taquito with RPC endpoint and signer",
     ],
     relatedTests: ["staking", "transfer", "estimate-fees"],
+    requiredCapabilities: L1_WALLET_CAPABILITIES,
+    missingCapabilitiesMessage:
+      "Delegation is only supported on L1 networks. Current network: __NETWORK__.",
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/delegation",
@@ -322,6 +340,9 @@ Users can control their staked funds using the 'stake', 'unstake', and 'finalize
       "Configure Taquito with RPC endpoint and signer",
     ],
     relatedTests: ["delegation", "counter-contract", "estimate-fees"],
+    requiredCapabilities: L1_WALLET_CAPABILITIES,
+    missingCapabilitiesMessage:
+      "Staking is only supported on L1 networks. Current network: __NETWORK__.",
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/staking",
@@ -405,6 +426,8 @@ Users can control their staked funds using the 'stake', 'unstake', and 'finalize
       "estimate-fees",
       "delegation",
     ],
+    requiredCapabilities: CONTRACT_FIXTURE_CAPABILITIES,
+    requiredContracts: ["counter"],
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/batch",
@@ -454,6 +477,8 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       "Understand the data you want to sign and its format",
     ],
     relatedTests: ["counter-contract", "estimate-fees"],
+    requiredCapabilities: CONTRACT_FIXTURE_CAPABILITIES,
+    requiredContracts: ["signature"],
     documentation: {
       contract: [
         {
@@ -570,6 +595,8 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       "estimate-fees",
       "increase-paid-storage",
     ],
+    requiredCapabilities: CONTRACT_FIXTURE_CAPABILITIES,
+    requiredContracts: ["counter"],
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/transaction-limit",
@@ -666,6 +693,8 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       "Understand the contract's entrypoints and expected parameters",
     ],
     relatedTests: ["counter-contract", "failing-noop", "estimate-fees"],
+    requiredCapabilities: CONTRACT_FIXTURE_CAPABILITIES,
+    requiredContracts: ["counter"],
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/failing-contract",
@@ -762,6 +791,8 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       "batch",
       "sign-payload",
     ],
+    requiredCapabilities: CONTRACT_FIXTURE_CAPABILITIES,
+    requiredContracts: ["complex-parameters"],
     documentation: {
       contract: [
         {
@@ -898,6 +929,8 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       "Configure Taquito with RPC endpoint",
     ],
     relatedTests: ["tzip16-metadata", "contract-events", "viewing-blocks"],
+    requiredCapabilities: CONTRACT_FIXTURE_CAPABILITIES,
+    requiredContracts: ["metadata"],
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/contract-views",
@@ -963,6 +996,8 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       "complex-parameters",
       "sign-payload",
     ],
+    requiredCapabilities: CONTRACT_FIXTURE_CAPABILITIES,
+    requiredContracts: ["metadata", "metadata-https"],
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/tzip16-metadata",
@@ -1011,6 +1046,8 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       "Use a faucet to fund your wallet with testnet Tez from https://teztnets.com/",
     ],
     relatedTests: ["tzip16-metadata", "transfer", "counter-contract"],
+    requiredCapabilities: CONTRACT_FIXTURE_CAPABILITIES,
+    requiredContracts: ["fa2-token", "balance-callback"],
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/fa2-token",
@@ -1128,6 +1165,8 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
       "Deploy a contract that emits events using EMIT instruction",
     ],
     relatedTests: ["counter-contract", "tzip16-metadata"],
+    requiredCapabilities: CONTRACT_FIXTURE_CAPABILITIES,
+    requiredContracts: ["events-contract"],
     documentation: {
       contract: [
         {
@@ -1206,9 +1245,10 @@ Etherlink is an EVM-compatible rollup built on Tezos. This test demonstrates how
 
 The bridge uses Smart Rollup technology to enable cross-layer communication.`,
     category: "Advanced Operations",
-    supportedNetworks: [NetworkType.GHOSTNET],
+    supportedNetworks: [SHADOWNET],
+    requiredCapabilities: ["etherlink-bridge"],
     setup: [
-      "Connect to Ghostnet testnet (only network currently supported)",
+      "Connect to Shadownet testnet (only network currently supported)",
       "Set up a Tezos wallet with Beacon/WalletConnect/Ledger",
       "Set up an EVM wallet (e.g. MetaMask)",
       "Have sufficient XTZ for gas fees and the amount to transfer",
@@ -1297,9 +1337,10 @@ The bridge uses Smart Rollup technology to enable cross-layer communication.`,
     title: "Tezlink Bridge",
     description: `Bridge XTZ tokens between Tezos L1 and Tezlink.`,
     category: "Advanced Operations",
-    supportedNetworks: [NetworkType.SHADOWNET],
+    supportedNetworks: [SHADOWNET, TEZLINK_SHADOWNET],
+    requiredCapabilities: ["tezlink-bridge-l1-to-l2"],
     setup: [
-      "Connect to Shadownet testnet (only network currently supported)",
+      "Connect to a network that supports the L1 to Tezlink bridge flow",
       "Set up a Tezos wallet with Beacon/WalletConnect/Ledger",
       "Have sufficient XTZ for gas fees and the amount to transfer",
     ],
@@ -1348,6 +1389,10 @@ The bridge uses Smart Rollup technology to enable cross-layer communication.`,
       "Understand Sapling concepts: spending keys, viewing keys, payment addresses",
     ],
     relatedTests: ["transfer", "sign-payload", "counter-contract"],
+    requiredCapabilities: SAPLING_CAPABILITIES,
+    requiredContracts: ["sapling"],
+    missingCapabilitiesMessage:
+      "Sapling is not supported on network __NETWORK__.",
     documentation: {
       script:
         "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/sapling",

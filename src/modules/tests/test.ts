@@ -1,4 +1,4 @@
-import type { NetworkType } from "@taquito/beacon-wallet/types";
+import type { NetworkCapability, NetworkId } from "@/types/network";
 import type { Component } from "vue";
 
 export interface DiagramNode {
@@ -24,7 +24,10 @@ export interface TestMetadata {
   setup: string[];
   relatedTests: string[];
   contractApi?: boolean;
-  supportedNetworks?: NetworkType[];
+  supportedNetworks?: NetworkId[];
+  requiredCapabilities?: NetworkCapability[];
+  requiredContracts?: string[];
+  missingCapabilitiesMessage?: string;
   documentation: {
     contract?: { name: string; url: string }[];
     script?: string;

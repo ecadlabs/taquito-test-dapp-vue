@@ -41,11 +41,10 @@ import {
   NumberFieldIncrement,
   NumberFieldInput,
 } from "@/components/ui/number-field";
-import contracts from "@/contracts/contract-config.json";
 import { increaseStorage } from "@/modules/tests/tests/increase-paid-storage/increase-paid-storage";
+import { getContractAddress } from "@/networks/network-registry";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
-import type { ContractConfig } from "@/types/contract";
 import { Loader2 } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 
@@ -54,16 +53,12 @@ const bytes = ref<number>(1);
 const processing = ref<boolean>(false);
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
+const networkId =
+  import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE;
 
 onMounted(() => {
   diagramStore.setTestDiagram("increase-paid-storage");
-
-  const CONTRACT_ADDRESS =
-    (contracts as ContractConfig[]).find(
-      (contract: ContractConfig) => contract.contractName === "counter",
-    )?.address ?? "";
-
-  contractAddress.value = CONTRACT_ADDRESS;
+  contractAddress.value = getContractAddress("counter", networkId) ?? "";
 });
 
 const increase = async () => {

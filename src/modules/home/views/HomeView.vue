@@ -252,7 +252,7 @@
         <div class="animate-on-scroll space-y-4 text-center">
           <h2 class="text-3xl font-bold">Originated Contracts</h2>
           <p class="text-muted-foreground">
-            Smart contracts deployed on Ghostnet for testing and exploration
+            Smart contracts deployed on Shadownet for testing and exploration
           </p>
         </div>
 
@@ -491,7 +491,6 @@
 
 <script setup lang="ts">
 import { Button } from "@/components/ui/button";
-import contractConfig from "@/contracts/contract-config.json";
 import { buildGitHubContractUrl, buildIndexerUrl } from "@/lib/utils";
 import AnimatedCounter from "@/modules/home/components/animated-counter.vue";
 import {
@@ -499,8 +498,8 @@ import {
   getTestById,
   getTestsByCategory,
 } from "@/modules/tests/tests";
+import { getFlattenedContractsForNetwork } from "@/networks/network-registry";
 import { useSettingsStore } from "@/stores/settingsStore";
-import type { ContractConfig } from "@/types/contract";
 import {
   ArrowRightIcon,
   BookOpenIcon,
@@ -518,7 +517,8 @@ import {
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
 const settingsStore = useSettingsStore();
-const networkType = import.meta.env.VITE_NETWORK_TYPE;
+const networkType =
+  import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE;
 
 const testCount = computed(() => Object.keys(AvailableTests).length);
 
@@ -578,7 +578,7 @@ const quickStartTests = computed(() => {
 });
 
 const originatedContracts = computed(() => {
-  return (contractConfig as ContractConfig[]).map((contract) => ({
+  return getFlattenedContractsForNetwork(networkType).map((contract) => ({
     ...contract,
     tzktUrl: buildIndexerUrl(
       settingsStore.settings.indexer,

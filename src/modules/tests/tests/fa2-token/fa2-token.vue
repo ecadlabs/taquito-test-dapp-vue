@@ -349,12 +349,11 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import contracts from "@/contracts/contract-config.json";
 import { validateTezosAddress } from "@/lib/utils";
 import OpenInExplorer from "@/modules/tests/components/open-in-explorer.vue";
+import { getContractAddress } from "@/networks/network-registry";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
-import type { ContractConfig } from "@/types/contract";
 import {
   ArrowRightLeft,
   Coins,
@@ -382,6 +381,8 @@ import {
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
 const { getAddress } = storeToRefs(walletStore);
+const networkId =
+  import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE;
 
 const walletConnected = computed(() => !!getAddress.value);
 
@@ -590,13 +591,8 @@ watch(
   { immediate: false }, // Don't trigger immediately since onMounted handles initial state
 );
 
-const CONTRACT_ADDRESS =
-  (contracts as ContractConfig[]).find(
-    (contract: ContractConfig) => contract.contractName === "fa2-token",
-  )?.address ?? "";
+const CONTRACT_ADDRESS = getContractAddress("fa2-token", networkId) ?? "";
 
 const CALLBACK_CONTRACT_ADDRESS =
-  (contracts as ContractConfig[]).find(
-    (contract: ContractConfig) => contract.contractName === "balance-callback",
-  )?.address ?? "";
+  getContractAddress("balance-callback", networkId) ?? "";
 </script>

@@ -89,6 +89,7 @@ npm run dev
 ```bash
 npm run dev          # Start development server
 npm run build        # Build for production
+npm run build:verified # Build and fail if the target network is missing required fixtures
 npm run preview      # Preview production build
 npm run test         # Run Playwright tests
 npm run test:ui      # Run tests with UI

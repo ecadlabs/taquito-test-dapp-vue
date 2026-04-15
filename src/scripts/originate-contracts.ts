@@ -5,6 +5,12 @@ import type {
   FA2TokenStorage,
   MetadataContractStorage,
 } from "@/types/contract";
+import type {
+  ContractName,
+  DeployedContract,
+  NetworkContractsConfig,
+  NetworkId,
+} from "@/types/network";
 import {
   importKey,
   MichelsonMap,
@@ -24,22 +30,15 @@ import { join } from "path";
 
 config();
 
-interface ContractConfig {
-  address: string;
-  originatedAt: string;
-  network: string;
-  contractName?: string;
-}
-
 interface OriginationResult {
   contractAddress: string;
-  contractName: string;
+  contractName: ContractName;
   operationHash: string;
   storage: ContractStorage;
 }
 
 interface ContractDefinition {
-  name: string;
+  name: ContractName;
   path: string;
   storage: ContractStorage;
 }
@@ -52,10 +51,17 @@ export const originateContracts = async (
   const rpcUrl = process.env.VITE_RPC_URL;
   const networkType = process.env.VITE_NETWORK_TYPE;
   const networkName = process.env.VITE_NETWORK_NAME;
+  const networkId = (networkName || networkType) as NetworkId | undefined;
 
-  if (!rpcUrl || !networkType) {
+  if (!rpcUrl || !networkType || !networkId) {
     throw new Error(
       "VITE_RPC_URL and VITE_NETWORK_TYPE must be set in environment variables.",
+    );
+  }
+
+  if (!["shadownet", "tezlink-shadownet"].includes(networkId)) {
+    throw new Error(
+      `Unsupported network "${networkId}" for contract origination.`,
     );
   }
 
@@ -66,8 +72,8 @@ export const originateContracts = async (
   // Initialize Tezos toolkit
   const Tezos = new TezosToolkit(rpcUrl);
 
-  // Configure polling provider for confirmation on tezlink-alphanet
-  if (networkType === "tezlink-alphanet") {
+  // Tezlink confirmations currently need polling rather than stream-based confirmation.
+  if (networkId === "tezlink-shadownet") {
     Tezos.setStreamProvider(
       Tezos.getFactory(PollingSubscribeProvider)({
         pollingIntervalMilliseconds: 1000,
@@ -125,7 +131,7 @@ export const originateContracts = async (
     );
 
     for (const file of files) {
-      const contractName = file.replace(".tz", "");
+      const contractName = file.replace(".tz", "") as ContractName;
 
       // If a specific contract is requested, only include that contract
       if (specificContract && contractName !== specificContract) {
@@ -228,7 +234,7 @@ export const originateContracts = async (
       );
 
       // Wait for confirmation
-      if (networkType === "tezlink-alphanet") {
+      if (networkId === "tezlink-shadownet") {
         await originationOp.contract();
       } else {
         await waitForConfirmation(originationOp.hash);
@@ -258,8 +264,8 @@ export const originateContracts = async (
 
   // Save contract configuration
   if (results.length > 0) {
-    const configDir = join(process.cwd(), "src", "contracts");
-    const configPath = join(configDir, "contract-config.json");
+    const configDir = join(process.cwd(), "src", "networks");
+    const configPath = join(configDir, "network-contracts.json");
 
     // Ensure the directory exists
     if (!existsSync(configDir)) {
@@ -267,7 +273,7 @@ export const originateContracts = async (
     }
 
     // Read existing config if it exists
-    let existingConfig: ContractConfig[] = [];
+    let existingConfig: NetworkContractsConfig[] = [];
     if (existsSync(configPath)) {
       try {
         const existingContent = readFileSync(configPath, "utf8");
@@ -282,42 +288,36 @@ export const originateContracts = async (
     }
 
     // Create new entries for the originated contracts
-    const newEntries: ContractConfig[] = results.map((result) => ({
-      address: result.contractAddress,
-      originatedAt: new Date().toISOString(),
-      network: networkName || networkType,
-      contractName: result.contractName,
-    }));
+    const nextContracts = results.reduce<
+      Partial<Record<ContractName, DeployedContract>>
+    >((contractsMap, result) => {
+      contractsMap[result.contractName] = {
+        address: result.contractAddress,
+        originatedAt: new Date().toISOString(),
+      };
+      return contractsMap;
+    }, {});
 
-    // If originating a specific contract, update or append to existing config
-    // Otherwise, replace the entire config (originating all contracts)
-    let finalConfig: ContractConfig[];
-    if (specificContract) {
-      finalConfig = [...existingConfig];
+    const finalConfig = [...existingConfig];
+    const networkIndex = finalConfig.findIndex(
+      (entry) => entry.id === networkId,
+    );
 
-      // Update existing entries or add new ones
-      for (const newEntry of newEntries) {
-        const existingIndex = finalConfig.findIndex(
-          (entry) => entry.contractName === newEntry.contractName,
-        );
-
-        if (existingIndex >= 0) {
-          // Update existing contract
-          finalConfig[existingIndex] = newEntry;
-          console.log(
-            `📝 Updated existing contract "${newEntry.contractName}" in config`,
-          );
-        } else {
-          // Append new contract
-          finalConfig.push(newEntry);
-          console.log(
-            `➕ Added new contract "${newEntry.contractName}" to config`,
-          );
-        }
-      }
+    if (networkIndex >= 0) {
+      finalConfig[networkIndex] = {
+        id: networkId,
+        contracts: specificContract
+          ? {
+              ...finalConfig[networkIndex].contracts,
+              ...nextContracts,
+            }
+          : nextContracts,
+      };
     } else {
-      // Originating all contracts, replace entire config
-      finalConfig = newEntries;
+      finalConfig.push({
+        id: networkId,
+        contracts: nextContracts,
+      });
     }
 
     writeFileSync(configPath, JSON.stringify(finalConfig, null, 2));

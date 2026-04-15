@@ -1,23 +1,17 @@
-import contracts from "@/contracts/contract-config.json";
+import { getContractAddress } from "@/networks/network-registry";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
-import type { FA2TokenStorage } from "@/types/contract";
-import {
-  type BalanceCallbackStorage,
-  type ContractConfig,
-} from "@/types/contract";
+import type { BalanceCallbackStorage, FA2TokenStorage } from "@/types/contract";
 import type { Estimate } from "@taquito/taquito";
 
-const CONTRACT_ADDRESS =
-  (contracts as ContractConfig[]).find(
-    (contract: ContractConfig) => contract.contractName === "fa2-token",
-  )?.address ?? "";
+const NETWORK_ID =
+  import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE;
+
+const CONTRACT_ADDRESS = getContractAddress("fa2-token", NETWORK_ID) ?? "";
 
 const CALLBACK_CONTRACT_ADDRESS =
-  (contracts as ContractConfig[]).find(
-    (contract: ContractConfig) => contract.contractName === "balance-callback",
-  )?.address ?? "";
+  getContractAddress("balance-callback", NETWORK_ID) ?? "";
 
 const TEST_ID = "fa2-token";
 

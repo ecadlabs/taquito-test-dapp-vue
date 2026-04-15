@@ -1,9 +1,8 @@
 import { useTaquitoModules } from "@/composables/useTaquitoModules";
-import contracts from "@/contracts/contract-config.json";
+import { getContractAddress } from "@/networks/network-registry";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
-import type { ContractConfig } from "@/types/contract";
 import { BeaconWallet } from "@taquito/beacon-wallet";
 import { LedgerSigner } from "@taquito/ledger-signer";
 import type { MichelsonData, MichelsonType } from "@taquito/michel-codec";
@@ -12,6 +11,8 @@ import { WalletConnect } from "@taquito/wallet-connect";
 
 const TEST_ID = "sign-payload";
 let estimate: Estimate;
+const NETWORK_ID =
+  import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE;
 
 const sign = async (
   input: string,
@@ -226,9 +227,7 @@ export const signMichelsonData = async (
 };
 
 const SIGNATURE_CONTRACT_ADDRESS =
-  (contracts as ContractConfig[]).find(
-    (contract: ContractConfig) => contract.contractName === "signature",
-  )?.address ?? "";
+  getContractAddress("signature", NETWORK_ID) ?? "";
 
 const verifyPayloadViaContract = async (
   payload: string,

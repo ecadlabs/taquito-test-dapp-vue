@@ -84,7 +84,7 @@ jobs:
       - name: Build application
         run: |
           export NODE_OPTIONS="--max_old_space_size=4096"
-          npm run build
+          npm run build:verified
 
       - name: Publish to Cloudflare Pages
         id: cloudflare_publish
