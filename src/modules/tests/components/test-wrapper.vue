@@ -175,22 +175,22 @@
         <div class="relative">
           <!-- Network Restriction Warning Overlay -->
           <div
-            v-if="!isNetworkSupported"
-            class="absolute inset-0 z-10 flex items-center justify-center"
+            v-if="!isTestReady"
+            class="absolute inset-0 z-10 flex items-start justify-center pt-10"
           >
             <div
-              class="bg-background flex flex-col items-center justify-center rounded-lg border px-4 py-3"
+              class="bg-background/95 flex max-w-md flex-col items-center justify-center rounded-lg border px-4 py-3 shadow-sm backdrop-blur-sm"
             >
               <Frown class="size-6" />
-              <p class="font-semibold">Test Not Supported</p>
-              <p class="text-muted-foreground text-sm">
-                This test is only available on {{ supportedNetworksText }}.
+              <p class="font-semibold">{{ readinessTitle }}</p>
+              <p class="text-muted-foreground text-center text-sm">
+                {{ readinessMessage }}
               </p>
             </div>
           </div>
 
           <!-- Test Content (blurred if network not supported) -->
-          <div :class="{ 'pointer-events-none blur-sm': !isNetworkSupported }">
+          <div :class="{ 'pointer-events-none blur-sm': !isTestReady }">
             <slot />
           </div>
         </div>
@@ -224,11 +224,12 @@ import TestDiagram from "@/components/test-diagram.vue";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getTestReadiness } from "@/modules/tests/readiness";
 import type { TestMetadata } from "@/modules/tests/test";
 import { getTestById } from "@/modules/tests/tests";
+import { getNetworkProfile } from "@/networks/network-registry";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
-import type { NetworkType } from "@taquito/beacon-wallet/types";
 import {
   ArrowRight,
   BookOpenText,
@@ -260,16 +261,26 @@ const getTestTitle = (testId: string): string => {
 };
 
 const currentNetwork = computed(
-  () => import.meta.env.VITE_NETWORK_TYPE as NetworkType,
+  () => import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE,
 );
 
-const isNetworkSupported = computed(() => {
-  if (!testMetadata.value?.supportedNetworks) {
-    // If no supportedNetworks is defined, the test is available on all networks
-    return true;
+const readiness = computed(() => {
+  if (!testMetadata.value) {
+    return {
+      isReady: false,
+      reason: "unsupported-network" as const,
+      missingCapabilities: [],
+      missingContracts: [],
+    };
   }
-  return testMetadata.value.supportedNetworks.includes(currentNetwork.value);
+
+  return getTestReadiness(
+    testMetadata.value,
+    getNetworkProfile(currentNetwork.value),
+  );
 });
+
+const isTestReady = computed(() => readiness.value.isReady);
 
 const supportedNetworksText = computed(() => {
   if (!testMetadata.value?.supportedNetworks) {
@@ -286,6 +297,39 @@ const supportedNetworksText = computed(() => {
     const rest = networks.slice(0, -1).join(", ");
     return `${rest}, and ${last}`;
   }
+});
+
+const readinessTitle = computed(() => {
+  if (readiness.value.reason === "missing-capabilities") {
+    return "Network Capability Not Available";
+  }
+
+  if (readiness.value.reason === "missing-contracts") {
+    return "Missing Contract Prerequisites";
+  }
+
+  return "Test Not Supported";
+});
+
+const readinessMessage = computed(() => {
+  if (readiness.value.reason === "missing-contracts") {
+    const missing = readiness.value.missingContracts.join(", ");
+    return `This test is configured for ${currentNetwork.value}, but it needs the following contracts in src/networks/network-contracts.json: ${missing}. Run npm run verify-network to check the current environment.`;
+  }
+
+  if (readiness.value.reason === "missing-capabilities") {
+    if (testMetadata.value?.missingCapabilitiesMessage) {
+      return testMetadata.value.missingCapabilitiesMessage.replace(
+        "__NETWORK__",
+        currentNetwork.value,
+      );
+    }
+
+    const missing = readiness.value.missingCapabilities.join(", ");
+    return `This test is not available on ${currentNetwork.value} because the network is missing these capabilities: ${missing}.`;
+  }
+
+  return `This test is only available on ${supportedNetworksText.value}.`;
 });
 
 onUnmounted(() => {

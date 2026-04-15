@@ -1,8 +1,7 @@
-import contracts from "@/contracts/contract-config.json";
+import { getContractAddress } from "@/networks/network-registry";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
-import { type ContractConfig } from "@/types/contract";
 import type { Estimate } from "@taquito/taquito";
 import { toast } from "vue-sonner";
 
@@ -22,10 +21,10 @@ interface EventSubscription {
   close(): void;
 }
 
+const NETWORK_ID =
+  import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE;
 const CONTRACT_ADDRESS =
-  (contracts as ContractConfig[]).find(
-    (contract: ContractConfig) => contract.contractName === "events-contract",
-  )?.address ?? "";
+  getContractAddress("events-contract", NETWORK_ID) ?? "";
 const TEST_ID = "contract-events";
 
 let estimate: Estimate;

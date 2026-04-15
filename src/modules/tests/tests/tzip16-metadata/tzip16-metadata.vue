@@ -145,12 +145,11 @@ import Button from "@/components/ui/button/Button.vue";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Input from "@/components/ui/input/Input.vue";
 import Label from "@/components/ui/label/Label.vue";
-import contracts from "@/contracts/contract-config.json";
 import { validateTezosAddress } from "@/lib/utils";
 import OpenInExplorer from "@/modules/tests/components/open-in-explorer.vue";
+import { getContractAddress } from "@/networks/network-registry";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
-import type { ContractConfig } from "@/types/contract";
 import { Tzip16Module } from "@taquito/tzip16";
 import { Database, Info, Loader2 } from "lucide-vue-next";
 import { computed, onMounted, ref } from "vue";
@@ -158,6 +157,8 @@ import { getContractMetadata, type MetadataResult } from "./tzip16-metadata";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
+const networkId =
+  import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE;
 
 const walletConnected = computed(() => !!walletStore.getAddress);
 const isLoading = ref(false);
@@ -172,13 +173,7 @@ onMounted(() => {
   const Tezos = walletStore.getTezos;
   Tezos.addExtension(new Tzip16Module());
 
-  // Pre-fill with metadata contract address if available
-  const metadataContract = (contracts as ContractConfig[]).find(
-    (contract: ContractConfig) => contract.contractName === "metadata",
-  );
-  if (metadataContract?.address) {
-    contractAddress.value = metadataContract.address;
-  }
+  contractAddress.value = METADATA_CONTRACT_ADDRESS;
 });
 
 const getMetadata = async () => {
@@ -196,12 +191,8 @@ const getMetadata = async () => {
 };
 
 const METADATA_CONTRACT_ADDRESS =
-  (contracts as ContractConfig[]).find(
-    (contract: ContractConfig) => contract.contractName === "metadata",
-  )?.address ?? "";
+  getContractAddress("metadata", networkId) ?? "";
 
 const METADATA_HTTPS_CONTRACT_ADDRESS =
-  (contracts as ContractConfig[]).find(
-    (contract: ContractConfig) => contract.contractName === "metadata-https",
-  )?.address ?? "";
+  getContractAddress("metadata-https", networkId) ?? "";
 </script>

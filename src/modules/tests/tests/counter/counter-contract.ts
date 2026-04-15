@@ -1,14 +1,12 @@
-import contracts from "@/contracts/contract-config.json";
+import { getContractAddress } from "@/networks/network-registry";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
-import { type ContractConfig } from "@/types/contract";
 import type { Estimate } from "@taquito/taquito";
 
-const CONTRACT_ADDRESS =
-  (contracts as ContractConfig[]).find(
-    (contract: ContractConfig) => contract.contractName === "counter",
-  )?.address ?? "";
+const NETWORK_ID =
+  import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE;
+const CONTRACT_ADDRESS = getContractAddress("counter", NETWORK_ID) ?? "";
 const TEST_ID = "counter-contract";
 
 let estimate: Estimate;

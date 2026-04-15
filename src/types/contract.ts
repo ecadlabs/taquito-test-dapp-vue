@@ -1,10 +1,11 @@
+import type { ContractName, NetworkId } from "@/types/network";
 import { MichelsonMap } from "@taquito/taquito";
 
 export interface ContractConfig {
   address: string;
   originatedAt: string;
-  network: string;
-  contractName?: string;
+  network: NetworkId;
+  contractName?: ContractName;
 }
 
 export type CounterStorage = number;

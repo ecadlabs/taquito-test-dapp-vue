@@ -285,15 +285,11 @@ import Button from "@/components/ui/button/Button.vue";
 import Input from "@/components/ui/input/Input.vue";
 import Label from "@/components/ui/label/Label.vue";
 import Textarea from "@/components/ui/textarea/Textarea.vue";
-import contracts from "@/contracts/contract-config.json";
 import OpenInExplorer from "@/modules/tests/components/open-in-explorer.vue";
+import { getContractAddress } from "@/networks/network-registry";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
-import type {
-  ContractConfig,
-  NestedRecord,
-  UserRecord,
-} from "@/types/contract";
+import type { NestedRecord, UserRecord } from "@/types/contract";
 import {
   Database,
   Eye,
@@ -317,6 +313,8 @@ import {
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
+const networkId =
+  import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE;
 
 const walletConnected = computed(() => !!walletStore.getAddress);
 
@@ -451,8 +449,5 @@ onMounted(() => {
 });
 
 const CONTRACT_ADDRESS =
-  (contracts as ContractConfig[]).find(
-    (contract: ContractConfig) =>
-      contract.contractName === "complex-parameters",
-  )?.address ?? "";
+  getContractAddress("complex-parameters", networkId) ?? "";
 </script>

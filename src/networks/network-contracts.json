@@ -1,0 +1,80 @@
+[
+  {
+    "id": "shadownet",
+    "contracts": {
+      "fa2-token": {
+        "address": "KT1RKDzqQjnMSHTiEDcshCSxYBx47edfJkdt",
+        "originatedAt": "2026-04-14T23:25:06.513Z"
+      },
+      "balance-callback": {
+        "address": "KT1LxhE2ThAafxSwQwuKVcnfhkLj8bieZkyB",
+        "originatedAt": "2026-04-14T23:25:06.513Z"
+      },
+      "complex-parameters": {
+        "address": "KT1Ud8PAFuWQdUmK3gGnhMWaZufpacWMdJXf",
+        "originatedAt": "2026-04-14T23:25:06.513Z"
+      },
+      "counter": {
+        "address": "KT1S4JeGENf157Ag8RTyUfHujeUg2A32x4VA",
+        "originatedAt": "2026-04-14T23:25:06.513Z"
+      },
+      "events-contract": {
+        "address": "KT1RkPvJFqZs9svjrACT5w3Abf7dVe1AXkPJ",
+        "originatedAt": "2026-04-14T23:25:06.513Z"
+      },
+      "metadata-https": {
+        "address": "KT1P6xpAzQxX1ksXhmByPhrQCXwtqyemH9v5",
+        "originatedAt": "2026-04-14T23:25:06.513Z"
+      },
+      "metadata": {
+        "address": "KT1HzVid2Pb8GvEcnNPfqS76CfDPb45gauSC",
+        "originatedAt": "2026-04-14T23:25:06.513Z"
+      },
+      "sapling": {
+        "address": "KT1GFkBEDZtngCS737gNgtt6LemG2a8kaifC",
+        "originatedAt": "2026-04-14T23:25:06.513Z"
+      },
+      "signature": {
+        "address": "KT1UhvMAEQSCSNLkPvLVeGb8vyUWbCVXZrgE",
+        "originatedAt": "2026-04-14T23:25:06.513Z"
+      }
+    }
+  },
+  {
+    "id": "tezlink-shadownet",
+    "contracts": {
+      "fa2-token": {
+        "address": "KT1E8TRxQB865DkT6b1RSMV9VUZhBa4YRqo3",
+        "originatedAt": "2026-04-14T23:47:33.549Z"
+      },
+      "balance-callback": {
+        "address": "KT1V4vJbVMk7oKQYcbDtProHhfy6DGjwxPVm",
+        "originatedAt": "2026-04-14T23:47:33.549Z"
+      },
+      "complex-parameters": {
+        "address": "KT1CCi31kRkv9j4GaFe2KNZKzjsPr5X1Wx3U",
+        "originatedAt": "2026-04-14T23:47:33.549Z"
+      },
+      "counter": {
+        "address": "KT1JJGhxburcRzkmNVcpm2Z2BqAU21Retibe",
+        "originatedAt": "2026-04-14T23:47:33.549Z"
+      },
+      "events-contract": {
+        "address": "KT1EeVVT6Vnd5AkwHSzUGKFgc2YvzvEF6aoH",
+        "originatedAt": "2026-04-14T23:47:33.549Z"
+      },
+      "metadata-https": {
+        "address": "KT1AUuqEGLv1Nr12yNRNHXiPxr4aF8KayUt8",
+        "originatedAt": "2026-04-14T23:47:33.549Z"
+      },
+      "metadata": {
+        "address": "KT1Eu625XvZfauXwaaEKWQhk3Jt3j8ufJN4y",
+        "originatedAt": "2026-04-14T23:47:33.549Z"
+      },
+      "signature": {
+        "address": "KT1HTbPoN7cEaDCkrTWAP7oMHdrk1xqrGZUC",
+        "originatedAt": "2026-04-14T23:47:33.549Z"
+      }
+    }
+  }
+]

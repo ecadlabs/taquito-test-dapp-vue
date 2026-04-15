@@ -2,8 +2,14 @@ import {
   initializeBeaconEvents,
   initializeWalletConnectEvents,
 } from "@/lib/walletEvents";
+import { getWalletConfig } from "@/networks/network-registry";
 import { createWalletStore } from "@/stores/createWalletStore";
-import { NetworkType } from "@taquito/beacon-wallet/types";
+
+const tezlinkWalletConfig = getWalletConfig("tezlink-shadownet");
+
+if (!tezlinkWalletConfig) {
+  throw new Error(`No wallet config found for network "tezlink-shadownet"`);
+}
 
 /**
  * Wallet store for Tezlink L2 network. Used for bridging operations from
@@ -15,11 +21,12 @@ import { NetworkType } from "@taquito/beacon-wallet/types";
 export const useTezlinkWalletStore = createWalletStore(
   {
     storeName: "tezlink-wallet",
-    rpcUrl: import.meta.env.VITE_TEZLINK_SHADOWNET_RPC,
-    networkType: NetworkType.CUSTOM,
-    networkName: "Tezlink",
+    rpcUrl: import.meta.env[tezlinkWalletConfig.rpcEnvVar],
+    beaconNetworkType: tezlinkWalletConfig.beacon.networkType,
+    beaconNetworkName: tezlinkWalletConfig.beacon.networkName,
+    walletConnectNetworkType: tezlinkWalletConfig.walletConnect.networkType,
     localStoragePrefix: "tezlink-wallet",
-    appName: "Taquito Playground (Tezlink)",
+    appName: tezlinkWalletConfig.appName,
   },
   {
     beacon: initializeBeaconEvents,

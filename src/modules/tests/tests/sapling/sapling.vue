@@ -342,7 +342,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import contracts from "@/contracts/contract-config.json";
 import { copyToClipboard } from "@/lib/utils";
 import {
   generateAliceAddress,
@@ -355,9 +354,9 @@ import {
   type SaplingTransactionHistory,
   type UserSaplingKey,
 } from "@/modules/tests/tests/sapling/sapling";
+import { getContractAddress } from "@/networks/network-registry";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
-import { type ContractConfig } from "@/types/contract";
 import {
   ArrowRightLeft,
   Copy,
@@ -373,6 +372,8 @@ import { toast } from "vue-sonner";
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
+const networkId =
+  import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE;
 
 const walletConnected = computed(() => !!walletStore.getAddress);
 const isRunning = ref(false);
@@ -392,10 +393,7 @@ const transactionHistory = ref<SaplingTransactionHistory | null>(null);
 const userBalance = ref<number | null>(null);
 
 // Get contract address from config
-const CONTRACT_ADDRESS =
-  (contracts as ContractConfig[]).find(
-    (contract: ContractConfig) => contract.contractName === "sapling",
-  )?.address ?? "";
+const CONTRACT_ADDRESS = getContractAddress("sapling", networkId) ?? "";
 
 onMounted(async () => {
   diagramStore.setTestDiagram("sapling");

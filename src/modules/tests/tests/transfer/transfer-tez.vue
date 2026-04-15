@@ -6,7 +6,13 @@
     </div>
 
     <div>
-      <NumberField :min="1" :max="100" v-model="amount">
+      <NumberField
+        :min="0.000001"
+        :max="100"
+        :step="0.000001"
+        :format-options="{ maximumFractionDigits: 6 }"
+        v-model="amount"
+      >
         <Label>Amount</Label>
         <NumberFieldContent class="w-48">
           <NumberFieldDecrement />

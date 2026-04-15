@@ -1,3 +1,4 @@
+import { getIndexerBaseUrl } from "@/networks/network-registry";
 import type { IndexerOption } from "@/stores/settingsStore";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -15,16 +16,10 @@ export const buildIndexerUrl = (
   networkName?: string,
 ) => {
   if (indexer.value === "tzkt") {
-    // Special handling for tezlink-shadownet
-    if (networkName === "tezlink-shadownet") {
-      const baseUrl = "https://shadownet.tezlink.tzkt.io";
-      if (routeType === "operations") {
-        return identifier ? `${baseUrl}/${identifier}/operations` : baseUrl;
-      }
-      return identifier ? `${baseUrl}/${identifier}/storage` : baseUrl;
-    }
-
-    const baseUrl = indexer.url.replace("[networkType]", networkType);
+    const activeNetworkId = networkName || networkType;
+    const baseUrl =
+      getIndexerBaseUrl(activeNetworkId, indexer.value) ||
+      indexer.url.replace("[networkType]", networkType);
     if (routeType === "operations") {
       return identifier ? `${baseUrl}/${identifier}/operations` : baseUrl;
     }

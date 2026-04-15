@@ -107,24 +107,23 @@ If your test requires a new contract:
 
 When the test dapp is deployed, the compilation and origination is handled automatically.
 
-Originated contracts have their details saved to `src/contracts/contract-config.json`
+Originated contracts have their details saved to `src/networks/network-contracts.json`
 
 #### 4. Implement the Logic (`[test-name].ts`)
 
 Create the core functionality that interacts with Taquito:
 
 ```typescript
-import contracts from "@/contracts/contract-config.json";
+import { getContractAddress } from "@/networks/network-registry";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
-import { type ContractConfig } from "@/types/contract";
 import type { Estimate } from "@taquito/taquito";
 
-// This can be used to get the address of a contract from the `contract-config.json` file that we created via origination earlier
-const CONTRACT_ADDRESS =
-  (contracts as ContractConfig[]).find(
-    (contract: ContractConfig) => contract.contractName === "your-contract",
-  )?.address ?? "";
+const NETWORK_ID =
+  import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE;
+
+// This can be used to get the address of a contract from the per-network contract registry
+const CONTRACT_ADDRESS = getContractAddress("your-contract", NETWORK_ID) ?? "";
 
 /**
  * Main test function description
@@ -279,6 +278,9 @@ npm run format
 
 # Test build
 npm run build
+
+# Strict deploy-style build, including network fixture verification
+npm run build:verified
 ```
 
 ### 🚨 Common Pitfalls

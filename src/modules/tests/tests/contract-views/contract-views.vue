@@ -18,9 +18,7 @@
             />
             <Button
               @click="getMetadata"
-              :disabled="
-                !walletConnected || isLoading || !isValidContractAddress
-              "
+              :disabled="isLoading || !isValidContractAddress"
               data-testid="get-metadata-button"
             >
               <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
@@ -103,15 +101,14 @@ import Button from "@/components/ui/button/Button.vue";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Input from "@/components/ui/input/Input.vue";
 import Label from "@/components/ui/label/Label.vue";
-import contracts from "@/contracts/contract-config.json";
 import { validateTezosAddress } from "@/lib/utils";
 import OpenInExplorer from "@/modules/tests/components/open-in-explorer.vue";
+import { getContractAddress } from "@/networks/network-registry";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
-import type { ContractConfig } from "@/types/contract";
 import { Tzip16Module, tzip16 } from "@taquito/tzip16";
 import { Eye, Loader2, Play } from "lucide-vue-next";
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import {
   executeView as executeViewFunction,
   type ViewExecutionResult,
@@ -166,8 +163,9 @@ const getContractMetadata = async (
 
 const diagramStore = useDiagramStore();
 const walletStore = useWalletStore();
+const networkId =
+  import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE;
 
-const walletConnected = computed(() => !!walletStore.getAddress);
 const isLoading = ref(false);
 const isExecutingView = ref(false);
 const contractAddress = ref("");
@@ -222,7 +220,5 @@ const getViewName = (view: string): string => {
 };
 
 const METADATA_CONTRACT_ADDRESS =
-  (contracts as ContractConfig[]).find(
-    (contract: ContractConfig) => contract.contractName === "metadata",
-  )?.address ?? "";
+  getContractAddress("metadata", networkId) ?? "";
 </script>

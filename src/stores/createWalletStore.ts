@@ -1,18 +1,19 @@
 import { web3AuthService } from "@/services/web3AuthService";
+import type {
+  BeaconNetworkType,
+  WalletConnectNetworkType,
+} from "@/types/network";
 import type { ProgrammaticWallet, WalletProvider } from "@/types/wallet";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
 import * as Sentry from "@sentry/vue";
 import { BeaconWallet } from "@taquito/beacon-wallet";
-import { NetworkType } from "@taquito/beacon-wallet/types";
+import type { NetworkType as BeaconSdkNetworkType } from "@taquito/beacon-wallet/types";
 import { LedgerSigner } from "@taquito/ledger-signer";
 import { InMemorySigner } from "@taquito/signer";
-import { TezosToolkit, importKey } from "@taquito/taquito";
+import { MichelCodecPacker, TezosToolkit, importKey } from "@taquito/taquito";
 import { hex2buf } from "@taquito/utils";
-import {
-  PermissionScopeMethods,
-  WalletConnect,
-  NetworkType as WalletConnectNetworkType,
-} from "@taquito/wallet-connect";
+import type { NetworkType as WalletConnectSdkNetworkType } from "@taquito/wallet-connect";
+import { PermissionScopeMethods, WalletConnect } from "@taquito/wallet-connect";
 import * as tezosCrypto from "@tezos-core-tools/crypto-utils";
 import { defineStore, type StoreDefinition } from "pinia";
 import { computed, ref, type ComputedRef, type Ref } from "vue";
@@ -30,9 +31,11 @@ export interface WalletStoreConfig {
    */
   rpcUrl: string | (() => string);
   /** Network type for Beacon wallet */
-  networkType: NetworkType;
-  /** Display name for the network */
-  networkName: string;
+  beaconNetworkType: BeaconNetworkType;
+  /** Display name for the network in Beacon */
+  beaconNetworkName: string;
+  /** Network type for WalletConnect permissions */
+  walletConnectNetworkType: WalletConnectNetworkType;
   /** Prefix for localStorage keys to avoid conflicts */
   localStoragePrefix: string;
   /** App name shown in wallet connection dialogs */
@@ -90,17 +93,24 @@ export const createWalletStore = (
   const {
     storeName,
     rpcUrl,
-    networkType,
-    networkName,
+    beaconNetworkType,
+    beaconNetworkName,
+    walletConnectNetworkType,
     localStoragePrefix,
     appName = "Taquito Playground",
     appIconUrl = "https://tezostaquito.io/img/favicon.svg",
   } = config;
 
+  const createToolkit = (rpcUrl: string): TezosToolkit => {
+    const tezos = new TezosToolkit(rpcUrl);
+    tezos.setPackerProvider(new MichelCodecPacker());
+    return tezos;
+  };
+
   return defineStore(storeName, () => {
     // Resolve rpcUrl if it's a function
     const resolvedRpcUrl = typeof rpcUrl === "function" ? rpcUrl() : rpcUrl;
-    const Tezos = new TezosToolkit(resolvedRpcUrl);
+    const Tezos = createToolkit(resolvedRpcUrl);
 
     const wallet = ref<
       BeaconWallet | WalletConnect | LedgerSigner | ProgrammaticWallet
@@ -188,7 +198,7 @@ export const createWalletStore = (
       // Reset Tezos provider to clear any configured signers/wallets
       // and recreate a fresh instance to fully clear any imported keys.
       // This is necessary because importKey() persists keys in the toolkit instance.
-      const freshTezos = new TezosToolkit(resolvedRpcUrl);
+      const freshTezos = createToolkit(resolvedRpcUrl);
       Object.assign(Tezos, freshTezos);
     };
 
@@ -198,8 +208,8 @@ export const createWalletStore = (
         name: appName,
         iconUrl: appIconUrl,
         network: {
-          type: networkType,
-          name: networkName,
+          type: beaconNetworkType as BeaconSdkNetworkType,
+          name: beaconNetworkName,
           rpcUrl: resolvedRpcUrl,
         },
         enableMetrics: true,
@@ -296,22 +306,9 @@ export const createWalletStore = (
       if (latestSessionKey) {
         walletConnect.configureWithExistingSessionKey(latestSessionKey);
       } else {
-        // Map network type to WalletConnect network type
-        // Note: WalletConnect has a limited set of supported networks
-        let wcNetworkType: WalletConnectNetworkType;
-        if (networkType === NetworkType.MAINNET) {
-          wcNetworkType = WalletConnectNetworkType.MAINNET;
-        } else if (networkType === NetworkType.GHOSTNET) {
-          wcNetworkType = WalletConnectNetworkType.GHOSTNET;
-        } else {
-          // For custom/unsupported networks, default to GHOSTNET
-          // WalletConnect may not work correctly with truly custom networks
-          wcNetworkType = WalletConnectNetworkType.GHOSTNET;
-        }
-
         await walletConnect.requestPermissions({
           permissionScope: {
-            networks: [wcNetworkType],
+            networks: [walletConnectNetworkType as WalletConnectSdkNetworkType],
             events: [],
             methods: [
               PermissionScopeMethods.TEZOS_SEND,

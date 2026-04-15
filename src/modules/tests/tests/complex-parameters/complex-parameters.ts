@@ -1,19 +1,14 @@
-import contracts from "@/contracts/contract-config.json";
+import { getContractAddress } from "@/networks/network-registry";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
-import {
-  type ContractConfig,
-  type NestedRecord,
-  type UserRecord,
-} from "@/types/contract";
+import { type NestedRecord, type UserRecord } from "@/types/contract";
 import type { Estimate } from "@taquito/taquito";
 
+const NETWORK_ID =
+  import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE;
 const CONTRACT_ADDRESS =
-  (contracts as ContractConfig[]).find(
-    (contract: ContractConfig) =>
-      contract.contractName === "complex-parameters",
-  )?.address ?? "";
+  getContractAddress("complex-parameters", NETWORK_ID) ?? "";
 const TEST_ID = "complex-parameters";
 
 let estimate: Estimate;

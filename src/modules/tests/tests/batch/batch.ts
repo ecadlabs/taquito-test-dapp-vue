@@ -1,13 +1,11 @@
-import contracts from "@/contracts/contract-config.json";
 import { getOperationHash } from "@/lib/utils";
+import { getContractAddress } from "@/networks/network-registry";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
-import type { ContractConfig } from "@/types/contract";
 
-const CONTRACT_ADDRESS =
-  (contracts as ContractConfig[]).find(
-    (contract: ContractConfig) => contract.contractName === "counter",
-  )?.address ?? "";
+const NETWORK_ID =
+  import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE;
+const CONTRACT_ADDRESS = getContractAddress("counter", NETWORK_ID) ?? "";
 
 /**
  * Sends a batch group of operations together.
