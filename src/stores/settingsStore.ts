@@ -18,6 +18,7 @@ export const availableIndexers: IndexerOption[] = [
       NetworkType.GHOSTNET,
       NetworkType.SHADOWNET,
       NetworkType.SEOULNET,
+      NetworkType.TEZLINK_SHADOWNET,
     ],
   },
   {

@@ -46,8 +46,8 @@ const networkDefinitions: Omit<NetworkProfile, "contracts">[] = [
       rpcEnvVar: "VITE_TEZLINK_SHADOWNET_RPC",
       appName: "Taquito Playground (Tezlink)",
       beacon: {
-        networkType: "custom" as BeaconNetworkType,
-        networkName: "Tezlink",
+        networkType: "tezlink-shadownet" as BeaconNetworkType,
+        networkName: "tezlink-shadownet",
       },
       walletConnect: {
         networkType: "tezlink_shadownet" as WalletConnectNetworkType,

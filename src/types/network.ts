@@ -10,6 +10,7 @@ export type BeaconNetworkType =
   | "weeklynet"
   | "shadownet"
   | "seoulnet"
+  | "tezlink-shadownet"
   | "custom";
 
 export type WalletConnectNetworkType =
