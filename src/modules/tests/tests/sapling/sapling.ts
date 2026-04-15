@@ -5,8 +5,227 @@ import type { InMemorySpendingKey } from "@taquito/sapling";
 import { RpcReadAdapter, type TezosToolkit } from "@taquito/taquito";
 import * as bip39 from "bip39";
 
-// Lazy load sapling to avoid bundling 70MB+ of proving parameters
-const getSaplingModule = () => import("@taquito/sapling");
+type SaplingModule = typeof import("@taquito/sapling");
+type SaplingModuleWithRuntime = SaplingModule & {
+  initSapling?: (options?: {
+    params?: {
+      source?: "taquito" | "zcash";
+      spendParamsUrl?: string;
+      spendParamsSha256?: string;
+      outputParamsUrl?: string;
+      outputParamsSha256?: string;
+    };
+  }) => Promise<void>;
+  preloadSaplingParams?: () => Promise<void>;
+};
+
+const SAPLING_PARAMS_SOURCE = "taquito" as const;
+const SAPLING_PARAMS_SPEND_URL =
+  "https://sapling.taquito.io/params/groth16-mainnet-1/spend.params";
+const SAPLING_PARAMS_SPEND_SHA256 =
+  "8e48ffd23abb3a5fd9c5589204f32d9c31285a04b78096ba40a79b75677efc13";
+const SAPLING_PARAMS_OUTPUT_URL =
+  "https://sapling.taquito.io/params/groth16-mainnet-1/output.params";
+const SAPLING_PARAMS_OUTPUT_SHA256 =
+  "2f0ebbcbb9bb0bcffe95a397e7eba89c29eb4dde6191c339db88570e3f3fb0e4";
+const SAPLING_FRESH_RELOAD_STORAGE_KEY = "sapling:fresh-params-reload";
+
+export type SaplingModuleStatus = "idle" | "loading" | "ready" | "failed";
+export type SaplingParamsStatus =
+  | "not-loaded"
+  | "preloading"
+  | "ready"
+  | "failed";
+
+export interface SaplingRuntimeSnapshot {
+  moduleStatus: SaplingModuleStatus;
+  paramsStatus: SaplingParamsStatus;
+  paramsSource: typeof SAPLING_PARAMS_SOURCE;
+  errorMessage: string | null;
+  lastPreloadDurationMs: number | null;
+}
+
+let saplingRuntimeSnapshot: SaplingRuntimeSnapshot = {
+  moduleStatus: "idle",
+  paramsStatus: "not-loaded",
+  paramsSource: SAPLING_PARAMS_SOURCE,
+  errorMessage: null,
+  lastPreloadDurationMs: null,
+};
+
+let saplingModulePromise: Promise<SaplingModule> | undefined;
+let saplingParamsPreloadPromise: Promise<SaplingRuntimeSnapshot> | undefined;
+
+const setSaplingRuntimeSnapshot = (next: Partial<SaplingRuntimeSnapshot>) => {
+  saplingRuntimeSnapshot = {
+    ...saplingRuntimeSnapshot,
+    ...next,
+  };
+};
+
+const getNowMs = () => globalThis.performance?.now() ?? Date.now();
+
+export const getSaplingErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
+export const isSaplingParamsError = (error: unknown): boolean =>
+  typeof error === "object" &&
+  error !== null &&
+  "code" in error &&
+  typeof error.code === "string" &&
+  error.code.startsWith("SAPLING_PARAMS_");
+
+export const getSaplingRuntimeSnapshot = (): SaplingRuntimeSnapshot => ({
+  ...saplingRuntimeSnapshot,
+});
+
+export const markSaplingProvingParamsReady = (
+  elapsedMs: number | null = saplingRuntimeSnapshot.lastPreloadDurationMs,
+): SaplingRuntimeSnapshot => {
+  setSaplingRuntimeSnapshot({
+    moduleStatus: "ready",
+    paramsStatus: "ready",
+    errorMessage: null,
+    lastPreloadDurationMs: elapsedMs,
+  });
+
+  return getSaplingRuntimeSnapshot();
+};
+
+export const markSaplingProvingParamsFailed = (
+  error: unknown,
+): SaplingRuntimeSnapshot => {
+  setSaplingRuntimeSnapshot({
+    moduleStatus:
+      saplingRuntimeSnapshot.moduleStatus === "failed" ? "failed" : "ready",
+    paramsStatus: "failed",
+    errorMessage: getSaplingErrorMessage(error),
+    lastPreloadDurationMs: null,
+  });
+
+  return getSaplingRuntimeSnapshot();
+};
+
+const getSaplingFreshReloadToken = (): string | null => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const token = window.sessionStorage.getItem(SAPLING_FRESH_RELOAD_STORAGE_KEY);
+
+  if (token) {
+    window.sessionStorage.removeItem(SAPLING_FRESH_RELOAD_STORAGE_KEY);
+  }
+
+  return token;
+};
+
+const getSaplingInitOptions = () => {
+  const freshReloadToken = getSaplingFreshReloadToken();
+
+  if (!freshReloadToken) {
+    return {
+      params: {
+        source: SAPLING_PARAMS_SOURCE,
+      },
+    };
+  }
+
+  const query = `cacheBust=${encodeURIComponent(freshReloadToken)}`;
+
+  return {
+    params: {
+      spendParamsUrl: `${SAPLING_PARAMS_SPEND_URL}?${query}`,
+      spendParamsSha256: SAPLING_PARAMS_SPEND_SHA256,
+      outputParamsUrl: `${SAPLING_PARAMS_OUTPUT_URL}?${query}`,
+      outputParamsSha256: SAPLING_PARAMS_OUTPUT_SHA256,
+    },
+  };
+};
+
+const getSaplingModule = () => {
+  if (!saplingModulePromise) {
+    setSaplingRuntimeSnapshot({ moduleStatus: "loading" });
+
+    saplingModulePromise = import("@taquito/sapling")
+      .then(async (saplingModule) => {
+        const saplingModuleWithRuntime =
+          saplingModule as SaplingModuleWithRuntime;
+
+        if (typeof saplingModuleWithRuntime.initSapling === "function") {
+          await saplingModuleWithRuntime.initSapling(getSaplingInitOptions());
+        }
+
+        setSaplingRuntimeSnapshot({ moduleStatus: "ready" });
+        return saplingModule;
+      })
+      .catch((error) => {
+        saplingModulePromise = undefined;
+        setSaplingRuntimeSnapshot({
+          moduleStatus: "failed",
+          errorMessage: getSaplingErrorMessage(error),
+        });
+        throw error;
+      });
+  }
+
+  return saplingModulePromise;
+};
+
+export const preloadSaplingProvingParams =
+  async (): Promise<SaplingRuntimeSnapshot> => {
+    if (saplingRuntimeSnapshot.paramsStatus === "ready") {
+      return getSaplingRuntimeSnapshot();
+    }
+
+    if (!saplingParamsPreloadPromise) {
+      setSaplingRuntimeSnapshot({
+        paramsStatus: "preloading",
+        errorMessage: null,
+        lastPreloadDurationMs: null,
+      });
+
+      saplingParamsPreloadPromise = (async () => {
+        const startedAt = getNowMs();
+
+        try {
+          const saplingModule = await getSaplingModule();
+          const saplingModuleWithRuntime =
+            saplingModule as SaplingModuleWithRuntime;
+
+          if (
+            typeof saplingModuleWithRuntime.preloadSaplingParams !== "function"
+          ) {
+            throw new Error(
+              "Installed @taquito/sapling runtime does not expose preloadSaplingParams()",
+            );
+          }
+
+          await saplingModuleWithRuntime.preloadSaplingParams();
+          return markSaplingProvingParamsReady(getNowMs() - startedAt);
+        } catch (error) {
+          markSaplingProvingParamsFailed(error);
+          throw error;
+        } finally {
+          saplingParamsPreloadPromise = undefined;
+        }
+      })();
+    }
+
+    return saplingParamsPreloadPromise;
+  };
+
+export const reloadWithFreshSaplingParams = (): void => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.sessionStorage.setItem(
+    SAPLING_FRESH_RELOAD_STORAGE_KEY,
+    `${Date.now()}`,
+  );
+  window.location.reload();
+};
 
 // Must match contract's memo size
 const MEMO_SIZE = 8;
