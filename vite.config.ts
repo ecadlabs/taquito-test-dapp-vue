@@ -12,9 +12,24 @@ export default defineConfig({
       protocolImports: true,
     }),
   ],
+  optimizeDeps: {
+    exclude: ["@taquito/sapling-wasm"],
+  },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "vite-plugin-node-polyfills/shims/buffer": fileURLToPath(
+        new URL(
+          "./node_modules/vite-plugin-node-polyfills/shims/buffer/dist/index.js",
+          import.meta.url,
+        ),
+      ),
+      "vite-plugin-node-polyfills/shims/process": fileURLToPath(
+        new URL(
+          "./node_modules/vite-plugin-node-polyfills/shims/process/dist/index.js",
+          import.meta.url,
+        ),
+      ),
     },
   },
   define: {
@@ -26,10 +41,6 @@ export default defineConfig({
     },
     rollupOptions: {
       external: (id) => {
-        // Externalize sapling to load from CDN - it's 68MB+ and exceeds Cloudflare Pages limit
-        if (id === "@taquito/sapling" || id.startsWith("@taquito/sapling/")) {
-          return true;
-        }
         return id.includes("/src/scripts/") || id.includes("\\src\\scripts\\");
       },
       output: {

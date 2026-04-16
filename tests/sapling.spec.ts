@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { goToTest, waitForSuccess } from "./helpers.ts";
 import { getSharedPage, setupSharedContext } from "./shared-context.ts";
 
@@ -15,10 +15,19 @@ test.describe("Sapling Transactions", () => {
 
     // Wait for keys to auto-generate on mount
     await page.waitForTimeout(2000);
+    await expect(page.getByTestId("sapling-runtime-module-status")).toHaveText(
+      "Sapling module ready",
+    );
+    await expect(page.getByTestId("sapling-runtime-params-status")).toHaveText(
+      "Proving params not loaded",
+    );
 
     // Execute shield operation (10-30s for zero-knowledge proof)
     await page.getByTestId("sapling-shield-button").click();
     await waitForSuccess({ page, timeout: 90000 });
+    await expect(page.getByTestId("sapling-runtime-params-status")).toHaveText(
+      "Proving params ready",
+    );
   });
 
   test("should transfer to Alice's address", async () => {
