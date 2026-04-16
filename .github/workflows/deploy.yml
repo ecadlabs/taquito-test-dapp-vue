@@ -92,6 +92,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          wranglerVersion: "4.83.0"
           command: pages deploy dist --project-name=${{ matrix.project_name }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
@@ -145,6 +146,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          wranglerVersion: "4.83.0"
           command: pages deploy dist --project-name=taquito-dapp-shadownet --branch=${{ steps.branch_info.outputs.name }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
