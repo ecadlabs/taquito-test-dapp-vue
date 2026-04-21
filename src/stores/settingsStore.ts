@@ -15,9 +15,8 @@ export const availableIndexers: IndexerOption[] = [
     value: "tzkt",
     url: "https://[networkType].tzkt.io",
     availableNetworks: [
-      NetworkType.GHOSTNET,
       NetworkType.SHADOWNET,
-      NetworkType.SEOULNET,
+      NetworkType.TALLINNNET,
       NetworkType.TEZLINK_SHADOWNET,
     ],
   },
@@ -25,7 +24,7 @@ export const availableIndexers: IndexerOption[] = [
     name: "Tzstats",
     value: "tzstats",
     url: "https://[networkType]tzstats.com",
-    availableNetworks: [NetworkType.GHOSTNET],
+    availableNetworks: [NetworkType.SHADOWNET],
   },
 ];
 
