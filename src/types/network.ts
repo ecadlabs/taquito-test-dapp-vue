@@ -6,16 +6,14 @@ export type IndexerId = "tzkt" | "tzstats";
 
 export type BeaconNetworkType =
   | "mainnet"
-  | "ghostnet"
   | "weeklynet"
   | "shadownet"
-  | "seoulnet"
+  | "tallinnnet"
   | "tezlink-shadownet"
   | "custom";
 
 export type WalletConnectNetworkType =
   | "mainnet"
-  | "ghostnet"
   | "weeklynet"
   | "shadownet"
   | "tezlink_shadownet"
