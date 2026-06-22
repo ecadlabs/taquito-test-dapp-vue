@@ -30,6 +30,8 @@ jobs:
         include:
           - environment: shadownet
             project_name: taquito-dapp-shadownet
+          - environment: ushuaianet
+            project_name: taquito-dapp-ushuaianet
           - environment: tezlink-shadownet
             network_name: tezlink-shadownet
             project_name: taquito-dapp-tezlink-shadownet

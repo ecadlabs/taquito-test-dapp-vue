@@ -20,8 +20,11 @@ We consider this a **public good**. Our goal is to have a deployment ready on ev
 
 | Network               | URL                                        | Description                                      |
 | --------------------- | ------------------------------------------ | ------------------------------------------------ |
+| **Ushuaianet**        | https://ushuaianet.dapp.taquito.io/        | U025 protocol testnet                            |
 | **Shadownet**         | https://shadownet.dapp.taquito.io/         | Long lived testnet                               |
 | **Tezlink Shadownet** | https://tezlink-shadownet.dapp.taquito.io/ | Tezos X Michelson Runtime connected to Shadownet |
+
+Ushuaianet uses the public RPC endpoint `https://rpc.ushuaianet.teztnets.com`.
 
 ## ✨ Available Tests
 
@@ -103,6 +106,24 @@ npm run reveal-key   # Reveal public key for a wallet
 npm run lint         # Lint code
 npm run format       # Format code
 ```
+
+### Cloudflare Deployments
+
+Deployments run from `.github/workflows/deploy.yml` into Cloudflare Pages
+projects named `taquito-dapp-<network>`. To deploy Ushuaianet, create or verify:
+
+- Cloudflare Pages project: `taquito-dapp-ushuaianet`
+- Custom domain: `ushuaianet.dapp.taquito.io`
+- GitHub environment: `ushuaianet`
+- GitHub environment vars: `RPC_URL=https://rpc.ushuaianet.teztnets.com`,
+  `NETWORK_TYPE=ushuaianet`, `NETWORK_NAME=ushuaianet`
+- Existing release secrets available to that environment:
+  `CF_API_TOKEN`, `CF_ACCOUNT_ID`, `WALLET_PRIVATE_KEY`, `REOWN_PROJECT_ID`,
+  `FAUCET_URL`, `TURNSTILE_SITE_KEY`, `SENTRY_DSN`, `WEB3AUTH_CLIENT_ID`
+
+The workflow compiles and originates the test contracts before
+`npm run build:verified`, so the first successful Ushuaianet deploy should
+write that network's fixture addresses into `src/networks/network-contracts.json`.
 
 ### Project Structure
 

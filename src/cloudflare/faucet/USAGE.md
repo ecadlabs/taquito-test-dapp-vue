@@ -49,7 +49,7 @@ const response = await fetch("/fund", {
     address: "tz1...",
     amount: 5,
     captchaToken: "turnstile_token",
-    rpc: "https://shadownet.tezos.ecadinfra.com", // optional
+    rpc: "https://rpc.ushuaianet.teztnets.com", // optional
   }),
 });
 
@@ -59,4 +59,5 @@ console.log("Transaction:", result.txHash);
 
 ## Supported Networks
 
-- **Shadownet**: `https://shadownet.tezos.ecadinfra.com`
+- **Shadownet**: `https://rpc.shadownet.teztnets.com`
+- **Ushuaianet**: `https://rpc.ushuaianet.teztnets.com`

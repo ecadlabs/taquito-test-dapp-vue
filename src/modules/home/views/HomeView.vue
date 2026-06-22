@@ -412,6 +412,13 @@
                 </p>
                 <div class="space-y-1 text-sm">
                   <a
+                    href="https://ushuaianet.dapp.taquito.io/"
+                    target="_blank"
+                    class="block text-green-500 transition-transform duration-200 hover:translate-x-1 hover:underline"
+                  >
+                    Ushuaianet →
+                  </a>
+                  <a
                     href="https://shadownet.dapp.taquito.io/"
                     target="_blank"
                     class="block text-green-500 transition-transform duration-200 hover:translate-x-1 hover:underline"

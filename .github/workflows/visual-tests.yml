@@ -13,6 +13,7 @@ jobs:
       matrix:
         include:
           - environment: shadownet
+          - environment: ushuaianet
     env:
       VITE_NETWORK_TYPE: ${{ matrix.environment }}
       VITE_RPC_URL: ${{ vars.RPC_URL }}
