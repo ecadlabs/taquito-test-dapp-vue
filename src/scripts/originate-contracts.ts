@@ -59,7 +59,7 @@ export const originateContracts = async (
     );
   }
 
-  if (!["shadownet", "tezlink-shadownet"].includes(networkId)) {
+  if (!["shadownet", "tezlink-shadownet", "ushuaianet"].includes(networkId)) {
     throw new Error(
       `Unsupported network "${networkId}" for contract origination.`,
     );

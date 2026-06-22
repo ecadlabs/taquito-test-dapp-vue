@@ -24,8 +24,8 @@
 
   "vars": {
     // Secret keys are stored in the Cloudflare Secrets Manager (npx wrangler secret put)
-    "RPC_URL": "https://shadownet.tezos.ecadinfra.com",
-    "ALLOWED_RPC_URLS": "https://shadownet.tezos.ecadinfra.com,https://rpc.shadownet.tezlink.nomadic-labs.com",
+    "RPC_URL": "https://rpc.shadownet.teztnets.com",
+    "ALLOWED_RPC_URLS": "https://rpc.shadownet.teztnets.com,https://rpc.ushuaianet.teztnets.com,https://rpc.shadownet.tezlink.nomadic-labs.com",
     "MIN_TEZ": "1",
     "MAX_TEZ": "10",
     "RATE_LIMIT_ENABLED": "true",

@@ -55,6 +55,24 @@ const networkDefinitions: Omit<NetworkProfile, "contracts">[] = [
     },
     capabilities: ["l2-wallet", "contract-fixtures", "tezlink-bridge-l2-to-l1"],
   },
+  {
+    id: "ushuaianet",
+    displayName: "Ushuaianet",
+    kind: "l1",
+    indexers: {},
+    wallet: {
+      rpcEnvVar: "VITE_RPC_URL",
+      appName: "Taquito Playground",
+      beacon: {
+        networkType: "ushuaianet" as BeaconNetworkType,
+        networkName: "ushuaianet",
+      },
+      walletConnect: {
+        networkType: "ushuaianet" as WalletConnectNetworkType,
+      },
+    },
+    capabilities: ["l1-wallet", "contract-fixtures", "sapling"],
+  },
 ];
 
 const contractConfigs = networkContracts as NetworkContractsConfig[];

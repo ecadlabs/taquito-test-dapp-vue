@@ -1,4 +1,4 @@
-export type NetworkId = "shadownet" | "tezlink-shadownet";
+export type NetworkId = "shadownet" | "tezlink-shadownet" | "ushuaianet";
 
 export type NetworkKind = "l1" | "l2";
 
@@ -10,6 +10,7 @@ export type BeaconNetworkType =
   | "weeklynet"
   | "shadownet"
   | "seoulnet"
+  | "ushuaianet"
   | "tezlink-shadownet"
   | "custom";
 
@@ -19,7 +20,7 @@ export type WalletConnectNetworkType =
   | "weeklynet"
   | "shadownet"
   | "tezlink_shadownet"
-  | "tallinnnet"
+  | "ushuaianet"
   | "custom";
 
 export type NetworkCapability =
