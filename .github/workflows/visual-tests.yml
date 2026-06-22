@@ -17,6 +17,7 @@ jobs:
     env:
       VITE_NETWORK_TYPE: ${{ matrix.environment }}
       VITE_RPC_URL: ${{ vars.RPC_URL }}
+      WALLET_PRIVATE_KEY: ${{ secrets.WALLET_PRIVATE_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
