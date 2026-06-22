@@ -88,6 +88,16 @@ jobs:
           export NODE_OPTIONS="--max_old_space_size=4096"
           npm run build:verified
 
+      - name: Ensure Cloudflare Pages project exists
+        uses: cloudflare/wrangler-action@v3
+        continue-on-error: true
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          wranglerVersion: "4.83.0"
+          command: pages project create ${{ matrix.project_name }} --production-branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Publish to Cloudflare Pages
         id: cloudflare_publish
         uses: cloudflare/wrangler-action@v3
