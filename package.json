@@ -20,7 +20,7 @@
     "prepare": "husky",
     "test": "npx playwright test",
     "test:ui": "npx playwright test --ui",
-    "test:guardrails": "node --import tsx --test src/modules/tests/readiness.test.ts"
+    "test:guardrails": "node --import tsx --test src/modules/tests/*.test.ts"
   },
   "dependencies": {
     "@ledgerhq/hw-transport-webhid": "^6.30.8",

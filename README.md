@@ -96,6 +96,7 @@ npm run build:verified # Build and fail if the target network is missing require
 npm run preview      # Preview production build
 npm run test         # Run Playwright tests
 npm run test:ui      # Run tests with UI
+npm run test:guardrails # Run configuration guardrails
 
 # Contract Management
 npm run originate    # Deploy contracts
@@ -124,6 +125,17 @@ projects named `taquito-dapp-<network>`. To deploy Ushuaianet, create or verify:
 The workflow compiles and originates the test contracts before
 `npm run build:verified`, so the first successful Ushuaianet deploy should
 write that network's fixture addresses into `src/networks/network-contracts.json`.
+
+### RPC and Test Wallets
+
+The dApp should not point at retired ECAD Infra RPC endpoints. Shadownet uses
+`https://rpc.shadownet.teztnets.com`, Ushuaianet uses
+`https://rpc.ushuaianet.teztnets.com`, and Tezlink Shadownet uses
+`https://rpc.shadownet.tezlink.nomadic-labs.com`.
+
+Playwright tests use `TEST_WALLET_PRIVATE_KEY` or `WALLET_PRIVATE_KEY` when
+provided. If a disposable key service is needed for local testing, set
+`TEST_KEYGEN_URL` explicitly; there is no built-in keygen host.
 
 ### Project Structure
 

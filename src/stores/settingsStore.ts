@@ -38,6 +38,27 @@ export type Settings = {
   themeMode: ThemeMode;
 };
 
+const activeRpcUrlByNetwork: Record<string, string> = {
+  shadownet: "https://rpc.shadownet.teztnets.com",
+  ushuaianet: "https://rpc.ushuaianet.teztnets.com",
+  "tezlink-shadownet": "https://rpc.shadownet.tezlink.nomadic-labs.com",
+};
+const retiredRpcDomain = ["ecadinfra", "com"].join(".");
+
+const isRetiredRpcUrl = (rpcUrl: string | undefined): boolean =>
+  rpcUrl?.includes(retiredRpcDomain) ?? false;
+
+const getDefaultRpcUrl = (): string => {
+  const configuredRpcUrl = import.meta.env.VITE_RPC_URL;
+  if (!isRetiredRpcUrl(configuredRpcUrl)) {
+    return configuredRpcUrl;
+  }
+
+  return (
+    activeRpcUrlByNetwork[import.meta.env.VITE_NETWORK_TYPE] ?? configuredRpcUrl
+  );
+};
+
 const defaultSettings: Settings = {
   indexer:
     availableIndexers.find((indexer) =>
@@ -45,21 +66,28 @@ const defaultSettings: Settings = {
         import.meta.env.VITE_NETWORK_TYPE as NetworkType,
       ),
     ) || availableIndexers[0],
-  rpcUrl: import.meta.env.VITE_RPC_URL,
+  rpcUrl: getDefaultRpcUrl(),
   confirmationCount: 3,
   themeMode: "light",
 };
 
 export const useSettingsStore = defineStore("settings", () => {
+  const migrateSettings = (settings: Settings): Settings => ({
+    ...settings,
+    rpcUrl: isRetiredRpcUrl(settings.rpcUrl)
+      ? defaultSettings.rpcUrl
+      : settings.rpcUrl,
+  });
+
   const getMergedSettings = (): Settings => {
     const stored = localStorage.getItem("playground-settings");
     if (!stored) return { ...defaultSettings };
     try {
       const parsed = JSON.parse(stored) as Partial<Settings>;
-      return {
+      return migrateSettings({
         ...defaultSettings,
         ...parsed,
-      };
+      });
     } catch {
       return { ...defaultSettings };
     }
@@ -72,7 +100,7 @@ export const useSettingsStore = defineStore("settings", () => {
   const getConfirmationCount = computed(() => settings.value.confirmationCount);
   const getThemeMode = computed(() => settings.value.themeMode);
   const isUsingCustomRpcUrl = computed(() => {
-    return settings.value.rpcUrl !== import.meta.env.VITE_RPC_URL;
+    return settings.value.rpcUrl !== defaultSettings.rpcUrl;
   });
 
   const setThemeMode = (themeMode: ThemeMode) => {
@@ -89,7 +117,7 @@ export const useSettingsStore = defineStore("settings", () => {
   );
 
   const resetRpcUrl = () => {
-    settings.value.rpcUrl = import.meta.env.VITE_RPC_URL;
+    settings.value.rpcUrl = defaultSettings.rpcUrl;
   };
 
   return {
