@@ -32,10 +32,7 @@ const SAPLING_FRESH_RELOAD_STORAGE_KEY = "sapling:fresh-params-reload";
 
 export type SaplingModuleStatus = "idle" | "loading" | "ready" | "failed";
 export type SaplingParamsStatus =
-  | "not-loaded"
-  | "preloading"
-  | "ready"
-  | "failed";
+  "not-loaded" | "preloading" | "ready" | "failed";
 
 export interface SaplingRuntimeSnapshot {
   moduleStatus: SaplingModuleStatus;
