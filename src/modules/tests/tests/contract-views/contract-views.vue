@@ -85,8 +85,7 @@
               <pre
                 v-if="viewExecutionResult[index]"
                 class="bg-muted mt-2 w-full rounded p-2 text-xs break-words whitespace-pre-wrap"
-                >{{ viewExecutionResult[index] }}</pre
-              >
+                >{{ viewExecutionResult[index] }}</pre>
             </div>
           </div>
         </CardContent>

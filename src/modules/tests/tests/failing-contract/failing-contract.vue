@@ -61,8 +61,7 @@
       >
         <pre
           class="overflow-auto font-mono text-xs whitespace-pre-wrap text-red-700 dark:text-red-300"
-          >{{ formattedError }}</pre
-        >
+          >{{ formattedError }}</pre>
       </div>
       <p class="mt-2 text-xs text-red-600 dark:text-red-400">
         This error was expected and demonstrates how Taquito handles contract
