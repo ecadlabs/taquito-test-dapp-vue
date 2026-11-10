@@ -31,18 +31,30 @@ export const goToTest = async ({
   await page.waitForSelector(`h1:has-text("${testName}")`);
 };
 
-export const waitForSuccess = async ({ page }: { page: Page }) => {
+export const waitForSuccess = async ({
+  page,
+  timeout = 60000,
+}: {
+  page: Page;
+  timeout?: number;
+}) => {
   // Wait for the diagram to complete
   await page.waitForSelector('div[data-testid="diagramComplete"]', {
-    timeout: 60000, // Increased timeout for blockchain operations
+    timeout, // Increased timeout for blockchain operations
     state: "visible",
   });
 };
 
-export const waitForError = async ({ page }: { page: Page }) => {
+export const waitForError = async ({
+  page,
+  timeout = 60000,
+}: {
+  page: Page;
+  timeout?: number;
+}) => {
   // Wait for the diagram to enter an error state
   await page.waitForSelector('div[data-testid="diagramError"]', {
-    timeout: 60000, // Increased timeout for blockchain operations
+    timeout, // Increased timeout for blockchain operations
     state: "visible",
   });
 };

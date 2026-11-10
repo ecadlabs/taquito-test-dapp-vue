@@ -13,10 +13,9 @@ test.describe("Sapling Transactions", () => {
     const page = getSharedPage();
     await goToTest({ page, testName: "Sapling Transactions" });
 
-    // Wait for keys to auto-generate on mount
-    await page.waitForTimeout(2000);
     await expect(page.getByTestId("sapling-runtime-module-status")).toHaveText(
       "Sapling module ready",
+      { timeout: 15000 },
     );
     await expect(page.getByTestId("sapling-runtime-params-status")).toHaveText(
       "Proving params not loaded",
@@ -38,7 +37,7 @@ test.describe("Sapling Transactions", () => {
     await waitForSuccess({ page, timeout: 90000 });
   });
 
-  test("should unshield to user's tz1 address", async () => {
+  test("should unshield to user's public address", async () => {
     const page = getSharedPage();
 
     // Execute unshield operation (10-30s for zero-knowledge proof)
@@ -49,16 +48,26 @@ test.describe("Sapling Transactions", () => {
   test("should get transaction history", async () => {
     const page = getSharedPage();
 
-    // Fetch transaction history (should be quick)
+    // Fetch transaction history and verify notes and transfers render
     await page.getByTestId("sapling-history-button").click();
-    await page.waitForTimeout(5000);
+    await expect(page.getByTestId("sapling-history-total")).toHaveText("4", {
+      timeout: 30000,
+    });
+    await expect(page.getByTestId("sapling-history-list")).toBeVisible();
   });
 
   test("should get user balance", async () => {
     const page = getSharedPage();
 
-    // Fetch balance from shielded pool (should be quick)
+    // Fetch balances from shielded pool and verify user and Alice balances
     await page.getByTestId("sapling-balance-button").click();
-    await page.waitForTimeout(5000);
+    await expect(page.getByTestId("sapling-user-balance")).toHaveText(
+      "1.000000 ꜩ",
+      { timeout: 30000 },
+    );
+    await expect(page.getByTestId("sapling-alice-balance")).toHaveText(
+      "1.000000 ꜩ",
+      { timeout: 30000 },
+    );
   });
 });

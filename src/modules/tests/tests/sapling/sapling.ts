@@ -1,12 +1,21 @@
-import { useDiagramStore } from "@/stores/diagramStore";
-import { useSettingsStore } from "@/stores/settingsStore";
 import { RpcClient } from "@taquito/rpc";
-import type { InMemorySpendingKey } from "@taquito/sapling";
-import { RpcReadAdapter, type TezosToolkit } from "@taquito/taquito";
+import type {
+  InMemorySpendingKey,
+  SaplingTransactionViewer,
+} from "@taquito/sapling";
+import {
+  RpcReadAdapter,
+  type Estimate,
+  type TezosToolkit,
+} from "@taquito/taquito";
 import * as bip39 from "bip39";
 
+export type SaplingViewerTransactions = Awaited<
+  ReturnType<SaplingTransactionViewer["getIncomingAndOutgoingTransactions"]>
+>;
+
 type SaplingModule = typeof import("@taquito/sapling");
-type SaplingModuleWithRuntime = SaplingModule & {
+export type SaplingModuleWithRuntime = SaplingModule & {
   initSapling?: (options?: {
     params?: {
       source?: "taquito" | "zcash";
@@ -29,6 +38,8 @@ const SAPLING_PARAMS_OUTPUT_URL =
 const SAPLING_PARAMS_OUTPUT_SHA256 =
   "2f0ebbcbb9bb0bcffe95a397e7eba89c29eb4dde6191c339db88570e3f3fb0e4";
 const SAPLING_FRESH_RELOAD_STORAGE_KEY = "sapling:fresh-params-reload";
+const SAPLING_USER_MNEMONIC_STORAGE_KEY = "sapling:user-mnemonic";
+const SAPLING_ALICE_MNEMONIC_STORAGE_KEY = "sapling:alice-mnemonic";
 
 export type SaplingModuleStatus = "idle" | "loading" | "ready" | "failed";
 export type SaplingParamsStatus =
@@ -42,22 +53,79 @@ export interface SaplingRuntimeSnapshot {
   lastPreloadDurationMs: number | null;
 }
 
-let saplingRuntimeSnapshot: SaplingRuntimeSnapshot = {
+export interface SaplingStoreHooks {
+  setTestDiagram: (testId: string, key?: string) => void;
+  setProgress: (step: string) => void;
+  setFeeEstimate: (estimate: Estimate | null) => void;
+  setOperationHash: (opHash: string) => void;
+  setCompleted: () => Promise<void> | void;
+  getConfirmationCount: () => number;
+}
+
+type SaplingRuntimeListener = (snapshot: SaplingRuntimeSnapshot) => void;
+
+const createInitialRuntimeSnapshot = (): SaplingRuntimeSnapshot => ({
   moduleStatus: "idle",
   paramsStatus: "not-loaded",
   paramsSource: SAPLING_PARAMS_SOURCE,
   errorMessage: null,
   lastPreloadDurationMs: null,
-};
+});
 
-let saplingModulePromise: Promise<SaplingModule> | undefined;
+let saplingRuntimeSnapshot: SaplingRuntimeSnapshot =
+  createInitialRuntimeSnapshot();
+
+let saplingModulePromise: Promise<SaplingModuleWithRuntime> | undefined;
 let saplingParamsPreloadPromise: Promise<SaplingRuntimeSnapshot> | undefined;
+let customSaplingModuleLoader:
+  (() => Promise<SaplingModuleWithRuntime>) | undefined;
+let customStoreHooks: SaplingStoreHooks | undefined;
+
+const runtimeSnapshotListeners = new Set<SaplingRuntimeListener>();
+
+const notifySaplingRuntimeListeners = () => {
+  const snapshot = getSaplingRuntimeSnapshot();
+  for (const listener of runtimeSnapshotListeners) {
+    listener(snapshot);
+  }
+};
 
 const setSaplingRuntimeSnapshot = (next: Partial<SaplingRuntimeSnapshot>) => {
   saplingRuntimeSnapshot = {
     ...saplingRuntimeSnapshot,
     ...next,
   };
+  notifySaplingRuntimeListeners();
+};
+
+export const subscribeSaplingRuntimeSnapshot = (
+  listener: SaplingRuntimeListener,
+): (() => void) => {
+  runtimeSnapshotListeners.add(listener);
+  listener(getSaplingRuntimeSnapshot());
+  return () => {
+    runtimeSnapshotListeners.delete(listener);
+  };
+};
+
+export const setSaplingStoreHooks = (
+  hooks: SaplingStoreHooks | undefined,
+): void => {
+  customStoreHooks = hooks;
+};
+
+export const setSaplingStoreHooksForTesting = setSaplingStoreHooks;
+
+export const resetSaplingRuntimeForTesting = (
+  loader?: () => Promise<unknown>,
+): void => {
+  saplingRuntimeSnapshot = createInitialRuntimeSnapshot();
+  saplingModulePromise = undefined;
+  saplingParamsPreloadPromise = undefined;
+  customSaplingModuleLoader = loader as
+    (() => Promise<SaplingModuleWithRuntime>) | undefined;
+  customStoreHooks = undefined;
+  notifySaplingRuntimeListeners();
 };
 
 const getNowMs = () => globalThis.performance?.now() ?? Date.now();
@@ -103,15 +171,23 @@ export const markSaplingProvingParamsFailed = (
   return getSaplingRuntimeSnapshot();
 };
 
+const getSessionStorage = (): Storage | null => {
+  if (typeof window === "undefined" || !window.sessionStorage) {
+    return null;
+  }
+  return window.sessionStorage;
+};
+
 const getSaplingFreshReloadToken = (): string | null => {
-  if (typeof window === "undefined") {
+  const storage = getSessionStorage();
+  if (!storage) {
     return null;
   }
 
-  const token = window.sessionStorage.getItem(SAPLING_FRESH_RELOAD_STORAGE_KEY);
+  const token = storage.getItem(SAPLING_FRESH_RELOAD_STORAGE_KEY);
 
   if (token) {
-    window.sessionStorage.removeItem(SAPLING_FRESH_RELOAD_STORAGE_KEY);
+    storage.removeItem(SAPLING_FRESH_RELOAD_STORAGE_KEY);
   }
 
   return token;
@@ -140,17 +216,18 @@ const getSaplingInitOptions = () => {
   };
 };
 
-const getSaplingModule = () => {
+const getSaplingModule = (): Promise<SaplingModuleWithRuntime> => {
   if (!saplingModulePromise) {
     setSaplingRuntimeSnapshot({ moduleStatus: "loading" });
 
-    saplingModulePromise = import("@taquito/sapling")
-      .then(async (saplingModule) => {
-        const saplingModuleWithRuntime =
-          saplingModule as SaplingModuleWithRuntime;
+    const loadModule =
+      customSaplingModuleLoader ??
+      (() => import("@taquito/sapling") as Promise<SaplingModuleWithRuntime>);
 
-        if (typeof saplingModuleWithRuntime.initSapling === "function") {
-          await saplingModuleWithRuntime.initSapling(getSaplingInitOptions());
+    saplingModulePromise = loadModule()
+      .then(async (saplingModule) => {
+        if (typeof saplingModule.initSapling === "function") {
+          await saplingModule.initSapling(getSaplingInitOptions());
         }
 
         setSaplingRuntimeSnapshot({ moduleStatus: "ready" });
@@ -187,18 +264,14 @@ export const preloadSaplingProvingParams =
 
         try {
           const saplingModule = await getSaplingModule();
-          const saplingModuleWithRuntime =
-            saplingModule as SaplingModuleWithRuntime;
 
-          if (
-            typeof saplingModuleWithRuntime.preloadSaplingParams !== "function"
-          ) {
+          if (typeof saplingModule.preloadSaplingParams !== "function") {
             throw new Error(
               "Installed @taquito/sapling runtime does not expose preloadSaplingParams()",
             );
           }
 
-          await saplingModuleWithRuntime.preloadSaplingParams();
+          await saplingModule.preloadSaplingParams();
           return markSaplingProvingParamsReady(getNowMs() - startedAt);
         } catch (error) {
           markSaplingProvingParamsFailed(error);
@@ -212,15 +285,23 @@ export const preloadSaplingProvingParams =
     return saplingParamsPreloadPromise;
   };
 
+export const clearStoredSaplingKeys = (): void => {
+  const storage = getSessionStorage();
+  if (!storage) {
+    return;
+  }
+  storage.removeItem(SAPLING_USER_MNEMONIC_STORAGE_KEY);
+  storage.removeItem(SAPLING_ALICE_MNEMONIC_STORAGE_KEY);
+};
+
 export const reloadWithFreshSaplingParams = (): void => {
-  if (typeof window === "undefined") {
+  const storage = getSessionStorage();
+  if (!storage || typeof window === "undefined") {
     return;
   }
 
-  window.sessionStorage.setItem(
-    SAPLING_FRESH_RELOAD_STORAGE_KEY,
-    `${Date.now()}`,
-  );
+  clearStoredSaplingKeys();
+  storage.setItem(SAPLING_FRESH_RELOAD_STORAGE_KEY, `${Date.now()}`);
   window.location.reload();
 };
 
@@ -237,14 +318,20 @@ export interface UserSaplingKey {
   mnemonic: string;
 }
 
-/** Detailed information about a single Sapling transaction */
+/** Detailed information about a single Sapling note or transfer */
 export interface SaplingTransaction {
-  /** Transaction type: incoming or outgoing */
+  /** Transaction type: incoming note or outgoing transfer */
   type: "incoming" | "outgoing";
   /** Amount in mutez */
   amount: number;
-  /** Optional memo attached to the transaction */
+  /** Optional memo attached to the note */
   memo?: string;
+  /** Sapling payment address (zet1...) */
+  paymentAddress: string;
+  /** For incoming notes, whether the note has already been spent */
+  isSpent?: boolean;
+  /** For incoming notes, whether this note is change returned to self */
+  isChange?: boolean;
 }
 
 /** User's complete Sapling transaction history */
@@ -255,58 +342,93 @@ export interface SaplingTransactionHistory {
   total: number;
 }
 
-/**
- * Generates a new Sapling spending key and payment address for the user
- *
- * Creates a random BIP39 mnemonic and derives a Sapling spending key from it.
- * The spending key is kept in memory and used to sign private transactions.
- *
- * @returns Promise resolving to the spending key, payment address, and mnemonic
- * @throws Error if key generation or address derivation fails
- */
-export async function generateUserSpendingKey(): Promise<UserSaplingKey> {
+const deriveSaplingKeyFromMnemonic = async (
+  mnemonic: string,
+): Promise<UserSaplingKey> => {
+  const normalizedMnemonic = mnemonic.trim().replace(/\s+/g, " ");
+  if (!bip39.validateMnemonic(normalizedMnemonic)) {
+    throw new Error("Invalid BIP39 recovery mnemonic");
+  }
+
   const { InMemorySpendingKey } = await getSaplingModule();
-  const mnemonic = bip39.generateMnemonic();
-  const spendingKey = await InMemorySpendingKey.fromMnemonic(mnemonic);
+  const spendingKey =
+    await InMemorySpendingKey.fromMnemonic(normalizedMnemonic);
   const viewingKey = await spendingKey.getSaplingViewingKeyProvider();
   const address = (await viewingKey.getAddress()).address;
 
   return {
     spendingKey,
     address,
-    mnemonic,
+    mnemonic: normalizedMnemonic,
   };
+};
+
+/**
+ * Generates or restores a Sapling spending key and payment address for the
+ * user.
+ *
+ * Persists the mnemonic in `sessionStorage` so navigating between tests within
+ * the same tab does not orphan shielded funds.
+ */
+export async function generateUserSpendingKey(options?: {
+  mnemonic?: string;
+  forceNew?: boolean;
+}): Promise<UserSaplingKey> {
+  const storage = getSessionStorage();
+  let mnemonic = options?.mnemonic?.trim();
+
+  if (!mnemonic && !options?.forceNew && storage) {
+    mnemonic = storage.getItem(SAPLING_USER_MNEMONIC_STORAGE_KEY) ?? undefined;
+  }
+
+  if (!mnemonic || (!options?.mnemonic && !bip39.validateMnemonic(mnemonic))) {
+    mnemonic = bip39.generateMnemonic();
+  }
+
+  const key = await deriveSaplingKeyFromMnemonic(mnemonic);
+  storage?.setItem(SAPLING_USER_MNEMONIC_STORAGE_KEY, key.mnemonic);
+  return key;
 }
 
 /**
- * Generates Alice's Sapling payment address from a predefined mnemonic
+ * Generates or restores a session-scoped Sapling spending key for Alice.
  *
- * Uses a fixed mnemonic to derive Alice's spending key and payment address.
- * This allows consistent address generation for testing purposes.
- *
- * @returns Promise resolving to Alice's Sapling payment address
- * @throws Error if address derivation fails
+ * Using a session-scoped key for Alice lets the user inspect Alice's incoming
+ * shielded balance cleanly without accumulating state from unrelated test
+ * runs.
  */
+export async function generateAliceSpendingKey(options?: {
+  forceNew?: boolean;
+}): Promise<UserSaplingKey> {
+  const storage = getSessionStorage();
+  let mnemonic = !options?.forceNew
+    ? (storage?.getItem(SAPLING_ALICE_MNEMONIC_STORAGE_KEY) ?? undefined)
+    : undefined;
+
+  if (!mnemonic || !bip39.validateMnemonic(mnemonic)) {
+    mnemonic = bip39.generateMnemonic();
+  }
+
+  const key = await deriveSaplingKeyFromMnemonic(mnemonic);
+  storage?.setItem(SAPLING_ALICE_MNEMONIC_STORAGE_KEY, key.mnemonic);
+  return key;
+}
+
+/** Generates Alice's Sapling payment address. */
 export async function generateAliceAddress(): Promise<string> {
+  const storage = getSessionStorage();
+  if (storage) {
+    const aliceKey = await generateAliceSpendingKey();
+    return aliceKey.address;
+  }
+
   const { InMemorySpendingKey } = await getSaplingModule();
   const aliceSk = await InMemorySpendingKey.fromMnemonic(ALICE_MNEMONIC);
   const aliceVk = await aliceSk.getSaplingViewingKeyProvider();
-  const aliceAddress = (await aliceVk.getAddress()).address;
-
-  return aliceAddress;
+  return (await aliceVk.getAddress()).address;
 }
 
-/**
- * Creates an RPC adapter with 404 error handling for empty Sapling state
- *
- * Wraps the RpcClient to gracefully handle 404 errors that occur when querying
- * Sapling state from contracts that haven't been initialized yet. Returns an
- * empty state structure instead of throwing an error.
- *
- * @param rpcUrl - The RPC endpoint URL to connect to
- * @returns RpcReadAdapter configured with error handling
- * @internal
- */
+/** Creates an RPC adapter with 404 error handling for empty Sapling state */
 function createSaplingRpcAdapter(rpcUrl: string): RpcReadAdapter {
   const rpcClient = new RpcClient(rpcUrl);
 
@@ -335,22 +457,63 @@ function createSaplingRpcAdapter(rpcUrl: string): RpcReadAdapter {
   return new RpcReadAdapter(rpcClient);
 }
 
+const resolveStoreHooks = async (): Promise<SaplingStoreHooks> => {
+  if (customStoreHooks) {
+    return customStoreHooks;
+  }
+
+  const [{ useDiagramStore }, { useSettingsStore }] = await Promise.all([
+    import("@/stores/diagramStore"),
+    import("@/stores/settingsStore"),
+  ]);
+  const diagramStore = useDiagramStore();
+  const settingsStore = useSettingsStore();
+
+  return {
+    setTestDiagram: (testId, key) => diagramStore.setTestDiagram(testId, key),
+    setProgress: (step) => diagramStore.setProgress(step),
+    setFeeEstimate: (estimate) => diagramStore.setFeeEstimate(estimate),
+    setOperationHash: (opHash) => diagramStore.setOperationHash(opHash),
+    setCompleted: () => diagramStore.setCompleted(),
+    getConfirmationCount: () => settingsStore.getConfirmationCount,
+  };
+};
+
+const assertPositiveAmount = (amount: number, operationLabel: string): void => {
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error(`${operationLabel} amount must be a positive number`);
+  }
+};
+
+const estimateContractCallIfSupported = async (
+  tezos: TezosToolkit,
+  methodCall: {
+    toTransferParams?: (params?: { amount?: number }) => unknown;
+  },
+  sendParams: { amount?: number } | undefined,
+  hooks: SaplingStoreHooks,
+): Promise<void> => {
+  if (
+    typeof methodCall.toTransferParams !== "function" ||
+    typeof tezos.estimate?.transfer !== "function"
+  ) {
+    return;
+  }
+
+  try {
+    const transferParams = await methodCall.toTransferParams(sendParams);
+    const estimate = await tezos.estimate.transfer(transferParams as never);
+    if (estimate) {
+      hooks.setFeeEstimate(estimate);
+    }
+  } catch {
+    // Fee estimation is best-effort and should not block Sapling execution
+  }
+};
+
 /**
  * Shields tez by moving them from a public address to the user's private
  * Sapling address
- *
- * Prepares and executes a shielded transaction that transfers tez from the
- * user's public account into the Sapling shielded pool. This operation
- * generates a zero-knowledge proof (10-30s) and updates the diagram store with
- * progress.
- *
- * @param tezos - Taquito instance configured with wallet
- * @param contractAddress - Address of the Sapling contract
- * @param userKey - User's Sapling spending key and address
- * @param amount - Amount to shield in tez (not mutez)
- * @returns Promise resolving to the operation hash
- * @throws Error if proof generation, transaction preparation, or confirmation
- *   fails
  */
 export async function shieldToUser(
   tezos: TezosToolkit,
@@ -358,12 +521,21 @@ export async function shieldToUser(
   userKey: UserSaplingKey,
   amount: number,
 ): Promise<string> {
-  const { SaplingToolkit } = await getSaplingModule();
-  const diagramStore = useDiagramStore();
-  const settingsStore = useSettingsStore();
+  assertPositiveAmount(amount, "Shield");
 
-  diagramStore.setTestDiagram(TEST_ID, "shield");
-  diagramStore.setProgress("prepare-shield");
+  if (customStoreHooks) {
+    customStoreHooks.setTestDiagram(TEST_ID, "shield");
+    customStoreHooks.setProgress("prepare-shield");
+  }
+
+  const hooks = customStoreHooks ?? (await resolveStoreHooks());
+  if (!customStoreHooks) {
+    hooks.setTestDiagram(TEST_ID, "shield");
+    hooks.setProgress("prepare-shield");
+  }
+
+  await preloadSaplingProvingParams();
+  const { SaplingToolkit } = await getSaplingModule();
 
   const contract = await tezos.wallet.at(contractAddress);
   const readProvider = createSaplingRpcAdapter(tezos.rpc.getRpcUrl());
@@ -382,36 +554,21 @@ export async function shieldToUser(
     },
   ]);
 
-  diagramStore.setProgress("call-contract");
-  const op = await contract.methodsObject
-    .default([shieldedTx])
-    .send({ amount });
+  const methodCall = contract.methodsObject.default([shieldedTx]);
+  await estimateContractCallIfSupported(tezos, methodCall, { amount }, hooks);
 
-  diagramStore.setProgress("wait-for-chain-confirmation");
-  await op.confirmation(settingsStore.getConfirmationCount);
+  hooks.setProgress("wait-for-user");
+  const op = await methodCall.send({ amount });
 
-  diagramStore.setOperationHash(op.opHash);
+  hooks.setProgress("wait-for-chain-confirmation");
+  await op.confirmation(hooks.getConfirmationCount());
 
-  diagramStore.setCompleted();
+  hooks.setOperationHash(op.opHash);
+  await hooks.setCompleted();
   return op.opHash;
 }
 
-/**
- * Transfers tez privately from the user to Alice's Sapling address
- *
- * Executes a private transfer within the Sapling shielded pool. Both sender and
- * receiver remain private, and only the spending key holder can see the
- * transaction. This operation generates a zero-knowledge proof (10-30s).
- *
- * @param tezos - Taquito instance configured with wallet
- * @param contractAddress - Address of the Sapling contract
- * @param userKey - User's Sapling spending key and address
- * @param aliceAddress - Alice's Sapling payment address
- * @param amount - Amount to transfer in tez (not mutez)
- * @returns Promise resolving to the operation hash
- * @throws Error if insufficient balance, proof generation, or confirmation
- *   fails
- */
+/** Transfers tez privately from the user to Alice's Sapling address */
 export async function transferToAlice(
   tezos: TezosToolkit,
   contractAddress: string,
@@ -419,12 +576,21 @@ export async function transferToAlice(
   aliceAddress: string,
   amount: number,
 ): Promise<string> {
-  const { SaplingToolkit } = await getSaplingModule();
-  const diagramStore = useDiagramStore();
-  const settingsStore = useSettingsStore();
+  assertPositiveAmount(amount, "Transfer");
 
-  diagramStore.setTestDiagram(TEST_ID, "transfer");
-  diagramStore.setProgress("prepare-transfer");
+  if (customStoreHooks) {
+    customStoreHooks.setTestDiagram(TEST_ID, "transfer");
+    customStoreHooks.setProgress("prepare-transfer");
+  }
+
+  const hooks = customStoreHooks ?? (await resolveStoreHooks());
+  if (!customStoreHooks) {
+    hooks.setTestDiagram(TEST_ID, "transfer");
+    hooks.setProgress("prepare-transfer");
+  }
+
+  await preloadSaplingProvingParams();
+  const { SaplingToolkit } = await getSaplingModule();
 
   const contract = await tezos.wallet.at(contractAddress);
   const readProvider = createSaplingRpcAdapter(tezos.rpc.getRpcUrl());
@@ -443,34 +609,23 @@ export async function transferToAlice(
     },
   ]);
 
-  diagramStore.setProgress("call-contract");
-  const op = await contract.methodsObject.default([saplingTx]).send();
+  const methodCall = contract.methodsObject.default([saplingTx]);
+  await estimateContractCallIfSupported(tezos, methodCall, undefined, hooks);
 
-  diagramStore.setProgress("wait-for-chain-confirmation");
-  await op.confirmation(settingsStore.getConfirmationCount);
+  hooks.setProgress("wait-for-user");
+  const op = await methodCall.send();
 
-  diagramStore.setOperationHash(op.opHash);
+  hooks.setProgress("wait-for-chain-confirmation");
+  await op.confirmation(hooks.getConfirmationCount());
 
-  diagramStore.setCompleted();
+  hooks.setOperationHash(op.opHash);
+  await hooks.setCompleted();
   return op.opHash;
 }
 
 /**
  * Unshields tez by moving them from the user's private Sapling address to a
- * public address
- *
- * Prepares and executes an unshielded transaction that withdraws tez from the
- * Sapling shielded pool back to a public Tezos address. This operation
- * generates a zero-knowledge proof (10-30s).
- *
- * @param tezos - Taquito instance configured with wallet
- * @param contractAddress - Address of the Sapling contract
- * @param userKey - User's Sapling spending key and address
- * @param toAddress - Destination public Tezos address (tz1, tz2, or tz3)
- * @param amount - Amount to unshield in tez (not mutez)
- * @returns Promise resolving to the operation hash
- * @throws Error if insufficient balance, proof generation, or confirmation
- *   fails
+ * public Tezos address
  */
 export async function unshieldToUser(
   tezos: TezosToolkit,
@@ -479,12 +634,21 @@ export async function unshieldToUser(
   toAddress: string,
   amount: number,
 ): Promise<string> {
-  const { SaplingToolkit } = await getSaplingModule();
-  const diagramStore = useDiagramStore();
-  const settingsStore = useSettingsStore();
+  assertPositiveAmount(amount, "Unshield");
 
-  diagramStore.setTestDiagram(TEST_ID, "unshield");
-  diagramStore.setProgress("prepare-unshield");
+  if (customStoreHooks) {
+    customStoreHooks.setTestDiagram(TEST_ID, "unshield");
+    customStoreHooks.setProgress("prepare-unshield");
+  }
+
+  const hooks = customStoreHooks ?? (await resolveStoreHooks());
+  if (!customStoreHooks) {
+    hooks.setTestDiagram(TEST_ID, "unshield");
+    hooks.setProgress("prepare-unshield");
+  }
+
+  await preloadSaplingProvingParams();
+  const { SaplingToolkit } = await getSaplingModule();
 
   const contract = await tezos.wallet.at(contractAddress);
   const readProvider = createSaplingRpcAdapter(tezos.rpc.getRpcUrl());
@@ -500,32 +664,128 @@ export async function unshieldToUser(
     amount,
   });
 
-  diagramStore.setProgress("call-contract");
-  const op = await contract.methodsObject.default([unshieldedTx]).send();
+  const methodCall = contract.methodsObject.default([unshieldedTx]);
+  await estimateContractCallIfSupported(tezos, methodCall, undefined, hooks);
 
-  diagramStore.setProgress("wait-for-chain-confirmation");
-  await op.confirmation(settingsStore.getConfirmationCount);
+  hooks.setProgress("wait-for-user");
+  const op = await methodCall.send();
 
-  diagramStore.setOperationHash(op.opHash);
+  hooks.setProgress("wait-for-chain-confirmation");
+  await op.confirmation(hooks.getConfirmationCount());
 
-  diagramStore.setCompleted();
+  hooks.setOperationHash(op.opHash);
+  await hooks.setCompleted();
   return op.opHash;
 }
 
+const normalizeMemo = (memo: string | undefined): string | undefined => {
+  if (!memo) {
+    return undefined;
+  }
+  const cleaned = memo.replace(/\0/g, "");
+  return cleaned.length > 0 ? cleaned : undefined;
+};
+
 /**
- * Retrieves the user's complete Sapling transaction history
- *
- * Queries the Sapling shielded pool to get all incoming and outgoing
- * transactions. Transactions are sorted chronologically by position. Note:
- * Sapling uses a UTXO model, so a single operation may result in multiple
- * transactions (e.g., spending a full amount and receiving change).
- *
- * @param tezos - Taquito instance configured with wallet
- * @param contractAddress - Address of the Sapling contract
- * @param userKey - User's Sapling spending key and address
- * @returns Promise resolving to the complete transaction history
- * @throws Error if transaction query fails
+ * Formats raw incoming and outgoing viewer data into a chronological list of
+ * Sapling notes without duplicating self-change outputs as outgoing payments.
  */
+export function formatSaplingTransactionHistory(
+  txData: SaplingViewerTransactions,
+  userAddress: string,
+): SaplingTransactionHistory {
+  const transactions: SaplingTransaction[] = [];
+  const pendingOutgoing: SaplingTransaction[] = [];
+  let inIdx = 0;
+
+  for (const outTx of txData.outgoing) {
+    const outAmount = Number(outTx.value);
+    const outMemo = normalizeMemo(outTx.memo);
+
+    if (outTx.paymentAddress !== userAddress || outMemo !== undefined) {
+      pendingOutgoing.push({
+        type: "outgoing",
+        amount: outAmount,
+        memo: outMemo,
+        paymentAddress: outTx.paymentAddress,
+        isSpent: undefined,
+        isChange: false,
+      });
+      continue;
+    }
+
+    // Self-addressed output in outgoing was created as payback (change) during
+    // a spend (transfer or unshield). Find the corresponding note in incoming.
+    let matchIdx = -1;
+    for (let i = inIdx; i < txData.incoming.length; i++) {
+      const candidate = txData.incoming[i];
+      if (
+        candidate.paymentAddress === userAddress &&
+        normalizeMemo(candidate.memo) === outMemo &&
+        Number(candidate.value) === outAmount
+      ) {
+        matchIdx = i;
+        break;
+      }
+    }
+
+    if (matchIdx !== -1) {
+      while (inIdx < matchIdx) {
+        const inc = txData.incoming[inIdx++];
+        transactions.push({
+          type: "incoming",
+          amount: Number(inc.value),
+          memo: normalizeMemo(inc.memo),
+          paymentAddress: inc.paymentAddress,
+          isSpent: inc.isSpent,
+          isChange: false,
+        });
+      }
+
+      if (pendingOutgoing.length > 0) {
+        transactions.push(...pendingOutgoing.splice(0, pendingOutgoing.length));
+      }
+
+      const matchedChange = txData.incoming[inIdx++];
+      const changeAmount = Number(matchedChange.value);
+      if (changeAmount > 0 || normalizeMemo(matchedChange.memo) !== undefined) {
+        transactions.push({
+          type: "incoming",
+          amount: changeAmount,
+          memo: normalizeMemo(matchedChange.memo),
+          paymentAddress: matchedChange.paymentAddress,
+          isSpent: matchedChange.isSpent,
+          isChange: true,
+        });
+      }
+    } else if (pendingOutgoing.length > 0) {
+      transactions.push(...pendingOutgoing.splice(0, pendingOutgoing.length));
+    }
+  }
+
+  while (inIdx < txData.incoming.length) {
+    const inc = txData.incoming[inIdx++];
+    transactions.push({
+      type: "incoming",
+      amount: Number(inc.value),
+      memo: normalizeMemo(inc.memo),
+      paymentAddress: inc.paymentAddress,
+      isSpent: inc.isSpent,
+      isChange: false,
+    });
+  }
+
+  if (pendingOutgoing.length > 0) {
+    transactions.push(...pendingOutgoing);
+  }
+
+  return {
+    transactions,
+    total: transactions.length,
+  };
+}
+
+/** Retrieves the user's complete Sapling transaction history */
 export async function getUserTransactionHistory(
   tezos: TezosToolkit,
   contractAddress: string,
@@ -543,65 +803,10 @@ export async function getUserTransactionHistory(
   const transactionViewer = await toolkit.getSaplingTransactionViewer();
   const txData = await transactionViewer.getIncomingAndOutgoingTransactions();
 
-  // Map transactions with their position index for chronological ordering
-  const incomingWithPosition = txData.incoming.map((tx, idx: number) => ({
-    type: "incoming" as const,
-    amount: Number(tx.value),
-    memo: tx.memo
-      ? Buffer.from(tx.memo).toString("utf-8").replace(/\0/g, "")
-      : undefined,
-    position: idx,
-    isIncoming: true,
-  }));
-
-  const outgoingWithPosition = txData.outgoing.map((tx, idx: number) => ({
-    type: "outgoing" as const,
-    amount: Number(tx.value),
-    memo: tx.memo
-      ? Buffer.from(tx.memo).toString("utf-8").replace(/\0/g, "")
-      : undefined,
-    position: idx,
-    isIncoming: false,
-  }));
-
-  // Interleave transactions based on position to maintain chronological order
-  const allTransactions = [...incomingWithPosition, ...outgoingWithPosition];
-
-  // Sort by position and type to maintain order as they appear on chain
-  allTransactions.sort((a, b) => {
-    // Alternate between incoming and outgoing at the same position
-    if (a.position === b.position) {
-      return a.isIncoming === b.isIncoming ? 0 : a.isIncoming ? -1 : 1;
-    }
-    return a.position - b.position;
-  });
-
-  const transactions: SaplingTransaction[] = allTransactions.map(
-    ({ type, amount, memo }) => ({
-      type,
-      amount,
-      memo,
-    }),
-  );
-
-  return {
-    transactions,
-    total: transactions.length,
-  };
+  return formatSaplingTransactionHistory(txData, userKey.address);
 }
 
-/**
- * Retrieves the user's balance from the Sapling shielded pool
- *
- * Queries the Sapling contract to calculate the user's unspent balance. The
- * balance represents the total amount available for transfers or unshielding.
- *
- * @param tezos - Taquito instance configured with wallet
- * @param contractAddress - Address of the Sapling contract
- * @param userKey - User's Sapling spending key and address
- * @returns Promise resolving to the balance in mutez
- * @throws Error if balance query fails
- */
+/** Retrieves the balance for a Sapling key from the shielded pool */
 export async function getUserSaplingBalance(
   tezos: TezosToolkit,
   contractAddress: string,
