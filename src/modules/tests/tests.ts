@@ -1379,7 +1379,7 @@ The bridge uses Smart Rollup technology to enable cross-layer communication.`,
   sapling: {
     id: "sapling",
     title: "Sapling Transactions",
-    description: `Demonstrates Taquito's Sapling shield operation: moving tez from public to private addresses using zero-knowledge proofs.`,
+    description: `Demonstrates Taquito's Sapling integration: shielding public tez into a private pool, transferring privately between Sapling addresses, unshielding back to a public address, and inspecting decrypted notes using zero-knowledge proofs.`,
     category: "Cryptography & Security",
     icon: EyeOff,
     setup: [
@@ -1414,8 +1414,8 @@ The bridge uses Smart Rollup technology to enable cross-layer communication.`,
             label: "Prepare Shield Transaction",
           },
           {
-            id: "call-contract",
-            label: "Call Contract",
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-for-chain-confirmation",
@@ -1430,8 +1430,8 @@ The bridge uses Smart Rollup technology to enable cross-layer communication.`,
             label: "Prepare Private Transfer",
           },
           {
-            id: "call-contract",
-            label: "Call Contract",
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-for-chain-confirmation",
@@ -1446,8 +1446,8 @@ The bridge uses Smart Rollup technology to enable cross-layer communication.`,
             label: "Prepare Unshield Transaction",
           },
           {
-            id: "call-contract",
-            label: "Call Contract",
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-for-chain-confirmation",

@@ -8,12 +8,13 @@
         </AlertTitle>
         <AlertDescription>
           Shield, transfer, and unshield operations take 10-30 seconds to
-          complete due to the need to generate zero-knowledge proofs. If the
-          proving params are not ready yet, the first proof-generating action
-          may also download them from <code>sapling.taquito.io</code>. The page
-          may freeze for a few seconds during proof generation.
+          complete due to zero-knowledge proof generation. If proving params are
+          not loaded yet, the first proof-generating action will download them
+          from <code>sapling.taquito.io</code> first. The page may pause briefly
+          while the WebAssembly prover runs.
         </AlertDescription>
       </Alert>
+
       <Card data-testid="sapling-runtime-status">
         <CardHeader class="gap-3">
           <div class="space-y-1">
@@ -23,30 +24,46 @@
             </CardTitle>
             <CardDescription>
               Key generation and viewing work without proving params. Shield,
-              transfer, and unshield will lazy-load a large proving-params
-              bundle on first use unless you preload it here.
+              transfer, and unshield lazy-load the proving-params bundle on
+              first use unless you preload it here.
             </CardDescription>
           </div>
           <CardAction>
-            <Button
-              variant="outline"
-              size="sm"
-              :disabled="preloadButtonDisabled"
-              @click="handlePreloadSaplingParams"
-              data-testid="sapling-preload-button"
-            >
-              <span
-                v-if="saplingRuntimeState.kind === 'params-preloading'"
-                class="sapling-spinner sapling-spinner-sm"
-                aria-hidden="true"
-              ></span>
-              <Check
-                v-else-if="saplingRuntimeState.kind === 'params-ready'"
-                class="size-4"
-              />
-              <Download v-else class="size-4" />
-              {{ preloadButtonLabel }}
-            </Button>
+            <div class="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                :disabled="preloadButtonDisabled"
+                @click="handlePreloadSaplingParams"
+                data-testid="sapling-preload-button"
+              >
+                <span
+                  v-if="saplingRuntimeState.kind === 'params-preloading'"
+                  class="sapling-spinner sapling-spinner-sm"
+                  aria-hidden="true"
+                ></span>
+                <Check
+                  v-else-if="saplingRuntimeState.kind === 'params-ready'"
+                  class="size-4"
+                />
+                <Download v-else class="size-4" />
+                {{ preloadButtonLabel }}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                :disabled="
+                  isRunning ||
+                  isReloadingSaplingSession ||
+                  saplingRuntimeState.kind === 'params-preloading'
+                "
+                @click="handleReloadWithFreshSaplingParams"
+                data-testid="sapling-fresh-reload-button"
+              >
+                <RotateCcw class="size-4" />
+                Reset Sapling Session
+              </Button>
+            </div>
           </CardAction>
         </CardHeader>
         <CardContent class="space-y-4">
@@ -102,66 +119,6 @@
             </div>
           </div>
 
-          <div
-            class="text-muted-foreground rounded-lg border border-dashed p-3 text-sm"
-          >
-            Suggested flow:
-            <span class="text-foreground font-medium"> Shield </span>
-            ,
-            <span class="text-foreground font-medium"> check balance </span>
-            ,
-            <span class="text-foreground font-medium"> inspect history </span>
-            ,
-            <span class="text-foreground font-medium"> transfer </span>
-            ,
-            <span class="text-foreground font-medium">
-              inspect history again
-            </span>
-            , then
-            <span class="text-foreground font-medium"> unshield </span>
-            .
-          </div>
-
-          <div class="rounded-lg border border-dashed p-3">
-            <div class="text-sm font-medium">Reset for a true cold start</div>
-            <div class="text-muted-foreground mt-1 text-sm">
-              Clearing site data for this dApp is not enough because the proving
-              params are fetched from <code>sapling.taquito.io</code> and then
-              cached by the browser.
-            </div>
-            <div class="mt-3 flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                :disabled="isRunning"
-                @click="handleReloadWithFreshSaplingParams"
-                data-testid="sapling-fresh-reload-button"
-              >
-                <RotateCcw class="size-4" />
-                Reset Sapling Session
-              </Button>
-            </div>
-            <ul class="text-muted-foreground mt-3 space-y-1 text-sm">
-              <li>
-                1. Close this tab or hard reload to clear in-memory params.
-              </li>
-              <li>
-                2. Use <code>Reset Sapling Session</code> above to clear the
-                current Sapling page state and force cache-busting Sapling param
-                URLs on reload, or enable <code>Disable cache</code> in DevTools
-                Network.
-              </li>
-              <li>
-                3. Clearing browser cached files still works if you want the
-                underlying cache gone.
-              </li>
-              <li>
-                4. For the cleanest repro, use a fresh Incognito window or
-                browser profile.
-              </li>
-            </ul>
-          </div>
-
           <Alert
             v-if="runtimeErrorMessage"
             variant="destructive"
@@ -174,10 +131,10 @@
 
           <div
             v-if="saplingRuntimeState.kind === 'params-preloading'"
-            class="space-y-3 rounded-xl border border-sky-200 bg-sky-50 p-4"
+            class="space-y-3 rounded-xl border border-sky-200 bg-sky-50 p-4 dark:border-sky-800 dark:bg-sky-950/50"
           >
             <div class="flex items-center gap-4">
-              <div class="relative text-sky-700">
+              <div class="relative text-sky-700 dark:text-sky-300">
                 <span
                   class="sapling-spinner sapling-spinner-lg"
                   aria-hidden="true"
@@ -185,41 +142,93 @@
                 <span class="sapling-spinner-dot" aria-hidden="true"></span>
               </div>
               <div class="space-y-1">
-                <div class="text-sm font-medium text-sky-950">
+                <div class="text-sm font-medium text-sky-950 dark:text-sky-100">
                   Downloading proving params
                 </div>
-                <div class="text-sm text-sky-900">
+                <div class="text-sm text-sky-900 dark:text-sky-200">
                   Pulling the Sapling proving bundle from
-                  <code class="rounded bg-white/80 px-1 py-0.5 text-xs"
+                  <code
+                    class="rounded bg-white/80 px-1 py-0.5 text-xs dark:bg-sky-900/80"
                     >sapling.taquito.io</code
                   >
-                  so later proof-generating actions can skip this step.
+                  so proof-generating actions can run.
                 </div>
               </div>
             </div>
             <div class="bg-muted h-2 overflow-hidden rounded-full">
               <div class="sapling-indeterminate-bar bg-primary h-full" />
             </div>
-            <div class="text-xs text-sky-900/80">
-              The runtime does not expose real byte-level progress, so this
-              stays indeterminate.
+            <div class="text-xs text-sky-900/80 dark:text-sky-300/80">
+              The runtime does not expose byte-level progress, so this bar stays
+              indeterminate.
             </div>
           </div>
         </CardContent>
       </Card>
+
       <!-- Sapling Addresses -->
       <Card>
         <CardHeader>
-          <CardTitle class="flex items-center gap-2">
-            <Key class="size-4" />
-            Sapling Addresses
-          </CardTitle>
-          <CardDescription>
-            Keys automatically generated for this test session. The spending key
-            can both view your notes and authorize private spends.
-          </CardDescription>
+          <div class="space-y-1">
+            <CardTitle class="flex items-center gap-2">
+              <Key class="size-4" />
+              Sapling Addresses
+            </CardTitle>
+            <CardDescription>
+              Keys are persisted in session storage for this tab so route
+              navigation does not orphan shielded funds. You can generate a new
+              keypair or restore an existing mnemonic at any time.
+            </CardDescription>
+          </div>
+          <CardAction>
+            <div class="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                :disabled="isRunning || !userKey"
+                @click="showMnemonicImport = !showMnemonicImport"
+              >
+                <Key class="size-4" />
+                {{ showMnemonicImport ? "Cancel Import" : "Import Mnemonic" }}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                :disabled="isRunning || !userKey"
+                @click="handleRegenerateKeys"
+                data-testid="sapling-regenerate-keys-button"
+              >
+                <RotateCcw class="size-4" />
+                New Keys
+              </Button>
+            </div>
+          </CardAction>
         </CardHeader>
         <CardContent class="space-y-4">
+          <div
+            v-if="showMnemonicImport"
+            class="bg-muted/40 space-y-3 rounded-lg border p-3"
+          >
+            <Label class="text-xs font-medium">
+              Restore Your Sapling Spending Key (BIP39 Mnemonic)
+            </Label>
+            <div class="flex gap-2">
+              <Input
+                v-model="mnemonicInput"
+                type="text"
+                placeholder="Enter 12 or 24 recovery words..."
+                :disabled="isRunning"
+              />
+              <Button
+                size="sm"
+                :disabled="isRunning || !mnemonicInput.trim()"
+                @click="handleImportMnemonic"
+              >
+                Restore
+              </Button>
+            </div>
+          </div>
+
           <div v-if="userKey" class="space-y-3">
             <div class="text-sm">
               <Label class="font-medium text-gray-700 dark:text-gray-300"
@@ -264,7 +273,7 @@
           <div v-if="aliceAddress" class="space-y-3">
             <div class="text-sm">
               <Label class="font-medium text-gray-700 dark:text-gray-300"
-                >Alice's Sapling Address:</Label
+                >Alice's Sapling Address (Session Recipient):</Label
               >
               <div class="mt-1 flex items-center gap-2">
                 <code
@@ -283,13 +292,16 @@
             </div>
           </div>
 
-          <div v-if="!userKey || !aliceAddress" class="text-sm text-gray-500">
+          <div
+            v-if="!userKey || !aliceAddress"
+            class="text-muted-foreground text-sm"
+          >
             Generating keys...
           </div>
         </CardContent>
       </Card>
 
-      <!-- Shield Tez -->
+      <!-- Step 1: Shield Tez -->
       <Card>
         <CardHeader>
           <CardTitle class="flex items-center gap-2">
@@ -300,9 +312,8 @@
             <Badge variant="outline">Step 1</Badge>
           </CardAction>
           <CardDescription>
-            Move tez from your public account into the Sapling pool, this
-            creates your first private note. If proving params are not ready,
-            first use will download them before the proof is built.
+            Move tez from your connected public account into the Sapling pool to
+            create a private note.
           </CardDescription>
         </CardHeader>
         <CardContent class="space-y-4">
@@ -320,7 +331,11 @@
           <Button
             @click="handleShieldToUser"
             :disabled="
-              !walletConnected || !contractAddress || !userKey || isRunning
+              !walletConnected ||
+              !contractAddress ||
+              !userKey ||
+              isRunning ||
+              !isValidAmount(shieldAmount)
             "
             class="w-full"
             data-testid="sapling-shield-button"
@@ -331,135 +346,7 @@
         </CardContent>
       </Card>
 
-      <!-- Get Balance -->
-      <Card>
-        <CardHeader>
-          <CardTitle class="flex items-center gap-2">
-            <Wallet class="size-4" />
-            Shielded Pool Balance
-          </CardTitle>
-          <CardAction>
-            <Badge variant="outline">Step 2</Badge>
-          </CardAction>
-          <CardDescription>
-            Viewing-only check, confirm the shielded note is visible to your
-            spending key. This flow does not need proving params.
-          </CardDescription>
-        </CardHeader>
-        <CardContent class="space-y-4">
-          <Button
-            @click="handleGetBalance"
-            :disabled="
-              !walletConnected || !contractAddress || !userKey || isRunning
-            "
-            class="w-full"
-            data-testid="sapling-balance-button"
-          >
-            <Wallet class="mr-2 h-4 w-4" />
-            Get Balance
-          </Button>
-          <div v-if="userBalance !== null" class="space-y-2">
-            <div class="rounded-lg border bg-white p-3">
-              <div class="text-sm font-medium text-gray-700">Your Balance:</div>
-              <div class="text-2xl font-bold">
-                {{ formatBalance(userBalance) }} ꜩ
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <!-- Get Transaction History -->
-      <Card>
-        <CardHeader>
-          <CardTitle class="flex items-center gap-2">
-            <History class="size-4" />
-            Transaction History
-          </CardTitle>
-          <CardAction>
-            <Badge variant="outline">Step 3</Badge>
-          </CardAction>
-          <CardDescription>
-            Viewing-only check, inspect incoming notes, outgoing notes, and
-            change behavior without generating a proof. Run it after shielding
-            and again after transferring to compare the note flow.
-          </CardDescription>
-        </CardHeader>
-        <CardContent class="space-y-4">
-          <Button
-            @click="handleGetTransactionHistory"
-            :disabled="
-              !walletConnected || !contractAddress || !userKey || isRunning
-            "
-            class="w-full"
-            data-testid="sapling-history-button"
-          >
-            <History class="mr-2 h-4 w-4" />
-            Get Transaction History
-          </Button>
-          <div v-if="transactionHistory" class="space-y-3">
-            <!-- Info Note -->
-            <div class="rounded-lg border border-blue-200 bg-blue-50 p-3">
-              <div class="mb-1 text-sm font-medium text-blue-900">
-                Why are there so many transactions?
-              </div>
-              <div class="text-xs text-blue-800">
-                Sapling uses a UTXO model (like Bitcoin). When spending, you
-                must consume entire "notes" (like bills) and create change back
-                to yourself. A single transfer may show as multiple
-                transactions: one spending the full amount and another receiving
-                change.
-              </div>
-            </div>
-
-            <!-- Transaction Count -->
-            <div class="rounded-lg border bg-white p-3">
-              <div class="mb-1 text-sm font-medium text-gray-700">
-                Total Transactions:
-              </div>
-              <div class="text-2xl font-bold">
-                {{ transactionHistory.total }}
-              </div>
-            </div>
-
-            <!-- Transaction List -->
-            <div class="space-y-1.5">
-              <div
-                v-for="(tx, index) in transactionHistory.transactions"
-                :key="`tx-${index}`"
-                :class="[
-                  'flex items-center justify-between rounded-lg border px-3 py-2 text-sm',
-                  tx.type === 'incoming'
-                    ? 'border-green-200 bg-green-50'
-                    : 'border-red-200 bg-red-50',
-                ]"
-              >
-                <div class="flex items-center gap-2">
-                  <span
-                    :class="[
-                      'font-medium',
-                      tx.type === 'incoming'
-                        ? 'text-green-800'
-                        : 'text-red-800',
-                    ]"
-                  >
-                    {{ tx.type === "incoming" ? "+" : "-" }}
-                    {{ formatBalance(tx.amount) }} ꜩ
-                  </span>
-                  <span v-if="tx.memo" class="text-xs text-gray-600">
-                    ({{ tx.memo }})
-                  </span>
-                </div>
-                <span class="text-xs text-gray-500">
-                  {{ tx.type === "incoming" ? "In" : "Out" }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <!-- Transfer to Alice -->
+      <!-- Step 2: Transfer to Alice -->
       <Card>
         <CardHeader>
           <CardTitle class="flex items-center gap-2">
@@ -467,11 +354,12 @@
             Transfer to Alice
           </CardTitle>
           <CardAction>
-            <Badge variant="outline">Step 4</Badge>
+            <Badge variant="outline">Step 2</Badge>
           </CardAction>
           <CardDescription>
-            Spend your private note to Alice's Sapling address. This is where
-            Sapling's note selection and change-note behavior becomes visible.
+            Spend your private note to Alice's Sapling address inside the
+            shielded pool. Any remaining value from the spent note is returned
+            to you as a new change note.
           </CardDescription>
         </CardHeader>
         <CardContent class="space-y-4">
@@ -493,7 +381,8 @@
               !contractAddress ||
               !userKey ||
               !aliceAddress ||
-              isRunning
+              isRunning ||
+              !isValidAmount(transferAmount)
             "
             class="w-full"
             data-testid="sapling-transfer-button"
@@ -504,19 +393,23 @@
         </CardContent>
       </Card>
 
-      <!-- Unshield to User's tz1 -->
+      <!-- Step 3: Unshield to User's Public Address -->
       <Card>
         <CardHeader>
           <CardTitle class="flex items-center gap-2">
             <Unlock class="size-4" />
-            Unshield to Your tz1 Address
+            Unshield to Your Public Address
           </CardTitle>
           <CardAction>
-            <Badge variant="outline">Step 5</Badge>
+            <Badge variant="outline">Step 3</Badge>
           </CardAction>
           <CardDescription>
-            Exit the Sapling pool by sending funds back to your public tz1
-            address. This is another proof-generating step.
+            Exit the Sapling pool by sending funds back to your connected public
+            address
+            <code v-if="walletStore.getAddress" class="text-xs">{{
+              walletStore.getAddress
+            }}</code
+            >.
           </CardDescription>
         </CardHeader>
         <CardContent class="space-y-4">
@@ -534,7 +427,11 @@
           <Button
             @click="handleUnshieldToUser"
             :disabled="
-              !walletConnected || !contractAddress || !userKey || isRunning
+              !walletConnected ||
+              !contractAddress ||
+              !userKey ||
+              isRunning ||
+              !isValidAmount(unshieldAmount)
             "
             class="w-full"
             data-testid="sapling-unshield-button"
@@ -542,6 +439,180 @@
             <Unlock class="mr-2 h-4 w-4" />
             Unshield Tez
           </Button>
+        </CardContent>
+      </Card>
+
+      <!-- Inspect Shielded Pool Balances -->
+      <Card>
+        <CardHeader>
+          <CardTitle class="flex items-center gap-2">
+            <Wallet class="size-4" />
+            Shielded Pool Balances
+          </CardTitle>
+          <CardAction>
+            <Badge variant="secondary">Viewing Key</Badge>
+          </CardAction>
+          <CardDescription>
+            Decrypt unspent notes for your viewing key and Alice's viewing key
+            without generating a proof. Automatically updates after operations
+            once opened.
+          </CardDescription>
+        </CardHeader>
+        <CardContent class="space-y-4">
+          <Button
+            @click="handleGetBalance"
+            :disabled="
+              !walletConnected || !contractAddress || !userKey || isRunning
+            "
+            class="w-full"
+            data-testid="sapling-balance-button"
+          >
+            <Wallet class="mr-2 h-4 w-4" />
+            Get Balance
+          </Button>
+          <div v-if="userBalance !== null" class="grid gap-3 md:grid-cols-2">
+            <div class="bg-background rounded-lg border p-3">
+              <div class="text-muted-foreground text-sm font-medium">
+                Your Unspent Balance:
+              </div>
+              <div
+                class="text-foreground text-2xl font-bold"
+                data-testid="sapling-user-balance"
+              >
+                {{ formatBalance(userBalance) }} ꜩ
+              </div>
+            </div>
+            <div
+              v-if="aliceBalance !== null"
+              class="bg-background rounded-lg border p-3"
+            >
+              <div class="text-muted-foreground text-sm font-medium">
+                Alice's Unspent Balance:
+              </div>
+              <div
+                class="text-foreground text-2xl font-bold"
+                data-testid="sapling-alice-balance"
+              >
+                {{ formatBalance(aliceBalance) }} ꜩ
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <!-- Inspect Transaction History -->
+      <Card>
+        <CardHeader>
+          <CardTitle class="flex items-center gap-2">
+            <History class="size-4" />
+            Transaction History
+          </CardTitle>
+          <CardAction>
+            <Badge variant="secondary">Viewing Key</Badge>
+          </CardAction>
+          <CardDescription>
+            Inspect decrypted incoming notes, outgoing private transfers, and
+            change notes for your viewing key without generating a proof.
+          </CardDescription>
+        </CardHeader>
+        <CardContent class="space-y-4">
+          <Button
+            @click="handleGetTransactionHistory"
+            :disabled="
+              !walletConnected || !contractAddress || !userKey || isRunning
+            "
+            class="w-full"
+            data-testid="sapling-history-button"
+          >
+            <History class="mr-2 h-4 w-4" />
+            Get Transaction History
+          </Button>
+          <div v-if="transactionHistory" class="space-y-3">
+            <!-- Info Note -->
+            <div
+              class="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950/50"
+            >
+              <div
+                class="mb-1 text-sm font-medium text-blue-900 dark:text-blue-100"
+              >
+                How Sapling UTXO notes work
+              </div>
+              <div class="text-xs text-blue-800 dark:text-blue-200">
+                Sapling uses an unspent-note (UTXO) model. When you spend a note
+                (for example, transferring 1 ꜩ from a 3 ꜩ note), the original 3
+                ꜩ note is marked <strong>Spent</strong>, an
+                <strong>Outgoing</strong> note of 1 ꜩ is sent to Alice, and a
+                new <strong>Change</strong> note of 2 ꜩ is returned to your
+                address. Unshielding exits to a public <code>tz</code> address,
+                so inside the pool it marks your input note spent and records
+                any remaining change note.
+              </div>
+            </div>
+
+            <!-- Transaction Count -->
+            <div class="bg-background rounded-lg border p-3">
+              <div class="text-muted-foreground mb-1 text-sm font-medium">
+                Total Notes &amp; Transfers:
+              </div>
+              <div
+                class="text-foreground text-2xl font-bold"
+                data-testid="sapling-history-total"
+              >
+                {{ transactionHistory.total }}
+              </div>
+            </div>
+
+            <!-- Transaction List -->
+            <div class="space-y-1.5" data-testid="sapling-history-list">
+              <div
+                v-for="(tx, index) in transactionHistory.transactions"
+                :key="`tx-${index}`"
+                :class="[
+                  'flex items-center justify-between rounded-lg border px-3 py-2 text-sm',
+                  tx.type === 'incoming'
+                    ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/40'
+                    : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/40',
+                ]"
+              >
+                <div class="flex flex-wrap items-center gap-2">
+                  <span
+                    :class="[
+                      'font-medium',
+                      tx.type === 'incoming'
+                        ? 'text-green-800 dark:text-green-200'
+                        : 'text-red-800 dark:text-red-200',
+                    ]"
+                  >
+                    {{ tx.type === "incoming" ? "+" : "-" }}
+                    {{ formatBalance(tx.amount) }} ꜩ
+                  </span>
+                  <span
+                    v-if="tx.memo"
+                    class="text-xs text-gray-600 dark:text-gray-300"
+                  >
+                    ({{ tx.memo }})
+                  </span>
+                  <Badge
+                    v-if="tx.isChange"
+                    variant="outline"
+                    class="text-[10px]"
+                  >
+                    Change
+                  </Badge>
+                  <Badge
+                    v-if="tx.type === 'incoming'"
+                    :variant="tx.isSpent ? 'outline' : 'secondary'"
+                    class="text-[10px]"
+                  >
+                    {{ tx.isSpent ? "Spent" : "Unspent" }}
+                  </Badge>
+                </div>
+                <span class="text-xs text-gray-600 dark:text-gray-400">
+                  {{ tx.type === "incoming" ? "In" : "Out" }}
+                </span>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -564,7 +635,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { copyToClipboard } from "@/lib/utils";
 import {
-  generateAliceAddress,
+  generateAliceSpendingKey,
   generateUserSpendingKey,
   getSaplingErrorMessage,
   getSaplingRuntimeSnapshot,
@@ -572,10 +643,11 @@ import {
   getUserTransactionHistory,
   isSaplingParamsError,
   markSaplingProvingParamsFailed,
-  markSaplingProvingParamsReady,
   preloadSaplingProvingParams,
   reloadWithFreshSaplingParams,
+  setSaplingStoreHooks,
   shieldToUser,
+  subscribeSaplingRuntimeSnapshot,
   transferToAlice,
   unshieldToUser,
   type SaplingRuntimeSnapshot,
@@ -584,6 +656,7 @@ import {
 } from "@/modules/tests/tests/sapling/sapling";
 import { getContractAddress } from "@/networks/network-registry";
 import { useDiagramStore } from "@/stores/diagramStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 import {
   ArrowRightLeft,
@@ -598,17 +671,29 @@ import {
   Unlock,
   Wallet,
 } from "lucide-vue-next";
-import { computed, nextTick, onMounted, ref, shallowRef } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  shallowRef,
+} from "vue";
 import { toast } from "vue-sonner";
 
 const diagramStore = useDiagramStore();
+const settingsStore = useSettingsStore();
 const walletStore = useWalletStore();
 const networkId =
   import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE;
 
 const walletConnected = computed(() => !!walletStore.getAddress);
 const isRunning = ref(false);
+const isBootingKeys = ref(true);
 const isReloadingSaplingSession = ref(false);
+const showMnemonicImport = ref(false);
+const mnemonicInput = ref("");
+
 type BadgeVariant = NonNullable<BadgeVariants["variant"]>;
 type SaplingRuntimeUiState =
   | { kind: "booting" }
@@ -619,9 +704,10 @@ type SaplingRuntimeUiState =
   | { kind: "params-error"; errorMessage: string };
 
 const contractAddress = ref("");
-// Use shallowRef to preserve private class members
+// Use shallowRef to preserve private class members on InMemorySpendingKey
 const userKey = shallowRef<UserSaplingKey | null>(null);
-const aliceAddress = ref("");
+const aliceKey = shallowRef<UserSaplingKey | null>(null);
+const aliceAddress = computed(() => aliceKey.value?.address ?? "");
 const saplingRuntimeState = ref<SaplingRuntimeUiState>({ kind: "booting" });
 
 // Amounts (in tez)
@@ -632,9 +718,15 @@ const unshieldAmount = ref(1);
 // Results
 const transactionHistory = ref<SaplingTransactionHistory | null>(null);
 const userBalance = ref<number | null>(null);
+const aliceBalance = ref<number | null>(null);
 
 // Get contract address from config
 const CONTRACT_ADDRESS = getContractAddress("sapling", networkId) ?? "";
+
+let unsubscribeRuntimeSnapshot: (() => void) | undefined;
+
+const isValidAmount = (value: number): boolean =>
+  typeof value === "number" && Number.isFinite(value) && value > 0;
 
 const syncSaplingRuntimeState = (snapshot: SaplingRuntimeSnapshot) => {
   if (snapshot.moduleStatus === "failed") {
@@ -664,7 +756,7 @@ const syncSaplingRuntimeState = (snapshot: SaplingRuntimeSnapshot) => {
       return;
     default:
       saplingRuntimeState.value =
-        snapshot.moduleStatus === "ready"
+        snapshot.moduleStatus === "ready" && !isBootingKeys.value
           ? { kind: "params-idle" }
           : { kind: "booting" };
   }
@@ -770,11 +862,11 @@ const runtimeDetailText = computed(() => {
     case "module-error":
       return "The runtime failed before key generation finished, so Sapling actions are not ready yet.";
     case "params-preloading":
-      return "Shield, transfer, and unshield should not need a second proving-params download once this completes.";
+      return "Shield, transfer, and unshield will not need a second proving-params download once this completes.";
     case "params-ready":
-      return "Later shield, transfer, and unshield calls should skip the proving-params download step and go straight into proof generation.";
+      return "Shield, transfer, and unshield calls can skip the proving-params download step and go straight into proof generation.";
     case "params-error":
-      return "Viewing and key-generation flows still work. Proof-generating actions will retry the proving-params download on first use.";
+      return "Viewing and key-generation flows still work. Proof-generating actions will retry the proving-params download on next use.";
     default:
       return "Shield, transfer, and unshield will lazy-load proving params from sapling.taquito.io the first time a proof is needed.";
   }
@@ -844,9 +936,10 @@ const handlePreloadSaplingParams = async () => {
 
 const resetSaplingPageState = () => {
   userKey.value = null;
-  aliceAddress.value = "";
+  aliceKey.value = null;
   transactionHistory.value = null;
   userBalance.value = null;
+  aliceBalance.value = null;
   saplingRuntimeState.value = { kind: "booting" };
   diagramStore.resetDiagram();
 };
@@ -858,8 +951,45 @@ const handleReloadWithFreshSaplingParams = async () => {
   reloadWithFreshSaplingParams();
 };
 
-const markProofParamsReadyFromAction = () => {
-  syncSaplingRuntimeState(markSaplingProvingParamsReady());
+const handleRegenerateKeys = async () => {
+  try {
+    isRunning.value = true;
+    const [newUserKey, newAliceKey] = await Promise.all([
+      generateUserSpendingKey({ forceNew: true }),
+      generateAliceSpendingKey({ forceNew: true }),
+    ]);
+    userKey.value = newUserKey;
+    aliceKey.value = newAliceKey;
+    transactionHistory.value = null;
+    userBalance.value = null;
+    aliceBalance.value = null;
+    toast.success("Generated new Sapling session keys");
+  } catch (error) {
+    toast.error(`Failed to generate keys: ${getSaplingErrorMessage(error)}`);
+  } finally {
+    isRunning.value = false;
+  }
+};
+
+const handleImportMnemonic = async () => {
+  if (!mnemonicInput.value.trim()) return;
+
+  try {
+    isRunning.value = true;
+    const restoredKey = await generateUserSpendingKey({
+      mnemonic: mnemonicInput.value,
+    });
+    userKey.value = restoredKey;
+    transactionHistory.value = null;
+    userBalance.value = null;
+    mnemonicInput.value = "";
+    showMnemonicImport.value = false;
+    toast.success("Restored Sapling spending key");
+  } catch (error) {
+    toast.error(`Failed to restore mnemonic: ${getSaplingErrorMessage(error)}`);
+  } finally {
+    isRunning.value = false;
+  }
 };
 
 const handleProofParamError = (error: unknown) => {
@@ -870,22 +1000,83 @@ const handleProofParamError = (error: unknown) => {
   syncSaplingRuntimeState(markSaplingProvingParamsFailed(error));
 };
 
+const refreshOpenedInspectionPanels = async () => {
+  if (!walletStore.getTezos || !userKey.value || !contractAddress.value) {
+    return;
+  }
+
+  const tasks: Promise<void>[] = [];
+
+  if (userBalance.value !== null) {
+    tasks.push(
+      (async () => {
+        const [uBal, aBal] = await Promise.all([
+          getUserSaplingBalance(
+            walletStore.getTezos!,
+            contractAddress.value,
+            userKey.value!,
+          ),
+          aliceKey.value
+            ? getUserSaplingBalance(
+                walletStore.getTezos!,
+                contractAddress.value,
+                aliceKey.value,
+              )
+            : Promise.resolve(null),
+        ]);
+        userBalance.value = uBal;
+        aliceBalance.value = aBal;
+      })(),
+    );
+  }
+
+  if (transactionHistory.value !== null) {
+    tasks.push(
+      (async () => {
+        transactionHistory.value = await getUserTransactionHistory(
+          walletStore.getTezos!,
+          contractAddress.value,
+          userKey.value!,
+        );
+      })(),
+    );
+  }
+
+  if (tasks.length > 0) {
+    await Promise.allSettled(tasks);
+  }
+};
+
 onMounted(async () => {
   diagramStore.setTestDiagram("sapling");
   contractAddress.value = CONTRACT_ADDRESS;
-  syncSaplingRuntimeState(getSaplingRuntimeSnapshot());
 
-  // Automatically generate keys on load
+  setSaplingStoreHooks({
+    setTestDiagram: (testId, key) => diagramStore.setTestDiagram(testId, key),
+    setProgress: (step) => diagramStore.setProgress(step),
+    setFeeEstimate: (estimate) => diagramStore.setFeeEstimate(estimate),
+    setOperationHash: (opHash) => diagramStore.setOperationHash(opHash),
+    setCompleted: () => diagramStore.setCompleted(),
+    getConfirmationCount: () => settingsStore.getConfirmationCount,
+  });
+
+  unsubscribeRuntimeSnapshot = subscribeSaplingRuntimeSnapshot(
+    syncSaplingRuntimeState,
+  );
+
+  // Automatically generate or restore session keys on load
   try {
-    const [key, address] = await Promise.all([
+    const [uKey, aKey] = await Promise.all([
       generateUserSpendingKey(),
-      generateAliceAddress(),
+      generateAliceSpendingKey(),
     ]);
 
-    userKey.value = key;
-    aliceAddress.value = address;
+    userKey.value = uKey;
+    aliceKey.value = aKey;
+    isBootingKeys.value = false;
     syncSaplingRuntimeState(getSaplingRuntimeSnapshot());
   } catch (error) {
+    isBootingKeys.value = false;
     const message = getSaplingErrorMessage(error);
     console.error("Key generation error:", error);
 
@@ -905,46 +1096,71 @@ onMounted(async () => {
   }
 });
 
-const handleShieldToUser = async () => {
-  if (!walletStore.getTezos || !userKey.value) return;
+onBeforeUnmount(() => {
+  unsubscribeRuntimeSnapshot?.();
+  setSaplingStoreHooks(undefined);
+});
 
+const handleShieldToUser = async () => {
+  if (
+    !walletStore.getTezos ||
+    !userKey.value ||
+    !isValidAmount(shieldAmount.value)
+  )
+    return;
+
+  let loadingToastId: string | number | undefined;
   try {
     isRunning.value = true;
-    toast.info("Shielding tez (generating zero-knowledge proof)...", {
-      duration: 30000,
-    });
+    loadingToastId = toast.info(
+      "Shielding tez (generating zero-knowledge proof)...",
+      {
+        duration: 60000,
+      },
+    );
 
-    const opHash = await shieldToUser(
+    await shieldToUser(
       walletStore.getTezos,
       contractAddress.value,
       userKey.value,
       shieldAmount.value,
     );
 
-    markProofParamsReadyFromAction();
-    diagramStore.setOperationHash(opHash);
+    toast.success(`Shielded ${shieldAmount.value} ꜩ into the Sapling pool`);
+    await refreshOpenedInspectionPanels();
   } catch (error) {
     console.error("Shield error:", error);
     handleProofParamError(error);
     diagramStore.setErrorMessage(error);
-    toast.error(
-      `Error: ${error instanceof Error ? error.message : String(error)}`,
-    );
+    toast.error(`Error: ${getSaplingErrorMessage(error)}`);
   } finally {
+    if (loadingToastId !== undefined) {
+      toast.dismiss(loadingToastId);
+    }
     isRunning.value = false;
   }
 };
 
 const handleTransferToAlice = async () => {
-  if (!walletStore.getTezos || !userKey.value || !aliceAddress.value) return;
+  if (
+    !walletStore.getTezos ||
+    !userKey.value ||
+    !aliceAddress.value ||
+    !isValidAmount(transferAmount.value)
+  )
+    return;
 
+  let loadingToastId: string | number | undefined;
   try {
     isRunning.value = true;
-    toast.info("Transferring to Alice (generating zero-knowledge proof)...", {
-      duration: 30000,
-    });
+    loadingToastId = toast.info(
+      "Transferring to Alice (generating zero-knowledge proof)...",
+      {
+        duration: 60000,
+      },
+    );
 
-    const opHash = await transferToAlice(
+    await transferToAlice(
       walletStore.getTezos,
       contractAddress.value,
       userKey.value,
@@ -952,31 +1168,41 @@ const handleTransferToAlice = async () => {
       transferAmount.value,
     );
 
-    markProofParamsReadyFromAction();
-    diagramStore.setOperationHash(opHash);
+    toast.success(`Transferred ${transferAmount.value} ꜩ privately to Alice`);
+    await refreshOpenedInspectionPanels();
   } catch (error) {
     console.error("Transfer error:", error);
     handleProofParamError(error);
     diagramStore.setErrorMessage(error);
-    toast.error(
-      `Error: ${error instanceof Error ? error.message : String(error)}`,
-    );
+    toast.error(`Error: ${getSaplingErrorMessage(error)}`);
   } finally {
+    if (loadingToastId !== undefined) {
+      toast.dismiss(loadingToastId);
+    }
     isRunning.value = false;
   }
 };
 
 const handleUnshieldToUser = async () => {
-  if (!walletStore.getTezos || !userKey.value || !walletStore.getAddress)
+  if (
+    !walletStore.getTezos ||
+    !userKey.value ||
+    !walletStore.getAddress ||
+    !isValidAmount(unshieldAmount.value)
+  )
     return;
 
+  let loadingToastId: string | number | undefined;
   try {
     isRunning.value = true;
-    toast.info("Unshielding tez (generating zero-knowledge proof)...", {
-      duration: 30000,
-    });
+    loadingToastId = toast.info(
+      "Unshielding tez (generating zero-knowledge proof)...",
+      {
+        duration: 60000,
+      },
+    );
 
-    const opHash = await unshieldToUser(
+    await unshieldToUser(
       walletStore.getTezos,
       contractAddress.value,
       userKey.value,
@@ -984,16 +1210,19 @@ const handleUnshieldToUser = async () => {
       unshieldAmount.value,
     );
 
-    markProofParamsReadyFromAction();
-    diagramStore.setOperationHash(opHash);
+    toast.success(
+      `Unshielded ${unshieldAmount.value} ꜩ to ${walletStore.getAddress}`,
+    );
+    await refreshOpenedInspectionPanels();
   } catch (error) {
     console.error("Unshield error:", error);
     handleProofParamError(error);
     diagramStore.setErrorMessage(error);
-    toast.error(
-      `Error: ${error instanceof Error ? error.message : String(error)}`,
-    );
+    toast.error(`Error: ${getSaplingErrorMessage(error)}`);
   } finally {
+    if (loadingToastId !== undefined) {
+      toast.dismiss(loadingToastId);
+    }
     isRunning.value = false;
   }
 };
@@ -1012,12 +1241,10 @@ const handleGetTransactionHistory = async () => {
     );
 
     transactionHistory.value = history;
-    toast.success(`Found ${history.total} transaction(s)`);
+    toast.success(`Found ${history.total} note(s) and transfer(s)`);
   } catch (error) {
     console.error("Transaction history error:", error);
-    toast.error(
-      `Error: ${error instanceof Error ? error.message : String(error)}`,
-    );
+    toast.error(`Error: ${getSaplingErrorMessage(error)}`);
   } finally {
     isRunning.value = false;
   }
@@ -1028,21 +1255,29 @@ const handleGetBalance = async () => {
 
   try {
     isRunning.value = true;
-    toast.info("Fetching balance...");
+    toast.info("Fetching shielded balances...");
 
-    const balance = await getUserSaplingBalance(
-      walletStore.getTezos,
-      contractAddress.value,
-      userKey.value,
-    );
+    const [uBalance, aBalance] = await Promise.all([
+      getUserSaplingBalance(
+        walletStore.getTezos,
+        contractAddress.value,
+        userKey.value,
+      ),
+      aliceKey.value
+        ? getUserSaplingBalance(
+            walletStore.getTezos,
+            contractAddress.value,
+            aliceKey.value,
+          )
+        : Promise.resolve(null),
+    ]);
 
-    userBalance.value = balance;
-    toast.success("Balance retrieved");
+    userBalance.value = uBalance;
+    aliceBalance.value = aBalance;
+    toast.success("Shielded balances retrieved");
   } catch (error) {
     console.error("Balance fetch error:", error);
-    toast.error(
-      `Error: ${error instanceof Error ? error.message : String(error)}`,
-    );
+    toast.error(`Error: ${getSaplingErrorMessage(error)}`);
   } finally {
     isRunning.value = false;
   }
