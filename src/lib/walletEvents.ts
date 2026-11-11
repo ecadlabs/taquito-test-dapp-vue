@@ -126,6 +126,32 @@ export const formatBeaconError = (error: unknown): string => {
   return String(error);
 };
 
+/**
+ * Returns a wallet-aware confirmation prompt for the "wait-for-user" diagram
+ * step, or `null` when the active provider signs in-memory without user
+ * interaction in an external wallet.
+ */
+export const getWalletConfirmationMessage = (
+  provider?: string,
+  walletName?: string,
+): string | null => {
+  if (provider === "programmatic" || provider === "web3auth") {
+    return null;
+  }
+
+  const normalizedName = walletName?.trim();
+  const target =
+    normalizedName &&
+    normalizedName !== "Beacon Wallet" &&
+    normalizedName !== "unknown" &&
+    normalizedName !== "Raw Private Key Access" &&
+    !normalizedName.startsWith("Web3Auth")
+      ? normalizedName
+      : "your wallet";
+
+  return `Check ${target} to confirm the operation`;
+};
+
 const describeInvalidAccountReason = (
   event?: InvalidAccountDeactivatedEvent,
 ): string => {

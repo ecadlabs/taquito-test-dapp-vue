@@ -40,6 +40,7 @@ const increment = async (amount: number): Promise<number | undefined> => {
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
     console.log(`Incrementing storage value by ${amount}...`);
 
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .increment(amount)
       .toTransferParams();
@@ -49,7 +50,7 @@ const increment = async (amount: number): Promise<number | undefined> => {
       diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("execute-operation");
+    diagramStore.setProgress("wait-for-user");
 
     const operation = await contract.methodsObject.increment(amount).send();
 
@@ -94,6 +95,7 @@ const decrement = async (amount: number): Promise<number | undefined> => {
     diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .decrement(amount)
       .toTransferParams();
@@ -103,7 +105,7 @@ const decrement = async (amount: number): Promise<number | undefined> => {
       diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("execute-operation");
+    diagramStore.setProgress("wait-for-user");
     const operation = await contract.methodsObject.decrement(amount).send();
     diagramStore.setProgress("wait-confirmation");
     await operation.confirmation(settingsStore.getConfirmationCount);
@@ -136,6 +138,7 @@ const reset = async (): Promise<void> => {
     diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .reset()
       .toTransferParams();
@@ -145,7 +148,7 @@ const reset = async (): Promise<void> => {
       diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("execute-operation");
+    diagramStore.setProgress("wait-for-user");
     const operation = await contract.methodsObject.reset().send();
     diagramStore.setProgress("wait-confirmation");
     await operation.confirmation(settingsStore.getConfirmationCount);

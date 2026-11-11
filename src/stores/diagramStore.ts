@@ -1,4 +1,7 @@
-import { formatBeaconError } from "@/lib/walletEvents";
+import {
+  formatBeaconError,
+  getWalletConfirmationMessage,
+} from "@/lib/walletEvents";
 import type { TestDiagram } from "@/modules/tests/test";
 import { getTestDiagram } from "@/modules/tests/tests";
 import { useWalletStore } from "@/stores/walletStore";
@@ -87,7 +90,14 @@ export const useDiagramStore = defineStore("diagram", () => {
 
       // Show toast when waiting for user confirmation in wallet
       if (stepId === "wait-for-user") {
-        toast.info("Check your wallet to confirm the operation");
+        const walletStore = useWalletStore();
+        const confirmationMessage = getWalletConfirmationMessage(
+          walletStore.getProvider,
+          walletStore.getWalletName,
+        );
+        if (confirmationMessage) {
+          toast.info(confirmationMessage);
+        }
       }
     }
   };

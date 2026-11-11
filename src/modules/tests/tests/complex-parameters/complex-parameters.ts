@@ -39,6 +39,7 @@ const addUserRecord = async (record: RecordParam): Promise<void> => {
     diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .add_user_record(record)
       .toTransferParams();
@@ -48,7 +49,7 @@ const addUserRecord = async (record: RecordParam): Promise<void> => {
       diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("execute-operation");
+    diagramStore.setProgress("wait-for-user");
     const operation = await contract.methodsObject
       .add_user_record(record)
       .send();
@@ -104,6 +105,7 @@ const setNestedRecord = async (nestedRecord: NestedRecord): Promise<void> => {
           : ["read"],
     };
 
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .set_nested_record(complexData)
       .toTransferParams();
@@ -113,7 +115,7 @@ const setNestedRecord = async (nestedRecord: NestedRecord): Promise<void> => {
       diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("execute-operation");
+    diagramStore.setProgress("wait-for-user");
     const operation = await contract.methodsObject
       .set_nested_record(complexData)
       .send();
@@ -158,6 +160,7 @@ const manageUserSet = async (
       user: userAddress,
     };
 
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .manage_authorization(params)
       .toTransferParams();
@@ -167,7 +170,7 @@ const manageUserSet = async (
       diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("execute-operation");
+    diagramStore.setProgress("wait-for-user");
     const operation = await contract.methodsObject
       .manage_authorization(params)
       .send();
@@ -204,6 +207,7 @@ const updateMetadata = async (
     diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .update_metadata(updates)
       .toTransferParams();
@@ -213,7 +217,7 @@ const updateMetadata = async (
       diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("execute-operation");
+    diagramStore.setProgress("wait-for-user");
     const operation = await contract.methodsObject
       .update_metadata(updates)
       .send();

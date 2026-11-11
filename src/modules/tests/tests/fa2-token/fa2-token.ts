@@ -65,6 +65,7 @@ export const mintTokens = async (param: MintParam): Promise<void> => {
 
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .mint(param)
       .toTransferParams();
@@ -74,7 +75,7 @@ export const mintTokens = async (param: MintParam): Promise<void> => {
       diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("execute-operation");
+    diagramStore.setProgress("wait-for-user");
     const operation = await contract.methodsObject.mint(param).send();
 
     diagramStore.setProgress("wait-confirmation");
@@ -106,6 +107,7 @@ export const burnTokens = async (param: BurnParam): Promise<void> => {
 
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .burn(param)
       .toTransferParams();
@@ -115,7 +117,7 @@ export const burnTokens = async (param: BurnParam): Promise<void> => {
       diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("execute-operation");
+    diagramStore.setProgress("wait-for-user");
     const operation = await contract.methodsObject.burn(param).send();
 
     diagramStore.setProgress("wait-confirmation");
@@ -153,6 +155,7 @@ export const transferTokens = async (
       throw new Error("No transfer parameters provided");
     }
 
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .transfer(transfers)
       .toTransferParams();
@@ -162,7 +165,7 @@ export const transferTokens = async (
       diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("execute-operation");
+    diagramStore.setProgress("wait-for-user");
     const operation = await contract.methodsObject.transfer(transfers).send();
 
     diagramStore.setProgress("wait-confirmation");
@@ -247,12 +250,12 @@ export const getTokenBalancesWithCallback = async (
 
   try {
     diagramStore.setTestDiagram(TEST_ID, "get-balance-with-callback");
-    diagramStore.setProgress("get-contracts");
+    diagramStore.setProgress("get-contract");
 
     const fa2Contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
     const callbackContract = await Tezos.wallet.at(CALLBACK_CONTRACT_ADDRESS);
 
-    diagramStore.setProgress("call-balance-of");
+    diagramStore.setProgress("wait-for-user");
 
     const balanceOfParams = {
       requests: requests,

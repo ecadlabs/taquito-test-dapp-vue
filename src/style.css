@@ -137,3 +137,18 @@
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/*
+ * Anchor the <beacon-toast> custom element to the top of the viewport.
+ * Workaround for https://github.com/ecadlabs/beacon-sdk-taquito-patches/issues/134
+ * where @ecadlabs/beacon-ui overrides .toast-wrapper-show { position: fixed } with
+ * inline style={{ position: 'absolute' }} on its inner shadow-DOM element.
+ * Safe to keep long-term even after #134 is fixed upstream.
+ */
+beacon-toast {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000000;
+}
