@@ -67,19 +67,62 @@ test("does not reference retired ECAD infra endpoints", async () => {
   assert.deepEqual(matches.sort(), []);
 });
 
-test("does not advertise unprovisioned ushuaianet.dapp.taquito.io live deployment URL", async () => {
+test("advertises shadownet and ushuaianet live deployments and omits retired tezlink-shadownet", async () => {
   const publicLandingFiles = [
     "README.md",
     "src/modules/home/views/HomeView.vue",
   ];
-  const matches: string[] = [];
 
   for (const file of publicLandingFiles) {
     const contents = await readFile(file, "utf8");
-    if (contents.includes("https://ushuaianet.dapp.taquito.io")) {
-      matches.push(file);
+    assert.equal(
+      contents.includes("https://tezlink-shadownet.dapp.taquito.io"),
+      false,
+      `${file} should not advertise retired tezlink-shadownet deployment`,
+    );
+    assert.equal(
+      contents.includes("https://shadownet.dapp.taquito.io/"),
+      true,
+      `${file} should include shadownet live deployment`,
+    );
+    assert.equal(
+      contents.includes("https://ushuaianet.dapp.taquito.io/"),
+      true,
+      `${file} should include ushuaianet live deployment`,
+    );
+  }
+});
+
+test("github workflows use current Node 24 actions and exclude retired tezlink-shadownet from deploy matrix", async () => {
+  const workflowFiles = await collectFiles(".github/workflows");
+  const deprecatedActions = [
+    "actions/checkout@v4",
+    "actions/setup-node@v4",
+    "actions/upload-artifact@v4",
+    "cloudflare/wrangler-action@v3",
+    "marocchino/sticky-pull-request-comment@v2",
+  ];
+
+  for (const file of workflowFiles) {
+    const contents = await readFile(file, "utf8");
+    for (const action of deprecatedActions) {
+      assert.equal(
+        contents.includes(action),
+        false,
+        `${file} still uses deprecated ${action}`,
+      );
     }
   }
 
-  assert.deepEqual(matches, []);
+  const deployWorkflow = await readFile(".github/workflows/deploy.yml", "utf8");
+  assert.equal(
+    deployWorkflow.includes("environment: tezlink-shadownet"),
+    false,
+    "deploy.yml should not deploy to retired tezlink-shadownet",
+  );
+  assert.equal(
+    deployWorkflow.includes("node-version: 24"),
+    true,
+    "deploy.yml should use Node 24 LTS",
+  );
 });
