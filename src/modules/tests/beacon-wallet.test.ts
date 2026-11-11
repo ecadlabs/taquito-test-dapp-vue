@@ -234,11 +234,17 @@ test("standalone @taquito/wallet-connect is removed across codebase and Beacon h
 });
 
 test("getWalletConfirmationMessage suppresses in-memory signers and uses active wallet name when available", async () => {
-  const walletEventsModule = await import("@/lib/walletEvents");
+  const [walletEventsModule, createWalletStoreTs, walletEventsTs] =
+    await Promise.all([
+      import("@/lib/walletEvents"),
+      readFile("src/stores/createWalletStore.ts", "utf8"),
+      readFile("src/lib/walletEvents.ts", "utf8"),
+    ]);
+
   const getConfirmationMessage = (
     walletEventsModule as unknown as {
       getWalletConfirmationMessage: (
-        provider?: string,
+        provider?: "beacon" | "programmatic" | "ledger" | "web3auth",
         walletName?: string,
       ) => string | null;
     }
@@ -267,18 +273,49 @@ test("getWalletConfirmationMessage suppresses in-memory signers and uses active 
     "Check Ledger Device to confirm the operation",
   );
 
-  // Generic or missing wallet names fall back to "your wallet"
-  assert.equal(
-    getConfirmationMessage("beacon", "Beacon Wallet"),
-    "Check your wallet to confirm the operation",
-  );
-  assert.equal(
-    getConfirmationMessage("beacon", "unknown"),
-    "Check your wallet to confirm the operation",
-  );
+  // Missing or blank wallet names fall back to "your wallet"
   assert.equal(
     getConfirmationMessage("beacon", undefined),
     "Check your wallet to confirm the operation",
+  );
+  assert.equal(
+    getConfirmationMessage("beacon", "   "),
+    "Check your wallet to confirm the operation",
+  );
+
+  // createWalletStore.ts should type getProvider with WalletProvider, leave unknown Beacon
+  // peer names as undefined, and reference ecadlabs/beacon-sdk-taquito-patches/issues/136
+  assert.match(
+    createWalletStoreTs,
+    /getProvider:\s*ComputedRef<WalletProvider\s*\|\s*undefined>/,
+    "Expected createWalletStore.ts to type getProvider as ComputedRef<WalletProvider | undefined>",
+  );
+  assert.match(
+    createWalletStoreTs,
+    /ecadlabs\/beacon-sdk-taquito-patches\/issues\/136/,
+    "Expected createWalletStore.ts to reference ecadlabs/beacon-sdk-taquito-patches/issues/136",
+  );
+  assert.doesNotMatch(
+    createWalletStoreTs,
+    /walletName\.value\s*=\s*"unknown"/,
+    "createWalletStore.ts should use undefined instead of magic string 'unknown' for walletName",
+  );
+  assert.doesNotMatch(
+    createWalletStoreTs,
+    /\?\?\s*"Beacon Wallet"/,
+    "createWalletStore.ts should not fall back to magic string 'Beacon Wallet'",
+  );
+
+  // walletEvents.ts should reference #136 and not filter magic placeholder strings
+  assert.match(
+    walletEventsTs,
+    /ecadlabs\/beacon-sdk-taquito-patches\/issues\/136/,
+    "Expected walletEvents.ts to reference ecadlabs/beacon-sdk-taquito-patches/issues/136",
+  );
+  assert.doesNotMatch(
+    walletEventsTs,
+    /normalizedName !== "Beacon Wallet"/,
+    "walletEvents.ts should rely on WalletProvider and optional walletName instead of string blacklists",
   );
 });
 
