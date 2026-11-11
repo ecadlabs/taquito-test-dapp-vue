@@ -9,10 +9,42 @@
         <p>Taquito Playground</p>
       </RouterLink>
 
-      <Badge v-if="network" variant="outline" class="h-fit">
-        <p>{{ network }}</p>
-        <p v-if="networkName">({{ networkName }})</p>
-      </Badge>
+      <TooltipProvider v-if="network">
+        <Tooltip>
+          <TooltipTrigger as-child>
+            <Badge
+              variant="outline"
+              as="button"
+              type="button"
+              class="h-fit cursor-pointer items-center gap-1.5"
+              :aria-label="`${network} RPC status: ${settingsStore.rpcHealthSummary}`"
+              @click="showSettingsDialog = true"
+            >
+              <span
+                class="size-2 rounded-full"
+                :class="{
+                  'animate-pulse bg-amber-400':
+                    settingsStore.rpcHealthStatus === 'checking',
+                  'bg-green-400': settingsStore.rpcHealthStatus === 'healthy',
+                  'bg-red-500': settingsStore.rpcHealthStatus === 'unhealthy',
+                }"
+                aria-hidden="true"
+              />
+              <span>{{ network }}</span>
+              <span v-if="networkName && networkName !== network"
+                >({{ networkName }})</span
+              >
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent class="space-y-0.5">
+            <p class="font-medium">{{ settingsStore.rpcHealthSummary }}</p>
+            <p class="opacity-80">{{ settingsStore.settings.rpcUrl }}</p>
+            <p v-if="settingsStore.isUsingCustomRpcUrl" class="text-orange-300">
+              Custom RPC URL active
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
 
     <div class="mr-auto" />
@@ -44,19 +76,39 @@
     </NavigationMenu>
 
     <WalletControl />
-    <Button
-      size="icon"
-      variant="outline"
-      class="relative ml-2"
-      @click="showSettingsDialog = true"
-      aria-label="Settings"
-    >
-      <div
-        v-if="settingsStore.isUsingCustomRpcUrl"
-        class="absolute -top-1 -right-1 size-3 rounded-full bg-orange-400"
-      />
-      <Settings class="size-5" aria-hidden="true" />
-    </Button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger as-child>
+          <Button
+            size="icon"
+            variant="outline"
+            class="relative ml-2"
+            @click="showSettingsDialog = true"
+            aria-label="Settings"
+          >
+            <div
+              v-if="
+                !settingsStore.isRpcHealthy || settingsStore.isUsingCustomRpcUrl
+              "
+              class="absolute -top-1 -right-1 size-3 rounded-full"
+              :class="
+                !settingsStore.isRpcHealthy ? 'bg-red-500' : 'bg-orange-400'
+              "
+            />
+            <Settings class="size-5" aria-hidden="true" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p v-if="!settingsStore.isRpcHealthy">
+            Settings ({{ settingsStore.rpcHealthSummary }})
+          </p>
+          <p v-else-if="settingsStore.isUsingCustomRpcUrl">
+            Settings (Custom RPC URL active)
+          </p>
+          <p v-else>Settings ({{ settingsStore.rpcHealthSummary }})</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
 
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -110,6 +162,12 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { AvailableTests } from "@/modules/tests/tests";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { Menu, Settings } from "lucide-vue-next";

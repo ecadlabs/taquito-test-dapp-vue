@@ -1,148 +1,148 @@
 <template>
-  <div class="relative">
-    <!-- Large Screens -->
-    <div class="hidden md:block">
-      <div v-if="!address" class="flex items-center gap-2">
-        <div class="size-3 rounded-full bg-red-400" aria-hidden="true" />
-        <p class="sr-only">Wallet Disconnected</p>
-        <Button variant="outline" @click="showConnectDialog = true">
-          Connect Wallet
-        </Button>
+  <TooltipProvider>
+    <div class="relative">
+      <!-- Large Screens -->
+      <div class="hidden md:block">
+        <div v-if="!address" class="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger as-child>
+              <span
+                class="size-3 rounded-full bg-red-400"
+                role="status"
+                aria-label="Wallet disconnected"
+                tabindex="0"
+              />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Wallet disconnected</p>
+            </TooltipContent>
+          </Tooltip>
+          <Button variant="outline" @click="showConnectDialog = true">
+            Connect Wallet
+          </Button>
+        </div>
+        <div v-else class="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger as-child>
+              <span
+                class="size-3 rounded-full bg-green-400"
+                role="status"
+                :aria-label="
+                  walletName
+                    ? `Wallet connected (${walletName})`
+                    : 'Wallet connected'
+                "
+                tabindex="0"
+              />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>
+                {{
+                  walletName
+                    ? `Wallet connected (${walletName})`
+                    : "Wallet connected"
+                }}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+          <Button
+            variant="outline"
+            @click="showDisconnectDialog = true"
+            class="flex items-center gap-2"
+          >
+            <p v-if="balance">{{ `${balance} ꜩ` }}</p>
+            <p v-else>...</p>
+            <Separator v-if="address" orientation="vertical" class="h-4" />
+            <p v-if="address">
+              {{ address.slice(0, 6) }}...{{ address.slice(-4) }}
+            </p>
+          </Button>
+        </div>
       </div>
-      <div v-else class="flex items-center gap-2">
-        <div class="size-3 rounded-full bg-green-400" aria-hidden="true" />
-        <p class="sr-only">Wallet Connected</p>
-        <Button
-          variant="outline"
-          @click="showDisconnectDialog = true"
-          class="flex items-center gap-2"
-        >
-          <p v-if="balance">{{ `${balance} ꜩ` }}</p>
-          <p v-else>...</p>
-          <Separator v-if="address" orientation="vertical" class="h-4" />
-          <p v-if="address">
-            {{ address.slice(0, 6) }}...{{ address.slice(-4) }}
-          </p>
-        </Button>
+      <!-- Small Screens -->
+      <div class="block md:hidden">
+        <div v-if="!address" class="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger as-child>
+              <span
+                class="size-3 rounded-full bg-red-400"
+                role="status"
+                aria-label="Wallet disconnected"
+                tabindex="0"
+              />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Wallet disconnected</p>
+            </TooltipContent>
+          </Tooltip>
+          <Button
+            size="icon"
+            variant="outline"
+            @click="showConnectDialog = true"
+            aria-label="Connect Wallet"
+          >
+            <Wallet class="size-5" aria-hidden="true" />
+          </Button>
+        </div>
+        <div v-else class="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger as-child>
+              <span
+                class="size-3 rounded-full bg-green-400"
+                role="status"
+                :aria-label="
+                  walletName
+                    ? `Wallet connected (${walletName})`
+                    : 'Wallet connected'
+                "
+                tabindex="0"
+              />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>
+                {{
+                  walletName
+                    ? `Wallet connected (${walletName})`
+                    : "Wallet connected"
+                }}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+          <Button
+            size="icon"
+            variant="outline"
+            @click="showDisconnectDialog = true"
+            aria-label="Disconnect Wallet"
+          >
+            <Unplug class="size-5" aria-hidden="true" />
+          </Button>
+        </div>
       </div>
     </div>
-    <!-- Small Screens -->
-    <div class="block md:hidden">
-      <div v-if="!address" class="flex items-center gap-2">
-        <div class="size-3 rounded-full bg-red-400" aria-hidden="true" />
-        <p class="sr-only">Wallet Disconnected</p>
-        <Button
-          size="icon"
-          variant="outline"
-          @click="showConnectDialog = true"
-          aria-label="Connect Wallet"
-        >
-          <Wallet class="size-5" aria-hidden="true" />
-        </Button>
-      </div>
-      <div v-else class="flex items-center gap-2">
-        <div class="size-3 rounded-full bg-green-400" aria-hidden="true" />
-        <p class="sr-only">Wallet Connected</p>
-        <Button
-          size="icon"
-          variant="outline"
-          @click="showDisconnectDialog = true"
-          aria-label="Disconnect Wallet"
-        >
-          <Unplug class="size-5" aria-hidden="true" />
-        </Button>
-      </div>
-    </div>
-  </div>
+  </TooltipProvider>
 
   <!-- Connection Dialog -->
   <Dialog :open="showConnectDialog" @update:open="showConnectDialog = $event">
     <DialogContent>
       <!-- Provider Selection Step -->
-      <div v-if="connectionStep === 'provider-selection'">
+      <div v-if="connectionStep === 'provider-selection'" class="space-y-4">
         <DialogHeader>
           <DialogTitle>Connect Wallet</DialogTitle>
           <DialogDescription>
-            <div>
-              <div class="flex flex-wrap items-center space-x-1 text-left">
-                <span>Taquito Playground connects via</span>
-                <a
-                  href="https://www.walletbeacon.io/"
-                  target="_blank"
-                  class="text-blue-400 hover:underline"
-                  >Beacon</a
-                >
-                <span>(supporting browser extensions and</span>
-                <a
-                  href="https://walletconnect.network/"
-                  target="_blank"
-                  class="text-blue-400 hover:underline"
-                  >WalletConnect</a
-                >
-                <span
-                  >mobile or QR wallets) as well as hardware and testing
-                  signers.</span
-                >
-                <p>Select your preference and hit connect to get started.</p>
-              </div>
-
-              <p class="mt-2 text-left italic">
-                Just a note: when building your own dApp, you shouldn't use
-                multiple wallet connection providers/methods. Instead, you
-                should pick one that works best for your use-case. We use many
-                here for testing and illustration purposes, but this is not best
-                practice in production applications.
-              </p>
-            </div>
+            Choose how Taquito connects and signs operations in this session.
           </DialogDescription>
         </DialogHeader>
 
-        <div class="mt-2">
-          <Alert v-if="provider === 'ledger' && !hidSupported" class="mb-2">
-            <AlertTriangle class="size-4 !text-red-500" aria-hidden="true" />
-            <AlertTitle>
-              <p>Heads up!</p>
-            </AlertTitle>
-            <AlertDescription>
-              The API's used to connect to the Ledger device are not supported
-              on this browser. Please use a Chromium-based browser to connect to
-              the Ledger device.
-            </AlertDescription>
-          </Alert>
-          <Alert v-if="provider === 'programmatic'" class="mb-2">
-            <AlertTriangle class="size-4 !text-red-500" aria-hidden="true" />
-            <AlertTitle>
-              <p>Important!</p>
-            </AlertTitle>
-            <AlertDescription>
-              Raw private key access is designed for testing purposes only, such
-              as automated test scripts. It has less security measures and will
-              NOT ask for confirmation before carrying out operations. This
-              should not be used with a real, personally owned wallet key.
-            </AlertDescription>
-          </Alert>
-          <Alert v-if="provider === 'web3auth'" class="mb-2">
-            <AlertTriangle class="size-4 !text-red-500" aria-hidden="true" />
-            <AlertTitle>
-              <p>Important!</p>
-            </AlertTitle>
-            <AlertDescription>
-              Web3Auth is not generally designed for dApps, but rather
-              authentication for wallet applications. It is available here for
-              demonstration purposes, but under the hood it simply relays a
-              private key to the dApp. This means transactions will not require
-              confirmation from the user.
-            </AlertDescription>
-          </Alert>
-          <div class="mt-2 space-y-2">
-            <Label :for="providerSelectId">Wallet Provider</Label>
+        <div class="space-y-3">
+          <div class="space-y-2">
+            <Label :for="providerSelectId">Connection Method</Label>
             <Select v-model="provider">
-              <SelectTrigger class="w-[220px]" :id="providerSelectId">
+              <SelectTrigger class="w-full" :id="providerSelectId">
                 <SelectValue placeholder="Select a wallet provider" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="beacon"> Beacon </SelectItem>
-                <SelectItem value="ledger"> Ledger Device </SelectItem>
+                <SelectItem value="beacon">Beacon</SelectItem>
+                <SelectItem value="ledger">Ledger Device</SelectItem>
                 <SelectItem value="web3auth">
                   Web3Auth (Social Login)
                 </SelectItem>
@@ -153,22 +153,145 @@
             </Select>
           </div>
 
-          <div v-if="provider === 'programmatic'" class="mt-2 space-y-2">
-            <Label :for="privateKeyInputId"> Private Key </Label>
+          <!-- Contextual Provider Details -->
+          <div
+            v-if="provider === 'beacon'"
+            class="bg-muted/40 space-y-1.5 rounded-lg border p-3 text-xs"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-foreground font-medium"
+                >Browser, Web &amp; Mobile Wallets</span
+              >
+              <Badge variant="outline" class="font-mono text-[11px]"
+                >@taquito/beacon-wallet</Badge
+              >
+            </div>
+            <p class="text-muted-foreground leading-relaxed">
+              Standard dApp wallet integration via
+              <a
+                href="https://github.com/ecadlabs/beacon-sdk-taquito-patches"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-blue-500 hover:underline dark:text-blue-400"
+                >Beacon</a
+              >, supporting browser extensions (Temple, Kukai), web wallets, and
+              <a
+                href="https://walletconnect.network/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-blue-500 hover:underline dark:text-blue-400"
+                >WalletConnect</a
+              >
+              mobile or QR wallets. Every operation prompts your wallet for
+              confirmation.
+            </p>
+          </div>
+
+          <div
+            v-else-if="provider === 'ledger'"
+            class="bg-muted/40 space-y-1.5 rounded-lg border p-3 text-xs"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-foreground font-medium"
+                >Hardware Wallet via WebHID</span
+              >
+              <Badge variant="outline" class="font-mono text-[11px]"
+                >@taquito/ledger-signer</Badge
+              >
+            </div>
+            <p class="text-muted-foreground leading-relaxed">
+              Connects directly to a Ledger device over USB (Chromium browsers
+              required). Operations require physical approval on your hardware
+              wallet.
+            </p>
+          </div>
+
+          <div
+            v-else-if="provider === 'web3auth'"
+            class="bg-muted/40 space-y-1.5 rounded-lg border p-3 text-xs"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-foreground font-medium"
+                >Social Login Key Derivation</span
+              >
+              <Badge variant="outline" class="font-mono text-[11px]"
+                >@taquito/signer</Badge
+              >
+            </div>
+            <p class="text-muted-foreground leading-relaxed">
+              Derives a key in memory from a social login via Web3Auth. Included
+              for demonstration; operations are signed automatically without
+              confirmation prompts.
+            </p>
+          </div>
+
+          <div
+            v-else-if="provider === 'programmatic'"
+            class="bg-muted/40 space-y-1.5 rounded-lg border p-3 text-xs"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-foreground font-medium"
+                >Direct In-Memory Signer</span
+              >
+              <Badge variant="outline" class="font-mono text-[11px]"
+                >@taquito/signer</Badge
+              >
+            </div>
+            <p class="text-muted-foreground leading-relaxed">
+              Signs operations directly in memory without confirmation prompts.
+              Intended for automated test scripts and disposable testnet keys
+              only.
+            </p>
+          </div>
+
+          <Alert v-if="provider === 'ledger' && !hidSupported">
+            <AlertTriangle class="size-4 !text-red-500" aria-hidden="true" />
+            <AlertTitle>Browser not supported</AlertTitle>
+            <AlertDescription>
+              WebHID is required to communicate with a Ledger device. Please use
+              a Chromium-based browser (Chrome, Edge, or Brave).
+            </AlertDescription>
+          </Alert>
+
+          <Alert v-if="provider === 'programmatic' || provider === 'web3auth'">
+            <AlertTriangle class="size-4 !text-red-500" aria-hidden="true" />
+            <AlertTitle>Testing &amp; demonstration only</AlertTitle>
+            <AlertDescription>
+              <span v-if="provider === 'programmatic'">
+                Never enter a real personal secret key. Operations will execute
+                immediately without wallet confirmation.
+              </span>
+              <span v-else>
+                Web3Auth relays a derived private key directly to the app, so
+                operations execute without confirmation prompts.
+              </span>
+            </AlertDescription>
+          </Alert>
+
+          <div v-if="provider === 'programmatic'" class="space-y-2">
+            <Label :for="privateKeyInputId">Private Key</Label>
             <Input
               :id="privateKeyInputId"
               v-model="privateKey"
               type="text"
               placeholder="edsk..."
-              class="w-full"
+              class="w-full font-mono text-xs"
               autocomplete="off"
               spellcheck="false"
               :aria-describedby="privateKeyHelpId"
             />
             <p :id="privateKeyHelpId" class="text-muted-foreground text-xs">
-              Stored only in-memory for this demo. Provide a throwaway key.
+              Stored only in memory for this session. Provide a throwaway
+              testnet key (`edsk...`, `spsk...`, `p2sk...`, or `blsk...`).
             </p>
           </div>
+
+          <p class="text-muted-foreground text-xs">
+            Tip: Production dApps typically only need
+            <span class="text-foreground font-medium">Beacon</span> as a single
+            wallet integration. The direct signers above are provided here for
+            testing and hardware workflows.
+          </p>
         </div>
 
         <DialogFooter>
@@ -214,16 +337,19 @@
     <DialogContent>
       <DialogHeader>
         <DialogTitle>Connected Wallet</DialogTitle>
-        <DialogDescription class="flex gap-1">
-          <p>Connected to</p>
-          <p class="font-medium">{{ walletName }}</p>
+        <DialogDescription>
+          Connected via
+          <span class="text-foreground font-medium">{{
+            walletName || "Active Wallet"
+          }}</span>
         </DialogDescription>
       </DialogHeader>
 
-      <div class="text-sm">
-        <div class="flex items-center gap-1">
+      <div class="bg-muted/40 space-y-2 rounded-lg border p-3 text-sm">
+        <div class="flex items-center justify-between gap-2">
           <div class="min-w-0">
-            <p class="break-all">Address: {{ address }}</p>
+            <p class="text-muted-foreground text-xs">Address</p>
+            <p class="font-mono text-xs break-all">{{ address }}</p>
           </div>
           <div class="flex flex-shrink-0 gap-1">
             <Button
@@ -245,7 +371,12 @@
           </div>
         </div>
 
-        <p>Balance: {{ balance }} ꜩ</p>
+        <Separator />
+
+        <div class="flex items-center justify-between">
+          <span class="text-muted-foreground text-xs">Balance</span>
+          <span class="font-medium">{{ balance }} ꜩ</span>
+        </div>
       </div>
 
       <DialogFooter class="flex flex-col gap-2">
@@ -286,6 +417,7 @@ import {
 import { computed, ref, watch } from "vue";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -307,6 +439,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { buildIndexerUrl } from "@/lib/utils";
 import { formatBeaconError } from "@/lib/walletEvents";
 import { useSettingsStore } from "@/stores/settingsStore";

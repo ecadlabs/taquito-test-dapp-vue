@@ -66,3 +66,20 @@ test("does not reference retired ECAD infra endpoints", async () => {
 
   assert.deepEqual(matches.sort(), []);
 });
+
+test("does not advertise unprovisioned ushuaianet.dapp.taquito.io live deployment URL", async () => {
+  const publicLandingFiles = [
+    "README.md",
+    "src/modules/home/views/HomeView.vue",
+  ];
+  const matches: string[] = [];
+
+  for (const file of publicLandingFiles) {
+    const contents = await readFile(file, "utf8");
+    if (contents.includes("https://ushuaianet.dapp.taquito.io")) {
+      matches.push(file);
+    }
+  }
+
+  assert.deepEqual(matches, []);
+});
