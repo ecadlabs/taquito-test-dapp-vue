@@ -1,4 +1,5 @@
 import type { WalletStoreState } from "@/stores/createWalletStore";
+import type { WalletProvider } from "@/types/wallet";
 import {
   BeaconEvent,
   type BeaconWallet,
@@ -124,6 +125,26 @@ export const formatBeaconError = (error: unknown): string => {
   }
 
   return String(error);
+};
+
+/**
+ * Returns a wallet-aware confirmation prompt for the "wait-for-user" diagram
+ * step, or `null` when the active provider signs in-memory without user
+ * interaction in an external wallet.
+ *
+ * See https://github.com/ecadlabs/beacon-sdk-taquito-patches/issues/136 for the
+ * upstream feature request to expose a typed `WalletInfo` API on `DAppClient`.
+ */
+export const getWalletConfirmationMessage = (
+  provider?: WalletProvider,
+  walletName?: string,
+): string | null => {
+  if (provider === "programmatic" || provider === "web3auth") {
+    return null;
+  }
+
+  const target = walletName?.trim() || "your wallet";
+  return `Check ${target} to confirm the operation`;
 };
 
 const describeInvalidAccountReason = (

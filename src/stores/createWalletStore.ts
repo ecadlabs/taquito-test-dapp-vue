@@ -58,7 +58,7 @@ export interface WalletStoreState {
   getTezos: ComputedRef<TezosToolkit>;
   getAddress: ComputedRef<string | undefined>;
   getBalance: ComputedRef<TezosBalance | undefined>;
-  getProvider: ComputedRef<string | undefined>;
+  getProvider: ComputedRef<WalletProvider | undefined>;
   getWallet: ComputedRef<
     BeaconWallet | LedgerSigner | ProgrammaticWallet | undefined
   >;
@@ -120,7 +120,7 @@ export const createWalletStore = (
     const balance = ref<TezosBalance>();
     const walletName = ref<string>();
     const isDisconnecting = ref<boolean>(false);
-    const provider = ref<string | undefined>();
+    const provider = ref<WalletProvider | undefined>();
 
     const getTezos = computed(() => Tezos);
     const getWallet = computed(() => wallet.value);
@@ -255,6 +255,9 @@ export const createWalletStore = (
         await beaconWallet.requestPermissions();
       }
 
+      // TODO(https://github.com/ecadlabs/beacon-sdk-taquito-patches/issues/136):
+      // Replace this manual getActiveAccount() + getPeers() lookup with the public
+      // WalletInfo API once exposed in @ecadlabs/beacon-dapp and @taquito/beacon-wallet.
       try {
         const activeAccount = await beaconWallet.client.getActiveAccount();
         const peers = await beaconWallet.client.getPeers();
@@ -266,10 +269,9 @@ export const createWalletStore = (
                 peer.publicKey === activeAccount.origin.id,
             )
           : undefined;
-        walletName.value =
-          matchedPeer?.name ?? peers[0]?.name ?? "Beacon Wallet";
+        walletName.value = matchedPeer?.name ?? peers[0]?.name;
       } catch {
-        walletName.value = "unknown";
+        walletName.value = undefined;
       }
 
       wallet.value = beaconWallet;

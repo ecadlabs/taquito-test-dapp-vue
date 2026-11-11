@@ -118,8 +118,12 @@ export const AvailableTests: Record<string, TestMetadata> = {
             label: "Get Contract",
           },
           {
-            id: "execute-operation",
-            label: "Execute Increment",
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-confirmation",
@@ -134,8 +138,12 @@ export const AvailableTests: Record<string, TestMetadata> = {
             label: "Get Contract",
           },
           {
-            id: "execute-operation",
-            label: "Execute Decrement",
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-confirmation",
@@ -150,8 +158,12 @@ export const AvailableTests: Record<string, TestMetadata> = {
             label: "Get Contract",
           },
           {
-            id: "execute-operation",
-            label: "Execute Reset",
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-confirmation",
@@ -817,8 +829,12 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
             label: "Get Contract",
           },
           {
-            id: "execute-operation",
-            label: "Execute Add Record",
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-confirmation",
@@ -833,8 +849,12 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
             label: "Get Contract",
           },
           {
-            id: "execute-operation",
-            label: "Execute Set Nested Record",
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-confirmation",
@@ -849,8 +869,12 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
             label: "Get Contract",
           },
           {
-            id: "execute-operation",
-            label: "Execute Set Operation",
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-confirmation",
@@ -865,8 +889,12 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
             label: "Get Contract",
           },
           {
-            id: "execute-operation",
-            label: "Execute Update Metadata",
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-confirmation",
@@ -1075,8 +1103,12 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
             label: "Get FA2 Contract",
           },
           {
-            id: "execute-operation",
-            label: "Execute Mint Operation",
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-confirmation",
@@ -1091,8 +1123,12 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
             label: "Get FA2 Contract",
           },
           {
-            id: "execute-operation",
-            label: "Execute Burn Operation",
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-confirmation",
@@ -1107,8 +1143,12 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
             label: "Get FA2 Contract",
           },
           {
-            id: "execute-operation",
-            label: "Execute Transfer Operation",
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-confirmation",
@@ -1137,8 +1177,8 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
             label: "Get FA2 Contract",
           },
           {
-            id: "call-balance-of",
-            label: "Call FA2 Balance Function",
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-confirmation",
@@ -1190,8 +1230,12 @@ Michelson implements an instruction called 'CHECK_SIGNATURE' that allows it to r
             label: "Get Contract",
           },
           {
-            id: "execute-operation",
-            label: "Execute Operation",
+            id: "estimate-fees",
+            label: "Estimate Fees",
+          },
+          {
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-confirmation",
@@ -1279,8 +1323,8 @@ The bridge uses Smart Rollup technology to enable cross-layer communication.`,
             label: "Estimate Fees",
           },
           {
-            id: "send-deposit-transaction",
-            label: "Send Deposit Transaction",
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-for-chain-confirmation",
@@ -1365,8 +1409,8 @@ The bridge uses Smart Rollup technology to enable cross-layer communication.`,
             label: "Estimate Fees",
           },
           {
-            id: "send-deposit-transaction",
-            label: "Send Deposit Transaction",
+            id: "wait-for-user",
+            label: "Wait for User Confirmation",
           },
           {
             id: "wait-for-chain-confirmation",

@@ -232,3 +232,233 @@ test("standalone @taquito/wallet-connect is removed across codebase and Beacon h
   assert.doesNotMatch(signPayloadTs, /@taquito\/wallet-connect/);
   assert.match(signPayloadTs, /RequestSignPayloadInput/);
 });
+
+test("getWalletConfirmationMessage suppresses in-memory signers and uses active wallet name when available", async () => {
+  const [walletEventsModule, createWalletStoreTs, walletEventsTs] =
+    await Promise.all([
+      import("@/lib/walletEvents"),
+      readFile("src/stores/createWalletStore.ts", "utf8"),
+      readFile("src/lib/walletEvents.ts", "utf8"),
+    ]);
+
+  const getConfirmationMessage = (
+    walletEventsModule as unknown as {
+      getWalletConfirmationMessage: (
+        provider?: "beacon" | "programmatic" | "ledger" | "web3auth",
+        walletName?: string,
+      ) => string | null;
+    }
+  ).getWalletConfirmationMessage;
+
+  assert.equal(
+    typeof getConfirmationMessage,
+    "function",
+    "Expected walletEvents.ts to export getWalletConfirmationMessage",
+  );
+
+  // In-memory providers should not prompt user to check an external wallet
+  assert.equal(
+    getConfirmationMessage("programmatic", "Raw Private Key Access"),
+    null,
+  );
+  assert.equal(getConfirmationMessage("web3auth", "Web3Auth (Alice)"), null);
+
+  // Named external wallets should be named in the prompt
+  assert.equal(
+    getConfirmationMessage("beacon", "Kukai Wallet"),
+    "Check Kukai Wallet to confirm the operation",
+  );
+  assert.equal(
+    getConfirmationMessage("ledger", "Ledger Device"),
+    "Check Ledger Device to confirm the operation",
+  );
+
+  // Missing or blank wallet names fall back to "your wallet"
+  assert.equal(
+    getConfirmationMessage("beacon", undefined),
+    "Check your wallet to confirm the operation",
+  );
+  assert.equal(
+    getConfirmationMessage("beacon", "   "),
+    "Check your wallet to confirm the operation",
+  );
+
+  // createWalletStore.ts should type getProvider with WalletProvider, leave unknown Beacon
+  // peer names as undefined, and reference ecadlabs/beacon-sdk-taquito-patches/issues/136
+  assert.match(
+    createWalletStoreTs,
+    /getProvider:\s*ComputedRef<WalletProvider\s*\|\s*undefined>/,
+    "Expected createWalletStore.ts to type getProvider as ComputedRef<WalletProvider | undefined>",
+  );
+  assert.match(
+    createWalletStoreTs,
+    /ecadlabs\/beacon-sdk-taquito-patches\/issues\/136/,
+    "Expected createWalletStore.ts to reference ecadlabs/beacon-sdk-taquito-patches/issues/136",
+  );
+  assert.doesNotMatch(
+    createWalletStoreTs,
+    /walletName\.value\s*=\s*"unknown"/,
+    "createWalletStore.ts should use undefined instead of magic string 'unknown' for walletName",
+  );
+  assert.doesNotMatch(
+    createWalletStoreTs,
+    /\?\?\s*"Beacon Wallet"/,
+    "createWalletStore.ts should not fall back to magic string 'Beacon Wallet'",
+  );
+
+  // walletEvents.ts should reference #136 and not filter magic placeholder strings
+  assert.match(
+    walletEventsTs,
+    /ecadlabs\/beacon-sdk-taquito-patches\/issues\/136/,
+    "Expected walletEvents.ts to reference ecadlabs/beacon-sdk-taquito-patches/issues/136",
+  );
+  assert.doesNotMatch(
+    walletEventsTs,
+    /normalizedName !== "Beacon Wallet"/,
+    "walletEvents.ts should rely on WalletProvider and optional walletName instead of string blacklists",
+  );
+});
+
+test("style.css anchors beacon-toast to viewport and references beacon-sdk-taquito-patches#134", async () => {
+  const styleCss = await readFile("src/style.css", "utf8");
+
+  assert.match(
+    styleCss,
+    /ecadlabs\/beacon-sdk-taquito-patches\/issues\/134/,
+    "Expected src/style.css to reference ecadlabs/beacon-sdk-taquito-patches/issues/134",
+  );
+  assert.match(
+    styleCss,
+    /beacon-toast\s*\{[\s\S]*?position:\s*fixed;[\s\S]*?top:\s*0;[\s\S]*?left:\s*0;[\s\S]*?right:\s*0;[\s\S]*?z-index:\s*1000000;/,
+    "Expected src/style.css to anchor beacon-toast with position: fixed at the top of the viewport",
+  );
+});
+
+test("wallet-signing tests use estimate-fees and wait-for-user steps consistently", async () => {
+  const [
+    testsTs,
+    diagramStoreTs,
+    counterTs,
+    fa2TokenTs,
+    complexParamsTs,
+    contractEventsTs,
+    etherlinkBridgeTs,
+    tezlinkBridgeTs,
+  ] = await Promise.all([
+    readFile("src/modules/tests/tests.ts", "utf8"),
+    readFile("src/stores/diagramStore.ts", "utf8"),
+    readFile("src/modules/tests/tests/counter/counter-contract.ts", "utf8"),
+    readFile("src/modules/tests/tests/fa2-token/fa2-token.ts", "utf8"),
+    readFile(
+      "src/modules/tests/tests/complex-parameters/complex-parameters.ts",
+      "utf8",
+    ),
+    readFile(
+      "src/modules/tests/tests/contract-events/contract-events.ts",
+      "utf8",
+    ),
+    readFile(
+      "src/modules/tests/tests/etherlink-bridge/etherlink-bridge.ts",
+      "utf8",
+    ),
+    readFile(
+      "src/modules/tests/tests/tezlink-bridge/tezlink-bridge.ts",
+      "utf8",
+    ),
+  ]);
+
+  // diagramStore.ts should use getWalletConfirmationMessage for wait-for-user
+  assert.match(
+    diagramStoreTs,
+    /getWalletConfirmationMessage/,
+    "Expected diagramStore.ts to use getWalletConfirmationMessage for wait-for-user toasts",
+  );
+
+  // counter-contract.ts should report estimate-fees and wait-for-user instead of execute-operation
+  assert.doesNotMatch(
+    counterTs,
+    /setProgress\("execute-operation"\)/,
+    "counter-contract.ts should use wait-for-user instead of execute-operation",
+  );
+  assert.equal(
+    (counterTs.match(/setProgress\("estimate-fees"\)/g) ?? []).length,
+    3,
+    "counter-contract.ts should report estimate-fees in increment, decrement, and reset",
+  );
+  assert.equal(
+    (counterTs.match(/setProgress\("wait-for-user"\)/g) ?? []).length,
+    3,
+    "counter-contract.ts should report wait-for-user in increment, decrement, and reset",
+  );
+
+  // fa2-token.ts should use estimate-fees and wait-for-user, and fix get-contracts -> get-contract
+  assert.doesNotMatch(
+    fa2TokenTs,
+    /setProgress\("execute-operation"\)/,
+    "fa2-token.ts should use wait-for-user instead of execute-operation",
+  );
+  assert.doesNotMatch(
+    fa2TokenTs,
+    /setProgress\("get-contracts"\)/,
+    "fa2-token.ts should use get-contract to match its diagram definition",
+  );
+  assert.doesNotMatch(
+    fa2TokenTs,
+    /setProgress\("call-balance-of"\)/,
+    "fa2-token.ts get-balance-with-callback should use wait-for-user before sending the callback transaction",
+  );
+  assert.equal(
+    (fa2TokenTs.match(/setProgress\("estimate-fees"\)/g) ?? []).length,
+    3,
+    "fa2-token.ts should report estimate-fees in mint, burn, and transfer",
+  );
+  assert.equal(
+    (fa2TokenTs.match(/setProgress\("wait-for-user"\)/g) ?? []).length,
+    4,
+    "fa2-token.ts should report wait-for-user in mint, burn, transfer, and get-balance-with-callback",
+  );
+
+  // complex-parameters.ts should report estimate-fees and wait-for-user across all 4 write entrypoints
+  assert.doesNotMatch(
+    complexParamsTs,
+    /setProgress\("execute-operation"\)/,
+    "complex-parameters.ts should use wait-for-user instead of execute-operation",
+  );
+  assert.equal(
+    (complexParamsTs.match(/setProgress\("estimate-fees"\)/g) ?? []).length,
+    4,
+    "complex-parameters.ts should report estimate-fees in all 4 write operations",
+  );
+  assert.equal(
+    (complexParamsTs.match(/setProgress\("wait-for-user"\)/g) ?? []).length,
+    4,
+    "complex-parameters.ts should report wait-for-user in all 4 write operations",
+  );
+
+  // contract-events.ts emitEvent should report estimate-fees and wait-for-user
+  assert.doesNotMatch(
+    contractEventsTs,
+    /setProgress\("execute-operation"\)/,
+    "contract-events.ts should use wait-for-user instead of execute-operation",
+  );
+  assert.match(contractEventsTs, /setProgress\("estimate-fees"\)/);
+  assert.match(contractEventsTs, /setProgress\("wait-for-user"\)/);
+
+  // etherlink-bridge.ts and tezlink-bridge.ts deposits should report wait-for-user before sending
+  assert.doesNotMatch(
+    etherlinkBridgeTs,
+    /setProgress\("send-deposit-transaction"\)/,
+    "etherlink-bridge.ts should use wait-for-user instead of send-deposit-transaction",
+  );
+  assert.match(etherlinkBridgeTs, /setProgress\("wait-for-user"\)/);
+  assert.doesNotMatch(
+    tezlinkBridgeTs,
+    /setProgress\("send-deposit-transaction"\)/,
+    "tezlink-bridge.ts should use wait-for-user instead of send-deposit-transaction",
+  );
+  assert.match(tezlinkBridgeTs, /setProgress\("wait-for-user"\)/);
+
+  // tests.ts should not use call-balance-of or send-deposit-transaction in diagrams
+  assert.doesNotMatch(testsTs, /id:\s*"call-balance-of"/);
+  assert.doesNotMatch(testsTs, /id:\s*"send-deposit-transaction"/);
+});

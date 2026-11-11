@@ -121,6 +121,7 @@ const emitEvent = async (): Promise<void> => {
     diagramStore.setProgress("get-contract");
     const contract = await Tezos.wallet.at(CONTRACT_ADDRESS);
 
+    diagramStore.setProgress("estimate-fees");
     const transferParams = await contract.methodsObject
       .default()
       .toTransferParams();
@@ -130,7 +131,7 @@ const emitEvent = async (): Promise<void> => {
       diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("execute-operation");
+    diagramStore.setProgress("wait-for-user");
     const operation = await contract.methodsObject.default().send();
 
     diagramStore.setProgress("wait-confirmation");

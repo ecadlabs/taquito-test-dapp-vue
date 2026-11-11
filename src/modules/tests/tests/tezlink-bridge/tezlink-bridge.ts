@@ -103,7 +103,7 @@ const depositToTezlink = async (
       diagramStore.setFeeEstimate(estimate);
     }
 
-    diagramStore.setProgress("send-deposit-transaction");
+    diagramStore.setProgress("wait-for-user");
 
     const op = await depositMethod.send({ amount });
 
