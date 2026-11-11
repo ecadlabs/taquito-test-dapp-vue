@@ -81,15 +81,25 @@
           <Label :for="rpcInputId" class="flex items-center gap-2 font-medium">
             RPC URL
           </Label>
-          <Badge
-            variant="outline"
-            v-if="
-              rpcHealthCheckDuration > 0 && !runningHealthCheck && isRpcHealthy
-            "
-            class="text-xs"
+          <div
+            v-if="!runningHealthCheck && isRpcHealthy"
+            class="flex items-center gap-1"
           >
-            {{ Math.round(rpcHealthCheckDuration) }}ms
-          </Badge>
+            <Badge
+              v-if="rpcBlockLevel !== null"
+              variant="outline"
+              class="text-xs"
+            >
+              Block #{{ rpcBlockLevel.toLocaleString("en-US") }}
+            </Badge>
+            <Badge
+              v-if="rpcHealthCheckDuration > 0"
+              variant="outline"
+              class="text-xs"
+            >
+              {{ Math.round(rpcHealthCheckDuration) }}ms
+            </Badge>
+          </div>
         </div>
 
         <div class="flex items-center">
@@ -105,6 +115,19 @@
             :aria-invalid="!isRpcHealthy"
             :aria-describedby="rpcStatusId"
           />
+          <Button
+            variant="ghost"
+            size="icon"
+            @click="settingsStore.checkRpcHealth()"
+            :disabled="runningHealthCheck"
+            class="ml-1"
+            aria-label="Check RPC health"
+          >
+            <RefreshCw
+              class="text-muted-foreground size-4"
+              :class="{ 'animate-spin': runningHealthCheck }"
+            />
+          </Button>
           <Button
             v-if="settingsStore.isUsingCustomRpcUrl"
             variant="ghost"
@@ -134,7 +157,11 @@
             class="flex items-center gap-1 text-xs text-red-500"
           >
             <TriangleAlert class="size-3" />
-            <span>Cannot reach RPC URL</span>
+            <span>{{
+              rpcHealthError
+                ? `Cannot reach RPC URL (${rpcHealthError})`
+                : "Cannot reach RPC URL"
+            }}</span>
           </div>
         </div>
       </div>
@@ -203,9 +230,8 @@ import {
 } from "@/stores/settingsStore";
 import type { NetworkType } from "@taquito/beacon-wallet/types";
 import { version as taquitoVersion } from "@taquito/taquito/package.json";
-import { useDebounce } from "@vueuse/core";
-import { LoaderCircle, TriangleAlert, Undo2 } from "lucide-vue-next";
-import { computed, ref, watch } from "vue";
+import { LoaderCircle, RefreshCw, TriangleAlert, Undo2 } from "lucide-vue-next";
+import { computed } from "vue";
 
 const emit = defineEmits(["close"]);
 
@@ -228,46 +254,14 @@ const confirmationHelpId = "settings-confirmation-help";
 const rpcInputId = "settings-rpc-url";
 const rpcStatusId = "settings-rpc-status";
 
-const isRpcHealthy = ref(true);
-const rpcHealthCheckDuration = ref(0);
-
-const rpcUrlRef = computed(() => settingsStore.settings.rpcUrl);
-const debouncedRpcUrl = useDebounce(rpcUrlRef, 500);
-const runningHealthCheck = ref(false);
+const isRpcHealthy = computed(() => settingsStore.isRpcHealthy);
+const rpcHealthCheckDuration = computed(
+  () => settingsStore.rpcHealthCheckDuration,
+);
+const rpcBlockLevel = computed(() => settingsStore.rpcBlockLevel);
+const rpcHealthError = computed(() => settingsStore.rpcHealthError);
+const runningHealthCheck = computed(() => settingsStore.runningHealthCheck);
 
 const versionUrl = `https://github.com/ecadlabs/taquito-test-dapp-vue/releases/tag/${version}`;
 const shaUrl = `https://github.com/ecadlabs/taquito-test-dapp-vue/commit/${gitSha}`;
-
-watch(debouncedRpcUrl, (newRpcUrl: string) => {
-  const checkRpcHealth = async (url: string) => {
-    const parsed = new URL(url);
-    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-      return false;
-    }
-
-    runningHealthCheck.value = true;
-
-    try {
-      const controller = new AbortController();
-      setTimeout(() => controller.abort(), 10000);
-
-      const response = await fetch(`${parsed}/chains/main/blocks/head/header`, {
-        method: "GET",
-      });
-      return response.ok;
-    } catch {
-      return false;
-    } finally {
-      runningHealthCheck.value = false;
-    }
-  };
-
-  (async () => {
-    const startTime = performance.now();
-    isRpcHealthy.value = await checkRpcHealth(newRpcUrl);
-    const endTime = performance.now();
-    const duration = endTime - startTime;
-    rpcHealthCheckDuration.value = duration;
-  })();
-});
 </script>

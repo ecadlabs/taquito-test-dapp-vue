@@ -20,11 +20,8 @@ We consider this a **public good**. Our goal is to have a deployment ready on ev
 
 | Network               | URL                                        | Description                                      |
 | --------------------- | ------------------------------------------ | ------------------------------------------------ |
-| **Ushuaianet**        | https://ushuaianet.dapp.taquito.io/        | U025 protocol testnet                            |
 | **Shadownet**         | https://shadownet.dapp.taquito.io/         | Long lived testnet                               |
 | **Tezlink Shadownet** | https://tezlink-shadownet.dapp.taquito.io/ | Tezos X Michelson Runtime connected to Shadownet |
-
-Ushuaianet uses the public RPC endpoint `https://rpc.ushuaianet.teztnets.com`.
 
 ## ✨ Available Tests
 

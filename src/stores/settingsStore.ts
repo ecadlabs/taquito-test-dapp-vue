@@ -1,4 +1,10 @@
+import {
+  formatRpcHealthSummary,
+  probeRpcHealth,
+  type RpcHealthStatus,
+} from "@/lib/rpcHealth";
 import { NetworkType } from "@taquito/beacon-wallet/types";
+import { useDebounce } from "@vueuse/core";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
 
@@ -120,6 +126,54 @@ export const useSettingsStore = defineStore("settings", () => {
     settings.value.rpcUrl = defaultSettings.rpcUrl;
   };
 
+  const rpcHealthStatus = ref<RpcHealthStatus>("checking");
+  const rpcHealthCheckDuration = ref<number>(0);
+  const rpcBlockLevel = ref<number | null>(null);
+  const rpcChainId = ref<string | null>(null);
+  const rpcHealthError = ref<string | null>(null);
+
+  const isRpcHealthy = computed(() => rpcHealthStatus.value !== "unhealthy");
+  const runningHealthCheck = computed(
+    () => rpcHealthStatus.value === "checking",
+  );
+  const rpcHealthSummary = computed(() =>
+    formatRpcHealthSummary({
+      status: rpcHealthStatus.value,
+      durationMs: rpcHealthCheckDuration.value,
+      blockLevel: rpcBlockLevel.value,
+      error: rpcHealthError.value,
+    }),
+  );
+
+  let latestProbeSequence = 0;
+
+  const checkRpcHealth = async (url = settings.value.rpcUrl): Promise<void> => {
+    const probeSequence = ++latestProbeSequence;
+    rpcHealthStatus.value = "checking";
+
+    const result = await probeRpcHealth(url);
+    if (probeSequence !== latestProbeSequence) {
+      return;
+    }
+
+    rpcHealthStatus.value = result.healthy ? "healthy" : "unhealthy";
+    rpcHealthCheckDuration.value = result.durationMs;
+    rpcBlockLevel.value = result.blockLevel;
+    rpcChainId.value = result.chainId;
+    rpcHealthError.value = result.error;
+  };
+
+  const rpcUrlRef = computed(() => settings.value.rpcUrl);
+  const debouncedRpcUrl = useDebounce(rpcUrlRef, 400);
+
+  watch(
+    debouncedRpcUrl,
+    (newRpcUrl: string) => {
+      void checkRpcHealth(newRpcUrl);
+    },
+    { immediate: true },
+  );
+
   return {
     settings,
     getSettings,
@@ -127,6 +181,15 @@ export const useSettingsStore = defineStore("settings", () => {
     getConfirmationCount,
     getThemeMode,
     isUsingCustomRpcUrl,
+    rpcHealthStatus,
+    rpcHealthCheckDuration,
+    rpcBlockLevel,
+    rpcChainId,
+    rpcHealthError,
+    isRpcHealthy,
+    runningHealthCheck,
+    rpcHealthSummary,
+    checkRpcHealth,
     setThemeMode,
     resetRpcUrl,
   };
