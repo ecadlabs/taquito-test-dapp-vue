@@ -18,10 +18,12 @@ We consider this a **public good**. Our goal is to have a deployment ready on ev
 
 ## 🌐 Live Deployments
 
-| Network               | URL                                        | Description                                      |
-| --------------------- | ------------------------------------------ | ------------------------------------------------ |
-| **Shadownet**         | https://shadownet.dapp.taquito.io/         | Long lived testnet                               |
-| **Tezlink Shadownet** | https://tezlink-shadownet.dapp.taquito.io/ | Tezos X Michelson Runtime connected to Shadownet |
+| Network        | URL                                 | Description           |
+| -------------- | ----------------------------------- | --------------------- |
+| **Ushuaianet** | https://ushuaianet.dapp.taquito.io/ | U025 protocol testnet |
+| **Shadownet**  | https://shadownet.dapp.taquito.io/  | Long lived testnet    |
+
+Ushuaianet uses the public RPC endpoint `https://rpc.ushuaianet.teztnets.com`.
 
 ## ✨ Available Tests
 
@@ -66,8 +68,8 @@ We consider this a **public good**. Our goal is to have a deployment ready on ev
 
 ### Prerequisites
 
-- **Node.js** 18+
-- **npm** or **yarn**
+- **Node.js** 24+ (LTS)
+- **npm**
 - **Tezos Wallet** (Temple, Kukai, etc.)
 
 ### Quick Start

@@ -32,9 +32,6 @@ jobs:
             project_name: taquito-dapp-shadownet
           - environment: ushuaianet
             project_name: taquito-dapp-ushuaianet
-          - environment: tezlink-shadownet
-            network_name: tezlink-shadownet
-            project_name: taquito-dapp-tezlink-shadownet
     env:
       VITE_NETWORK_TYPE: ${{ vars.NETWORK_TYPE || matrix.environment }}
       VITE_NETWORK_NAME: ${{ vars.NETWORK_NAME }}
@@ -51,13 +48,13 @@ jobs:
       preview-url: ${{ steps.cloudflare_publish.outputs.URL }}
       environment: ${{ matrix.environment }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event_name == 'push' && 'main' || github.ref }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22.18.0
-      - run: npx -y npm@11 ci
+          node-version: 24
+      - run: npm ci
       - run: npm run format:check
 
       # Debug environment variables
@@ -89,23 +86,38 @@ jobs:
           npm run build:verified
 
       - name: Ensure Cloudflare Pages project exists
-        uses: cloudflare/wrangler-action@v3
-        continue-on-error: true
-        with:
-          apiToken: ${{ secrets.CF_API_TOKEN }}
-          accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          wranglerVersion: "4.83.0"
-          command: pages project create ${{ matrix.project_name }} --production-branch=main
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          PROJECT_NAME: ${{ matrix.project_name }}
+          CUSTOM_DOMAIN: ${{ matrix.environment }}.dapp.taquito.io
+        run: |
+          API="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects/$PROJECT_NAME"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $CF_API_TOKEN" "$API")
+          if [ "$STATUS" = "404" ]; then
+            curl -sf -X POST \
+              -H "Authorization: Bearer $CF_API_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d "{\"name\":\"$PROJECT_NAME\",\"production_branch\":\"main\"}" \
+              "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/pages/projects"
+          fi
+          DOMAINS=$(curl -sf -H "Authorization: Bearer $CF_API_TOKEN" "$API/domains" | jq -r '.result[]?.name' || true)
+          if ! printf '%s\n' "$DOMAINS" | grep -qx "$CUSTOM_DOMAIN"; then
+            curl -s -X POST \
+              -H "Authorization: Bearer $CF_API_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d "{\"name\":\"$CUSTOM_DOMAIN\"}" \
+              "$API/domains" >/dev/null || true
+          fi
 
       - name: Publish to Cloudflare Pages
         id: cloudflare_publish
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          wranglerVersion: "4.83.0"
-          command: pages deploy dist --project-name=${{ matrix.project_name }}
+          wranglerVersion: "4.160.1"
+          command: pages deploy dist --project-name=${{ matrix.project_name }} --commit-dirty=true
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
   preview:
@@ -130,13 +142,13 @@ jobs:
       VITE_WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID }}
       VITE_TEZLINK_SHADOWNET_RPC: ${{ vars.TEZLINK_SHADOWNET_RPC }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22.18.0
+          node-version: 24
 
-      - run: npx -y npm@11 ci
+      - run: npm ci
       - run: npm run format:check
 
       - name: Build application
@@ -154,16 +166,16 @@ jobs:
 
       - name: Publish to Cloudflare Pages
         id: cloudflare_publish
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          wranglerVersion: "4.83.0"
-          command: pages deploy dist --project-name=taquito-dapp-shadownet --branch=${{ steps.branch_info.outputs.name }}
+          wranglerVersion: "4.160.1"
+          command: pages deploy dist --project-name=taquito-dapp-shadownet --branch=${{ steps.branch_info.outputs.name }} --commit-dirty=true
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Comment PR with preview URL
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         with:
           header: shadownet-preview
           message: |

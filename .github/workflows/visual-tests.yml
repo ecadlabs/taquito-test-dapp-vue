@@ -19,19 +19,19 @@ jobs:
       VITE_RPC_URL: ${{ vars.RPC_URL }}
       WALLET_PRIVATE_KEY: ${{ secrets.WALLET_PRIVATE_KEY }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: lts/*
+          node-version: 24
       - name: Install dependencies
-        run: npx -y npm@11 ci
+        run: npm ci
       - name: Originate Counter Contract
         run: npm run originate ${{ secrets.WALLET_PRIVATE_KEY }}
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Run Playwright tests
         run: npx playwright test staking.spec.ts
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: playwright-artifacts
