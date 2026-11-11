@@ -211,6 +211,182 @@ test("formatSaplingTransactionHistory preserves chronological order and filters 
       },
     ],
   );
+
+  // Shuffled output ordering (outputOrder: 'randomized'):
+  // When the self-change output appears BEFORE the recipient output in txData.outgoing,
+  // followed by a subsequent incoming shield note from another sender, the recipient outgoing
+  // note must remain grouped with its transfer before the subsequent incoming shield note.
+  const shuffledViewerData = {
+    incoming: [
+      {
+        value: new BigNumber(3_000_000),
+        memo: "Shield",
+        paymentAddress: USER_ADDRESS,
+        isSpent: true,
+      },
+      {
+        value: new BigNumber(2_000_000),
+        memo: "",
+        paymentAddress: USER_ADDRESS,
+        isSpent: false,
+      },
+      {
+        value: new BigNumber(4_000_000),
+        memo: "Later",
+        paymentAddress: USER_ADDRESS,
+        isSpent: false,
+      },
+    ],
+    outgoing: [
+      // Self-change note shuffled before the recipient note in the transfer
+      {
+        value: new BigNumber(2_000_000),
+        memo: "",
+        paymentAddress: USER_ADDRESS,
+      },
+      {
+        value: new BigNumber(1_000_000),
+        memo: "Transfer",
+        paymentAddress: ALICE_ADDRESS,
+      },
+    ],
+  };
+
+  const shuffledHistory = formatHistory(shuffledViewerData, USER_ADDRESS);
+
+  assert.equal(shuffledHistory.total, 4);
+  assert.deepEqual(
+    shuffledHistory.transactions.map((tx) => ({
+      type: tx.type,
+      amount: tx.amount,
+      memo: tx.memo,
+      isSpent: tx.isSpent,
+      isChange: tx.isChange,
+    })),
+    [
+      {
+        type: "incoming",
+        amount: 3_000_000,
+        memo: "Shield",
+        isSpent: true,
+        isChange: false,
+      },
+      {
+        type: "outgoing",
+        amount: 1_000_000,
+        memo: "Transfer",
+        isSpent: undefined,
+        isChange: false,
+      },
+      {
+        type: "incoming",
+        amount: 2_000_000,
+        memo: undefined,
+        isSpent: false,
+        isChange: true,
+      },
+      {
+        type: "incoming",
+        amount: 4_000_000,
+        memo: "Later",
+        isSpent: false,
+        isChange: false,
+      },
+    ],
+  );
+
+  // Unshield followed by private transfer:
+  // 1. User shields 5 tez (spent later)
+  // 2. User unshields 2 tez -> creates 3 tez self-change (no recipient note in pool)
+  // 3. User transfers 1 tez to Alice -> creates 1 tez outgoing to Alice + 2 tez self-change
+  // The unshield's self-change note must NOT steal Alice's subsequent outgoing note!
+  const unshieldThenTransferData = {
+    incoming: [
+      {
+        value: new BigNumber(5_000_000),
+        memo: "Shield",
+        paymentAddress: USER_ADDRESS,
+        isSpent: true,
+      },
+      {
+        value: new BigNumber(3_000_000),
+        memo: "",
+        paymentAddress: USER_ADDRESS,
+        isSpent: true,
+      },
+      {
+        value: new BigNumber(2_000_000),
+        memo: "",
+        paymentAddress: USER_ADDRESS,
+        isSpent: false,
+      },
+    ],
+    outgoing: [
+      // Unshield change note (3 tez)
+      {
+        value: new BigNumber(3_000_000),
+        memo: "",
+        paymentAddress: USER_ADDRESS,
+      },
+      // Subsequent transfer to Alice (1 tez recipient + 2 tez change)
+      {
+        value: new BigNumber(1_000_000),
+        memo: "Transfer",
+        paymentAddress: ALICE_ADDRESS,
+      },
+      {
+        value: new BigNumber(2_000_000),
+        memo: "",
+        paymentAddress: USER_ADDRESS,
+      },
+    ],
+  };
+
+  const unshieldThenTransferHistory = formatHistory(
+    unshieldThenTransferData,
+    USER_ADDRESS,
+  );
+
+  assert.equal(unshieldThenTransferHistory.total, 4);
+  assert.deepEqual(
+    unshieldThenTransferHistory.transactions.map((tx) => ({
+      type: tx.type,
+      amount: tx.amount,
+      memo: tx.memo,
+      isSpent: tx.isSpent,
+      isChange: tx.isChange,
+    })),
+    [
+      {
+        type: "incoming",
+        amount: 5_000_000,
+        memo: "Shield",
+        isSpent: true,
+        isChange: false,
+      },
+      {
+        type: "incoming",
+        amount: 3_000_000,
+        memo: undefined,
+        isSpent: true,
+        isChange: true,
+      },
+      {
+        type: "outgoing",
+        amount: 1_000_000,
+        memo: "Transfer",
+        isSpent: undefined,
+        isChange: false,
+      },
+      {
+        type: "incoming",
+        amount: 2_000_000,
+        memo: undefined,
+        isSpent: false,
+        isChange: true,
+      },
+    ],
+  );
 });
 
 test("shieldToUser, transferToAlice, and unshieldToUser validate amounts, preload params before sending, and use wait-for-user step", async () => {
@@ -226,12 +402,16 @@ test("shieldToUser, transferToAlice, and unshieldToUser validate amounts, preloa
 
   const progressSteps: string[] = [];
   const recordedDiagrams: Array<{ testId: string; key?: string }> = [];
+  const recordedContractDetails: Array<Record<string, unknown>> = [];
   let recordedEstimate: unknown = null;
 
   resetForTesting(async () => ({
     initSapling: async () => {},
     preloadSaplingParams: async () => {},
     SaplingToolkit: class {
+      constructor(_keys: unknown, contractDetails: Record<string, unknown>) {
+        recordedContractDetails.push(contractDetails);
+      }
       async prepareShieldedTransaction() {
         return "00deadbeef";
       }
@@ -353,6 +533,30 @@ test("shieldToUser, transferToAlice, and unshieldToUser validate amounts, preloa
       "ready",
       "Proving params should be marked ready by shieldToUser itself",
     );
+
+    await saplingModule.transferToAlice(
+      fakeTezos as never,
+      "KT1test",
+      fakeUserKey,
+      ALICE_ADDRESS,
+      1,
+    );
+    await saplingModule.unshieldToUser(
+      fakeTezos as never,
+      "KT1test",
+      fakeUserKey,
+      "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb",
+      1,
+    );
+
+    assert.equal(recordedContractDetails.length, 3);
+    for (const details of recordedContractDetails) {
+      assert.equal(
+        details.outputOrder,
+        "randomized",
+        "SaplingToolkit should opt in to randomized output ordering",
+      );
+    }
   } finally {
     resetForTesting();
   }

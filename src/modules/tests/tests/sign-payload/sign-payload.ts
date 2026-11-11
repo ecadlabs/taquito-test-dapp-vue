@@ -4,10 +4,10 @@ import { useDiagramStore } from "@/stores/diagramStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
 import { BeaconWallet } from "@taquito/beacon-wallet";
+import type { RequestSignPayloadInput } from "@taquito/beacon-wallet/types";
 import { LedgerSigner } from "@taquito/ledger-signer";
 import type { MichelsonData, MichelsonType } from "@taquito/michel-codec";
 import type { Estimate } from "@taquito/taquito";
-import { WalletConnect } from "@taquito/wallet-connect";
 
 const TEST_ID = "sign-payload";
 let estimate: Estimate;
@@ -46,7 +46,7 @@ const sign = async (
     const payloadBytes = "05" + "01" + paddedBytesLength + bytes;
 
     // The payload to send to the wallet
-    const payload = {
+    const payload: RequestSignPayloadInput = {
       signingType: beaconTypes.SigningType.MICHELINE,
       payload: payloadBytes,
       sourceAddress: walletStore.getAddress,
@@ -66,9 +66,6 @@ const sign = async (
 
     if (wallet instanceof BeaconWallet) {
       signedPayload = await wallet.client.requestSignPayload(payload);
-    } else if (wallet instanceof WalletConnect) {
-      const signature = await wallet.sign(payloadBytes);
-      signedPayload = { signature };
     } else if (wallet instanceof LedgerSigner) {
       const signature = await Tezos.signer.sign(payloadBytes);
       signedPayload = { signature: signature.prefixSig };
@@ -147,7 +144,7 @@ const signTzip32 = async (input: string) => {
     // The 05 prefix indicates a Micheline expression, 01 indicates bytes
     const michelinePayload = "05" + "01" + fullPayloadHex;
 
-    const payload = {
+    const payload: RequestSignPayloadInput = {
       signingType: beaconTypes.SigningType.MICHELINE,
       payload: michelinePayload,
     };
@@ -166,9 +163,6 @@ const signTzip32 = async (input: string) => {
 
     if (wallet instanceof BeaconWallet) {
       signedPayload = await wallet.client.requestSignPayload(payload);
-    } else if (wallet instanceof WalletConnect) {
-      const signature = await wallet.sign(payload.payload);
-      signedPayload = { signature };
     } else if (wallet instanceof LedgerSigner) {
       const signature = await Tezos.signer.sign(payload.payload);
       signedPayload = { signature: signature.prefixSig };

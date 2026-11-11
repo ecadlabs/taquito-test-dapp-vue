@@ -41,15 +41,8 @@ onMounted(async () => {
 
   if (provider === "beacon") {
     const beaconActiveAccount = localStorage.getItem("beacon:active-account");
-    if (beaconActiveAccount !== "undefined") {
+    if (beaconActiveAccount && beaconActiveAccount !== "undefined") {
       walletStore.initializeWallet("beacon");
-    }
-  } else if (provider === "walletconnect") {
-    // TODO: pass a disabled state to the connect button while this is loading
-    const walletConnectActiveSession =
-      await walletStore.getWalletConnectSessionFromIndexedDB();
-    if (walletConnectActiveSession !== undefined) {
-      walletStore.initializeWallet("walletconnect");
     }
   } else if (provider === "web3auth") {
     // Restore Web3Auth session if the user was previously connected
@@ -62,6 +55,9 @@ onMounted(async () => {
       console.error("Failed to restore Web3Auth session:", error);
       localStorage.removeItem("wallet-provider");
     }
+  } else if (provider) {
+    // Clean up any stale or removed provider keys (e.g. legacy standalone walletconnect)
+    localStorage.removeItem("wallet-provider");
   }
 });
 

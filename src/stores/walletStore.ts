@@ -1,7 +1,4 @@
-import {
-  initializeBeaconEvents,
-  initializeWalletConnectEvents,
-} from "@/lib/walletEvents";
+import { initializeBeaconEvents } from "@/lib/walletEvents";
 import { getWalletConfig } from "@/networks/network-registry";
 import { createWalletStore } from "@/stores/createWalletStore";
 import { useSettingsStore } from "@/stores/settingsStore";
@@ -26,12 +23,10 @@ export const useWalletStore = createWalletStore(
     rpcUrl: () => useSettingsStore().settings.rpcUrl,
     beaconNetworkType: walletConfig.beacon.networkType,
     beaconNetworkName: walletConfig.beacon.networkName,
-    walletConnectNetworkType: walletConfig.walletConnect.networkType,
     localStoragePrefix: "wallet",
     appName: walletConfig.appName,
   },
   {
     beacon: initializeBeaconEvents,
-    walletConnect: initializeWalletConnectEvents,
   },
 );

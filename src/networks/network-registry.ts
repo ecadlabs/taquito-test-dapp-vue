@@ -5,7 +5,6 @@ import type {
   NetworkContractsConfig,
   NetworkId,
   NetworkProfile,
-  WalletConnectNetworkType,
 } from "@/types/network";
 
 const networkDefinitions: Omit<NetworkProfile, "contracts">[] = [
@@ -22,9 +21,6 @@ const networkDefinitions: Omit<NetworkProfile, "contracts">[] = [
       beacon: {
         networkType: "shadownet" as BeaconNetworkType,
         networkName: "shadownet",
-      },
-      walletConnect: {
-        networkType: "shadownet" as WalletConnectNetworkType,
       },
     },
     capabilities: [
@@ -49,9 +45,6 @@ const networkDefinitions: Omit<NetworkProfile, "contracts">[] = [
         networkType: "tezlink-shadownet" as BeaconNetworkType,
         networkName: "tezlink-shadownet",
       },
-      walletConnect: {
-        networkType: "tezlink_shadownet" as WalletConnectNetworkType,
-      },
     },
     capabilities: ["l2-wallet", "contract-fixtures", "tezlink-bridge-l2-to-l1"],
   },
@@ -66,9 +59,6 @@ const networkDefinitions: Omit<NetworkProfile, "contracts">[] = [
       beacon: {
         networkType: "ushuaianet" as BeaconNetworkType,
         networkName: "ushuaianet",
-      },
-      walletConnect: {
-        networkType: "ushuaianet" as WalletConnectNetworkType,
       },
     },
     capabilities: ["l1-wallet", "contract-fixtures", "sapling"],

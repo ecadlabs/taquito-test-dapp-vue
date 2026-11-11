@@ -1,3 +1,4 @@
+import { formatBeaconError } from "@/lib/walletEvents";
 import type { TestDiagram } from "@/modules/tests/test";
 import { getTestDiagram } from "@/modules/tests/tests";
 import { useWalletStore } from "@/stores/walletStore";
@@ -128,7 +129,7 @@ export const useDiagramStore = defineStore("diagram", () => {
       }
     }
 
-    errorMessage.value = error;
+    errorMessage.value = formatBeaconError(error);
     diagramStatus.value = "errored";
   };
 

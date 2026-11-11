@@ -1,5 +1,4 @@
-type WalletProvider =
-  "beacon" | "walletconnect" | "programmatic" | "ledger" | "web3auth";
+type WalletProvider = "beacon" | "programmatic" | "ledger" | "web3auth";
 
 export interface ProgrammaticWallet {
   getPKH: () => Promise<string>;

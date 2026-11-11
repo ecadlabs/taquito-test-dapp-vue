@@ -65,19 +65,23 @@
           <DialogDescription>
             <div>
               <div class="flex flex-wrap items-center space-x-1 text-left">
-                <span>Taquito Playground supports both</span>
+                <span>Taquito Playground connects via</span>
                 <a
                   href="https://www.walletbeacon.io/"
                   target="_blank"
                   class="text-blue-400 hover:underline"
                   >Beacon</a
                 >
-                <span>and</span>
+                <span>(supporting browser extensions and</span>
                 <a
                   href="https://walletconnect.network/"
                   target="_blank"
                   class="text-blue-400 hover:underline"
-                  >WalletConnect.</a
+                  >WalletConnect</a
+                >
+                <span
+                  >mobile or QR wallets) as well as hardware and testing
+                  signers.</span
                 >
                 <p>Select your preference and hit connect to get started.</p>
               </div>
@@ -138,7 +142,6 @@
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="beacon"> Beacon </SelectItem>
-                <SelectItem value="walletconnect"> WalletConnect </SelectItem>
                 <SelectItem value="ledger"> Ledger Device </SelectItem>
                 <SelectItem value="web3auth">
                   Web3Auth (Social Login)
@@ -305,6 +308,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { buildIndexerUrl } from "@/lib/utils";
+import { formatBeaconError } from "@/lib/walletEvents";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { toast } from "vue-sonner";
 
@@ -384,12 +388,12 @@ const connect = async () => {
       // For Ledger, go back to preparation step and show error
       connectionStep.value = "ledger-preparation";
       toast.error("Ledger connection failed", {
-        description: error instanceof Error ? error.message : String(error),
+        description: formatBeaconError(error),
       });
     } else {
       // For other providers, just show error and close dialog
       toast.error("Wallet connection failed", {
-        description: error instanceof Error ? error.message : String(error),
+        description: formatBeaconError(error),
       });
       showConnectDialog.value = false;
     }
@@ -405,7 +409,7 @@ const disconnect = async () => {
     toast.success("Wallet disconnected");
   } catch (error) {
     toast.error("Wallet disconnection failed", {
-      description: error instanceof Error ? error.message : String(error),
+      description: formatBeaconError(error),
     });
   } finally {
     showDisconnectDialog.value = false;
