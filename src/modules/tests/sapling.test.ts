@@ -624,3 +624,318 @@ test("sapling UI, metadata, and Playwright spec follow UX and dark-mode guardrai
     "tests/sapling.spec.ts should use real Playwright assertions instead of waitForTimeout(5000)",
   );
 });
+
+test("reloadWithFreshSaplingParams preserves stored session keys unless clearKeys option is true", async () => {
+  const saplingModule = await import("@/modules/tests/tests/sapling/sapling");
+
+  const fakeStorageMap = new Map<string, string>();
+  const fakeStorage = {
+    getItem: (key: string) => fakeStorageMap.get(key) ?? null,
+    setItem: (key: string, value: string) => {
+      fakeStorageMap.set(key, value);
+    },
+    removeItem: (key: string) => {
+      fakeStorageMap.delete(key);
+    },
+  };
+
+  const originalWindow = globalThis.window;
+  let reloadCount = 0;
+
+  Object.defineProperty(globalThis, "window", {
+    configurable: true,
+    value: {
+      sessionStorage: fakeStorage,
+      location: {
+        reload: () => {
+          reloadCount++;
+        },
+      },
+    },
+  });
+
+  try {
+    fakeStorage.setItem("sapling:user-mnemonic", "user words");
+    fakeStorage.setItem("sapling:alice-mnemonic", "alice words");
+
+    // Default reload should bust proving-params cache WITHOUT wiping keys
+    saplingModule.reloadWithFreshSaplingParams();
+    assert.equal(reloadCount, 1);
+    assert.equal(
+      fakeStorage.getItem("sapling:user-mnemonic"),
+      "user words",
+      "reloadWithFreshSaplingParams() must preserve user mnemonic by default",
+    );
+    assert.equal(
+      fakeStorage.getItem("sapling:alice-mnemonic"),
+      "alice words",
+      "reloadWithFreshSaplingParams() must preserve Alice mnemonic by default",
+    );
+    assert.ok(
+      fakeStorage.getItem("sapling:fresh-params-reload"),
+      "reloadWithFreshSaplingParams() must set the cache-bust token",
+    );
+
+    // Explicit { clearKeys: true } should clear keys as well
+    saplingModule.reloadWithFreshSaplingParams({ clearKeys: true });
+    assert.equal(reloadCount, 2);
+    assert.equal(fakeStorage.getItem("sapling:user-mnemonic"), null);
+    assert.equal(fakeStorage.getItem("sapling:alice-mnemonic"), null);
+  } finally {
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: originalWindow,
+    });
+  }
+});
+
+test("shieldToUser and transferToAlice support custom memos and reject memos exceeding 8 UTF-8 bytes", async () => {
+  const saplingModule = await import("@/modules/tests/tests/sapling/sapling");
+
+  const resetForTesting = (
+    saplingModule as unknown as {
+      resetSaplingRuntimeForTesting: (loader?: () => Promise<unknown>) => void;
+    }
+  ).resetSaplingRuntimeForTesting;
+  const setHooks = (
+    saplingModule as unknown as {
+      setSaplingStoreHooksForTesting: (hooks: {
+        setTestDiagram: (testId: string, key?: string) => void;
+        setProgress: (step: string) => void;
+        setFeeEstimate: (estimate: unknown) => void;
+        setOperationHash: (opHash: string) => void;
+        setCompleted: () => void;
+        getConfirmationCount: () => number;
+      }) => void;
+    }
+  ).setSaplingStoreHooksForTesting;
+
+  const shieldInputs: Array<
+    Array<{ to: string; amount: number; memo?: string }>
+  > = [];
+  const transferInputs: Array<
+    Array<{ to: string; amount: number; memo?: string }>
+  > = [];
+
+  resetForTesting(async () => ({
+    initSapling: async () => {},
+    preloadSaplingParams: async () => {},
+    SaplingToolkit: class {
+      async prepareShieldedTransaction(
+        txs: Array<{ to: string; amount: number; memo?: string }>,
+      ) {
+        shieldInputs.push(txs);
+        return "00deadbeef";
+      }
+      async prepareSaplingTransaction(
+        txs: Array<{ to: string; amount: number; memo?: string }>,
+      ) {
+        transferInputs.push(txs);
+        return "00cafebabe";
+      }
+    },
+  }));
+
+  setHooks({
+    setTestDiagram: () => {},
+    setProgress: () => {},
+    setFeeEstimate: () => {},
+    setOperationHash: () => {},
+    setCompleted: () => {},
+    getConfirmationCount: () => 1,
+  });
+
+  const fakeUserKey = {
+    spendingKey: {} as never,
+    address: USER_ADDRESS,
+    mnemonic: "test mnemonic",
+  };
+
+  const fakeTezos = {
+    rpc: {
+      getRpcUrl: () => "https://rpc.shadownet.teztnets.com",
+    },
+    estimate: {
+      transfer: async () => ({ suggestedFeeMutez: 1234 }),
+    },
+    wallet: {
+      at: async () => ({
+        methodsObject: {
+          default: () => ({
+            toTransferParams: async () => ({ to: "KT1test", amount: 3 }),
+            send: async () => ({
+              opHash: "ooTestOpHash123",
+              confirmation: async () => {},
+            }),
+          }),
+        },
+      }),
+    },
+  };
+
+  try {
+    await saplingModule.shieldToUser(
+      fakeTezos as never,
+      "KT1test",
+      fakeUserKey,
+      2,
+      "Note1",
+    );
+
+    await saplingModule.transferToAlice(
+      fakeTezos as never,
+      "KT1test",
+      fakeUserKey,
+      ALICE_ADDRESS,
+      1,
+      "PayBob",
+    );
+
+    assert.equal(shieldInputs[0]?.[0]?.memo, "Note1");
+    assert.equal(transferInputs[0]?.[0]?.memo, "PayBob");
+
+    // Empty / whitespace memo falls back to default "Shield" / "Transfer"
+    await saplingModule.shieldToUser(
+      fakeTezos as never,
+      "KT1test",
+      fakeUserKey,
+      2,
+      "   ",
+    );
+    assert.equal(shieldInputs[1]?.[0]?.memo, "Shield");
+
+    // Over 8 bytes must reject before running proof
+    await assert.rejects(
+      () =>
+        saplingModule.shieldToUser(
+          fakeTezos as never,
+          "KT1test",
+          fakeUserKey,
+          2,
+          "123456789",
+        ),
+      /8 bytes/i,
+    );
+    await assert.rejects(
+      () =>
+        saplingModule.transferToAlice(
+          fakeTezos as never,
+          "KT1test",
+          fakeUserKey,
+          ALICE_ADDRESS,
+          1,
+          "123456789",
+        ),
+      /8 bytes/i,
+    );
+  } finally {
+    resetForTesting();
+  }
+});
+
+test("sapling IA and UX improvements: 2-column layout, stepped tabs, contract header, masked mnemonic, memo inputs, and viewer perspective toggle", async () => {
+  const saplingVue = await readFile(
+    "src/modules/tests/tests/sapling/sapling.vue",
+    "utf8",
+  );
+
+  // 1. Contract header with OpenInExplorer and 8-byte memo badge
+  assert.match(
+    saplingVue,
+    /OpenInExplorer/,
+    "sapling.vue should render OpenInExplorer for the deployed Sapling contract",
+  );
+  assert.match(
+    saplingVue,
+    /data-testid="sapling-contract-address"/,
+    "sapling.vue should expose data-testid='sapling-contract-address'",
+  );
+
+  // 2. Two-column workspace layout and stepped Tabs for Shield / Transfer / Unshield
+  assert.match(
+    saplingVue,
+    /lg:grid-cols-12|lg:grid-cols-2/,
+    "sapling.vue should use a responsive 2-column grid layout on desktop",
+  );
+  assert.match(
+    saplingVue,
+    /TabsTrigger[\s\S]*?value="shield"/,
+    "sapling.vue should provide a Shield tab trigger",
+  );
+  assert.match(
+    saplingVue,
+    /TabsTrigger[\s\S]*?value="transfer"/,
+    "sapling.vue should provide a Transfer tab trigger",
+  );
+  assert.match(
+    saplingVue,
+    /TabsTrigger[\s\S]*?value="unshield"/,
+    "sapling.vue should provide an Unshield tab trigger",
+  );
+
+  // 3. Inline phase-aware feedback during running operations
+  assert.match(
+    saplingVue,
+    /activeOperation/,
+    "sapling.vue should track the active operation to show inline button feedback",
+  );
+
+  // 4. Masked mnemonic toggle and confirmation guard when userBalance > 0
+  assert.match(
+    saplingVue,
+    /showMnemonicSecret/,
+    "sapling.vue should mask the spending key mnemonic by default with a reveal toggle",
+  );
+  assert.match(
+    saplingVue,
+    /confirmKeyReplacement|window\.confirm/,
+    "sapling.vue should guard against accidental key replacement when userBalance > 0",
+  );
+
+  // 5. Memo inputs and history perspective toggle (User vs Alice) plus counterparty address display
+  assert.match(
+    saplingVue,
+    /shieldMemo/,
+    "sapling.vue should allow customizing the shield memo",
+  );
+  assert.match(
+    saplingVue,
+    /transferMemo/,
+    "sapling.vue should allow customizing the private transfer memo",
+  );
+  assert.match(
+    saplingVue,
+    /historyPerspective/,
+    "sapling.vue should allow toggling transaction history between User and Alice viewing keys",
+  );
+  assert.match(
+    saplingVue,
+    /tx\.paymentAddress/,
+    "sapling.vue should display the counterparty/recipient Sapling address in transaction history",
+  );
+
+  // 6. Auto-advance operation tab after each step so sequential flow and Playwright specs work smoothly,
+  //    without resetting the completed diagram status (waitForSuccess relies on diagramComplete)
+  assert.match(
+    saplingVue,
+    /activeOperationTab\.value\s*=\s*"transfer"/,
+    "sapling.vue should advance to the transfer tab after shielding",
+  );
+  assert.match(
+    saplingVue,
+    /activeOperationTab\.value\s*=\s*"unshield"/,
+    "sapling.vue should advance to the unshield tab after transferring to Alice",
+  );
+  assert.doesNotMatch(
+    saplingVue,
+    /watch\(activeOperationTab/,
+    "sapling.vue must not use watch(activeOperationTab) to reset setTestDiagram when auto-advancing, as that clears diagramStatus='completed' and breaks waitForSuccess",
+  );
+
+  // 7. Auto-load shielded balances on mount / wallet connect without locking isRunning
+  assert.match(
+    saplingVue,
+    /loadInitialBalancesIfReady/,
+    "sapling.vue should auto-fetch shielded balances in the background once keys and wallet are ready",
+  );
+});

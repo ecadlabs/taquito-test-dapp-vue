@@ -294,19 +294,43 @@ export const clearStoredSaplingKeys = (): void => {
   storage.removeItem(SAPLING_ALICE_MNEMONIC_STORAGE_KEY);
 };
 
-export const reloadWithFreshSaplingParams = (): void => {
+export const reloadWithFreshSaplingParams = (options?: {
+  clearKeys?: boolean;
+}): void => {
   const storage = getSessionStorage();
   if (!storage || typeof window === "undefined") {
     return;
   }
 
-  clearStoredSaplingKeys();
+  if (options?.clearKeys) {
+    clearStoredSaplingKeys();
+  }
   storage.setItem(SAPLING_FRESH_RELOAD_STORAGE_KEY, `${Date.now()}`);
   window.location.reload();
 };
 
 // Must match contract's memo size
-const MEMO_SIZE = 8;
+export const MEMO_SIZE = 8;
+
+const textEncoder = new TextEncoder();
+
+export const getSaplingMemoByteLength = (memo: string): number =>
+  textEncoder.encode(memo).byteLength;
+
+export const resolveSaplingMemo = (
+  memo: string | undefined,
+  defaultMemo: string,
+): string => {
+  const trimmed = memo?.trim();
+  const resolved = trimmed && trimmed.length > 0 ? trimmed : defaultMemo;
+  const byteLength = getSaplingMemoByteLength(resolved);
+  if (byteLength > MEMO_SIZE) {
+    throw new Error(
+      `Sapling memo must be at most ${MEMO_SIZE} bytes (got ${byteLength} bytes)`,
+    );
+  }
+  return resolved;
+};
 const SAPLING_OUTPUT_ORDER = "randomized" as const;
 const ALICE_MNEMONIC =
   "normal dash crumble neutral reflect parrot know stairs culture fault check whale flock dog account";
@@ -521,8 +545,10 @@ export async function shieldToUser(
   contractAddress: string,
   userKey: UserSaplingKey,
   amount: number,
+  memo?: string,
 ): Promise<string> {
   assertPositiveAmount(amount, "Shield");
+  const resolvedMemo = resolveSaplingMemo(memo, "Shield");
 
   if (customStoreHooks) {
     customStoreHooks.setTestDiagram(TEST_ID, "shield");
@@ -555,7 +581,7 @@ export async function shieldToUser(
     {
       to: userKey.address,
       amount,
-      memo: "Shield",
+      memo: resolvedMemo,
     },
   ]);
 
@@ -580,8 +606,10 @@ export async function transferToAlice(
   userKey: UserSaplingKey,
   aliceAddress: string,
   amount: number,
+  memo?: string,
 ): Promise<string> {
   assertPositiveAmount(amount, "Transfer");
+  const resolvedMemo = resolveSaplingMemo(memo, "Transfer");
 
   if (customStoreHooks) {
     customStoreHooks.setTestDiagram(TEST_ID, "transfer");
@@ -614,7 +642,7 @@ export async function transferToAlice(
     {
       to: aliceAddress,
       amount,
-      memo: "Transfer",
+      memo: resolvedMemo,
     },
   ]);
 
