@@ -14,15 +14,6 @@ export type BeaconNetworkType =
   | "tezlink-shadownet"
   | "custom";
 
-export type WalletConnectNetworkType =
-  | "mainnet"
-  | "ghostnet"
-  | "weeklynet"
-  | "shadownet"
-  | "tezlink_shadownet"
-  | "ushuaianet"
-  | "custom";
-
 export type NetworkCapability =
   | "l1-wallet"
   | "l2-wallet"
@@ -59,9 +50,6 @@ export interface NetworkWalletConfig {
   beacon: {
     networkType: BeaconNetworkType;
     networkName: string;
-  };
-  walletConnect: {
-    networkType: WalletConnectNetworkType;
   };
 }
 

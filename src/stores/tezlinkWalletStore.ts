@@ -1,7 +1,4 @@
-import {
-  initializeBeaconEvents,
-  initializeWalletConnectEvents,
-} from "@/lib/walletEvents";
+import { initializeBeaconEvents } from "@/lib/walletEvents";
 import { getWalletConfig } from "@/networks/network-registry";
 import { createWalletStore } from "@/stores/createWalletStore";
 
@@ -16,7 +13,7 @@ if (!tezlinkWalletConfig) {
  * Tezlink back to Tezos L1.
  *
  * Tezlink is a Tezos-based L2, so it uses standard Tezos wallets (Beacon,
- * WalletConnect, Ledger, etc.) connected to the Tezlink network.
+ * Ledger, etc.) connected to the Tezlink network.
  */
 export const useTezlinkWalletStore = createWalletStore(
   {
@@ -24,12 +21,10 @@ export const useTezlinkWalletStore = createWalletStore(
     rpcUrl: import.meta.env[tezlinkWalletConfig.rpcEnvVar],
     beaconNetworkType: tezlinkWalletConfig.beacon.networkType,
     beaconNetworkName: tezlinkWalletConfig.beacon.networkName,
-    walletConnectNetworkType: tezlinkWalletConfig.walletConnect.networkType,
     localStoragePrefix: "tezlink-wallet",
     appName: tezlinkWalletConfig.appName,
   },
   {
     beacon: initializeBeaconEvents,
-    walletConnect: initializeWalletConnectEvents,
   },
 );

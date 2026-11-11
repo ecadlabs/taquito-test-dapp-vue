@@ -69,38 +69,11 @@
               <div class="min-w-0 flex-1">
                 <p class="text-sm font-medium">Beacon</p>
                 <p class="text-muted-foreground text-xs">
-                  Temple, Kukai, and other Beacon wallets
+                  Temple, Kukai, WalletConnect, and other Beacon wallets
                 </p>
               </div>
               <div
                 v-if="selectedOption === 'beacon'"
-                class="bg-primary flex size-5 shrink-0 items-center justify-center rounded-full"
-              >
-                <Check class="size-3 text-white" />
-              </div>
-            </button>
-
-            <button
-              class="border-border hover:border-primary/50 hover:bg-muted/50 flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors"
-              :class="{
-                'border-primary bg-primary/5':
-                  selectedOption === 'walletconnect',
-              }"
-              @click="selectedOption = 'walletconnect'"
-            >
-              <div
-                class="flex size-8 shrink-0 items-center justify-center rounded-full bg-blue-100"
-              >
-                <Smartphone class="size-4 text-blue-600" />
-              </div>
-              <div class="min-w-0 flex-1">
-                <p class="text-sm font-medium">WalletConnect</p>
-                <p class="text-muted-foreground text-xs">
-                  Connect via QR code or deep link
-                </p>
-              </div>
-              <div
-                v-if="selectedOption === 'walletconnect'"
                 class="bg-primary flex size-5 shrink-0 items-center justify-center rounded-full"
               >
                 <Check class="size-3 text-white" />
@@ -233,6 +206,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import LedgerPreparationStep from "@/components/ui/ledger-preparation-step.vue";
 import LedgerWaitingStep from "@/components/ui/ledger-waiting-step.vue";
+import { formatBeaconError } from "@/lib/walletEvents";
 import { useTezlinkWalletStore } from "@/stores/tezlinkWalletStore";
 import { useWalletStore } from "@/stores/walletStore";
 import type { WalletProvider } from "@/types/wallet";
@@ -244,7 +218,6 @@ import {
   Link,
   Loader2,
   Radio,
-  Smartphone,
 } from "lucide-vue-next";
 import { computed, ref, watch } from "vue";
 import { toast } from "vue-sonner";
@@ -310,7 +283,6 @@ function formatProviderName(provider: WalletProvider | null): string {
   if (!provider) return "";
   const names: Record<WalletProvider, string> = {
     beacon: "Beacon",
-    walletconnect: "WalletConnect",
     ledger: "Ledger",
     programmatic: "Private Key",
     web3auth: "Web3Auth",
@@ -371,11 +343,11 @@ async function connect() {
     ) {
       connectionStep.value = "ledger-preparation";
       toast.error("Ledger connection failed", {
-        description: error instanceof Error ? error.message : String(error),
+        description: formatBeaconError(error),
       });
     } else {
       toast.error("Failed to connect wallet", {
-        description: error instanceof Error ? error.message : String(error),
+        description: formatBeaconError(error),
       });
     }
   } finally {

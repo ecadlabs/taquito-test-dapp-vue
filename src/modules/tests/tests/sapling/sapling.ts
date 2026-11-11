@@ -307,6 +307,7 @@ export const reloadWithFreshSaplingParams = (): void => {
 
 // Must match contract's memo size
 const MEMO_SIZE = 8;
+const SAPLING_OUTPUT_ORDER = "randomized" as const;
 const ALICE_MNEMONIC =
   "normal dash crumble neutral reflect parrot know stairs culture fault check whale flock dog account";
 
@@ -542,7 +543,11 @@ export async function shieldToUser(
 
   const toolkit = new SaplingToolkit(
     { saplingSigner: userKey.spendingKey },
-    { contractAddress, memoSize: MEMO_SIZE },
+    {
+      contractAddress,
+      memoSize: MEMO_SIZE,
+      outputOrder: SAPLING_OUTPUT_ORDER,
+    },
     readProvider,
   );
 
@@ -597,7 +602,11 @@ export async function transferToAlice(
 
   const toolkit = new SaplingToolkit(
     { saplingSigner: userKey.spendingKey },
-    { contractAddress, memoSize: MEMO_SIZE },
+    {
+      contractAddress,
+      memoSize: MEMO_SIZE,
+      outputOrder: SAPLING_OUTPUT_ORDER,
+    },
     readProvider,
   );
 
@@ -655,7 +664,11 @@ export async function unshieldToUser(
 
   const toolkit = new SaplingToolkit(
     { saplingSigner: userKey.spendingKey },
-    { contractAddress, memoSize: MEMO_SIZE },
+    {
+      contractAddress,
+      memoSize: MEMO_SIZE,
+      outputOrder: SAPLING_OUTPUT_ORDER,
+    },
     readProvider,
   );
 
@@ -689,6 +702,10 @@ const normalizeMemo = (memo: string | undefined): string | undefined => {
 /**
  * Formats raw incoming and outgoing viewer data into a chronological list of
  * Sapling notes without duplicating self-change outputs as outgoing payments.
+ *
+ * Supports both preserved and randomized (`outputOrder: 'randomized'`) output
+ * orderings, where a private transfer's self-change output may appear either
+ * before or after the recipient output in `txData.outgoing`.
  */
 export function formatSaplingTransactionHistory(
   txData: SaplingViewerTransactions,
@@ -698,7 +715,8 @@ export function formatSaplingTransactionHistory(
   const pendingOutgoing: SaplingTransaction[] = [];
   let inIdx = 0;
 
-  for (const outTx of txData.outgoing) {
+  for (let outIdx = 0; outIdx < txData.outgoing.length; outIdx++) {
+    const outTx = txData.outgoing[outIdx];
     const outAmount = Number(outTx.value);
     const outMemo = normalizeMemo(outTx.memo);
 
@@ -712,6 +730,36 @@ export function formatSaplingTransactionHistory(
         isChange: false,
       });
       continue;
+    }
+
+    // With `outputOrder: 'randomized'`, a private transfer's self-change note
+    // can appear before the recipient note in `txData.outgoing`. If no earlier
+    // outgoing note is pending and the immediately following outgoing note is a
+    // non-change recipient output that is NOT followed by its own self-change
+    // note, pair it with this transfer before emitting the change note.
+    if (pendingOutgoing.length === 0 && outIdx + 1 < txData.outgoing.length) {
+      const nextOut = txData.outgoing[outIdx + 1];
+      const nextOutMemo = normalizeMemo(nextOut.memo);
+      const isNextNonChange =
+        nextOut.paymentAddress !== userAddress || nextOutMemo !== undefined;
+
+      const afterNext = txData.outgoing[outIdx + 2];
+      const isAfterNextChange =
+        afterNext !== undefined &&
+        afterNext.paymentAddress === userAddress &&
+        normalizeMemo(afterNext.memo) === undefined;
+
+      if (isNextNonChange && !isAfterNextChange) {
+        pendingOutgoing.push({
+          type: "outgoing",
+          amount: Number(nextOut.value),
+          memo: nextOutMemo,
+          paymentAddress: nextOut.paymentAddress,
+          isSpent: undefined,
+          isChange: false,
+        });
+        outIdx++;
+      }
     }
 
     // Self-addressed output in outgoing was created as payback (change) during

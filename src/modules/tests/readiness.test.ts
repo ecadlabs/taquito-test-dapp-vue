@@ -48,9 +48,6 @@ const makeWallet = (networkName: string): NetworkWalletConfig =>
       networkType: "shadownet",
       networkName,
     },
-    walletConnect: {
-      networkType: "shadownet",
-    },
   }) as NetworkWalletConfig;
 
 test("marks a supported test as not ready when its required contract is missing", () => {
