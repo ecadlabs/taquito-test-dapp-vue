@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 
+import { checkReownProjectId } from "@/lib/devConfig";
 import { getTestsMissingPrerequisites } from "@/modules/tests/readiness";
 import { AvailableTests } from "@/modules/tests/tests";
 import {
@@ -41,6 +42,15 @@ const verifyNetworkConfig = (): void => {
   });
 
   console.log(`🔎 Verifying dApp readiness for network: ${network}`);
+
+  const reown = checkReownProjectId(process.env.VITE_REOWN_PROJECT_ID);
+  if (reown.ok) {
+    console.log(`✅ ${reown.message}`);
+  } else {
+    console.error(`❌ ${reown.message}`);
+    process.exitCode = 1;
+  }
+
   console.log(`📚 Supported tests on this network: ${supportedTests.length}`);
   console.log(
     `📄 Configured contracts in src/networks/network-contracts.json: ${contracts.length}`,

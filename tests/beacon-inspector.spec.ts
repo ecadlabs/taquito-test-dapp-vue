@@ -13,12 +13,17 @@ const resetBeaconState = async (page: Page) => {
 };
 
 // The Beacon pairing modal has no Escape handler; it closes on a backdrop click.
+// The exact match finds the modal's wallet tile, not the KUKAI_URL_OVERRIDE
+// banner, which also mentions Kukai.
+const kukaiTile = (page: Page) =>
+  page.getByText("Kukai", { exact: true }).first();
+
 const dismissBeaconPairing = async (page: Page) => {
-  await expect(page.getByText("Kukai").first()).toBeVisible();
+  await expect(kukaiTile(page)).toBeVisible();
   const viewport = page.viewportSize();
   if (!viewport) throw new Error("Playwright page has no viewport");
   await page.mouse.click(8, viewport.height - 8);
-  await expect(page.getByText("Kukai").first()).toBeHidden();
+  await expect(kukaiTile(page)).toBeHidden();
 };
 
 const inspector = (page: Page) =>

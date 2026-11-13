@@ -1,3 +1,4 @@
+import { readReownProjectId } from "@/lib/devConfig";
 import { attachBeaconCollector } from "@/lib/inspector/beaconCollector";
 import { resolveBeaconWalletDisplay } from "@/lib/walletDisplay";
 import { attachBeaconWalletEvents } from "@/lib/walletEvents";
@@ -227,7 +228,11 @@ export const createWalletStore = (
 
     /** Initializes a Beacon wallet */
     const initializeBeaconWallet = async (): Promise<void> => {
-      const reownProjectId = import.meta.env.VITE_REOWN_PROJECT_ID;
+      // Without one, Beacon uses its deprecated demo project ID; the dev banner
+      // says so, and `npm run build:verified` refuses to build.
+      const reownProjectId = readReownProjectId(
+        import.meta.env.VITE_REOWN_PROJECT_ID,
+      );
       const options: DAppClientOptions = {
         name: appName,
         iconUrl: appIconUrl,
