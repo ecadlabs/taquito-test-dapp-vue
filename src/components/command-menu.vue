@@ -14,6 +14,12 @@
           <p>{{ page.label }}</p>
         </CommandItem>
       </CommandGroup>
+      <CommandGroup heading="Tools">
+        <CommandItem value="beacon-inspector" @select="toggleInspector">
+          <Radar class="size-4" />
+          <p>Toggle Beacon inspector</p>
+        </CommandItem>
+      </CommandGroup>
       <CommandGroup heading="Tests">
         <CommandItem
           v-for="test in tests"
@@ -39,8 +45,9 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { AvailableTests } from "@/modules/tests/tests";
+import { useBeaconInspectorStore } from "@/stores/inspectorStore";
 import { useMagicKeys } from "@vueuse/core";
-import { BookOpenIcon, HandCoinsIcon, HomeIcon } from "lucide-vue-next";
+import { BookOpenIcon, HandCoinsIcon, HomeIcon, Radar } from "lucide-vue-next";
 import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
@@ -57,6 +64,12 @@ const { Meta_K, Ctrl_K } = useMagicKeys({
 watch([Meta_K, Ctrl_K], (v) => {
   if (v[0] || v[1]) handleOpenChange();
 });
+
+const inspector = useBeaconInspectorStore();
+const toggleInspector = () => {
+  open.value = false;
+  inspector.toggle();
+};
 
 function handleOpenChange() {
   open.value = !open.value;

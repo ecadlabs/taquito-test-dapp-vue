@@ -81,6 +81,29 @@
         <TooltipTrigger as-child>
           <Button
             size="icon"
+            :variant="inspector.isOpen ? 'secondary' : 'outline'"
+            class="ml-2"
+            :aria-label="
+              inspector.isOpen
+                ? 'Close Beacon inspector'
+                : 'Open Beacon inspector'
+            "
+            :aria-pressed="inspector.isOpen"
+            @click="inspector.toggle()"
+          >
+            <Radar class="size-5" aria-hidden="true" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Beacon inspector</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger as-child>
+          <Button
+            size="icon"
             variant="outline"
             class="relative ml-2"
             @click="showSettingsDialog = true"
@@ -169,11 +192,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { AvailableTests } from "@/modules/tests/tests";
+import { useBeaconInspectorStore } from "@/stores/inspectorStore";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { Menu, Settings } from "lucide-vue-next";
+import { Menu, Radar, Settings } from "lucide-vue-next";
 import { computed, ref, watch } from "vue";
 
 const settingsStore = useSettingsStore();
+const inspector = useBeaconInspectorStore();
 
 const showSettingsDialog = ref<boolean>(false);
 

@@ -11,9 +11,12 @@
 
   <!-- Global Command Palette -->
   <CommandMenu />
+
+  <BeaconInspector />
 </template>
 
 <script setup lang="ts">
+import BeaconInspector from "@/components/beacon-inspector.vue";
 import CommandMenu from "@/components/command-menu.vue";
 import HeaderComponent from "@/components/header-component.vue";
 import { Toaster } from "@/components/ui/sonner";

@@ -1,12 +1,22 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import type { BeaconWalletEventsStore } from "@/lib/walletEvents";
+import { FakeBeaconWallet } from "@/modules/tests/fakes/fakeBeaconWallet";
 import {
+  type AccountInfo,
   BeaconErrorType,
   BeaconMessageType,
+  type ErrorResponse,
+  NetworkType,
+  type OperationResponseOutput,
+  Origin,
+  PermissionScope,
+  type SignPayloadResponseOutput,
   SigningType,
 } from "@taquito/beacon-wallet/types";
 import { BeaconEvent } from "@taquito/beacon-wallet";
+import { ref } from "vue";
 
 test("formatBeaconError formats BeaconErrorType errors, RequestErrorResponse objects, and standard errors", async () => {
   const walletEventsModule = await import("@/lib/walletEvents");
@@ -73,106 +83,214 @@ test("formatBeaconError formats BeaconErrorType errors, RequestErrorResponse obj
   assert.doesNotMatch(objectMsg, /\[object Object\]/);
 });
 
-test("initializeBeaconEvents subscribes to ACTIVE_ACCOUNT_SET, LATE_RESPONSE_RECEIVED, and INVALID_ACCOUNT_DEACTIVATED", async () => {
-  const { initializeBeaconEvents } = await import("@/lib/walletEvents");
-
-  const subscriptions = new Map<
-    string,
-    (payload: unknown) => Promise<void> | void
-  >();
-  let disconnectCalls = 0;
-  let lastDisconnectFromWallet: boolean | undefined;
-
-  const fakeBeaconWallet = {
-    client: {
-      subscribeToEvent: async (
-        event: string,
-        handler: (payload: unknown) => Promise<void> | void,
-      ) => {
-        subscriptions.set(event, handler);
-      },
-    },
-  };
-
-  const fakeStore = {
-    address: { value: "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb" },
-    isDisconnecting: { value: false },
+const fakeEventsStore = () => {
+  const calls = { disconnect: [] as (boolean | undefined)[], refresh: 0 };
+  const store: BeaconWalletEventsStore = {
+    address: ref<string | undefined>("tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb"),
+    isDisconnecting: ref(false),
+    hasWallet: () => true,
     disconnectWallet: async (fromWallet?: boolean) => {
-      disconnectCalls += 1;
-      lastDisconnectFromWallet = fromWallet;
-      fakeStore.address.value = undefined as unknown as string;
+      calls.disconnect.push(fromWallet);
+      store.address.value = undefined;
+    },
+    refreshWalletDisplay: async () => {
+      calls.refresh += 1;
     },
   };
+  return { store, calls };
+};
 
-  initializeBeaconEvents(fakeBeaconWallet as never, fakeStore as never);
+const activeAccount: AccountInfo = {
+  accountIdentifier: "acc-1",
+  senderId: "peer-1",
+  origin: { type: Origin.P2P, id: "peer-public-key" },
+  address: "tz1aSkwEot3L2kmUvcoxzjMomb9mvBNuzFK6",
+  publicKey: "edpkuBknW28nW72KG6RoHtYW7p12T6GKc7nAbwYX5m8Wd9sDVC9yav",
+  network: { type: NetworkType.MAINNET },
+  scopes: [PermissionScope.SIGN, PermissionScope.OPERATION_REQUEST],
+  connectedAt: 1,
+  walletType: "implicit",
+};
 
-  assert.ok(
-    subscriptions.has(BeaconEvent.ACTIVE_ACCOUNT_SET),
-    "Should subscribe to BeaconEvent.ACTIVE_ACCOUNT_SET",
-  );
-  assert.ok(
-    subscriptions.has(BeaconEvent.LATE_RESPONSE_RECEIVED),
-    "Should subscribe to BeaconEvent.LATE_RESPONSE_RECEIVED",
-  );
-  assert.ok(
-    subscriptions.has(BeaconEvent.INVALID_ACCOUNT_DEACTIVATED),
-    "Should subscribe to BeaconEvent.INVALID_ACCOUNT_DEACTIVATED",
-  );
+const connectionContext = { origin: Origin.P2P, id: "peer-1" };
 
-  // Trigger INVALID_ACCOUNT_DEACTIVATED when active account storage fails validation
-  const invalidAccountHandler = subscriptions.get(
-    BeaconEvent.INVALID_ACCOUNT_DEACTIVATED,
-  )!;
-  await invalidAccountHandler({ reason: "storage_validation_failed" });
-  assert.equal(
-    disconnectCalls,
-    1,
-    "INVALID_ACCOUNT_DEACTIVATED should reset/disconnect active wallet state",
-  );
-  assert.equal(lastDisconnectFromWallet, false);
+test("attachBeaconWalletEvents subscribes the three wallet handlers through BeaconWallet.subscribeToEvent", async () => {
+  const { attachBeaconWalletEvents } = await import("@/lib/walletEvents");
+  const wallet = new FakeBeaconWallet();
+  const { store } = fakeEventsStore();
 
-  // Trigger LATE_RESPONSE_RECEIVED for both success (operation & sign) and error
-  const lateResponseHandler = subscriptions.get(
+  await attachBeaconWalletEvents(wallet, store);
+
+  for (const event of [
+    BeaconEvent.ACTIVE_ACCOUNT_SET,
     BeaconEvent.LATE_RESPONSE_RECEIVED,
-  )!;
+    BeaconEvent.INVALID_ACCOUNT_DEACTIVATED,
+  ]) {
+    assert.equal(wallet.subscriberCount(event), 1, `subscribed to ${event}`);
+  }
+});
+
+test("ACTIVE_ACCOUNT_SET updates the address and refreshes the wallet name and icon", async () => {
+  const { attachBeaconWalletEvents } = await import("@/lib/walletEvents");
+  const wallet = new FakeBeaconWallet();
+  const { store, calls } = fakeEventsStore();
+  await attachBeaconWalletEvents(wallet, store);
+
+  await wallet.emit(BeaconEvent.ACTIVE_ACCOUNT_SET, activeAccount);
+
+  assert.equal(store.address.value, activeAccount.address);
+  assert.equal(calls.refresh, 1);
+  assert.deepEqual(calls.disconnect, []);
+});
+
+test("ACTIVE_ACCOUNT_SET with no account disconnects a connected store from the wallet side", async () => {
+  const { attachBeaconWalletEvents } = await import("@/lib/walletEvents");
+  const wallet = new FakeBeaconWallet();
+  const { store, calls } = fakeEventsStore();
+  await attachBeaconWalletEvents(wallet, store);
+
+  await wallet.emit(BeaconEvent.ACTIVE_ACCOUNT_SET, undefined);
+
+  assert.deepEqual(calls.disconnect, [true]);
+  assert.equal(calls.refresh, 0);
+});
+
+test("INVALID_ACCOUNT_DEACTIVATED resets the store without notifying the wallet", async () => {
+  const { attachBeaconWalletEvents } = await import("@/lib/walletEvents");
+  const wallet = new FakeBeaconWallet();
+  const { store, calls } = fakeEventsStore();
+  await attachBeaconWalletEvents(wallet, store);
+
+  await wallet.emit(BeaconEvent.INVALID_ACCOUNT_DEACTIVATED, {
+    reason: "storage_validation_failed",
+  });
+
+  assert.deepEqual(calls.disconnect, [false]);
+});
+
+test("LATE_RESPONSE_RECEIVED handles late operation, signature, and error responses", async () => {
+  const { attachBeaconWalletEvents } = await import("@/lib/walletEvents");
+  const wallet = new FakeBeaconWallet();
+  const { store } = fakeEventsStore();
+  await attachBeaconWalletEvents(wallet, store);
+
+  const operationResponse: OperationResponseOutput = {
+    type: BeaconMessageType.OperationResponse,
+    version: "2",
+    id: "req-1",
+    senderId: "wallet-1",
+    transactionHash: "ooLateOpHash1234567890",
+  };
+  const signResponse: SignPayloadResponseOutput = {
+    type: BeaconMessageType.SignPayloadResponse,
+    version: "2",
+    id: "req-2",
+    senderId: "wallet-1",
+    signingType: SigningType.MICHELINE,
+    signature: "edsigLateSignature1234567890",
+  };
+  const errorResponse: ErrorResponse = {
+    type: BeaconMessageType.Error,
+    version: "2",
+    id: "req-3",
+    senderId: "wallet-1",
+    errorType: BeaconErrorType.ABORTED_ERROR,
+  };
+
   await assert.doesNotReject(async () => {
-    await lateResponseHandler({
+    await wallet.emit(BeaconEvent.LATE_RESPONSE_RECEIVED, {
       kind: "success",
       requestId: "req-1",
       requestType: BeaconMessageType.OperationRequest,
-      transactionHash: "ooLateOpHash1234567890",
-      output: {
-        type: BeaconMessageType.OperationResponse,
-        transactionHash: "ooLateOpHash1234567890",
-      },
+      message: operationResponse,
+      output: operationResponse,
+      transactionHash: operationResponse.transactionHash,
+      connectionInfo: connectionContext,
       walletInfo: { name: "Kukai" },
     });
-    await lateResponseHandler({
+    await wallet.emit(BeaconEvent.LATE_RESPONSE_RECEIVED, {
       kind: "success",
       requestId: "req-2",
       requestType: BeaconMessageType.SignPayloadRequest,
-      output: {
-        type: BeaconMessageType.SignPayloadResponse,
-        signingType: SigningType.MICHELINE,
-        signature: "edsigLateSignature1234567890",
-      },
+      message: signResponse,
+      output: signResponse,
+      connectionInfo: connectionContext,
       walletInfo: { name: "Temple" },
     });
-    await lateResponseHandler({
+    await wallet.emit(BeaconEvent.LATE_RESPONSE_RECEIVED, {
       kind: "error",
       requestId: "req-3",
       requestType: BeaconMessageType.OperationRequest,
-      error: {
-        id: "req-3",
-        version: "2",
-        senderId: "peer-1",
-        type: BeaconMessageType.Error,
-        errorType: BeaconErrorType.ABORTED_ERROR,
-        errorOrigin: "wallet",
-      },
+      message: errorResponse,
+      error: { ...errorResponse, errorOrigin: "wallet" },
+      connectionInfo: connectionContext,
       walletInfo: { name: "Kukai" },
     });
   });
+});
+
+test("attachBeaconWalletEvents cleanup removes every handler so re-initialization does not stack them", async () => {
+  const { attachBeaconWalletEvents } = await import("@/lib/walletEvents");
+  const wallet = new FakeBeaconWallet();
+  const first = fakeEventsStore();
+  const second = fakeEventsStore();
+
+  const cleanupFirst = await attachBeaconWalletEvents(wallet, first.store);
+  cleanupFirst();
+  cleanupFirst();
+  await attachBeaconWalletEvents(wallet, second.store);
+
+  assert.equal(wallet.eventUnsubscribes, 3);
+  await wallet.emit(BeaconEvent.ACTIVE_ACCOUNT_SET, activeAccount);
+  assert.equal(first.calls.refresh, 0, "detached handlers must not run");
+  assert.equal(second.calls.refresh, 1);
+});
+
+test("the wallet store resolves wallet display through getWalletInfo and exposes the icon", async () => {
+  const createWalletStoreTs = await readFile(
+    "src/stores/createWalletStore.ts",
+    "utf8",
+  );
+
+  assert.doesNotMatch(
+    createWalletStoreTs,
+    /matchedPeer|client\.getPeers\(\)/,
+    "the manual peer lookup is replaced by BeaconWallet.getWalletInfo()",
+  );
+  assert.match(createWalletStoreTs, /resolveBeaconWalletDisplay/);
+  assert.match(
+    createWalletStoreTs,
+    /getWalletIcon/,
+    "the store exposes the resolved wallet icon",
+  );
+});
+
+test("the wallet store attaches Beacon subscriptions before pairing and releases them on reset", async () => {
+  const createWalletStoreTs = await readFile(
+    "src/stores/createWalletStore.ts",
+    "utf8",
+  );
+
+  const attachCollector = createWalletStoreTs.indexOf("attachBeaconCollector(");
+  const requestPermissions = createWalletStoreTs.indexOf(
+    "beaconWallet.requestPermissions(",
+  );
+  assert.ok(attachCollector >= 0, "the store attaches the inspector collector");
+  assert.ok(
+    attachCollector < requestPermissions,
+    "the collector must be attached before pairing so PAIR_INIT is recorded",
+  );
+  assert.match(createWalletStoreTs, /attachBeaconWalletEvents\(/);
+  assert.doesNotMatch(createWalletStoreTs, /initializeBeaconEvents/);
+
+  const resetStart = createWalletStoreTs.indexOf("const resetWalletState");
+  const resetEnd = createWalletStoreTs.indexOf("\n    };\n", resetStart);
+  assert.ok(resetStart >= 0 && resetEnd > resetStart);
+  assert.match(
+    createWalletStoreTs.slice(resetStart, resetEnd),
+    /releaseBeaconSubscriptions\(\)/,
+    "resetWalletState releases the wallet event handlers and the collector",
+  );
 });
 
 test("standalone @taquito/wallet-connect is removed across codebase and Beacon handles WalletConnect", async () => {

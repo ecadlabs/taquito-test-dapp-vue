@@ -152,3 +152,30 @@ beacon-toast {
   right: 0;
   z-index: 1000000;
 }
+
+/*
+ * The Beacon inspector docks along the bottom, like browser devtools. A side
+ * dock would shrink the page without shrinking the viewport, so viewport
+ * breakpoints would lay out for space the page no longer has. While the dock is
+ * open the app gets matching bottom padding so every part of the page can still
+ * be scrolled into view, and bottom toasts sit above the dock.
+ */
+:root {
+  --beacon-inspector-height: max(16rem, 40vh);
+  /* Space the open dock takes from the viewport; 0 when closed. Viewport-tall
+   * sticky elements (the tests sidebar) subtract it from their height. */
+  --beacon-inspector-offset: 0px;
+}
+
+:root[data-beacon-inspector="open"] {
+  --beacon-inspector-offset: var(--beacon-inspector-height);
+}
+
+#app {
+  padding-bottom: var(--beacon-inspector-offset);
+}
+
+:root[data-beacon-inspector="open"]
+  [data-sonner-toaster][data-y-position="bottom"] {
+  bottom: calc(var(--beacon-inspector-offset) + 1rem) !important;
+}

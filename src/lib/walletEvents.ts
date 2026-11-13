@@ -1,4 +1,3 @@
-import type { WalletStoreState } from "@/stores/createWalletStore";
 import type { WalletProvider } from "@/types/wallet";
 import {
   BeaconEvent,
@@ -12,6 +11,7 @@ import {
   BeaconMessageType,
 } from "@taquito/beacon-wallet/types";
 import { toast } from "vue-sonner";
+import type { Ref } from "vue";
 
 interface RpcErrorItem {
   kind?: string;
@@ -201,48 +201,62 @@ const handleLateResponse = (info: LateResponseInfo): void => {
   });
 };
 
-const initializeBeaconEvents = (
-  beaconWallet: BeaconWallet,
-  walletStore: WalletStoreState,
-) => {
-  beaconWallet.client.subscribeToEvent(
-    BeaconEvent.ACTIVE_ACCOUNT_SET,
-    (account) => {
+/** The parts of the wallet store the Beacon event handlers read and drive. */
+export interface BeaconWalletEventsStore {
+  address: Ref<string | undefined>;
+  isDisconnecting: Ref<boolean>;
+  hasWallet: () => boolean;
+  disconnectWallet: (fromWallet?: boolean) => Promise<void>;
+  /** Re-reads wallet name and icon after the active account changes. */
+  refreshWalletDisplay: () => Promise<void>;
+}
+
+/**
+ * Subscribes the wallet store to ACTIVE_ACCOUNT_SET, LATE_RESPONSE_RECEIVED,
+ * and INVALID_ACCOUNT_DEACTIVATED. Resolves to a cleanup function that removes
+ * all three, so re-initializing the wallet (which reuses the singleton
+ * DAppClient) does not stack handlers.
+ */
+const attachBeaconWalletEvents = async (
+  wallet: Pick<BeaconWallet, "subscribeToEvent">,
+  store: BeaconWalletEventsStore,
+): Promise<() => void> => {
+  const unsubscribes = await Promise.all([
+    wallet.subscribeToEvent(BeaconEvent.ACTIVE_ACCOUNT_SET, async (account) => {
       if (account) {
-        walletStore.address.value = account.address;
-      } else if (
-        account === undefined &&
-        walletStore.address.value &&
-        !walletStore.isDisconnecting.value
-      ) {
-        walletStore.disconnectWallet(true);
+        store.address.value = account.address;
+        await store.refreshWalletDisplay();
+      } else if (store.address.value && !store.isDisconnecting.value) {
+        await store.disconnectWallet(true);
       }
-    },
-  );
-
-  beaconWallet.client.subscribeToEvent(
-    BeaconEvent.LATE_RESPONSE_RECEIVED,
-    (info: LateResponseInfo) => {
+    }),
+    wallet.subscribeToEvent(BeaconEvent.LATE_RESPONSE_RECEIVED, (info) => {
       handleLateResponse(info);
-    },
-  );
+    }),
+    wallet.subscribeToEvent(
+      BeaconEvent.INVALID_ACCOUNT_DEACTIVATED,
+      async (event) => {
+        if (
+          (store.address.value || store.hasWallet()) &&
+          !store.isDisconnecting.value
+        ) {
+          await store.disconnectWallet(false);
+        }
+        if (event?.reason && event.reason !== "missing_active_account") {
+          toast.warning("Wallet session deactivated", {
+            description: describeInvalidAccountReason(event),
+          });
+        }
+      },
+    ),
+  ]);
 
-  beaconWallet.client.subscribeToEvent(
-    BeaconEvent.INVALID_ACCOUNT_DEACTIVATED,
-    async (event?: InvalidAccountDeactivatedEvent) => {
-      if (
-        (walletStore.address.value || walletStore.getWallet?.value) &&
-        !walletStore.isDisconnecting.value
-      ) {
-        await walletStore.disconnectWallet(false);
-      }
-      if (event?.reason && event.reason !== "missing_active_account") {
-        toast.warning("Wallet session deactivated", {
-          description: describeInvalidAccountReason(event),
-        });
-      }
-    },
-  );
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    for (const unsubscribe of unsubscribes) unsubscribe();
+  };
 };
 
-export { initializeBeaconEvents };
+export { attachBeaconWalletEvents };
