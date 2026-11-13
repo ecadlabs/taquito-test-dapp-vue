@@ -1,16 +1,26 @@
 import tailwindcss from "@tailwindcss/vite";
 import vue from "@vitejs/plugin-vue";
 import { fileURLToPath, URL } from "url";
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
+import {
+  KUKAI_URL_OVERRIDE_ENV,
+  kukaiLinkOverride,
+} from "./vite-plugins/kukai-link-override";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     vue(),
     tailwindcss(),
     nodePolyfills({
       protocolImports: true,
     }),
+    // Dev server only; see vite-plugins/kukai-link-override.ts and the README.
+    kukaiLinkOverride(
+      loadEnv(mode, fileURLToPath(new URL(".", import.meta.url)), "KUKAI_")[
+        KUKAI_URL_OVERRIDE_ENV
+      ],
+    ),
   ],
   optimizeDeps: {
     exclude: ["@taquito/sapling-wasm"],
@@ -59,4 +69,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));

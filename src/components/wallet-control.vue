@@ -50,6 +50,14 @@
             @click="showDisconnectDialog = true"
             class="flex items-center gap-2"
           >
+            <img
+              v-if="walletIconUrl"
+              :src="walletIconUrl"
+              alt=""
+              referrerpolicy="no-referrer"
+              class="size-5 rounded-sm object-contain"
+              @error="failedIconUrl = walletIconUrl"
+            />
             <p v-if="balance">{{ `${balance} ꜩ` }}</p>
             <p v-else>...</p>
             <Separator v-if="address" orientation="vertical" class="h-4" />
@@ -114,7 +122,15 @@
             @click="showDisconnectDialog = true"
             aria-label="Disconnect Wallet"
           >
-            <Unplug class="size-5" aria-hidden="true" />
+            <img
+              v-if="walletIconUrl"
+              :src="walletIconUrl"
+              alt=""
+              referrerpolicy="no-referrer"
+              class="size-5 rounded-sm object-contain"
+              @error="failedIconUrl = walletIconUrl"
+            />
+            <Unplug v-else class="size-5" aria-hidden="true" />
           </Button>
         </div>
       </div>
@@ -455,6 +471,13 @@ const settingsStore = useSettingsStore();
 
 const address = computed(() => walletStore.getAddress);
 const walletName = computed(() => walletStore.getWalletName);
+// A wallet-supplied icon URL can 404; remember which one failed so the
+// button shows its plain layout instead of a broken image.
+const failedIconUrl = ref<string>();
+const walletIconUrl = computed(() => {
+  const icon = walletStore.getWalletIcon;
+  return icon !== failedIconUrl.value ? icon : undefined;
+});
 const balance = computed(() => {
   if (walletStore.getBalance) {
     const balanceTez = walletStore.getBalance.toNumber() / 1000000;

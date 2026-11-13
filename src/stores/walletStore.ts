@@ -1,4 +1,3 @@
-import { initializeBeaconEvents } from "@/lib/walletEvents";
 import { getWalletConfig } from "@/networks/network-registry";
 import { createWalletStore } from "@/stores/createWalletStore";
 import { useSettingsStore } from "@/stores/settingsStore";
@@ -16,17 +15,12 @@ if (!walletConfig) {
  * Main wallet store for Tezos L1 network. Uses the network configuration from
  * environment variables and settings.
  */
-export const useWalletStore = createWalletStore(
-  {
-    storeName: "wallet",
-    // Use a getter function to access settingsStore at runtime
-    rpcUrl: () => useSettingsStore().settings.rpcUrl,
-    beaconNetworkType: walletConfig.beacon.networkType,
-    beaconNetworkName: walletConfig.beacon.networkName,
-    localStoragePrefix: "wallet",
-    appName: walletConfig.appName,
-  },
-  {
-    beacon: initializeBeaconEvents,
-  },
-);
+export const useWalletStore = createWalletStore({
+  storeName: "wallet",
+  // Use a getter function to access settingsStore at runtime
+  rpcUrl: () => useSettingsStore().settings.rpcUrl,
+  beaconNetworkType: walletConfig.beacon.networkType,
+  beaconNetworkName: walletConfig.beacon.networkName,
+  localStoragePrefix: "wallet",
+  appName: walletConfig.appName,
+});

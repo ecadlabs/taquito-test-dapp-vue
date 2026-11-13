@@ -1,4 +1,9 @@
+import { readReownProjectId } from "@/lib/devConfig";
+import { attachBeaconCollector } from "@/lib/inspector/beaconCollector";
+import { resolveBeaconWalletDisplay } from "@/lib/walletDisplay";
+import { attachBeaconWalletEvents } from "@/lib/walletEvents";
 import { web3AuthService } from "@/services/web3AuthService";
+import { useBeaconInspectorStore } from "@/stores/inspectorStore";
 import type { BeaconNetworkType } from "@/types/network";
 import type { ProgrammaticWallet, WalletProvider } from "@/types/wallet";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
@@ -9,8 +14,8 @@ import {
   type DAppClientOptions,
 } from "@taquito/beacon-wallet";
 import type {
-  AccountInfo,
   NetworkType as BeaconSdkNetworkType,
+  StoredAccountInfo,
 } from "@taquito/beacon-wallet/types";
 import { LedgerSigner } from "@taquito/ledger-signer";
 import { InMemorySigner } from "@taquito/signer";
@@ -63,6 +68,8 @@ export interface WalletStoreState {
     BeaconWallet | LedgerSigner | ProgrammaticWallet | undefined
   >;
   getWalletName: ComputedRef<string | undefined>;
+  /** Wallet logo, only set for Beacon wallets with a safe icon URL. */
+  getWalletIcon: ComputedRef<string | undefined>;
   initializeWallet: (
     provider: WalletProvider,
     privateKeyOrSocialProvider?: string,
@@ -76,21 +83,12 @@ export interface WalletStoreState {
   getWalletPublicKey: () => Promise<string | undefined>;
 }
 
-/** Event initializer function type for wallet events */
-export type BeaconEventInitializer = (
-  beaconWallet: BeaconWallet,
-  store: WalletStoreState,
-) => void;
-
 /**
  * Creates a wallet store with the given configuration. This factory function
  * allows creating multiple wallet stores for different networks.
  */
 export const createWalletStore = (
   config: WalletStoreConfig,
-  eventInitializers?: {
-    beacon?: BeaconEventInitializer;
-  },
 ): StoreDefinition<string, WalletStoreState> => {
   const {
     storeName,
@@ -119,6 +117,7 @@ export const createWalletStore = (
     const address = ref<string>();
     const balance = ref<TezosBalance>();
     const walletName = ref<string>();
+    const walletIcon = ref<string>();
     const isDisconnecting = ref<boolean>(false);
     const provider = ref<WalletProvider | undefined>();
 
@@ -133,8 +132,8 @@ export const createWalletStore = (
 
       try {
         if (wallet.value instanceof BeaconWallet) {
-          const activeAccount: AccountInfo | undefined =
-            await wallet.value.client.getActiveAccount();
+          const activeAccount: StoredAccountInfo | undefined =
+            await wallet.value.getActiveAccount();
           return activeAccount?.address;
         } else if (wallet.value instanceof LedgerSigner) {
           return await wallet.value.publicKeyHash();
@@ -167,12 +166,37 @@ export const createWalletStore = (
     };
     const getBalance = computed(() => balance.value);
     const getWalletName = computed(() => walletName.value);
+    const getWalletIcon = computed(() => walletIcon.value);
+
+    /**
+     * Cleanups for the Beacon event handlers and the inspector collector. The
+     * DAppClient is a singleton shared across wallet re-inits, so these must be
+     * released on every reset or handlers stack up.
+     */
+    const beaconSubscriptions: (() => void)[] = [];
+    const releaseBeaconSubscriptions = (): void => {
+      for (const release of beaconSubscriptions.splice(0)) release();
+    };
+
+    /**
+     * Wallet name and logo come from BeaconWallet.getWalletInfo(), added for
+     * https://github.com/ecadlabs/beacon-sdk-taquito-patches/issues/136.
+     */
+    const applyBeaconWalletDisplay = async (
+      beaconWallet: BeaconWallet,
+    ): Promise<void> => {
+      const display = await resolveBeaconWalletDisplay(beaconWallet);
+      walletName.value = display.name;
+      walletIcon.value = display.iconUrl;
+    };
 
     /**
      * Resets all wallet state variables to undefined and clears the local
      * storage
      */
     const resetWalletState = async (): Promise<void> => {
+      releaseBeaconSubscriptions();
+
       // Clean up Ledger transport if it exists
       if (ledgerTransport.value) {
         try {
@@ -188,6 +212,7 @@ export const createWalletStore = (
       address.value = undefined;
       balance.value = undefined;
       walletName.value = undefined;
+      walletIcon.value = undefined;
       provider.value = undefined;
 
       // Clear any persisted wallet state
@@ -203,7 +228,11 @@ export const createWalletStore = (
 
     /** Initializes a Beacon wallet */
     const initializeBeaconWallet = async (): Promise<void> => {
-      const reownProjectId = import.meta.env.VITE_REOWN_PROJECT_ID;
+      // Without one, Beacon uses its deprecated demo project ID; the dev banner
+      // says so, and `npm run build:verified` refuses to build.
+      const reownProjectId = readReownProjectId(
+        import.meta.env.VITE_REOWN_PROJECT_ID,
+      );
       const options: DAppClientOptions = {
         name: appName,
         iconUrl: appIconUrl,
@@ -224,29 +253,37 @@ export const createWalletStore = (
 
       console.log("Beacon wallet options:", options);
 
+      // Creating the inspector store installs its Beacon log sink. That has to
+      // happen before `new BeaconWallet`, which can report a config-mismatch
+      // diagnostic from getDAppClientInstance.
+      const inspector = useBeaconInspectorStore();
       const beaconWallet = new BeaconWallet(options);
 
-      // Initialize events using the provided initializer or skip if not provided
-      if (eventInitializers?.beacon) {
-        eventInitializers.beacon(beaconWallet, {
-          Tezos,
+      // Attach before pairing so PAIR_INIT and the permission request are
+      // recorded.
+      const detachCollector = await attachBeaconCollector(beaconWallet, {
+        log: inspector.log,
+        onPendingRequests: inspector.setPendingRequests,
+      });
+      beaconSubscriptions.push(() => {
+        detachCollector();
+        inspector.setPendingRequests([]);
+      });
+      beaconSubscriptions.push(
+        await attachBeaconWalletEvents(beaconWallet, {
           address,
           isDisconnecting,
-          getTezos,
-          getAddress,
-          getBalance,
-          getWallet,
-          getWalletName,
-          getProvider,
-          initializeWallet,
+          hasWallet: () => wallet.value !== undefined,
           disconnectWallet,
-          fetchBalance,
-          getWalletAddress,
-          getWalletPublicKey,
-        });
-      }
+          refreshWalletDisplay: async () => {
+            if (wallet.value instanceof BeaconWallet) {
+              await applyBeaconWalletDisplay(wallet.value);
+            }
+          },
+        }),
+      );
 
-      const cachedAccount = await beaconWallet.client.getActiveAccount();
+      const cachedAccount = await beaconWallet.getActiveAccount();
 
       if (cachedAccount === undefined) {
         console.log(
@@ -255,24 +292,7 @@ export const createWalletStore = (
         await beaconWallet.requestPermissions();
       }
 
-      // TODO(https://github.com/ecadlabs/beacon-sdk-taquito-patches/issues/136):
-      // Replace this manual getActiveAccount() + getPeers() lookup with the public
-      // WalletInfo API once exposed in @ecadlabs/beacon-dapp and @taquito/beacon-wallet.
-      try {
-        const activeAccount = await beaconWallet.client.getActiveAccount();
-        const peers = await beaconWallet.client.getPeers();
-        const matchedPeer = activeAccount
-          ? peers.find(
-              (peer) =>
-                ("senderId" in peer &&
-                  peer.senderId === activeAccount.senderId) ||
-                peer.publicKey === activeAccount.origin.id,
-            )
-          : undefined;
-        walletName.value = matchedPeer?.name ?? peers[0]?.name;
-      } catch {
-        walletName.value = undefined;
-      }
+      await applyBeaconWalletDisplay(beaconWallet);
 
       wallet.value = beaconWallet;
       Tezos.setProvider({ wallet: beaconWallet });
@@ -596,6 +616,7 @@ export const createWalletStore = (
       getProvider,
       getWallet,
       getWalletName,
+      getWalletIcon,
       initializeWallet,
       disconnectWallet,
       fetchBalance,

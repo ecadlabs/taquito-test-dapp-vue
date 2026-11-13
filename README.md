@@ -136,6 +136,62 @@ Playwright tests use `TEST_WALLET_PRIVATE_KEY` or `WALLET_PRIVATE_KEY` when
 provided. If a disposable key service is needed for local testing, set
 `TEST_KEYGEN_URL` explicitly; there is no built-in keygen host.
 
+### WalletConnect Project ID
+
+Beacon pairs WalletConnect wallets, such as Kukai Mobile, through Reown, and
+needs a Reown project ID to do it. Set the dApp's project ID from
+[dashboard.reown.com](https://dashboard.reown.com/) as `VITE_REOWN_PROJECT_ID`
+in `.env.local`. Deployments get it from the `REOWN_PROJECT_ID` secret.
+
+- **Deploy builds:** `npm run build:verified` fails without it, so production
+  never falls back to Beacon's built-in demo project ID. That demo ID is
+  deprecated and will be removed in the next Beacon minor release.
+- **Local dev:** without it, Beacon uses the demo ID and the page shows a
+  banner saying so. Extension and Matrix pairing don't need it.
+- **Allowed origins:** the Reown project's allowed origins need to include
+  every origin the dApp is served from: the deploy domains, PR preview
+  domains, `http://localhost:5173`, and any tunnel you test through.
+
+### Testing Against a Local Kukai
+
+Beacon's pairing modal has Kukai's links hardcoded in `@ecadlabs/beacon-ui`:
+the web wallet for each network, the `kukai://` deep link, and the iOS app
+link. To send all of them to another Kukai, such as a local build behind a
+tunnel, set `KUKAI_URL_OVERRIDE` in `.env.local` and start the dev server:
+
+```bash
+# .env.local
+KUKAI_URL_OVERRIDE=https://your-kukai.trycloudflare.com/account/tz1...
+```
+
+```bash
+npm run dev
+```
+
+- **Dev server only.** The Vite plugin in `vite-plugins/kukai-link-override.ts`
+  rewrites the links while Vite pre-bundles `beacon-ui`. `npm run build` and the
+  Cloudflare deployments don't use it, and nothing in `node_modules` is changed.
+- **Allowed values:** `https` URLs, or `http` on `localhost`, `127.0.0.1` or
+  `[::1]`. No query string or fragment, because Beacon appends `/wc?uri=...` to
+  the URL. Trailing slashes are removed. An invalid value stops Vite with an
+  error.
+- **Every network's Kukai link** gets the same URL, so point it at a Kukai built
+  for the network the dApp is running on.
+- **To change or remove it,** edit `.env.local` and restart `npm run dev`. Vite
+  rebuilds its dependency cache on its own; `--force` isn't needed.
+- **While it is on,** the dev server prints the target at startup and the page
+  shows a banner with it.
+- **Why there is no setting or URL parameter in the app:** either would let
+  anyone send a link to the real deployment that opens a fake Kukai.
+
+To reach the dev server through a Cloudflare quick tunnel, allow the tunnel's
+host and point `cloudflared` at the dev server:
+
+```bash
+__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS=.trycloudflare.com npm run dev
+cloudflared tunnel --url http://localhost:5173
+```
+
 ### Project Structure
 
 ```

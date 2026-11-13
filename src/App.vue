@@ -2,6 +2,7 @@
   <Toaster />
   <div id="app">
     <header class="bg-background sticky top-0 z-20">
+      <DevBanner />
       <HeaderComponent />
     </header>
     <main>
@@ -11,10 +12,14 @@
 
   <!-- Global Command Palette -->
   <CommandMenu />
+
+  <BeaconInspector />
 </template>
 
 <script setup lang="ts">
+import BeaconInspector from "@/components/beacon-inspector.vue";
 import CommandMenu from "@/components/command-menu.vue";
+import DevBanner from "@/components/dev-banner.vue";
 import HeaderComponent from "@/components/header-component.vue";
 import { Toaster } from "@/components/ui/sonner";
 import { useFavicon } from "@/composables/useFavicon";

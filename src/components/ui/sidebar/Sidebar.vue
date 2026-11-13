@@ -86,7 +86,7 @@ const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
     <div
       :class="
         cn(
-          'sticky top-16 z-10 hidden h-[calc(100vh-4rem)] w-(--sidebar-width) pb-2 transition-[left,right,width] duration-200 ease-linear md:flex',
+          'sticky top-16 z-10 hidden h-[calc(100vh-4rem-var(--beacon-inspector-offset))] w-(--sidebar-width) pb-2 transition-[left,right,width] duration-200 ease-linear md:flex',
           side === 'left'
             ? 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
             : 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
