@@ -1,6 +1,7 @@
 import { RpcClient } from "@taquito/rpc";
 import type {
   InMemorySpendingKey,
+  SaplingInitOptions,
   SaplingTransactionViewer,
 } from "@taquito/sapling";
 import {
@@ -15,16 +16,11 @@ export type SaplingViewerTransactions = Awaited<
 >;
 
 type SaplingModule = typeof import("@taquito/sapling");
-export type SaplingModuleWithRuntime = SaplingModule & {
-  initSapling?: (options?: {
-    params?: {
-      source?: "taquito" | "zcash";
-      spendParamsUrl?: string;
-      spendParamsSha256?: string;
-      outputParamsUrl?: string;
-      outputParamsSha256?: string;
-    };
-  }) => Promise<void>;
+export type SaplingModuleWithRuntime = Omit<
+  SaplingModule,
+  "initSapling" | "preloadSaplingParams"
+> & {
+  initSapling?: (options?: SaplingInitOptions) => Promise<void>;
   preloadSaplingParams?: () => Promise<void>;
 };
 

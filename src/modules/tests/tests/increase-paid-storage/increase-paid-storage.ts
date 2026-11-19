@@ -1,6 +1,7 @@
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useWalletStore } from "@/stores/walletStore";
+import type { IncreasePaidStorageWalletOperation } from "@taquito/taquito";
 
 const increaseStorage = async (contract: string, bytes: number) => {
   const diagramStore = useDiagramStore();
@@ -16,7 +17,7 @@ const increaseStorage = async (contract: string, bytes: number) => {
     }
 
     diagramStore.setProgress("wait-for-user");
-    const operation = await Tezos.wallet
+    const operation: IncreasePaidStorageWalletOperation = await Tezos.wallet
       .increasePaidStorage({ amount: bytes, destination: contract })
       .send();
 

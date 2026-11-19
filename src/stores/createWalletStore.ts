@@ -1,9 +1,14 @@
+import {
+  applyBeaconAppearance,
+  buildBeaconClientAppearanceOptions,
+} from "@/lib/beaconAppearance";
 import { readReownProjectId } from "@/lib/devConfig";
 import { attachBeaconCollector } from "@/lib/inspector/beaconCollector";
 import { resolveBeaconWalletDisplay } from "@/lib/walletDisplay";
 import { attachBeaconWalletEvents } from "@/lib/walletEvents";
 import { web3AuthService } from "@/services/web3AuthService";
 import { useBeaconInspectorStore } from "@/stores/inspectorStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import type { BeaconNetworkType } from "@/types/network";
 import type { ProgrammaticWallet, WalletProvider } from "@/types/wallet";
 import TransportWebHID from "@ledgerhq/hw-transport-webhid";
@@ -233,6 +238,20 @@ export const createWalletStore = (
       const reownProjectId = readReownProjectId(
         import.meta.env.VITE_REOWN_PROJECT_ID,
       );
+      const settingsStore = useSettingsStore();
+      const prefersDark =
+        typeof window !== "undefined" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const appearanceSettings = {
+        themeMode: settingsStore.getThemeMode,
+        beaconLocale: settingsStore.getBeaconLocale,
+        beaconDirection: settingsStore.getBeaconDirection,
+        beaconCustomTitle: settingsStore.getBeaconCustomTitle,
+      };
+      const appearanceOptions = buildBeaconClientAppearanceOptions(
+        appearanceSettings,
+        prefersDark,
+      );
       const options: DAppClientOptions = {
         name: appName,
         iconUrl: appIconUrl,
@@ -241,6 +260,7 @@ export const createWalletStore = (
           name: beaconNetworkName,
           rpcUrl: resolvedRpcUrl,
         },
+        ...appearanceOptions,
         ...(reownProjectId
           ? {
               walletConnectOptions: {
@@ -258,6 +278,15 @@ export const createWalletStore = (
       // diagnostic from getDAppClientInstance.
       const inspector = useBeaconInspectorStore();
       const beaconWallet = new BeaconWallet(options);
+
+      // Explicitly apply full appearance config to the (possibly reused)
+      // singleton DAppClient so cleared locale/translation overrides from a
+      // prior session do not linger into the next pairing modal.
+      await applyBeaconAppearance(
+        appearanceSettings,
+        prefersDark,
+        beaconWallet,
+      );
 
       // Attach before pairing so PAIR_INIT and the permission request are
       // recorded.
@@ -478,7 +507,6 @@ export const createWalletStore = (
         "Starting initialization of wallet using provider:",
         _provider,
       );
-      provider.value = _provider;
       try {
         if (wallet.value) {
           await resetWalletState();
@@ -486,6 +514,7 @@ export const createWalletStore = (
             "A wallet seems to already be initialized in this session. Resetting wallet state and assuming it is a new session.",
           );
         }
+        provider.value = _provider;
 
         // Initialize wallet based on provider
         switch (_provider) {

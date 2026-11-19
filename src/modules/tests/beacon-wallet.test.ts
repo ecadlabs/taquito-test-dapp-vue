@@ -19,12 +19,7 @@ import { BeaconEvent } from "@taquito/beacon-wallet";
 import { ref } from "vue";
 
 test("formatBeaconError formats BeaconErrorType errors, RequestErrorResponse objects, and standard errors", async () => {
-  const walletEventsModule = await import("@/lib/walletEvents");
-  const formatError = (
-    walletEventsModule as unknown as {
-      formatBeaconError: (error: unknown) => string;
-    }
-  ).formatBeaconError;
+  const { formatBeaconError: formatError } = await import("@/lib/walletEvents");
 
   assert.equal(
     typeof formatError,

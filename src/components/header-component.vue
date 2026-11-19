@@ -39,7 +39,10 @@
           <TooltipContent class="space-y-0.5">
             <p class="font-medium">{{ settingsStore.rpcHealthSummary }}</p>
             <p class="opacity-80">{{ settingsStore.settings.rpcUrl }}</p>
-            <p v-if="settingsStore.isUsingCustomRpcUrl" class="text-orange-300">
+            <p
+              v-if="settingsStore.isUsingCustomRpcUrl"
+              class="text-orange-600 dark:text-orange-700"
+            >
               Custom RPC URL active
             </p>
           </TooltipContent>
@@ -81,6 +84,23 @@
         <TooltipTrigger as-child>
           <Button
             size="icon"
+            variant="outline"
+            class="ml-2 hidden sm:inline-flex"
+            :aria-label="themeToggleLabel"
+            @click="toggleTheme"
+          >
+            <Sun v-if="isDarkTheme" class="size-5" aria-hidden="true" />
+            <Moon v-else class="size-5" aria-hidden="true" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{{ themeToggleTooltip }}</p>
+        </TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger as-child>
+          <Button
+            size="icon"
             :variant="inspector.isOpen ? 'secondary' : 'outline'"
             class="ml-2"
             :aria-label="
@@ -98,8 +118,6 @@
           <p>Beacon inspector</p>
         </TooltipContent>
       </Tooltip>
-    </TooltipProvider>
-    <TooltipProvider>
       <Tooltip>
         <TooltipTrigger as-child>
           <Button
@@ -156,6 +174,12 @@
           class="hover:cursor-pointer"
           >Taquito Documentation
         </DropdownMenuItem>
+        <DropdownMenuItem
+          @click.stop="toggleTheme"
+          class="hover:cursor-pointer sm:hidden"
+        >
+          {{ themeToggleLabel }}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   </div>
@@ -191,13 +215,40 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { resolveColorMode } from "@/lib/beaconAppearance";
 import { AvailableTests } from "@/modules/tests/tests";
 import { useBeaconInspectorStore } from "@/stores/inspectorStore";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { Menu, Radar, Settings } from "lucide-vue-next";
+import { ColorMode } from "@taquito/beacon-wallet/types";
+import { usePreferredDark } from "@vueuse/core";
+import { Menu, Moon, Radar, Settings, Sun } from "lucide-vue-next";
 import { computed, ref, watch } from "vue";
 
 const settingsStore = useSettingsStore();
+const prefersDark = usePreferredDark();
+
+const isDarkTheme = computed(
+  () =>
+    resolveColorMode(settingsStore.getThemeMode, prefersDark.value) ===
+    ColorMode.DARK,
+);
+
+const themeToggleLabel = computed(() =>
+  isDarkTheme.value ? "Switch to light mode" : "Switch to dark mode",
+);
+
+const themeToggleTooltip = computed(() => {
+  if (settingsStore.getThemeMode === "system") {
+    return isDarkTheme.value
+      ? "Following system; click to force light mode"
+      : "Following system; click to force dark mode";
+  }
+  return themeToggleLabel.value;
+});
+
+const toggleTheme = () => {
+  settingsStore.setThemeMode(isDarkTheme.value ? "light" : "dark");
+};
 const inspector = useBeaconInspectorStore();
 
 const showSettingsDialog = ref<boolean>(false);

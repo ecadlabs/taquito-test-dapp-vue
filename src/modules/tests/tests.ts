@@ -11,6 +11,7 @@ import {
   Globe,
   InfinityIcon,
   Info,
+  Languages,
   Network,
   Package,
   Parentheses,
@@ -1500,6 +1501,28 @@ The bridge uses Smart Rollup technology to enable cross-layer communication.`,
         ],
       },
     },
+  },
+  "beacon-ui": {
+    id: "beacon-ui",
+    title: "Beacon UI, i18n & Theme",
+    description:
+      "Interactive showcase for Beacon SDK 4.9.0-ecad-beta.5 capabilities in @taquito/beacon-wallet: 6-language i18n with browser auto-detection and Arabic RTL layout, light/dark ColorMode syncing, custom translation overrides, localized error copy, WCAG accessibility, and runtime BeaconWallet observability.",
+    category: "Wallet & Beacon",
+    setup: [
+      "Install Taquito Beacon Wallet: `npm install @taquito/taquito @taquito/beacon-wallet`",
+      "Configure `colorMode`, `locale`, `direction`, and `translations` in `new BeaconWallet(options)` or at runtime via `setColorMode()` and `configureI18n()`",
+      "Switch themes or languages below, then open the live Beacon pairing modal to inspect the themed, localized shadow-DOM UI",
+    ],
+    relatedTests: ["transfer", "sign-payload"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/beacon-ui",
+      taquitoDocumentation: "https://taquito.io/docs/wallet_API",
+      tezosDocumentation:
+        "https://github.com/ecadlabs/beacon-sdk-taquito-patches",
+    },
+    component: () => import("@/modules/tests/tests/beacon-ui/beacon-ui.vue"),
+    icon: Languages,
   },
 };
 
