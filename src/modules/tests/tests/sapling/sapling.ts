@@ -7,6 +7,7 @@ import type {
 import {
   RpcReadAdapter,
   type Estimate,
+  type OperationStatus,
   type TezosToolkit,
 } from "@taquito/taquito";
 import * as bip39 from "bip39";
@@ -584,19 +585,46 @@ export async function shieldToUser(
   const methodCall = contract.methodsObject.default([shieldedTx]);
   await estimateContractCallIfSupported(tezos, methodCall, { amount }, hooks);
 
-  hooks.setProgress("wait-for-user");
-  const op = await methodCall.send({ amount });
-
-  hooks.setProgress("wait-for-chain-confirmation");
-  await op.confirmation(hooks.getConfirmationCount());
-
-  hooks.setOperationHash(op.opHash);
-  await hooks.setCompleted();
-  return op.opHash;
+  return sendAndConfirmApplied(methodCall, { amount }, hooks);
 }
 
 /** Transfers tez privately from the user to Alice's Sapling address */
 export async function transferToAlice(
+  tezos: TezosToolkit,
+  contractAddress: string,
+  userKey: UserSaplingKey,
+  aliceAddress: string,
+  amount: number,
+  memo?: string,
+  onInjected?: (opHash: string) => void,
+): Promise<string> {
+  const saplingTx = await buildTransferToAlice(
+    tezos,
+    contractAddress,
+    userKey,
+    aliceAddress,
+    amount,
+    memo,
+  );
+  const hooks = customStoreHooks ?? (await resolveStoreHooks());
+  return sendSaplingTransfer(
+    tezos,
+    contractAddress,
+    saplingTx,
+    hooks,
+    onInjected,
+  );
+}
+
+/**
+ * Builds a private transfer to Alice without submitting it.
+ *
+ * The Sapling key proves the transfer; no wallet account takes part. The result
+ * commits to the spent notes, the new notes and the pool, but not to the
+ * account that submits it, so any account can inject it with
+ * `submitBuiltTransfer`.
+ */
+export async function buildTransferToAlice(
   tezos: TezosToolkit,
   contractAddress: string,
   userKey: UserSaplingKey,
@@ -621,7 +649,6 @@ export async function transferToAlice(
   await preloadSaplingProvingParams();
   const { SaplingToolkit } = await getSaplingModule();
 
-  const contract = await tezos.wallet.at(contractAddress);
   const readProvider = createSaplingRpcAdapter(tezos.rpc.getRpcUrl());
 
   const toolkit = new SaplingToolkit(
@@ -634,27 +661,192 @@ export async function transferToAlice(
     readProvider,
   );
 
-  const saplingTx = await toolkit.prepareSaplingTransaction([
+  return toolkit.prepareSaplingTransaction([
     {
       to: aliceAddress,
       amount,
       memo: resolvedMemo,
     },
   ]);
+}
 
-  const methodCall = contract.methodsObject.default([saplingTx]);
-  await estimateContractCallIfSupported(tezos, methodCall, undefined, hooks);
+/**
+ * Submits a built private transfer from whichever account `tezos` is connected
+ * to. That account signs and pays the fee, and it is the public source of the
+ * operation. Amounts, recipients and memos stay encrypted, but the pool, the
+ * timing, the fee and the transaction size are public too, so submitting from
+ * another account removes one link without making the transfer anonymous.
+ *
+ * `onInjected` receives the operation hash as soon as the wallet injects it,
+ * before confirmation, so a caller can keep tracking it if confirmation fails.
+ */
+export async function submitBuiltTransfer(
+  tezos: TezosToolkit,
+  contractAddress: string,
+  saplingTx: string,
+  onInjected?: (operation: InjectedSaplingOperation) => void,
+): Promise<string> {
+  const hooks = customStoreHooks ?? (await resolveStoreHooks());
+  hooks.setTestDiagram(TEST_ID, "transfer");
+  // Read before sending, so a later lookup by hash starts no later than the
+  // block that includes the operation.
+  const { hash: trackFrom } = await tezos.rpc.getBlockHeader();
+  return sendSaplingTransfer(
+    tezos,
+    contractAddress,
+    saplingTx,
+    hooks,
+    (opHash) => onInjected?.({ opHash, trackFrom }),
+  );
+}
 
-  hooks.setProgress("wait-for-user");
-  const op = await methodCall.send();
+/**
+ * Waits again for a submitted transfer whose confirmation did not arrive.
+ * Resolves with the hash once it is applied.
+ *
+ * @throws {@link SaplingOperationNotAppliedError} When it was included but did
+ *   not apply
+ */
+export async function trackSubmittedTransfer(
+  tezos: TezosToolkit,
+  operation: InjectedSaplingOperation,
+): Promise<string> {
+  const hooks = customStoreHooks ?? (await resolveStoreHooks());
+  hooks.setTestDiagram(TEST_ID, "transfer");
+  hooks.setOperationHash(operation.opHash);
+  const op = await tezos.operation.createTransactionOperation(
+    operation.opHash,
+    { blockIdentifier: operation.trackFrom },
+  );
+  return confirmApplied(op, hooks);
+}
 
+/** An injected operation: its hash and the head block just before sending. */
+export interface InjectedSaplingOperation {
+  opHash: string;
+  /** Tracking an operation again starts from this block. */
+  trackFrom: string;
+}
+
+type NotAppliedStatus = Extract<
+  OperationStatus,
+  "failed" | "skipped" | "backtracked"
+>;
+
+/** The operation was included in a block, but its result is not `applied`. */
+export class SaplingOperationNotAppliedError extends Error {
+  override readonly name = "SaplingOperationNotAppliedError";
+  readonly opHash: string;
+  readonly status: NotAppliedStatus;
+
+  /**
+   * @param opHash The included operation
+   * @param status Its result status
+   */
+  constructor(opHash: string, status: NotAppliedStatus) {
+    super(
+      `Operation ${opHash} was included with status "${status}", so it did not apply.`,
+    );
+    this.opHash = opHash;
+    this.status = status;
+  }
+}
+
+/** The operation was seen, but its result couldn't be read. */
+export class SaplingOperationStatusUnknownError extends Error {
+  override readonly name = "SaplingOperationStatusUnknownError";
+  readonly opHash: string;
+  readonly status: Extract<OperationStatus, "pending" | "unknown">;
+
+  /**
+   * @param opHash The operation whose result is unknown
+   * @param status What Taquito reported instead of a result
+   */
+  constructor(
+    opHash: string,
+    status: Extract<OperationStatus, "pending" | "unknown">,
+  ) {
+    super(
+      `The result of operation ${opHash} couldn't be read (status "${status}"). Check its status again.`,
+    );
+    this.opHash = opHash;
+    this.status = status;
+  }
+}
+
+type TrackableOperation = {
+  opHash: string;
+  confirmation: (confirmations?: number) => Promise<unknown>;
+  status: () => Promise<OperationStatus>;
+};
+
+/**
+ * Waits for inclusion and reports success only for an applied result.
+ * confirmation() resolves once the operation is included, whether or not it
+ * applied, so the status decides.
+ *
+ * @returns The operation hash once it is applied
+ * @throws {@link SaplingOperationNotAppliedError} For a failed, skipped or
+ *   backtracked result
+ * @throws {@link SaplingOperationStatusUnknownError} When no result is readable
+ */
+const confirmApplied = async (
+  op: TrackableOperation,
+  hooks: SaplingStoreHooks,
+): Promise<string> => {
   hooks.setProgress("wait-for-chain-confirmation");
   await op.confirmation(hooks.getConfirmationCount());
+  const status = await op.status();
+  switch (status) {
+    case "applied":
+      await hooks.setCompleted();
+      return op.opHash;
+    case "failed":
+    case "skipped":
+    case "backtracked":
+      throw new SaplingOperationNotAppliedError(op.opHash, status);
+    case "pending":
+    case "unknown":
+      throw new SaplingOperationStatusUnknownError(op.opHash, status);
+  }
+};
 
+/**
+ * Asks the wallet to send the call, records its hash as soon as it is injected,
+ * then waits for an applied result.
+ *
+ * @param onInjected Receives the hash before confirmation starts
+ * @returns The operation hash once it is applied
+ */
+const sendAndConfirmApplied = async (
+  methodCall: {
+    send: (params?: { amount?: number }) => Promise<TrackableOperation>;
+  },
+  sendParams: { amount?: number } | undefined,
+  hooks: SaplingStoreHooks,
+  onInjected?: (opHash: string) => void,
+): Promise<string> => {
+  hooks.setProgress("wait-for-user");
+  const op = await methodCall.send(sendParams);
+  // Record the hash at injection, so a confirmation timeout leaves it known.
   hooks.setOperationHash(op.opHash);
-  await hooks.setCompleted();
-  return op.opHash;
-}
+  onInjected?.(op.opHash);
+  return confirmApplied(op, hooks);
+};
+
+/** Sends a built Sapling transaction to the pool's default entrypoint. */
+const sendSaplingTransfer = async (
+  tezos: TezosToolkit,
+  contractAddress: string,
+  saplingTx: string,
+  hooks: SaplingStoreHooks,
+  onInjected?: (opHash: string) => void,
+): Promise<string> => {
+  const contract = await tezos.wallet.at(contractAddress);
+  const methodCall = contract.methodsObject.default([saplingTx]);
+  await estimateContractCallIfSupported(tezos, methodCall, undefined, hooks);
+  return sendAndConfirmApplied(methodCall, undefined, hooks, onInjected);
+};
 
 /**
  * Unshields tez by moving them from the user's private Sapling address to a
@@ -666,6 +858,7 @@ export async function unshieldToUser(
   userKey: UserSaplingKey,
   toAddress: string,
   amount: number,
+  onInjected?: (opHash: string) => void,
 ): Promise<string> {
   assertPositiveAmount(amount, "Unshield");
 
@@ -704,15 +897,7 @@ export async function unshieldToUser(
   const methodCall = contract.methodsObject.default([unshieldedTx]);
   await estimateContractCallIfSupported(tezos, methodCall, undefined, hooks);
 
-  hooks.setProgress("wait-for-user");
-  const op = await methodCall.send();
-
-  hooks.setProgress("wait-for-chain-confirmation");
-  await op.confirmation(hooks.getConfirmationCount());
-
-  hooks.setOperationHash(op.opHash);
-  await hooks.setCompleted();
-  return op.opHash;
+  return sendAndConfirmApplied(methodCall, undefined, hooks, onInjected);
 }
 
 const normalizeMemo = (memo: string | undefined): string | undefined => {

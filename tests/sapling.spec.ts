@@ -70,4 +70,32 @@ test.describe("Sapling Transactions", () => {
       { timeout: 30000 },
     );
   });
+
+  // One account builds and submits here. This checks the build-then-submit
+  // flow and the applied result, not a real wallet account switch.
+  test("should build a transfer and submit it separately", async () => {
+    const page = getSharedPage();
+
+    // Prove the transfer without sending it, then submit the built transaction.
+    await page.getByTestId("sapling-tab-transfer").click();
+    await page.getByTestId("sapling-transfer-build-button").click();
+    await expect(page.getByTestId("sapling-built-transfer")).toHaveAttribute(
+      "data-state",
+      "prepared",
+      { timeout: 90000 },
+    );
+    await page.getByTestId("sapling-transfer-submit-built-button").click();
+    await waitForSuccess({ page, timeout: 90000 });
+    await expect(page.getByTestId("sapling-built-transfer")).toBeHidden();
+
+    await page.getByTestId("sapling-balance-button").click();
+    await expect(page.getByTestId("sapling-user-balance")).toHaveText(
+      "0.000000 ꜩ",
+      { timeout: 30000 },
+    );
+    await expect(page.getByTestId("sapling-alice-balance")).toHaveText(
+      "2.000000 ꜩ",
+      { timeout: 30000 },
+    );
+  });
 });
