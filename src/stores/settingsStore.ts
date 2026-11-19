@@ -1,12 +1,18 @@
+import { getBeaconLocaleOptions, type ThemeMode } from "@/lib/beaconAppearance";
 import {
   formatRpcHealthSummary,
   probeRpcHealth,
   type RpcHealthStatus,
 } from "@/lib/rpcHealth";
-import { NetworkType } from "@taquito/beacon-wallet/types";
+import {
+  NetworkType,
+  type BeaconTextDirection,
+} from "@taquito/beacon-wallet/types";
 import { useDebounce } from "@vueuse/core";
 import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
+
+export type { ThemeMode };
 
 export type IndexerOption = {
   name: string;
@@ -35,13 +41,14 @@ export const availableIndexers: IndexerOption[] = [
   },
 ];
 
-export type ThemeMode = "light" | "dark" | "system";
-
 export type Settings = {
   indexer: IndexerOption;
   rpcUrl: string;
   confirmationCount: number;
   themeMode: ThemeMode;
+  beaconLocale: string;
+  beaconDirection: BeaconTextDirection;
+  beaconCustomTitle: string;
 };
 
 const activeRpcUrlByNetwork: Record<string, string> = {
@@ -75,14 +82,47 @@ const defaultSettings: Settings = {
   rpcUrl: getDefaultRpcUrl(),
   confirmationCount: 3,
   themeMode: "light",
+  beaconLocale: "auto",
+  beaconDirection: "auto",
+  beaconCustomTitle: "",
 };
 
 export const useSettingsStore = defineStore("settings", () => {
+  const VALID_DIRECTIONS: ReadonlySet<BeaconTextDirection> = new Set([
+    "auto",
+    "ltr",
+    "rtl",
+  ]);
+  const VALID_THEMES: ReadonlySet<ThemeMode> = new Set([
+    "light",
+    "dark",
+    "system",
+  ]);
+  const VALID_LOCALES: ReadonlySet<string> = new Set([
+    "auto",
+    ...getBeaconLocaleOptions().map((item) => item.locale),
+  ]);
+
   const migrateSettings = (settings: Settings): Settings => ({
     ...settings,
     rpcUrl: isRetiredRpcUrl(settings.rpcUrl)
       ? defaultSettings.rpcUrl
       : settings.rpcUrl,
+    themeMode: VALID_THEMES.has(settings.themeMode)
+      ? settings.themeMode
+      : defaultSettings.themeMode,
+    beaconLocale:
+      typeof settings.beaconLocale === "string" &&
+      VALID_LOCALES.has(settings.beaconLocale)
+        ? settings.beaconLocale
+        : defaultSettings.beaconLocale,
+    beaconDirection: VALID_DIRECTIONS.has(settings.beaconDirection)
+      ? settings.beaconDirection
+      : defaultSettings.beaconDirection,
+    beaconCustomTitle:
+      typeof settings.beaconCustomTitle === "string"
+        ? settings.beaconCustomTitle
+        : defaultSettings.beaconCustomTitle,
   });
 
   const getMergedSettings = (): Settings => {
@@ -105,12 +145,27 @@ export const useSettingsStore = defineStore("settings", () => {
   const getIndexer = computed(() => settings.value.indexer);
   const getConfirmationCount = computed(() => settings.value.confirmationCount);
   const getThemeMode = computed(() => settings.value.themeMode);
+  const getBeaconLocale = computed(() => settings.value.beaconLocale);
+  const getBeaconDirection = computed(() => settings.value.beaconDirection);
+  const getBeaconCustomTitle = computed(() => settings.value.beaconCustomTitle);
   const isUsingCustomRpcUrl = computed(() => {
     return settings.value.rpcUrl !== defaultSettings.rpcUrl;
   });
 
   const setThemeMode = (themeMode: ThemeMode) => {
     settings.value.themeMode = themeMode;
+  };
+
+  const setBeaconLocale = (locale: string) => {
+    settings.value.beaconLocale = locale;
+  };
+
+  const setBeaconDirection = (direction: BeaconTextDirection) => {
+    settings.value.beaconDirection = direction;
+  };
+
+  const setBeaconCustomTitle = (title: string) => {
+    settings.value.beaconCustomTitle = title;
   };
 
   // Update the settings in localStorage when the settings change so they persist across sessions
@@ -180,6 +235,9 @@ export const useSettingsStore = defineStore("settings", () => {
     getIndexer,
     getConfirmationCount,
     getThemeMode,
+    getBeaconLocale,
+    getBeaconDirection,
+    getBeaconCustomTitle,
     isUsingCustomRpcUrl,
     rpcHealthStatus,
     rpcHealthCheckDuration,
@@ -191,6 +249,9 @@ export const useSettingsStore = defineStore("settings", () => {
     rpcHealthSummary,
     checkRpcHealth,
     setThemeMode,
+    setBeaconLocale,
+    setBeaconDirection,
+    setBeaconCustomTitle,
     resetRpcUrl,
   };
 });

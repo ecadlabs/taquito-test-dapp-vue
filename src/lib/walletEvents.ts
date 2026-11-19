@@ -4,118 +4,110 @@ import {
   type BeaconWallet,
   type InvalidAccountDeactivatedEvent,
   type LateResponseInfo,
-  type RequestErrorResponse,
 } from "@taquito/beacon-wallet";
 import {
   BeaconErrorType,
   BeaconMessageType,
+  getBeaconErrorCopy,
+  isBeaconError,
+  isRequestErrorResponse,
+  isTezosRpcError,
+  resolveBeaconLang,
+  type RequestErrorResponse,
 } from "@taquito/beacon-wallet/types";
 import { toast } from "vue-sonner";
 import type { Ref } from "vue";
 
-interface RpcErrorItem {
-  kind?: string;
-  id?: string;
-  with?: {
-    string?: string;
-    int?: number;
-  };
-}
-
-const isBeaconErrorObject = (
-  value: unknown,
-): value is Partial<RequestErrorResponse> & { errorType: BeaconErrorType } =>
-  typeof value === "object" &&
-  value !== null &&
-  "errorType" in value &&
-  typeof (value as { errorType: unknown }).errorType === "string";
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
 
 const extractRpcErrorDetail = (errorData: unknown): string | undefined => {
   if (!Array.isArray(errorData)) {
     return undefined;
   }
 
-  for (const item of errorData as RpcErrorItem[]) {
-    if (item && typeof item === "object") {
-      if (item.with?.string) {
+  for (const item of errorData) {
+    if (!isTezosRpcError(item)) {
+      continue;
+    }
+    if (isRecord(item.with)) {
+      if (typeof item.with.string === "string" && item.with.string.length > 0) {
         return item.with.string;
       }
-      if (typeof item.with?.int === "number") {
+      if (typeof item.with.int === "number") {
         return String(item.with.int);
       }
-      if (typeof item.id === "string" && item.id.length > 0) {
-        return item.id;
-      }
+    }
+    if (typeof item.id === "string" && item.id.length > 0) {
+      return item.id;
     }
   }
 
   return undefined;
 };
 
+const formatBeaconErrorType = (
+  errorType: BeaconErrorType,
+  errorData?: unknown,
+  errorOrigin?: RequestErrorResponse["errorOrigin"],
+): string => {
+  const copy = getBeaconErrorCopy(errorType);
+
+  if (
+    errorType === BeaconErrorType.ABORTED_ERROR &&
+    errorOrigin === "local" &&
+    resolveBeaconLang() === "en"
+  ) {
+    return "The wallet request was cancelled.";
+  }
+
+  if (errorType === BeaconErrorType.TRANSACTION_INVALID_ERROR) {
+    const detail = extractRpcErrorDetail(errorData);
+    if (detail) {
+      return `${copy.description.replace(/\.$/, "")} (${detail}).`;
+    }
+  }
+
+  return copy.description;
+};
+
 /**
  * Formats Beacon SDK errors, `RequestErrorResponse` payloads, and standard
- * exceptions into readable user-facing strings.
+ * exceptions into readable user-facing strings localized to the active Beacon
+ * i18n locale.
  */
 export const formatBeaconError = (error: unknown): string => {
   if (typeof error === "string") {
     return error;
   }
 
-  if (isBeaconErrorObject(error)) {
-    const isLocal = error.errorOrigin === "local";
-    switch (error.errorType) {
-      case BeaconErrorType.ABORTED_ERROR:
-        return isLocal
-          ? "The wallet request was cancelled."
-          : "The request was aborted in the wallet.";
-      case BeaconErrorType.PEER_UNREACHABLE:
-        return "The wallet did not respond in time. Check the wallet and your recent account activity before trying again.";
-      case BeaconErrorType.TRANSACTION_INVALID_ERROR: {
-        const detail = extractRpcErrorDetail(error.errorData);
-        return detail
-          ? `The transaction is invalid and the node rejected it (${detail}).`
-          : "The transaction is invalid and the node did not accept it.";
-      }
-      case BeaconErrorType.SIGNATURE_TYPE_NOT_SUPPORTED:
-        return "The wallet is not able to sign payloads of this type.";
-      case BeaconErrorType.BROADCAST_ERROR:
-        return "The transaction could not be broadcast to the network. Please try again.";
-      case BeaconErrorType.NETWORK_NOT_SUPPORTED:
-        return "The wallet does not support this network. Please select another one.";
-      case BeaconErrorType.NO_ADDRESS_ERROR:
-        return "The wallet does not have an account set up for this network.";
-      case BeaconErrorType.NO_PRIVATE_KEY_FOUND_ERROR:
-        return "The account you are trying to interact with is not available in the wallet.";
-      case BeaconErrorType.NOT_GRANTED_ERROR:
-        return "The wallet did not grant the necessary permissions for this action.";
-      case BeaconErrorType.PARAMETERS_INVALID_ERROR:
-        return "Some of the parameters provided are invalid and the request could not be completed.";
-      case BeaconErrorType.TOO_MANY_OPERATIONS:
-        return "The request contains too many operations to fit in a single batch.";
-      case BeaconErrorType.UNKNOWN_ERROR:
-      default:
-        return "The wallet returned an unexpected error.";
-    }
+  if (isBeaconError(error)) {
+    const errorData = Array.isArray(error.errorData)
+      ? error.errorData
+      : undefined;
+    return formatBeaconErrorType(error.errorType, errorData, error.errorOrigin);
+  }
+
+  if (isRequestErrorResponse(error)) {
+    return formatBeaconErrorType(
+      error.errorType,
+      error.errorData,
+      error.errorOrigin,
+    );
   }
 
   if (error instanceof Error) {
-    // Strip leading "[ERROR_TYPE]:" prefix from BeaconError instances
+    // Strip leading "[ERROR_TYPE]:" prefix from BeaconError-like Error messages
     const stripped = error.message.replace(/^\[[A-Z0-9_]+\]:\s*/, "");
     return stripped || error.message;
   }
 
-  if (typeof error === "object" && error !== null) {
-    if (
-      "description" in error &&
-      typeof (error as { description: unknown }).description === "string"
-    ) {
-      return (error as { description: string }).description;
+  if (isRecord(error)) {
+    if (typeof error.description === "string") {
+      return error.description;
     }
-    if (
-      "message" in error &&
-      typeof (error as { message: unknown }).message === "string"
-    ) {
-      return (error as { message: string }).message;
+    if (typeof error.message === "string") {
+      return error.message;
     }
     try {
       return JSON.stringify(error);

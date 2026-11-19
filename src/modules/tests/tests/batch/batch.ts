@@ -2,6 +2,7 @@ import { getOperationHash } from "@/lib/utils";
 import { getContractAddress } from "@/networks/network-registry";
 import { useDiagramStore } from "@/stores/diagramStore";
 import { useWalletStore } from "@/stores/walletStore";
+import type { BatchWalletOperation } from "@taquito/taquito";
 
 const NETWORK_ID =
   import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE;
@@ -31,7 +32,7 @@ const sendBatch = async (): Promise<void> => {
     batch.withContractCall(contract.methodsObject.increment(1));
 
     diagramStore.setProgress("wait-for-user");
-    const batchOp = await batch.send();
+    const batchOp: BatchWalletOperation = await batch.send();
 
     diagramStore.setProgress("wait-for-chain-confirmation");
     await batchOp.confirmation();

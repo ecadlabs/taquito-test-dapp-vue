@@ -179,3 +179,8 @@ beacon-toast {
   [data-sonner-toaster][data-y-position="bottom"] {
   bottom: calc(var(--beacon-inspector-offset) + 1rem) !important;
 }
+
+/* Allow localized RTL Beacon error descriptions to render in their natural direction. */
+[data-sonner-toast] [data-description] {
+  unicode-bidi: plaintext;
+}

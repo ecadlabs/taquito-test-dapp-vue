@@ -1,5 +1,5 @@
 <template>
-  <DialogContent class="overflow-hidden">
+  <DialogContent class="max-h-[90dvh] overflow-y-auto">
     <DialogHeader>
       <DialogTitle>Settings</DialogTitle>
     </DialogHeader>
@@ -60,10 +60,14 @@
         </div>
       </div>
       <div class="flex flex-col gap-2">
-        <Label class="font-medium">Theme</Label>
+        <Label :for="themeSelectId" class="font-medium">Theme</Label>
         <div class="w-full space-y-2 sm:w-auto">
           <Select v-model="settingsStore.settings.themeMode">
-            <SelectTrigger class="w-full sm:w-[220px]">
+            <SelectTrigger
+              :id="themeSelectId"
+              :aria-describedby="themeHelpId"
+              class="w-full sm:w-[220px]"
+            >
               <SelectValue placeholder="Select theme" />
             </SelectTrigger>
             <SelectContent>
@@ -74,7 +78,71 @@
               </SelectGroup>
             </SelectContent>
           </Select>
+          <p :id="themeHelpId" class="text-muted-foreground text-xs">
+            Applies to both the Playground and Beacon wallet modals/toasts.
+          </p>
         </div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center justify-between gap-2">
+          <Label :for="beaconLocaleSelectId" class="font-medium"
+            >Beacon Language</Label
+          >
+          <Badge variant="outline" class="font-mono text-xs">
+            {{ resolvedBeaconSummary }}
+          </Badge>
+        </div>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <Select v-model="settingsStore.settings.beaconLocale">
+            <SelectTrigger
+              :id="beaconLocaleSelectId"
+              :aria-describedby="beaconLocaleHelpId"
+              class="w-full"
+            >
+              <SelectValue placeholder="Select language" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="auto">
+                  Auto (Browser{{ browserLocale ? `: ${browserLocale}` : "" }})
+                </SelectItem>
+                <SelectItem
+                  v-for="locale in beaconLocales"
+                  :key="locale.locale"
+                  :value="locale.locale"
+                >
+                  {{ locale.name }} ({{ locale.locale
+                  }}{{ locale.direction === "rtl" ? ", RTL" : "" }})
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <div class="flex flex-col gap-1.5">
+            <Label :for="beaconDirectionSelectId" class="text-xs font-medium"
+              >Text Direction</Label
+            >
+            <Select v-model="settingsStore.settings.beaconDirection">
+              <SelectTrigger
+                :id="beaconDirectionSelectId"
+                :aria-describedby="beaconLocaleHelpId"
+                class="w-full"
+              >
+                <SelectValue placeholder="Direction" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="auto">Auto (from locale)</SelectItem>
+                  <SelectItem value="ltr">LTR (Left-to-Right)</SelectItem>
+                  <SelectItem value="rtl">RTL (Right-to-Left)</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <p :id="beaconLocaleHelpId" class="text-muted-foreground text-xs">
+          Controls Beacon pairing screens, toasts, and error copy (supports
+          Arabic RTL).
+        </p>
       </div>
       <div class="flex flex-col gap-2">
         <div class="flex items-center justify-between gap-2">
@@ -223,15 +291,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getBeaconLocaleOptions } from "@/lib/beaconAppearance";
 import {
   availableIndexers,
   useSettingsStore,
   type IndexerOption,
 } from "@/stores/settingsStore";
-import type { NetworkType } from "@taquito/beacon-wallet/types";
+import {
+  detectBrowserLocale,
+  getBeaconDirection,
+  resolveBeaconLang,
+  subscribeBeaconI18n,
+  type NetworkType,
+} from "@taquito/beacon-wallet/types";
 import { version as taquitoVersion } from "@taquito/taquito/package.json";
 import { LoaderCircle, RefreshCw, TriangleAlert, Undo2 } from "lucide-vue-next";
-import { computed } from "vue";
+import { computed, onUnmounted, ref, useId } from "vue";
 
 const emit = defineEmits(["close"]);
 
@@ -243,16 +318,36 @@ const indexers: IndexerOption[] = availableIndexers.filter((indexer) =>
   ),
 );
 
+const beaconLocales = getBeaconLocaleOptions();
+const browserLocale = detectBrowserLocale();
+
+const formatResolvedBeaconSummary = () =>
+  `${resolveBeaconLang()} · ${getBeaconDirection().toUpperCase()}`;
+
+const resolvedBeaconSummary = ref(formatResolvedBeaconSummary());
+const unsubscribeBeaconI18n = subscribeBeaconI18n(() => {
+  resolvedBeaconSummary.value = formatResolvedBeaconSummary();
+});
+
+onUnmounted(() => {
+  unsubscribeBeaconI18n();
+});
+
 const gitSha = import.meta.env.VITE_GITHUB_SHA;
 const version = import.meta.env.VITE_VERSION;
 const network = import.meta.env.VITE_NETWORK_TYPE;
 
-const indexerSelectId = "settings-indexer-select";
-const indexerHelpId = "settings-indexer-help";
-const confirmationInputId = "settings-confirmation-count";
-const confirmationHelpId = "settings-confirmation-help";
-const rpcInputId = "settings-rpc-url";
-const rpcStatusId = "settings-rpc-status";
+const indexerSelectId = useId();
+const indexerHelpId = useId();
+const confirmationInputId = useId();
+const confirmationHelpId = useId();
+const themeSelectId = useId();
+const themeHelpId = useId();
+const beaconLocaleSelectId = useId();
+const beaconDirectionSelectId = useId();
+const beaconLocaleHelpId = useId();
+const rpcInputId = useId();
+const rpcStatusId = useId();
 
 const isRpcHealthy = computed(() => settingsStore.isRpcHealthy);
 const rpcHealthCheckDuration = computed(

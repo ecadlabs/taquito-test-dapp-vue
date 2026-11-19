@@ -547,7 +547,7 @@ test("collector stores JSON-safe snapshots of PAIR_INIT, which carries promises 
   await wallet.emit(BeaconEvent.PAIR_INIT, {
     p2pPeerInfo: Promise.resolve("p2p-pairing"),
     postmessagePeerInfo: Promise.resolve("postmessage-pairing"),
-    walletConnectPeerInfo: Promise.resolve("wc-pairing"),
+    walletConnectPeerInfo: Promise.resolve({ ok: true, uri: "wc-pairing" }),
     networkType: NetworkType.MAINNET,
     abortedHandler: () => undefined,
     analytics: { track: () => undefined },

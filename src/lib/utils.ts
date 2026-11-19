@@ -1,5 +1,6 @@
 import { getIndexerBaseUrl } from "@/networks/network-registry";
 import type { IndexerOption } from "@/stores/settingsStore";
+import { isValidAddress } from "@taquito/utils";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { toast } from "vue-sonner";
@@ -62,14 +63,17 @@ export const copyToClipboard = async (
 };
 
 /**
- * Validates a Tezos address (tz1, tz2, tz3, tz4, KT1)
+ * Validates a bare Tezos address (tz1, tz2, tz3, tz4, KT1, etc.) using
+ * Taquito's base58check validator without accepting `%entrypoint` suffixes.
  *
  * @param address - The address string to validate
  * @returns True if valid, false otherwise
  */
 export const validateTezosAddress = (address: string): boolean => {
-  const tezosAddressPattern = /^(tz[1-4]|KT1)[0-9A-Za-z]{33}$/;
-  return tezosAddressPattern.test(address);
+  if (address.includes("%") || /\s/.test(address)) {
+    return false;
+  }
+  return isValidAddress(address);
 };
 
 /**
