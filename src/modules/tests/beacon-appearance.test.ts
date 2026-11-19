@@ -36,11 +36,11 @@ test("resolveColorMode maps light, dark, and system theme modes to Beacon ColorM
   assert.equal(resolveColorMode("system", false), ColorMode.LIGHT);
 });
 
-test("getBeaconLocaleOptions lists all 6 built-in Beacon locales with metadata and RTL flag", () => {
+test("getBeaconLocaleOptions lists built-in Beacon locales with metadata and RTL flag", () => {
   const locales = getBeaconLocaleOptions();
   const tags = locales.map((item) => item.locale);
 
-  for (const expected of ["en", "fr", "es", "de", "ja", "ar"]) {
+  for (const expected of ["en", "fr", "es", "de", "ja", "ar", "pl"]) {
     assert.ok(
       tags.includes(expected),
       `Expected built-in locale "${expected}"`,
