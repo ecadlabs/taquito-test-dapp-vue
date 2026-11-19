@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
+import { once } from "node:events";
 import { readFile } from "node:fs/promises";
+import { createServer } from "node:http";
 import test from "node:test";
 import BigNumber from "bignumber.js";
 
@@ -938,4 +940,86 @@ test("sapling IA and UX improvements: 2-column layout, stepped tabs, contract he
     /loadInitialBalancesIfReady/,
     "sapling.vue should auto-fetch shielded balances in the background once keys and wallet are ready",
   );
+});
+
+test("firstRejection reports the first failed load and keeps an undefined reason", async () => {
+  const { firstRejection } =
+    await import("@/modules/tests/tests/sapling/sapling");
+  const unreadable = new Error("HTTP 404");
+
+  assert.equal(
+    firstRejection(await Promise.allSettled([Promise.resolve(1)])),
+    undefined,
+  );
+  assert.deepEqual(
+    firstRejection(
+      await Promise.allSettled([
+        Promise.resolve("balances"),
+        Promise.reject(unreadable),
+        Promise.reject(new Error("later")),
+      ]),
+    ),
+    { reason: unreadable },
+  );
+  assert.deepEqual(
+    firstRejection(await Promise.allSettled([Promise.reject(undefined)])),
+    { reason: undefined },
+  );
+});
+
+test("createSaplingRpcAdapter reports an unreadable Sapling state with its cause instead of an empty pool", async () => {
+  const { createSaplingRpcAdapter, SaplingStateUnavailableError } =
+    await import("@/modules/tests/tests/sapling/sapling");
+
+  const POOL = "KT1GFkBEDZtngCS737gNgtt6LemG2a8kaifC";
+  const NOT_A_POOL = "KT1RKDzqQjnMSHTiEDcshCSxYBx47edfJkdt";
+  // An unused pool answers 200 with an empty state; only a contract with no
+  // Sapling state answers 404 (checked against Shadownet on 2026-11-17).
+  const emptyPool = {
+    root: "fbc2f4300c01f0b7820d00e3347c8da4ee614674376cbc45359daa54f9b5493e",
+    commitments_and_ciphertexts: [],
+    nullifiers: [],
+  };
+  const server = createServer((req, res) => {
+    res.setHeader("Content-Type", "application/json");
+    if (req.url?.includes(`/contracts/${POOL}/single_sapling_get_diff`)) {
+      res.end(JSON.stringify(emptyPool));
+    } else {
+      res.statusCode = 404;
+      res.end("Not found");
+    }
+  });
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  try {
+    const address = server.address();
+    if (address === null || typeof address === "string") {
+      throw new Error("No TCP address");
+    }
+    const rpcUrl = `http://127.0.0.1:${address.port}`;
+    const adapter = createSaplingRpcAdapter(rpcUrl);
+
+    assert.deepEqual(
+      await adapter.getSaplingDiffByContract(POOL, "head"),
+      emptyPool,
+    );
+    const error: unknown = await adapter
+      .getSaplingDiffByContract(NOT_A_POOL, "head")
+      .then(
+        () => undefined,
+        (reason: unknown) => reason,
+      );
+    assert.ok(error instanceof SaplingStateUnavailableError);
+    assert.equal(error.contract, NOT_A_POOL);
+    assert.equal(error.rpcUrl, rpcUrl);
+    assert.equal(error.status, 404);
+    assert.equal(error.body, "Not found");
+    assert.ok(error.cause instanceof Error);
+    assert.match(error.message, /Couldn't read the Sapling state of KT1/);
+    assert.match(error.message, /answered HTTP 404/);
+    assert.ok(error.message.includes(NOT_A_POOL));
+  } finally {
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  }
 });
