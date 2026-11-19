@@ -129,6 +129,23 @@ const getNowMs = () => globalThis.performance?.now() ?? Date.now();
 export const getSaplingErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
+/**
+ * Finds the first rejection among settled balance and history loads, so the
+ * page can report it while keeping the loads that succeeded.
+ *
+ * @param results The settled loads, in the order they were started
+ * @returns The first rejection reason, wrapped so that a rejection with an
+ *   undefined reason differs from no rejection; undefined when all succeeded
+ */
+export const firstRejection = (
+  results: PromiseSettledResult<unknown>[],
+): { reason: unknown } | undefined => {
+  const failure = results.find(
+    (result): result is PromiseRejectedResult => result.status === "rejected",
+  );
+  return failure === undefined ? undefined : { reason: failure.reason };
+};
+
 export const isSaplingParamsError = (error: unknown): boolean =>
   typeof error === "object" &&
   error !== null &&
@@ -449,27 +466,89 @@ export async function generateAliceAddress(): Promise<string> {
   return (await aliceVk.getAddress()).address;
 }
 
-/** Creates an RPC adapter with 404 error handling for empty Sapling state */
-function createSaplingRpcAdapter(rpcUrl: string): RpcReadAdapter {
+/** What the RPC returned when it couldn't serve a contract's Sapling state. */
+export interface SaplingStateReadFailure {
+  contract: string;
+  rpcUrl: string;
+  status: number;
+  body: string;
+  cause: unknown;
+}
+
+/**
+ * The RPC answered 404 to `single_sapling_get_diff`. Keeps the HTTP status, the
+ * response body and the original error.
+ */
+export class SaplingStateUnavailableError extends Error {
+  override readonly name = "SaplingStateUnavailableError";
+  readonly contract: string;
+  readonly rpcUrl: string;
+  readonly status: number;
+  readonly body: string;
+  readonly cause: unknown;
+
+  /** @param failure The contract, RPC and HTTP response that failed */
+  constructor(failure: SaplingStateReadFailure) {
+    super(
+      `Couldn't read the Sapling state of ${failure.contract} from ${failure.rpcUrl}: single_sapling_get_diff answered HTTP ${failure.status}. Check that the address is a contract with one Sapling state on this network and that the RPC URL is right.`,
+    );
+    this.contract = failure.contract;
+    this.rpcUrl = failure.rpcUrl;
+    this.status = failure.status;
+    this.body = failure.body;
+    this.cause = failure.cause;
+  }
+}
+
+/**
+ * Reads the HTTP status and body from an RPC error without trusting its type.
+ *
+ * @param error Anything an RPC call rejected with
+ * @returns The status and body (empty when absent), or undefined when the error
+ *   carries no numeric status
+ */
+const httpErrorDetails = (
+  error: unknown,
+): { status: number; body: string } | undefined => {
+  if (
+    typeof error !== "object" ||
+    error === null ||
+    !("status" in error) ||
+    typeof error.status !== "number"
+  ) {
+    return undefined;
+  }
+  const body =
+    "body" in error && typeof error.body === "string" ? error.body : "";
+  return { status: error.status, body };
+};
+
+/**
+ * Creates the RPC adapter used by the Sapling toolkit.
+ *
+ * A freshly originated pool answers `single_sapling_get_diff` with an empty
+ * state. A 404 can mean a stale address in network-contracts.json, a contract
+ * with several Sapling states, or an RPC route or proxy problem, so it is
+ * reported as an unreadable state rather than as an empty pool.
+ */
+export function createSaplingRpcAdapter(rpcUrl: string): RpcReadAdapter {
   const rpcClient = new RpcClient(rpcUrl);
 
-  // Wrap RpcClient to handle 404 on empty Sapling state
-  const originalGetSaplingDiff =
+  const getSaplingDiffByContract =
     rpcClient.getSaplingDiffByContract.bind(rpcClient);
-  rpcClient.getSaplingDiffByContract = async (...args) => {
+  rpcClient.getSaplingDiffByContract = async (contract, ...rest) => {
     try {
-      return await originalGetSaplingDiff(...args);
+      return await getSaplingDiffByContract(contract, ...rest);
     } catch (error: unknown) {
-      // If 404, contract has no Sapling state yet - return empty state structure
-      if (
-        (error as { status?: number })?.status === 404 ||
-        (error as Error)?.message?.includes("404")
-      ) {
-        return {
-          root: "0000000000000000000000000000000000000000000000000000000000000000",
-          commitments_and_ciphertexts: [],
-          nullifiers: [],
-        };
+      const http = httpErrorDetails(error);
+      if (http?.status === 404) {
+        throw new SaplingStateUnavailableError({
+          contract,
+          rpcUrl,
+          status: http.status,
+          body: http.body,
+          cause: error,
+        });
       }
       throw error;
     }

@@ -952,6 +952,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { copyToClipboard } from "@/lib/utils";
 import OpenInExplorer from "@/modules/tests/components/open-in-explorer.vue";
 import {
+  firstRejection,
   generateAliceSpendingKey,
   generateUserSpendingKey,
   getSaplingErrorMessage,
@@ -1478,12 +1479,26 @@ const refreshOpenedInspectionPanels = async () => {
   if (tasks.length > 0) {
     isRefreshingInspection.value = true;
     try {
-      await Promise.allSettled(tasks);
+      const failure = firstRejection(await Promise.allSettled(tasks));
+      if (failure) {
+        reportInspectionFailure(failure.reason);
+      }
     } finally {
       isRefreshingInspection.value = false;
     }
   }
 };
+
+const inspectionFailureMessage = (error: unknown) =>
+  `Failed to load Sapling balances or history: ${getSaplingErrorMessage(error)}`;
+
+const reportInspectionFailure = (error: unknown) => {
+  toast.error(inspectionFailureMessage(error));
+};
+
+// The background load retries on every account change. It shows each failure
+// once, until the background load succeeds.
+let lastBackgroundLoadFailure: string | null = null;
 
 const loadInitialBalancesIfReady = async () => {
   if (
@@ -1512,12 +1527,17 @@ const loadInitialBalancesIfReady = async () => {
           )
         : Promise.resolve(null),
     ]);
+    lastBackgroundLoadFailure = null;
     if (userBalance.value === null) {
       userBalance.value = uBal;
       aliceBalance.value = aBal;
     }
-  } catch {
-    // Background initial balance check is best-effort
+  } catch (error) {
+    const message = inspectionFailureMessage(error);
+    if (message !== lastBackgroundLoadFailure) {
+      lastBackgroundLoadFailure = message;
+      toast.error(message);
+    }
   } finally {
     isRefreshingInspection.value = false;
   }
