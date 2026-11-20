@@ -8,6 +8,7 @@ import {
   Eye,
   EyeOff,
   FileText,
+  Gauge,
   Globe,
   InfinityIcon,
   Info,
@@ -1523,6 +1524,30 @@ The bridge uses Smart Rollup technology to enable cross-layer communication.`,
     },
     component: () => import("@/modules/tests/tests/beacon-ui/beacon-ui.vue"),
     icon: Languages,
+  },
+  "large-payload": {
+    id: "large-payload",
+    title: "Large Beacon Payloads",
+    description:
+      "Sends sign and operation requests of a chosen size (1 to 256 KiB) to the connected Beacon wallet and records how long each stage takes: dApp-side dispatch, time until the wallet acknowledges the request (relay transport plus wallet-side decode), and time until the wallet responds, which includes approval. Useful for comparing Beacon SDK versions on either side and for wallet developers checking their own decode cost. Operation parameters over 32 KiB are simulated and shown by wallets but rejected by the node at injection.",
+    category: "Wallet & Beacon",
+    setup: [
+      "Connect a Beacon wallet (Matrix, PostMessage, or WalletConnect)",
+      "Note the wallet build so results from different SDK versions can be told apart",
+      "Operation requests need the `large-payload-sink` contract (`parameter bytes; storage unit`) originated on the network",
+    ],
+    relatedTests: ["sign-payload", "beacon-ui"],
+    requiredContracts: ["large-payload-sink"],
+    documentation: {
+      script:
+        "https://github.com/ecadlabs/taquito-test-dapp-vue/tree/main/src/modules/tests/tests/large-payload",
+      taquitoDocumentation: "https://taquito.io/docs/wallet_API",
+      tezosDocumentation:
+        "https://github.com/ecadlabs/beacon-sdk-taquito-patches/pull/257",
+    },
+    component: () =>
+      import("@/modules/tests/tests/large-payload/large-payload.vue"),
+    icon: Gauge,
   },
 };
 

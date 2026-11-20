@@ -1,0 +1,5 @@
+# Accepts any bytes and stores nothing. Used to send large operation
+# parameters through a wallet without paying storage burn.
+parameter bytes;
+storage unit;
+code { CDR; NIL operation; PAIR }
