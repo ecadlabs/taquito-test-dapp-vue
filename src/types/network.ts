@@ -29,6 +29,7 @@ export type ContractName =
   | "counter"
   | "events-contract"
   | "fa2-token"
+  | "large-payload-sink"
   | "metadata"
   | "metadata-https"
   | "sapling"

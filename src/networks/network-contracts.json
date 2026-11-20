@@ -37,6 +37,10 @@
       "signature": {
         "address": "KT1UhvMAEQSCSNLkPvLVeGb8vyUWbCVXZrgE",
         "originatedAt": "2026-04-14T23:25:06.513Z"
+      },
+      "large-payload-sink": {
+        "address": "KT1Girhan48YvPVxsL3vMPb6J7ovBjQD8Nik",
+        "originatedAt": "2026-11-20T14:47:12.550Z"
       }
     }
   },
