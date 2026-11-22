@@ -433,6 +433,7 @@ test("shieldToUser, transferToAlice, and unshieldToUser validate amounts, preloa
   const fakeTezos = {
     rpc: {
       getRpcUrl: () => "https://rpc.shadownet.teztnets.com",
+      getBlockHeader: async () => ({ hash: "BLtrackFrom" }),
     },
     estimate: {
       transfer: async () => ({ suggestedFeeMutez: 1234 }),
@@ -445,6 +446,7 @@ test("shieldToUser, transferToAlice, and unshieldToUser validate amounts, preloa
             send: async () => ({
               opHash: "ooTestOpHash123",
               confirmation: async () => {},
+              status: async () => "applied",
             }),
           }),
         },
@@ -754,6 +756,7 @@ test("shieldToUser and transferToAlice support custom memos and reject memos exc
   const fakeTezos = {
     rpc: {
       getRpcUrl: () => "https://rpc.shadownet.teztnets.com",
+      getBlockHeader: async () => ({ hash: "BLtrackFrom" }),
     },
     estimate: {
       transfer: async () => ({ suggestedFeeMutez: 1234 }),
@@ -766,6 +769,7 @@ test("shieldToUser and transferToAlice support custom memos and reject memos exc
             send: async () => ({
               opHash: "ooTestOpHash123",
               confirmation: async () => {},
+              status: async () => "applied",
             }),
           }),
         },
@@ -938,4 +942,325 @@ test("sapling IA and UX improvements: 2-column layout, stepped tabs, contract he
     /loadInitialBalancesIfReady/,
     "sapling.vue should auto-fetch shielded balances in the background once keys and wallet are ready",
   );
+});
+
+type SubmitFake = {
+  status?: string;
+  confirmation?: () => Promise<void>;
+};
+
+// Resetting the runtime also clears the store hooks, so it runs first.
+const loadSubmitHarness = async (loader?: () => Promise<unknown>) => {
+  const saplingModule = await import("@/modules/tests/tests/sapling/sapling");
+  saplingModule.resetSaplingRuntimeForTesting(loader);
+  const events: string[] = [];
+  saplingModule.setSaplingStoreHooksForTesting({
+    setTestDiagram: () => {},
+    setProgress: (step: string) => events.push(`progress:${step}`),
+    setFeeEstimate: () => {},
+    setOperationHash: (opHash: string) => events.push(`hash:${opHash}`),
+    setCompleted: () => {
+      events.push("completed");
+    },
+    getConfirmationCount: () => 1,
+  });
+  const sentParameters: unknown[] = [];
+  const submitterTezos = ({ status = "applied", confirmation }: SubmitFake) =>
+    ({
+      rpc: {
+        getRpcUrl: () => "https://rpc.shadownet.teztnets.com",
+        getBlockHeader: async () => ({ hash: "BLtrackFrom" }),
+      },
+      wallet: {
+        at: async () => ({
+          methodsObject: {
+            default: (parameter: unknown) => {
+              sentParameters.push(parameter);
+              return {
+                send: async () => ({
+                  opHash: "ooRelayedOpHash",
+                  confirmation:
+                    confirmation ??
+                    (async () => {
+                      events.push("confirmed");
+                    }),
+                  status: async () => status,
+                }),
+              };
+            },
+          },
+        }),
+      },
+    }) as never;
+  const restore = () => {
+    saplingModule.setSaplingStoreHooksForTesting(undefined);
+    saplingModule.resetSaplingRuntimeForTesting();
+  };
+  return { saplingModule, events, sentParameters, submitterTezos, restore };
+};
+
+test("a private transfer can be built without a wallet and submitted by any account", async () => {
+  const preparedOutputs: unknown[] = [];
+  const { saplingModule, events, sentParameters, submitterTezos, restore } =
+    await loadSubmitHarness(async () => ({
+      initSapling: async () => {},
+      preloadSaplingParams: async () => {},
+      SaplingToolkit: class {
+        async prepareSaplingTransaction(outputs: unknown) {
+          preparedOutputs.push(outputs);
+          return "00cafebabe";
+        }
+      },
+    }));
+  const fakeUserKey = {
+    spendingKey: {} as never,
+    address: USER_ADDRESS,
+    mnemonic: "test mnemonic",
+  };
+  // Building never reaches a wallet.
+  const builderTezos = {
+    rpc: { getRpcUrl: () => "https://rpc.shadownet.teztnets.com" },
+    wallet: {
+      at: async () => {
+        throw new Error("building must not touch the wallet");
+      },
+    },
+  } as never;
+  const injected: unknown[] = [];
+
+  try {
+    const built = await saplingModule.buildTransferToAlice(
+      builderTezos,
+      "KT1test",
+      fakeUserKey,
+      ALICE_ADDRESS,
+      1,
+      "Relay",
+    );
+    assert.equal(built, "00cafebabe");
+    assert.deepEqual(preparedOutputs, [
+      [{ to: ALICE_ADDRESS, amount: 1, memo: "Relay" }],
+    ]);
+    assert.deepEqual(events, ["progress:prepare-transfer"]);
+    events.length = 0;
+
+    const opHash = await saplingModule.submitBuiltTransfer(
+      submitterTezos({}),
+      "KT1test",
+      built,
+      (operation) => injected.push(operation),
+    );
+    assert.equal(opHash, "ooRelayedOpHash");
+    assert.deepEqual(sentParameters, [["00cafebabe"]]);
+    assert.deepEqual(injected, [
+      { opHash: "ooRelayedOpHash", trackFrom: "BLtrackFrom" },
+    ]);
+    assert.deepEqual(events, [
+      "progress:wait-for-user",
+      "hash:ooRelayedOpHash",
+      "progress:wait-for-chain-confirmation",
+      "confirmed",
+      "completed",
+    ]);
+  } finally {
+    restore();
+  }
+});
+
+test("an included transfer that did not apply is not reported as completed", async () => {
+  const { saplingModule, events, submitterTezos, restore } =
+    await loadSubmitHarness();
+  try {
+    const error: unknown = await saplingModule
+      .submitBuiltTransfer(
+        submitterTezos({ status: "failed" }),
+        "KT1test",
+        "00",
+      )
+      .then(
+        () => undefined,
+        (reason: unknown) => reason,
+      );
+    assert.ok(error instanceof saplingModule.SaplingOperationNotAppliedError);
+    assert.equal(error.opHash, "ooRelayedOpHash");
+    assert.equal(error.status, "failed");
+    assert.ok(events.includes("hash:ooRelayedOpHash"));
+    assert.ok(!events.includes("completed"));
+  } finally {
+    restore();
+  }
+});
+
+test("the operation hash is kept when confirmation does not arrive", async () => {
+  const { saplingModule, events, submitterTezos, restore } =
+    await loadSubmitHarness();
+  const injected: unknown[] = [];
+  try {
+    await assert.rejects(
+      saplingModule.submitBuiltTransfer(
+        submitterTezos({
+          confirmation: async () => {
+            throw new Error("Confirmation polling timed out");
+          },
+        }),
+        "KT1test",
+        "00",
+        (operation) => injected.push(operation),
+      ),
+      /timed out/,
+    );
+    assert.deepEqual(injected, [
+      { opHash: "ooRelayedOpHash", trackFrom: "BLtrackFrom" },
+    ]);
+    assert.ok(events.includes("hash:ooRelayedOpHash"));
+    assert.ok(!events.includes("completed"));
+  } finally {
+    restore();
+  }
+});
+
+test("a pending transfer is tracked again by its hash from the block it was sent at", async () => {
+  const { saplingModule, events, restore } = await loadSubmitHarness();
+  const tracked: unknown[] = [];
+  const tezos = {
+    operation: {
+      createTransactionOperation: async (hash: string, config: unknown) => {
+        tracked.push({ hash, config });
+        return {
+          opHash: hash,
+          confirmation: async () => {},
+          status: async () => "applied",
+        };
+      },
+    },
+  } as never;
+  try {
+    assert.equal(
+      await saplingModule.trackSubmittedTransfer(tezos, {
+        opHash: "ooPending",
+        trackFrom: "BLtrackFrom",
+      }),
+      "ooPending",
+    );
+    assert.deepEqual(tracked, [
+      { hash: "ooPending", config: { blockIdentifier: "BLtrackFrom" } },
+    ]);
+    assert.ok(events.includes("completed"));
+  } finally {
+    restore();
+  }
+});
+
+test("shielding reports an included but backtracked operation as a failure", async () => {
+  const { saplingModule, events, submitterTezos, restore } =
+    await loadSubmitHarness(async () => ({
+      initSapling: async () => {},
+      preloadSaplingParams: async () => {},
+      SaplingToolkit: class {
+        async prepareShieldedTransaction() {
+          return "00shield";
+        }
+      },
+    }));
+  try {
+    await assert.rejects(
+      saplingModule.shieldToUser(
+        submitterTezos({ status: "backtracked" }),
+        "KT1test",
+        { spendingKey: {} as never, address: USER_ADDRESS, mnemonic: "m" },
+        1,
+      ),
+      (error: unknown) =>
+        error instanceof saplingModule.SaplingOperationNotAppliedError &&
+        error.status === "backtracked",
+    );
+    assert.ok(!events.includes("completed"));
+  } finally {
+    restore();
+  }
+});
+
+test("a built transfer moves from prepared to pending to failed, and local spends drop it", async () => {
+  const {
+    afterLocalSpend,
+    isPending,
+    isPrepared,
+    markInjected,
+    markNotApplied,
+    prepareTransfer,
+  } = await import("@/modules/tests/tests/sapling/built-transfer");
+  const intent = {
+    saplingTx: "00cafebabe",
+    amountTez: 1,
+    contractAddress: "KT1pool",
+    spender: USER_ADDRESS,
+    connectedAtBuild: "tz1connectedAtBuild",
+  };
+
+  const prepared = prepareTransfer(intent);
+  assert.ok(isPrepared(prepared));
+  const pending = markInjected(prepared, {
+    opHash: "ooPending",
+    trackFrom: "BLtrackFrom",
+  });
+  assert.ok(isPending(pending));
+  assert.ok(!isPrepared(pending));
+  assert.deepEqual(markNotApplied(pending, "failed"), {
+    state: "failed",
+    intent,
+    opHash: "ooPending",
+    reason: "failed",
+  });
+
+  const sameSpend = { contractAddress: "KT1pool", spender: USER_ADDRESS };
+  assert.equal(afterLocalSpend(prepared, sameSpend), null);
+  assert.equal(
+    afterLocalSpend(markNotApplied(pending, "failed"), sameSpend),
+    null,
+  );
+  // An injected transfer stays, so it can still be tracked by its hash.
+  assert.equal(afterLocalSpend(pending, sameSpend), pending);
+  assert.equal(
+    afterLocalSpend(prepared, {
+      contractAddress: "KT1other",
+      spender: USER_ADDRESS,
+    }),
+    prepared,
+  );
+  assert.equal(
+    afterLocalSpend(prepared, {
+      contractAddress: "KT1pool",
+      spender: ALICE_ADDRESS,
+    }),
+    prepared,
+  );
+  assert.equal(afterLocalSpend(null, sameSpend), null);
+});
+
+test("an operation whose result can't be read stays unknown, not failed", async () => {
+  const { saplingModule, events, submitterTezos, restore } =
+    await loadSubmitHarness();
+  try {
+    const error: unknown = await saplingModule
+      .submitBuiltTransfer(
+        submitterTezos({ status: "unknown" }),
+        "KT1test",
+        "00",
+      )
+      .then(
+        () => undefined,
+        (reason: unknown) => reason,
+      );
+    assert.ok(
+      error instanceof saplingModule.SaplingOperationStatusUnknownError,
+    );
+    assert.ok(
+      !(error instanceof saplingModule.SaplingOperationNotAppliedError),
+    );
+    assert.equal(error.opHash, "ooRelayedOpHash");
+    assert.equal(error.status, "unknown");
+    assert.ok(!events.includes("completed"));
+  } finally {
+    restore();
+  }
 });

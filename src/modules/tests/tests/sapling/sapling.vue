@@ -341,6 +341,14 @@
                     the shielded pool. Any remaining value from the spent note
                     is returned to you as a new change note.
                   </p>
+                  <p class="text-muted-foreground text-xs">
+                    The amount, recipient and memo are encrypted. The pool, the
+                    timing, the fee and the account that submits the transaction
+                    are public, so submitting from the account that shielded
+                    links the two. Build only lets you switch accounts in your
+                    wallet and submit from another one. That removes this link,
+                    but it doesn't make the transfer anonymous.
+                  </p>
 
                   <div class="grid gap-4 sm:grid-cols-2">
                     <div class="space-y-2">
@@ -394,15 +402,7 @@
 
                   <Button
                     @click="handleTransferToAlice"
-                    :disabled="
-                      !walletConnected ||
-                      !contractAddress ||
-                      !userKey ||
-                      !aliceAddress ||
-                      isRunning ||
-                      !isValidAmount(transferAmount) ||
-                      transferMemoBytes > MEMO_SIZE
-                    "
+                    :disabled="!canTransfer"
                     class="w-full"
                     data-testid="sapling-transfer-button"
                   >
@@ -418,6 +418,140 @@
                         : "Transfer to Alice"
                     }}
                   </Button>
+
+                  <Button
+                    variant="outline"
+                    @click="handleBuildTransferOnly"
+                    :disabled="!canBuild"
+                    class="w-full"
+                    data-testid="sapling-transfer-build-button"
+                  >
+                    <span
+                      v-if="activeOperation === 'build-transfer'"
+                      class="sapling-spinner sapling-spinner-sm mr-2"
+                      aria-hidden="true"
+                    ></span>
+                    {{
+                      activeOperation === "build-transfer"
+                        ? activePhaseButtonLabel
+                        : "Build only"
+                    }}
+                  </Button>
+
+                  <div
+                    v-if="builtTransfer"
+                    class="space-y-2 rounded-md border p-3"
+                    data-testid="sapling-built-transfer"
+                    :data-state="builtTransfer.state"
+                  >
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="text-xs font-medium"
+                        >Built transfer ({{ builtTransfer.intent.amountTez }} ꜩ
+                        to Alice)</span
+                      >
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        @click="copyToClipboard(builtTransfer.intent.saplingTx)"
+                        aria-label="Copy the built Sapling transaction"
+                      >
+                        <Copy class="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p
+                      class="text-muted-foreground font-mono text-[11px] break-all"
+                    >
+                      {{ builtTransfer.intent.saplingTx.slice(0, 64) }}…
+                    </p>
+                    <p
+                      v-if="builtTransfer.intent.connectedAtBuild"
+                      class="text-muted-foreground text-xs"
+                    >
+                      Connected when you clicked Build:
+                      {{ builtTransfer.intent.connectedAtBuild }}. Your Sapling
+                      key built the proof; this account didn't take part.
+                    </p>
+                    <template v-if="builtTransfer.state === 'prepared'">
+                      <p class="text-muted-foreground text-xs">
+                        The account connected when you submit signs the
+                        operation, pays the fee and is its public source.
+                      </p>
+                      <Button
+                        @click="handleSubmitBuiltTransfer"
+                        :disabled="!walletConnected || isRunning"
+                        class="w-full"
+                        data-testid="sapling-transfer-submit-built-button"
+                      >
+                        <span
+                          v-if="activeOperation === 'submit-built-transfer'"
+                          class="sapling-spinner sapling-spinner-sm mr-2"
+                          aria-hidden="true"
+                        ></span>
+                        {{
+                          activeOperation === "submit-built-transfer"
+                            ? activePhaseButtonLabel
+                            : "Submit from connected account"
+                        }}
+                      </Button>
+                    </template>
+                    <template v-else-if="builtTransfer.state === 'pending'">
+                      <p
+                        class="text-xs break-all"
+                        data-testid="sapling-built-transfer-pending"
+                      >
+                        Submitted as {{ builtTransfer.opHash }}. Its result
+                        isn't known yet. Building, transferring and unshielding
+                        stay blocked until you check it or forget it.
+                      </p>
+                      <Button
+                        @click="handleTrackBuiltTransfer"
+                        :disabled="isRunning"
+                        variant="outline"
+                        class="w-full"
+                        data-testid="sapling-transfer-track-built-button"
+                      >
+                        <span
+                          v-if="activeOperation === 'track-built-transfer'"
+                          class="sapling-spinner sapling-spinner-sm mr-2"
+                          aria-hidden="true"
+                        ></span>
+                        {{
+                          activeOperation === "track-built-transfer"
+                            ? activePhaseButtonLabel
+                            : "Check its status again"
+                        }}
+                      </Button>
+                      <Button
+                        @click="handleForgetBuiltTransfer"
+                        :disabled="isRunning"
+                        variant="ghost"
+                        class="w-full"
+                        data-testid="sapling-transfer-forget-built-button"
+                      >
+                        Forget it
+                      </Button>
+                    </template>
+                    <template v-else>
+                      <p
+                        class="text-destructive text-xs break-all"
+                        data-testid="sapling-built-transfer-failed"
+                      >
+                        Operation {{ builtTransfer.opHash }} was included with
+                        status "{{ builtTransfer.reason }}", so it didn't apply.
+                        Its notes may already be spent or its root too old.
+                        Build the transfer again.
+                      </p>
+                      <Button
+                        @click="handleForgetBuiltTransfer"
+                        :disabled="isRunning"
+                        variant="ghost"
+                        class="w-full"
+                        data-testid="sapling-transfer-forget-built-button"
+                      >
+                        Dismiss
+                      </Button>
+                    </template>
+                  </div>
                 </TabsContent>
 
                 <!-- Step 3: Unshield to User's Public Address -->
@@ -474,6 +608,7 @@
                       !contractAddress ||
                       !userKey ||
                       isRunning ||
+                      hasPendingBuiltTransfer ||
                       !isValidAmount(unshieldAmount)
                     "
                     class="w-full"
@@ -952,6 +1087,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { copyToClipboard } from "@/lib/utils";
 import OpenInExplorer from "@/modules/tests/components/open-in-explorer.vue";
 import {
+  afterLocalSpend,
+  isPending,
+  isPrepared,
+  markInjected,
+  markNotApplied,
+  prepareTransfer,
+  type BuiltTransfer,
+} from "@/modules/tests/tests/sapling/built-transfer";
+import {
+  buildTransferToAlice,
   generateAliceSpendingKey,
   generateUserSpendingKey,
   getSaplingErrorMessage,
@@ -964,9 +1109,12 @@ import {
   MEMO_SIZE,
   preloadSaplingProvingParams,
   reloadWithFreshSaplingParams,
+  SaplingOperationNotAppliedError,
   setSaplingStoreHooks,
   shieldToUser,
+  submitBuiltTransfer,
   subscribeSaplingRuntimeSnapshot,
+  trackSubmittedTransfer,
   transferToAlice,
   unshieldToUser,
   type SaplingRuntimeSnapshot,
@@ -1010,7 +1158,15 @@ const networkId =
   import.meta.env.VITE_NETWORK_NAME || import.meta.env.VITE_NETWORK_TYPE;
 
 type ActiveOperation =
-  "shield" | "transfer" | "unshield" | "balance" | "history" | null;
+  | "shield"
+  | "transfer"
+  | "build-transfer"
+  | "submit-built-transfer"
+  | "track-built-transfer"
+  | "unshield"
+  | "balance"
+  | "history"
+  | null;
 type OperationTab = "shield" | "transfer" | "unshield";
 type HistoryPerspective = "user" | "alice";
 
@@ -1023,6 +1179,7 @@ const publicBalanceTez = computed(() => {
 });
 
 const isRunning = ref(false);
+const builtTransfer = ref<BuiltTransfer | null>(null);
 const isRefreshingInspection = ref(false);
 const activeOperation = ref<ActiveOperation>(null);
 const activeOperationTab = ref<OperationTab>("shield");
@@ -1083,6 +1240,24 @@ let unsubscribeRuntimeSnapshot: (() => void) | undefined;
 const isValidAmount = (value: number): boolean =>
   typeof value === "number" && Number.isFinite(value) && value > 0;
 
+// A pending built transfer may still spend its notes, so nothing else may
+// build or spend from them until it is checked or forgotten.
+const hasPendingBuiltTransfer = computed(() => isPending(builtTransfer.value));
+
+// Building uses the Sapling key and a read-only RPC, so it needs no wallet.
+const canBuild = computed(
+  () =>
+    !!contractAddress.value &&
+    !!userKey.value &&
+    !!aliceAddress.value &&
+    !isRunning.value &&
+    !hasPendingBuiltTransfer.value &&
+    isValidAmount(transferAmount.value) &&
+    transferMemoBytes.value <= MEMO_SIZE,
+);
+
+const canTransfer = computed(() => walletConnected.value && canBuild.value);
+
 const exceedsShieldedBalance = (amountTez: number): boolean => {
   if (userBalance.value === null || !isValidAmount(amountTez)) {
     return false;
@@ -1100,7 +1275,11 @@ const activePhaseButtonLabel = computed(() => {
     case "wait-for-chain-confirmation":
       return "Waiting for block inclusion...";
     default:
-      return "Generating ZK proof (10-30s)...";
+      // Submitting or tracking a built transfer generates no proof.
+      return activeOperation.value === "submit-built-transfer" ||
+        activeOperation.value === "track-built-transfer"
+        ? "Preparing submission..."
+        : "Generating ZK proof (10-30s)...";
   }
 });
 
@@ -1651,16 +1830,20 @@ const handleTransferToAlice = async () => {
       },
     );
 
+    const pool = contractAddress.value;
+    const spender = userKey.value.address;
+    const amountTez = transferAmount.value;
     await transferToAlice(
       walletStore.getTezos,
-      contractAddress.value,
+      pool,
       userKey.value,
       aliceAddress.value,
-      transferAmount.value,
+      amountTez,
       transferMemo.value,
+      () => dropBuiltTransferAfterSpend(pool, spender),
     );
 
-    toast.success(`Transferred ${transferAmount.value} ꜩ privately to Alice`);
+    toast.success(`Transferred ${amountTez} ꜩ privately to Alice`);
     activeOperationTab.value = "unshield";
     void refreshOpenedInspectionPanels();
   } catch (error) {
@@ -1672,6 +1855,182 @@ const handleTransferToAlice = async () => {
     if (loadingToastId !== undefined) {
       toast.dismiss(loadingToastId);
     }
+    activeOperation.value = null;
+    isRunning.value = false;
+  }
+};
+
+// A built transfer belongs to the pool and keys it was built with. A pending
+// one is already injected and stays so it can still be tracked, and one being
+// submitted stays so its hash can be recorded.
+watch([contractAddress, userKey], () => {
+  if (
+    isPending(builtTransfer.value) ||
+    activeOperation.value === "submit-built-transfer"
+  ) {
+    return;
+  }
+  builtTransfer.value = null;
+});
+
+// A transfer or unshield spends notes, so once injected it may have spent the
+// ones a built transfer relies on.
+const dropBuiltTransferAfterSpend = (pool: string, spender: string) => {
+  builtTransfer.value = afterLocalSpend(builtTransfer.value, {
+    contractAddress: pool,
+    spender,
+  });
+};
+
+const handleForgetBuiltTransfer = () => {
+  const transfer = builtTransfer.value;
+  builtTransfer.value = null;
+  if (isPending(transfer)) {
+    toast.info(
+      `Forgot ${transfer.opHash}. If it applies later, refresh the balances to see it.`,
+    );
+  }
+};
+
+const handleBuildTransferOnly = async () => {
+  const tezos = walletStore.getTezos;
+  const key = userKey.value;
+  const recipient = aliceAddress.value;
+  const pool = contractAddress.value;
+  const amountTez = transferAmount.value;
+  const memo = transferMemo.value;
+  // Read now: the account can change while the proof is generated.
+  const connectedAtBuild = walletStore.getAddress ?? null;
+  if (
+    !tezos ||
+    !key ||
+    !recipient ||
+    !pool ||
+    !isValidAmount(amountTez) ||
+    isPending(builtTransfer.value)
+  )
+    return;
+
+  let loadingToastId: string | number | undefined;
+  try {
+    isRunning.value = true;
+    activeOperation.value = "build-transfer";
+    loadingToastId = toast.info(
+      "Building the transfer (generating zero-knowledge proof)...",
+      { duration: 60000 },
+    );
+    const saplingTx = await buildTransferToAlice(
+      tezos,
+      pool,
+      key,
+      recipient,
+      amountTez,
+      memo,
+    );
+    // Nothing is in flight until the built transfer is submitted.
+    diagramStore.resetDiagram();
+    if (contractAddress.value !== pool || userKey.value !== key) {
+      toast.info("The pool or keys changed while building, so it was dropped.");
+      return;
+    }
+    builtTransfer.value = prepareTransfer({
+      saplingTx,
+      amountTez,
+      contractAddress: pool,
+      spender: key.address,
+      connectedAtBuild,
+    });
+    toast.success(
+      "Transfer built. Switch accounts in your wallet if you like, then submit it.",
+    );
+  } catch (error) {
+    console.error("Build transfer error:", error);
+    handleProofParamError(error);
+    diagramStore.setErrorMessage(error);
+    toast.error(`Error: ${getSaplingErrorMessage(error)}`);
+  } finally {
+    if (loadingToastId !== undefined) {
+      toast.dismiss(loadingToastId);
+    }
+    activeOperation.value = null;
+    isRunning.value = false;
+  }
+};
+
+const reportBuiltTransferError = (error: unknown) => {
+  const current = builtTransfer.value;
+  diagramStore.setErrorMessage(error);
+  if (
+    error instanceof SaplingOperationNotAppliedError &&
+    isPending(current) &&
+    current.opHash === error.opHash
+  ) {
+    builtTransfer.value = markNotApplied(current, error.status);
+    toast.error(getSaplingErrorMessage(error));
+  } else if (isPending(current)) {
+    toast.error(
+      `Submitted as ${current.opHash}, but its result isn't known yet: ${getSaplingErrorMessage(error)}`,
+    );
+  } else {
+    // Not injected: the transfer stays prepared and can be submitted again.
+    toast.error(
+      `Error: ${getSaplingErrorMessage(error)} If its notes were spent elsewhere or its root is too old, build the transfer again.`,
+    );
+  }
+};
+
+const onBuiltTransferApplied = (opHash: string) => {
+  builtTransfer.value = null;
+  toast.success(`The built transfer applied in operation ${opHash}`);
+  activeOperationTab.value = "unshield";
+  void refreshOpenedInspectionPanels();
+};
+
+const handleSubmitBuiltTransfer = async () => {
+  const tezos = walletStore.getTezos;
+  const transfer = builtTransfer.value;
+  if (!tezos || !isPrepared(transfer)) return;
+
+  try {
+    isRunning.value = true;
+    activeOperation.value = "submit-built-transfer";
+    const opHash = await submitBuiltTransfer(
+      tezos,
+      transfer.intent.contractAddress,
+      transfer.intent.saplingTx,
+      (injected) => {
+        if (builtTransfer.value === transfer) {
+          builtTransfer.value = markInjected(transfer, injected);
+        }
+      },
+    );
+    onBuiltTransferApplied(opHash);
+  } catch (error) {
+    console.error("Submit built transfer error:", error);
+    reportBuiltTransferError(error);
+  } finally {
+    activeOperation.value = null;
+    isRunning.value = false;
+  }
+};
+
+const handleTrackBuiltTransfer = async () => {
+  const tezos = walletStore.getTezos;
+  const transfer = builtTransfer.value;
+  if (!tezos || !isPending(transfer)) return;
+
+  try {
+    isRunning.value = true;
+    activeOperation.value = "track-built-transfer";
+    const opHash = await trackSubmittedTransfer(tezos, {
+      opHash: transfer.opHash,
+      trackFrom: transfer.trackFrom,
+    });
+    onBuiltTransferApplied(opHash);
+  } catch (error) {
+    console.error("Track built transfer error:", error);
+    reportBuiltTransferError(error);
+  } finally {
     activeOperation.value = null;
     isRunning.value = false;
   }
@@ -1697,17 +2056,21 @@ const handleUnshieldToUser = async () => {
       },
     );
 
+    // Read now: the account and amount can change while the operation confirms.
+    const recipient = walletStore.getAddress;
+    const pool = contractAddress.value;
+    const spender = userKey.value.address;
+    const amountTez = unshieldAmount.value;
     await unshieldToUser(
       walletStore.getTezos,
-      contractAddress.value,
+      pool,
       userKey.value,
-      walletStore.getAddress,
-      unshieldAmount.value,
+      recipient,
+      amountTez,
+      () => dropBuiltTransferAfterSpend(pool, spender),
     );
 
-    toast.success(
-      `Unshielded ${unshieldAmount.value} ꜩ to ${walletStore.getAddress}`,
-    );
+    toast.success(`Unshielded ${amountTez} ꜩ to ${recipient}`);
     void refreshOpenedInspectionPanels();
   } catch (error) {
     console.error("Unshield error:", error);
