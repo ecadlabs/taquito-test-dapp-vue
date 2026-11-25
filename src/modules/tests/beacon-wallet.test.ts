@@ -30,6 +30,9 @@ test("formatBeaconError formats BeaconErrorType errors, RequestErrorResponse obj
   // 1. Local PEER_UNREACHABLE RequestErrorResponse
   const peerUnreachableMsg = formatError({
     type: BeaconMessageType.Error,
+    version: "2",
+    id: "req-1",
+    senderId: "wallet-1",
     errorType: BeaconErrorType.PEER_UNREACHABLE,
     errorOrigin: "local",
   });
@@ -39,6 +42,9 @@ test("formatBeaconError formats BeaconErrorType errors, RequestErrorResponse obj
   // 2. ABORTED_ERROR RequestErrorResponse
   const abortedMsg = formatError({
     type: BeaconMessageType.Error,
+    version: "2",
+    id: "req-2",
+    senderId: "wallet-1",
     errorType: BeaconErrorType.ABORTED_ERROR,
     errorOrigin: "wallet",
   });
@@ -47,6 +53,9 @@ test("formatBeaconError formats BeaconErrorType errors, RequestErrorResponse obj
   // 3. TRANSACTION_INVALID_ERROR with RPC error details
   const txInvalidMsg = formatError({
     type: BeaconMessageType.Error,
+    version: "2",
+    id: "req-3",
+    senderId: "wallet-1",
     errorType: BeaconErrorType.TRANSACTION_INVALID_ERROR,
     errorData: [
       {
@@ -62,6 +71,9 @@ test("formatBeaconError formats BeaconErrorType errors, RequestErrorResponse obj
   // 4. SIGNATURE_TYPE_NOT_SUPPORTED
   const sigNotSupportedMsg = formatError({
     type: BeaconMessageType.Error,
+    version: "2",
+    id: "req-4",
+    senderId: "wallet-1",
     errorType: BeaconErrorType.SIGNATURE_TYPE_NOT_SUPPORTED,
   });
   assert.match(sigNotSupportedMsg, /sign/i);
